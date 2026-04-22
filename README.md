@@ -34,7 +34,11 @@ Built on Scroll Viewport for Confluence Data Centre, the theme transforms a plai
 - **Dark mode** with View Transitions API circular reveal, OS preference detection, localStorage persistence.
 - **Accessibility** — skip-to-content, keyboard shortcuts (`?` for help, `D` for dark, `T` for top), WCAG-AA focus rings.
 - **Content patterns** — reusable download cards, Canto cards, colour swatches, figures, and related-link grids documented on the in-Confluence **Content Patterns** page.
-- **Audience tag strip** — driven by Confluence page labels (`audience-staff`, `audience-partner`, `audience-internal`, `status-draft`, `status-deprecated`).
+- **Label-driven homepage sections** — three homepage sections populate from Confluence page labels:
+  - `popular-download` → Popular Downloads (top 5 by last-modified)
+  - `featured-template` → Featured Templates thumbnails (top 4, uses page cover image)
+  - `brand-guideline` → Recently Updated Guidelines list (top 5)
+- **Audience tag strip** — driven by labels (`audience-staff`, `audience-partner`, `audience-internal`, `status-draft`, `status-deprecated`).
 - **Print stylesheet** for brand-book pages that staff will actually print.
 
 ## Running the theme inside Confluence

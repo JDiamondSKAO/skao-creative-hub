@@ -1117,7 +1117,9 @@ document.addEventListener('DOMContentLoaded', function () {
             var article = document.createElement('article');
             article.className = 'crh-update-card';
             var a = document.createElement('a');
-            a.href = (item._links && item._links.webui) ? item._links.webui : '#';
+            /* Prepend contextPath — Scroll Viewport rewrites URLs, raw webui is incomplete */
+            var webui = (item._links && item._links.webui) ? item._links.webui : '';
+            a.href = webui ? ((typeof contextPath !== 'undefined' ? contextPath : '') + webui) : '#';
             a.className = 'crh-update-card-link';
             var h3 = document.createElement('h3');
             h3.className = 'crh-update-title';
@@ -1135,8 +1137,15 @@ document.addEventListener('DOMContentLoaded', function () {
             return article;
         }
         var cql = 'space = "' + spaceKey + '" AND type = page AND title != "' + homeTitle.replace(/"/g, '\\"') + '" ORDER BY lastModified DESC';
-        var endpoint = '/rest/api/content/search?' + 'cql=' + encodeURIComponent(cql) + '&limit=3&expand=version,ancestors';
-        fetch(endpoint, { credentials: 'same-origin' })
+        /* Prepend contextPath — Scroll Viewport serves the portal at a rewritten
+           URL, so bare /rest/api/content/search won't resolve to the Confluence
+           REST endpoint. Same fix as the search modal code above. */
+        var ctx = (typeof contextPath !== 'undefined' ? contextPath : '');
+        var endpoint = ctx + '/rest/api/content/search?cql=' + encodeURIComponent(cql) + '&limit=3&expand=version,ancestors';
+        fetch(endpoint, {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'X-Atlassian-Token': 'nocheck' }
+        })
             .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
             .then(function (data) {
                 updatesGrid.innerHTML = '';
@@ -1146,8 +1155,241 @@ document.addEventListener('DOMContentLoaded', function () {
                     updatesGrid.innerHTML = '<p class="crh-updates-empty">No recent updates found.</p>';
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
+                /* Log to console so the failure mode is diagnosable without server logs */
+                try { console.warn('[CRH] Recent updates fetch failed:', err, 'endpoint:', endpoint); } catch (e) {}
                 updatesGrid.innerHTML = '<p class="crh-updates-empty">Could not load recent updates.</p>';
+            });
+    }
+
+    /* -----------------------------------------
+     * HOMEPAGE LABEL-DRIVEN SECTIONS
+     * Popular Downloads, Featured Templates, Recently Updated Guidelines.
+     * All three use the same CQL pattern: filter by label, order by modified,
+     * render via a section-specific builder. Containers opt in via data-label
+     * on the element, so markup drives the query.
+     * ----------------------------------------- */
+
+    /* Shared helpers */
+    var ctx = (typeof contextPath !== 'undefined' ? contextPath : '');
+
+    function formatRelative(iso) {
+        if (!iso) return '';
+        var then = new Date(iso).getTime();
+        if (isNaN(then)) return '';
+        var secs = Math.round((Date.now() - then) / 1000);
+        if (secs < 60)       return 'just now';
+        if (secs < 3600)     return Math.floor(secs / 60) + ' min ago';
+        if (secs < 86400)    return Math.floor(secs / 3600) + ' hr ago';
+        if (secs < 604800)   return Math.floor(secs / 86400) + ' days ago';
+        if (secs < 2592000)  return Math.floor(secs / 604800) + ' wk ago';
+        if (secs < 31536000) return Math.floor(secs / 2592000) + ' mo ago';
+        return Math.floor(secs / 31536000) + ' yr ago';
+    }
+
+    function resolveWebui(item) {
+        /* Scroll Viewport rewrites URLs \u2014 raw webui paths need contextPath prepended */
+        if (item && item._links && item._links.webui) return ctx + item._links.webui;
+        return '#';
+    }
+
+    function detectFormat(title) {
+        /* Infer a file-type badge from page title text. Fallback: "page" */
+        var t = (title || '').toLowerCase();
+        if (/\.pptx|powerpoint|deck|slide/.test(t)) return 'pptx';
+        if (/\.docx|letterhead|memo|report/.test(t)) return 'docx';
+        if (/\.pdf|brand book|guidelines pdf/.test(t)) return 'pdf';
+        if (/\.zip|pack|kit/.test(t)) return 'zip';
+        if (/logo|image|photo/.test(t)) return 'image';
+        return 'docx';
+    }
+
+    function ancestorSection(item) {
+        /* Section name = first ancestor below home. Ancestors are ordered root-first. */
+        var anc = (item && item.ancestors) || [];
+        if (anc.length > 1) return anc[1].title;
+        if (anc.length > 0) return anc[0].title;
+        return 'Hub';
+    }
+
+    function titleGradient(title) {
+        /* Deterministic gradient for thumbnail fallback \u2014 no flicker on reload */
+        var hash = 0, s = title || '';
+        for (var i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) & 0xffffffff;
+        var palettes = [
+            'linear-gradient(135deg, #9333ea, #C8247E)',
+            'linear-gradient(135deg, #C8247E, #003366)',
+            'linear-gradient(135deg, #003366, #9333ea)',
+            'linear-gradient(135deg, #9333ea, #003366)',
+            'linear-gradient(135deg, #C8247E, #9333ea)'
+        ];
+        return palettes[Math.abs(hash) % palettes.length];
+    }
+
+    function showSectionEmpty(container, message) {
+        if (!container) return;
+        var empty = document.createElement('div');
+        empty.className = 'crh-section-empty';
+        empty.textContent = message;
+        container.innerHTML = '';
+        container.appendChild(empty);
+    }
+
+    function fetchByLabel(label, limit) {
+        var space = 'CRH';
+        try { space = document.body.getAttribute('data-space') || space; } catch (e) {}
+        var cql = 'space = "' + space + '" AND type = page AND label = "' + label + '" ORDER BY lastModified DESC';
+        var endpoint = ctx + '/rest/api/content/search?cql=' + encodeURIComponent(cql) +
+                       '&limit=' + limit +
+                       '&expand=version,ancestors,metadata.labels';
+        return fetch(endpoint, {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'X-Atlassian-Token': 'nocheck' }
+        }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
+    }
+
+    /* ---- Popular Downloads ---- */
+    var popularList = document.getElementById('crhPopularList');
+    if (popularList) {
+        var popLabel = popularList.getAttribute('data-label') || 'popular-download';
+        var popLimit = parseInt(popularList.getAttribute('data-limit') || '5', 10);
+        fetchByLabel(popLabel, popLimit)
+            .then(function (data) {
+                popularList.innerHTML = '';
+                if (!data.results || !data.results.length) {
+                    showSectionEmpty(popularList, 'No popular downloads yet. Apply the popular-download label to any page to feature it here.');
+                    return;
+                }
+                data.results.forEach(function (item) {
+                    var a = document.createElement('a');
+                    a.className = 'crh-popular-item';
+                    a.href = resolveWebui(item);
+                    var icon = document.createElement('div');
+                    icon.className = 'crh-popular-icon';
+                    icon.setAttribute('data-type', detectFormat(item.title));
+                    var meta = document.createElement('div');
+                    meta.className = 'crh-popular-meta';
+                    var title = document.createElement('span');
+                    title.className = 'crh-popular-title';
+                    title.textContent = item.title;
+                    var detail = document.createElement('span');
+                    detail.className = 'crh-popular-detail';
+                    detail.textContent = ancestorSection(item) + ' \u00b7 Updated ' + formatRelative(item.version && item.version.when);
+                    meta.appendChild(title);
+                    meta.appendChild(detail);
+                    var arrow = document.createElement('svg');
+                    arrow.setAttribute('class', 'crh-popular-arrow');
+                    arrow.setAttribute('width', '18');
+                    arrow.setAttribute('height', '18');
+                    arrow.setAttribute('viewBox', '0 0 24 24');
+                    arrow.setAttribute('fill', 'none');
+                    arrow.setAttribute('stroke', 'currentColor');
+                    arrow.setAttribute('stroke-width', '2');
+                    arrow.innerHTML = '<polyline points="9 18 15 12 9 6"/>';
+                    a.appendChild(icon);
+                    a.appendChild(meta);
+                    a.appendChild(arrow);
+                    popularList.appendChild(a);
+                });
+            })
+            .catch(function (err) {
+                try { console.warn('[CRH] Popular downloads fetch failed:', err); } catch (e) {}
+                showSectionEmpty(popularList, 'Could not load popular downloads.');
+            });
+    }
+
+    /* ---- Featured Templates ---- */
+    var templateGrid = document.getElementById('crhTemplateGrid');
+    if (templateGrid) {
+        var tplLabel = templateGrid.getAttribute('data-label') || 'featured-template';
+        var tplLimit = parseInt(templateGrid.getAttribute('data-limit') || '4', 10);
+        fetchByLabel(tplLabel, tplLimit)
+            .then(function (data) {
+                templateGrid.innerHTML = '';
+                if (!data.results || !data.results.length) {
+                    showSectionEmpty(templateGrid, 'No featured templates yet. Apply the featured-template label to surface a page here.');
+                    return;
+                }
+                data.results.forEach(function (item) {
+                    var a = document.createElement('a');
+                    a.className = 'crh-template-card';
+                    a.href = resolveWebui(item);
+                    var thumb = document.createElement('div');
+                    thumb.className = 'crh-template-thumb';
+                    /* Confluence Data Centre exposes a page thumbnail at
+                       /download/thumbnails/<pageId>/<filename>. We can't know the
+                       filename, but attempting the directory listing redirects to
+                       the cover image if one is set. Fall back to gradient on 404. */
+                    var thumbUrl = ctx + '/download/thumbnails/' + item.id;
+                    var probe = new Image();
+                    probe.onload = function () { thumb.style.backgroundImage = 'url(' + thumbUrl + ')'; };
+                    probe.onerror = function () { thumb.style.backgroundImage = titleGradient(item.title); };
+                    probe.src = thumbUrl;
+                    /* Default to gradient immediately so there's no delay */
+                    thumb.style.backgroundImage = titleGradient(item.title);
+                    var fmt = document.createElement('span');
+                    fmt.className = 'crh-template-format';
+                    fmt.textContent = detectFormat(item.title).toUpperCase();
+                    thumb.appendChild(fmt);
+                    var body = document.createElement('div');
+                    body.className = 'crh-template-body';
+                    var title = document.createElement('span');
+                    title.className = 'crh-template-title';
+                    title.textContent = item.title;
+                    var desc = document.createElement('span');
+                    desc.className = 'crh-template-desc';
+                    desc.textContent = ancestorSection(item);
+                    body.appendChild(title);
+                    body.appendChild(desc);
+                    a.appendChild(thumb);
+                    a.appendChild(body);
+                    templateGrid.appendChild(a);
+                });
+            })
+            .catch(function (err) {
+                try { console.warn('[CRH] Featured templates fetch failed:', err); } catch (e) {}
+                showSectionEmpty(templateGrid, 'Could not load featured templates.');
+            });
+    }
+
+    /* ---- Recently Updated Guidelines ---- */
+    var guidelinesList = document.getElementById('crhGuidelinesList');
+    if (guidelinesList) {
+        var glLabel = guidelinesList.getAttribute('data-label') || 'brand-guideline';
+        var glLimit = parseInt(guidelinesList.getAttribute('data-limit') || '5', 10);
+        fetchByLabel(glLabel, glLimit)
+            .then(function (data) {
+                guidelinesList.innerHTML = '';
+                if (!data.results || !data.results.length) {
+                    var li = document.createElement('li');
+                    li.innerHTML = '<div class="crh-section-empty" style="border:none;">No recently updated guidelines. Apply the brand-guideline label to surface pages here.</div>';
+                    guidelinesList.appendChild(li);
+                    return;
+                }
+                data.results.forEach(function (item) {
+                    var li = document.createElement('li');
+                    var a = document.createElement('a');
+                    a.className = 'crh-guidelines-item';
+                    a.href = resolveWebui(item);
+                    var title = document.createElement('span');
+                    title.className = 'crh-guidelines-item-title';
+                    title.textContent = item.title;
+                    var section = document.createElement('span');
+                    section.className = 'crh-guidelines-item-section';
+                    section.textContent = ancestorSection(item);
+                    var date = document.createElement('span');
+                    date.className = 'crh-guidelines-item-date';
+                    date.textContent = formatRelative(item.version && item.version.when);
+                    a.appendChild(title);
+                    a.appendChild(section);
+                    a.appendChild(date);
+                    li.appendChild(a);
+                    guidelinesList.appendChild(li);
+                });
+            })
+            .catch(function (err) {
+                try { console.warn('[CRH] Recent guidelines fetch failed:', err); } catch (e) {}
+                guidelinesList.innerHTML = '<li><div class="crh-section-empty" style="border:none;">Could not load recent guidelines.</div></li>';
             });
     }
 
