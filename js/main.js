@@ -1117,7 +1117,9 @@ document.addEventListener('DOMContentLoaded', function () {
             var article = document.createElement('article');
             article.className = 'crh-update-card';
             var a = document.createElement('a');
-            a.href = (item._links && item._links.webui) ? item._links.webui : '#';
+            /* Prepend contextPath — Scroll Viewport rewrites URLs, raw webui is incomplete */
+            var webui = (item._links && item._links.webui) ? item._links.webui : '';
+            a.href = webui ? ((typeof contextPath !== 'undefined' ? contextPath : '') + webui) : '#';
             a.className = 'crh-update-card-link';
             var h3 = document.createElement('h3');
             h3.className = 'crh-update-title';
@@ -1135,8 +1137,15 @@ document.addEventListener('DOMContentLoaded', function () {
             return article;
         }
         var cql = 'space = "' + spaceKey + '" AND type = page AND title != "' + homeTitle.replace(/"/g, '\\"') + '" ORDER BY lastModified DESC';
-        var endpoint = '/rest/api/content/search?' + 'cql=' + encodeURIComponent(cql) + '&limit=3&expand=version,ancestors';
-        fetch(endpoint, { credentials: 'same-origin' })
+        /* Prepend contextPath — Scroll Viewport serves the portal at a rewritten
+           URL, so bare /rest/api/content/search won't resolve to the Confluence
+           REST endpoint. Same fix as the search modal code above. */
+        var ctx = (typeof contextPath !== 'undefined' ? contextPath : '');
+        var endpoint = ctx + '/rest/api/content/search?cql=' + encodeURIComponent(cql) + '&limit=3&expand=version,ancestors';
+        fetch(endpoint, {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'X-Atlassian-Token': 'nocheck' }
+        })
             .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
             .then(function (data) {
                 updatesGrid.innerHTML = '';
@@ -1146,7 +1155,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     updatesGrid.innerHTML = '<p class="crh-updates-empty">No recent updates found.</p>';
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
+                /* Log to console so the failure mode is diagnosable without server logs */
+                try { console.warn('[CRH] Recent updates fetch failed:', err, 'endpoint:', endpoint); } catch (e) {}
                 updatesGrid.innerHTML = '<p class="crh-updates-empty">Could not load recent updates.</p>';
             });
     }

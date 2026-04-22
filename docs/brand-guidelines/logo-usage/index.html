@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Usage &mdash; SKAO Creative Hub</title>
+<meta name="description" content="SKAO Creative Hub — a Scroll Viewport theme for SKA Observatory's internal creative production portal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/style.css">
+<link rel="stylesheet" href="../../assets/css/eggs.css">
+<script>
+(function(){try{var s=localStorage.getItem('crh-theme');if(s==='dark'){document.documentElement.classList.add('dark')}else if(!s&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark')}}catch(e){}})();
+</script>
+</head>
+<body>
+
+<a href="#main-content" class="skip-to-content">Skip to main content</a>
+<div class="crh-progress-bar" id="crhProgressBar" role="progressbar" aria-hidden="true"></div>
+
+<div class="crh-search-modal" id="searchModal" role="dialog" aria-modal="true" style="display:none;">
+  <div class="crh-search-modal-backdrop" id="searchBackdrop"></div>
+  <div class="crh-search-modal-dialog">
+    <div class="crh-search-modal-header">
+      <h2 class="crh-search-modal-title">Search the Creative Hub</h2>
+      <button class="crh-search-modal-close" id="closeSearchModal" aria-label="Close search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form class="crh-search-form" id="searchForm" role="search">
+      <div class="crh-search-input-wrapper">
+        <svg class="crh-search-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" class="crh-search-input" placeholder="Search..." autocomplete="off">
+      </div>
+    </form>
+    <div class="crh-search-results" id="searchResults">
+      <div class="crh-search-empty"><p>Search is live in Confluence. Disabled in this static demo.</p></div>
+    </div>
+  </div>
+</div>
+
+<header class="crh-header">
+  <div class="crh-header-bg"></div>
+  <div class="crh-header-overlay"></div>
+  <div class="crh-header-bar">
+    <div class="crh-header-inner">
+      <a href="../../index.html" class="crh-brand-link" aria-label="SKAO Creative Hub Home">
+        <img src="../../assets/images/skao-logo-white.png" alt="SKAO Logo" class="crh-logo-img">
+        <span class="crh-site-title">Creative Hub</span>
+      </a>
+      <div class="crh-header-actions">
+        <button class="crh-theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="crh-theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="crh-theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <nav class="crh-nav-strip" aria-label="Main navigation">
+    <div class="crh-nav-strip-inner">
+      <ul class="crh-nav-list">
+        <li><a href="../../index.html" class="crh-nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Home</a></li>
+        <li><a href="../../whats-new/" class="crh-nav-link">What’s New</a></li>
+        <li><a href="../../brand-guidelines/" class="crh-nav-link crh-nav-active">Brand Guidelines</a></li>
+        <li><a href="../../templates-assets/" class="crh-nav-link">Templates &amp; Assets</a></li>
+        <li><a href="../../how-to-work-with-us/" class="crh-nav-link">How To Work With Us</a></li>
+        <li><a href="../../events-support/" class="crh-nav-link">Events Support</a></li>
+        <li><a href="../../tools-resources/" class="crh-nav-link">Tools &amp; Resources</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<div class="crh-layout">
+  <aside class="crh-sidebar" id="sidebarPanel">
+  <div class="crh-sidebar-inner">
+    <nav class="crh-sidebar-nav" aria-label="Section navigation">
+      <a href="../brand-guidelines/" class="crh-sidebar-section-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Brand Guidelines
+      </a>
+      <ul class="crh-sidebar-tree">
+        <li class="crh-sidebar-item crh-sidebar-open"><a href="../logo-usage/" class="crh-sidebar-link crh-sidebar-active">Logo Usage</a></li><li class="crh-sidebar-item"><a href="../colour-palette/" class="crh-sidebar-link">Colour Palette</a></li>
+      </ul>
+    </nav>
+  </div>
+</aside>
+  <button class="crh-sidebar-toggle" id="sidebarToggle" aria-label="Open navigation panel">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <main id="main-content" class="crh-main">
+    <article class="crh-content">
+      <nav class="crh-breadcrumbs" aria-label="Breadcrumb">
+        <a href="../../index.html" class="crh-breadcrumb-link">Home</a><svg class="crh-breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+<a href="../" class="crh-breadcrumb-link">Brand Guidelines</a><svg class="crh-breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+<span class="crh-breadcrumb-current">Logo Usage</span>
+      </nav>
+      <ul class="crh-audience-strip" aria-label="Page audience and status"><li><span class="crh-audience-tag">For staff</span></li><li><span class="crh-audience-tag" data-variant="partner">Partner-safe</span></li></ul>
+      <h1 class="crh-page-title">Logo Usage</h1>
+      <div class="crh-article-meta">
+        <span class="crh-article-date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span class="crh-article-date-text">Demo content</span>
+        </span>
+      </div>
+      <div class="crh-content-body content-body">
+        <p>The SKAO logo is the most recognisable element of our visual identity. Correct use across materials is the single most important brand rule &mdash; everything else follows from it.</p>
+
+<h3>Logo variants</h3>
+<ul>
+  <li><strong>Primary</strong> &mdash; full colour on white or very light backgrounds.</li>
+  <li><strong>Reverse</strong> &mdash; white logo on dark or coloured backgrounds.</li>
+  <li><strong>Monochrome</strong> &mdash; black for single-colour print (e.g. internal memos, faxes).</li>
+  <li><strong>Stacked</strong> &mdash; for narrow spaces where the horizontal version doesn&rsquo;t fit.</li>
+</ul>
+
+<h3>Clear space</h3>
+<p>Always maintain clear space around the logo equal to the height of the &ldquo;S&rdquo; in &ldquo;SKAO&rdquo;. Nothing should encroach on this space &mdash; no text, images, borders, or other elements.</p>
+
+<figure class="crh-figure">
+  <div style="background:linear-gradient(135deg,#9333ea,#C8247E,#003366);aspect-ratio:16/9;border-radius:10px;display:flex;align-items:center;justify-content:center;"><img src="../../assets/images/skao-logo-white.png" alt="SKAO logo on brand gradient" style="height:80px;" class="no-dim"></div>
+  <figcaption>The SKAO primary logo on the brand gradient. Use this combination for hero sections and landing pages.<cite>SKAO Brand</cite></figcaption>
+</figure>
+
+<h3>Download the logo pack</h3>
+<p>All logo variants live in Canto. Please use the latest files &mdash; older variants (pre-2024) are deprecated.</p>
+
+<a class="crh-canto-card" href="https://skao.canto.global/" target="_blank" rel="noopener">
+  <span class="crh-canto-badge">Canto</span>
+  <span class="crh-canto-title">SKAO Logo &mdash; Primary Pack</span>
+  <span class="crh-canto-desc">EPS, SVG, PNG (colour, white, black, stacked). 12 files. Updated March 2026.</span>
+  <span class="crh-canto-arrow">Open in Canto &rarr;</span>
+</a>
+
+<div class="crh-download-card">
+  <div class="crh-download-icon" data-type="zip"></div>
+  <div class="crh-download-meta">
+    <strong class="crh-download-name">skao-logo-pack-2026.zip</strong>
+    <span class="crh-download-detail">ZIP archive &middot; 2.4 MB &middot; 12 files</span>
+  </div>
+  <a class="crh-download-btn" href="#demo" onclick="alert('Demo build — no actual file. In the live hub, this downloads from Confluence attachments.');return false;">Download</a>
+</div>
+
+<div class="crh-download-card">
+  <div class="crh-download-icon" data-type="pdf"></div>
+  <div class="crh-download-meta">
+    <strong class="crh-download-name">Logo-Usage-Guidelines.pdf</strong>
+    <span class="crh-download-detail">PDF &middot; 340 KB &middot; 8 pages</span>
+  </div>
+  <a class="crh-download-btn" href="#demo" onclick="alert('Demo build — no actual file.');return false;">Download</a>
+</div>
+
+<h3>Do and don’t</h3>
+<ul>
+  <li><strong>Do</strong> maintain clear space equal to the height of the &ldquo;S&rdquo;.</li>
+  <li><strong>Do</strong> use the reverse logo on dark backgrounds for contrast.</li>
+  <li><strong>Don’t</strong> stretch, skew, or rotate the logo.</li>
+  <li><strong>Don’t</strong> place the logo on busy or low-contrast backgrounds.</li>
+  <li><strong>Don’t</strong> recreate the logo &mdash; always use the official files.</li>
+</ul>
+
+<h3>Related pages</h3>
+<div class="crh-related-grid">
+  <a href="../colour-palette/">Colour Palette</a>
+  <a href="../../templates-assets/">Templates &amp; Assets</a>
+  <a href="../../tools-resources/content-patterns/">Content Patterns</a>
+</div>
+      </div>
+      <div class="crh-feedback-widget" id="pageFeedback">
+  <div class="crh-feedback-question">
+    <span class="crh-feedback-label">Was this page helpful?</span>
+    <div class="crh-feedback-buttons">
+      <button class="crh-feedback-btn crh-feedback-yes" data-vote="yes" aria-label="Yes, helpful"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> Yes</button>
+      <button class="crh-feedback-btn crh-feedback-no" data-vote="no" aria-label="No, not helpful"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg> No</button>
+    </div>
+  </div>
+  <div class="crh-feedback-thanks" id="pfThanks" style="display:none;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <span>Thank you for your feedback!</span>
+  </div>
+</div>
+      <nav class="crh-page-nav"><div class="crh-nav-prev"></div><div class="crh-nav-next"><a href="../colour-palette/" class="crh-nav-button"><span class="crh-nav-label">Next</span><span class="crh-nav-title">Colour Palette</span></a></div></nav>
+    </article>
+  </main>
+</div>
+
+<footer class="crh-footer">
+  <div class="crh-footer-inner">
+    <div class="crh-footer-columns">
+      <div class="crh-footer-column">
+        <h4>About SKAO</h4>
+        <ul>
+          <li><a href="https://skao.int/about" target="_blank" rel="noopener">About Us</a></li>
+          <li><a href="https://skao.int/careers" target="_blank" rel="noopener">Careers</a></li>
+          <li><a href="https://skao.int/news" target="_blank" rel="noopener">News</a></li>
+          <li><a href="https://skao.int/contact" target="_blank" rel="noopener">Contact</a></li>
+        </ul>
+      </div>
+      <div class="crh-footer-column">
+        <h4>Hub Sections</h4>
+        <ul>
+          <li><a href="../../whats-new/">What&rsquo;s New</a></li>
+          <li><a href="../../brand-guidelines/">Brand Guidelines</a></li>
+          <li><a href="../../templates-assets/">Templates &amp; Assets</a></li>
+          <li><a href="../../how-to-work-with-us/">How To Work With Us</a></li>
+          <li><a href="../../events-support/">Events Support</a></li>
+          <li><a href="../../tools-resources/">Tools &amp; Resources</a></li>
+        </ul>
+      </div>
+      <div class="crh-footer-column">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" target="_blank" rel="noopener">Canto DAM</a></li>
+          <li><a href="https://fonts.google.com/noto/specimen/Noto+Sans" target="_blank" rel="noopener">Brand Fonts</a></li>
+          <li><a href="https://github.com/JDiamondSKAO/skao-creative-hub" target="_blank" rel="noopener">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="crh-footer-column">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Creative Helpdesk</a></li>
+          <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/298" target="_blank" rel="noopener">HSSE Helpdesk</a></li>
+          <li><a href="mailto:comms@skao.int">comms@skao.int</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="crh-footer-bottom">
+      <p class="crh-footer-copyright">&copy; 2026 SKA Observatory. Static demo build. Source on <a href="https://github.com/JDiamondSKAO/skao-creative-hub" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);text-decoration:underline;">GitHub</a>.</p>
+      <button class="crh-footer-easter-egg" id="footerStar" aria-label="Secret surprise" title="⭐">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l3 6h6.5l-5.2 4 2 6.5L10 15l-5.3 4 2-6.5L.5 7.5H7l3-6z"/></svg>
+      </button>
+    </div>
+  </div>
+</footer>
+<button class="crh-back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/eggs.js"></script>
+</body>
+</html>
