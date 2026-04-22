@@ -372,89 +372,88 @@
             ## Any Confluence page body content (macros, text) would appear as raw unstyled
             ## content and break the design. Edit the template to change homepage sections.
 
-            ## POPULAR DOWNLOADS — pages labelled popular-download, last-modified order
-            ## Limit 5. JS (main.js) populates this container from CQL.
-            <section class="crh-home-section crh-popular-downloads" id="popularDownloads">
-                <div class="crh-home-section-header">
-                    <h2>
-                        <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Popular Downloads
-                    </h2>
+            ## BENTO ROW \u2014 Essentials (left) + Featured Templates (right)
+            ## Essentials = pages labelled `essential` (compact stacked list)
+            ## Featured Templates = pages labelled `featured-template` (media-object cards)
+            <div class="crh-bento-row">
+                <div class="crh-bento-col">
+                    <section class="crh-home-section crh-popular-downloads">
+                        <div class="crh-home-section-header">
+                            <h2>
+                                <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15 8.5L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8.5L12 2z"/></svg>
+                                Essentials
+                            </h2>
+                        </div>
+                        <div class="crh-popular-list" id="crhPopularList" data-space="$page.space.key" data-label="essential" data-limit="5">
+                            <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
+                            <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
+                            <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
+                        </div>
+                    </section>
                 </div>
-                <div class="crh-popular-list" id="crhPopularList" data-space="$page.space.key" data-label="popular-download" data-limit="5">
-                    <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
-                    <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
-                    <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
+                <div class="crh-bento-col">
+                    <section class="crh-home-section crh-featured-templates">
+                        <div class="crh-home-section-header">
+                            <h2>
+                                <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                                Featured Templates
+                            </h2>
+                            #set($templatesLink = $homeLink)
+                            #foreach($tp in $homePage.children)
+                                #if($tp.title.toLowerCase().contains("template"))
+                                    #set($templatesLink = $tp.absoluteLink)
+                                #end
+                            #end
+                            <a href="$templatesLink" class="crh-home-section-link">Browse all &rarr;</a>
+                        </div>
+                        <div class="crh-template-grid" id="crhTemplateGrid" data-space="$page.space.key" data-label="featured-template" data-limit="3">
+                            <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
+                            <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
+                            <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
+                        </div>
+                    </section>
                 </div>
-            </section>
+            </div>
 
-            ## FEATURED TEMPLATES — pages labelled featured-template, thumbnail card row
-            ## Limit 4. Thumbnails drawn from page cover images (fallback: gradient).
-            <section class="crh-home-section crh-featured-templates" id="featuredTemplates">
-                <div class="crh-home-section-header">
-                    <h2>
-                        <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                        Featured Templates
-                    </h2>
-                    #set($templatesLink = $homeLink)
-                    #foreach($tp in $homePage.children)
-                        #if($tp.title.toLowerCase().contains("template"))
-                            #set($templatesLink = $tp.absoluteLink)
-                        #end
-                    #end
-                    <a href="$templatesLink" class="crh-home-section-link">Browse all →</a>
-                </div>
-                <div class="crh-template-grid" id="crhTemplateGrid" data-space="$page.space.key" data-label="featured-template" data-limit="4">
-                    <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
-                    <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
-                    <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
-                    <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
-                </div>
-            </section>
-
-            ## RECENT UPDATES SECTION
-            <section class="crh-updates" id="updates">
-                <div class="crh-updates-header">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:middle;">
-                        <path d="M12 2L15.09 8.26H22L17.55 12.5L19.64 18.76L12 14.5L4.36 18.76L6.45 12.5L2 8.26H8.91L12 2Z"/>
-                    </svg>
-                    <h2 style="display:inline;">Recent Updates</h2>
-                </div>
-                <div class="crh-updates-grid" id="crhUpdatesGrid" data-space="$page.space.key" data-home-title="$homePage.title">
-                    <article class="crh-update-card crh-update-skeleton"><div class="crh-skel-line crh-skel-title"></div><div class="crh-skel-line crh-skel-meta"></div></article>
-                    <article class="crh-update-card crh-update-skeleton"><div class="crh-skel-line crh-skel-title"></div><div class="crh-skel-line crh-skel-meta"></div></article>
-                    <article class="crh-update-card crh-update-skeleton"><div class="crh-skel-line crh-skel-title"></div><div class="crh-skel-line crh-skel-meta"></div></article>
-                </div>
-                #set($whatsNewLink = $homeLink)
-                #foreach($wn in $homePage.children)
-                    #if($wn.title.toLowerCase().contains("what"))
-                        #set($whatsNewLink = $wn.absoluteLink)
-                    #end
+            ## WHAT'S NEW \u2014 tabbed activity panel.
+            ## Two tabs: All updates (any page in space) / Guidelines only (pages labelled brand-guideline).
+            ## Replaces the old Recent Updates card grid and Recently Updated Guidelines list.
+            #set($brandLink = $homeLink)
+            #foreach($bg in $homePage.children)
+                #if($bg.title.toLowerCase().contains("brand"))
+                    #set($brandLink = $bg.absoluteLink)
                 #end
-                <a href="$whatsNewLink" class="crh-updates-link">View all updates →</a>
-            </section>
-
-            ## RECENTLY UPDATED GUIDELINES — pages labelled brand-guideline, last-modified
-            ## Compact list (text-first) \u2014 deliberately visually distinct from Recent Updates.
-            <section class="crh-home-section crh-recent-guidelines" id="recentGuidelines">
-                <div class="crh-home-section-header">
+            #end
+            #set($whatsNewLink = $homeLink)
+            #foreach($wn in $homePage.children)
+                #if($wn.title.toLowerCase().contains("what"))
+                    #set($whatsNewLink = $wn.absoluteLink)
+                #end
+            #end
+            <section class="crh-home-section crh-activity-panel" id="crhActivity"
+                     data-space="$page.space.key"
+                     data-home-title="$homePage.title"
+                     data-all-link="$whatsNewLink"
+                     data-guidelines-link="$brandLink">
+                <div class="crh-activity-header">
                     <h2>
-                        <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v10l9 5 9-5V7z"/><polyline points="3 7 12 12 21 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
-                        Recently Updated Guidelines
+                        <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        What&rsquo;s New
                     </h2>
-                    #set($brandLink = $homeLink)
-                    #foreach($bg in $homePage.children)
-                        #if($bg.title.toLowerCase().contains("brand"))
-                            #set($brandLink = $bg.absoluteLink)
-                        #end
-                    #end
-                    <a href="$brandLink" class="crh-home-section-link">All guidelines →</a>
+                    <div class="crh-activity-tabs" role="tablist" aria-label="Activity filter">
+                        <button class="crh-activity-tab crh-activity-tab-active" role="tab" aria-selected="true" data-scope="all">All updates</button>
+                        <button class="crh-activity-tab" role="tab" aria-selected="false" data-scope="guidelines">Guidelines only</button>
+                    </div>
                 </div>
-                <ol class="crh-guidelines-list" id="crhGuidelinesList" data-space="$page.space.key" data-label="brand-guideline" data-limit="5">
-                    <li><a class="crh-guidelines-item crh-guidelines-skeleton" href="#"><span class="crh-guidelines-item-title"></span><span class="crh-guidelines-item-section"></span><span class="crh-guidelines-item-date"></span></a></li>
-                    <li><a class="crh-guidelines-item crh-guidelines-skeleton" href="#"><span class="crh-guidelines-item-title"></span><span class="crh-guidelines-item-section"></span><span class="crh-guidelines-item-date"></span></a></li>
-                    <li><a class="crh-guidelines-item crh-guidelines-skeleton" href="#"><span class="crh-guidelines-item-title"></span><span class="crh-guidelines-item-section"></span><span class="crh-guidelines-item-date"></span></a></li>
+                <ol class="crh-activity-content" id="crhActivityContent" role="tabpanel">
+                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
+                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
+                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
+                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
                 </ol>
+                <div class="crh-activity-footer">
+                    <a href="$whatsNewLink" id="crhActivityFooterLink">View all updates &rarr;</a>
+                </div>
             </section>
 
             ## RESOURCE CATEGORIES SECTION

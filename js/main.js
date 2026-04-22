@@ -1090,84 +1090,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     /* -----------------------------------------
-     * DYNAMIC RECENT UPDATES
-     * Replaces skeleton cards with 3 most recently modified pages via CQL
-     * ----------------------------------------- */
-    var updatesGrid = document.getElementById('crhUpdatesGrid');
-    if (updatesGrid) {
-        var spaceKey = updatesGrid.getAttribute('data-space') || 'CRH';
-        var homeTitle = updatesGrid.getAttribute('data-home-title') || '';
-        var tagMap = {
-            'brand': 'brand', 'guideline': 'brand',
-            'template': 'templates', 'asset': 'templates', 'slide': 'templates',
-            'photo': 'media', 'video': 'media', 'animation': 'media',
-            'event': 'events', 'tool': 'tools', 'resource': 'tools'
-        };
-        function getSectionTag(title) {
-            var lower = (title || '').toLowerCase();
-            for (var k in tagMap) { if (lower.indexOf(k) !== -1) return tagMap[k]; }
-            return 'portal';
-        }
-        function buildUpdateCard(item) {
-            var anc = item.ancestors || [];
-            var section = anc.length > 1 ? anc[1].title : (anc.length > 0 ? anc[0].title : 'Hub');
-            var tag = getSectionTag(section);
-            var dateStr = '';
-            try { dateStr = new Date(item.version.when).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }); } catch (e) {}
-            var article = document.createElement('article');
-            article.className = 'crh-update-card';
-            var a = document.createElement('a');
-            /* Prepend contextPath — Scroll Viewport rewrites URLs, raw webui is incomplete */
-            var webui = (item._links && item._links.webui) ? item._links.webui : '';
-            a.href = webui ? ((typeof contextPath !== 'undefined' ? contextPath : '') + webui) : '#';
-            a.className = 'crh-update-card-link';
-            var h3 = document.createElement('h3');
-            h3.className = 'crh-update-title';
-            h3.textContent = item.title;
-            a.appendChild(h3);
-            var t = document.createElement('time');
-            t.className = 'crh-update-date';
-            t.textContent = dateStr;
-            var sp = document.createElement('span');
-            sp.className = 'crh-update-tag crh-update-tag-' + tag;
-            sp.textContent = section;
-            article.appendChild(a);
-            article.appendChild(t);
-            article.appendChild(sp);
-            return article;
-        }
-        var cql = 'space = "' + spaceKey + '" AND type = page AND title != "' + homeTitle.replace(/"/g, '\\"') + '" ORDER BY lastModified DESC';
-        /* Prepend contextPath — Scroll Viewport serves the portal at a rewritten
-           URL, so bare /rest/api/content/search won't resolve to the Confluence
-           REST endpoint. Same fix as the search modal code above. */
-        var ctx = (typeof contextPath !== 'undefined' ? contextPath : '');
-        var endpoint = ctx + '/rest/api/content/search?cql=' + encodeURIComponent(cql) + '&limit=3&expand=version,ancestors';
-        fetch(endpoint, {
-            credentials: 'same-origin',
-            headers: { 'Accept': 'application/json', 'X-Atlassian-Token': 'nocheck' }
-        })
-            .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-            .then(function (data) {
-                updatesGrid.innerHTML = '';
-                if (data.results && data.results.length) {
-                    data.results.forEach(function (item) { updatesGrid.appendChild(buildUpdateCard(item)); });
-                } else {
-                    updatesGrid.innerHTML = '<p class="crh-updates-empty">No recent updates found.</p>';
-                }
-            })
-            .catch(function (err) {
-                /* Log to console so the failure mode is diagnosable without server logs */
-                try { console.warn('[CRH] Recent updates fetch failed:', err, 'endpoint:', endpoint); } catch (e) {}
-                updatesGrid.innerHTML = '<p class="crh-updates-empty">Could not load recent updates.</p>';
-            });
-    }
-
-    /* -----------------------------------------
      * HOMEPAGE LABEL-DRIVEN SECTIONS
-     * Popular Downloads, Featured Templates, Recently Updated Guidelines.
-     * All three use the same CQL pattern: filter by label, order by modified,
-     * render via a section-specific builder. Containers opt in via data-label
-     * on the element, so markup drives the query.
+     * - Essentials (label "essential") \u2014 compact stacked list
+     * - Featured Templates (label "featured-template") \u2014 media-object cards
+     * - What's New activity panel \u2014 tabs for [All updates | Guidelines only]
+     *
+     * All three use the same CQL pattern: filter by label (or not, for "all"),
+     * order by lastModified, render via a section-specific builder.
      * ----------------------------------------- */
 
     /* Shared helpers */
@@ -1248,16 +1177,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
     }
 
-    /* ---- Popular Downloads ---- */
+    /* ---- Essentials (Popular Downloads renamed) ---- */
     var popularList = document.getElementById('crhPopularList');
     if (popularList) {
-        var popLabel = popularList.getAttribute('data-label') || 'popular-download';
+        var popLabel = popularList.getAttribute('data-label') || 'essential';
         var popLimit = parseInt(popularList.getAttribute('data-limit') || '5', 10);
         fetchByLabel(popLabel, popLimit)
             .then(function (data) {
                 popularList.innerHTML = '';
                 if (!data.results || !data.results.length) {
-                    showSectionEmpty(popularList, 'No popular downloads yet. Apply the popular-download label to any page to feature it here.');
+                    showSectionEmpty(popularList, 'No essentials yet. Apply the "essential" label to pages to feature them here.');
                     return;
                 }
                 data.results.forEach(function (item) {
@@ -1293,8 +1222,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             })
             .catch(function (err) {
-                try { console.warn('[CRH] Popular downloads fetch failed:', err); } catch (e) {}
-                showSectionEmpty(popularList, 'Could not load popular downloads.');
+                try { console.warn('[CRH] Essentials fetch failed:', err); } catch (e) {}
+                showSectionEmpty(popularList, 'Could not load essentials.');
             });
     }
 
@@ -1302,7 +1231,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var templateGrid = document.getElementById('crhTemplateGrid');
     if (templateGrid) {
         var tplLabel = templateGrid.getAttribute('data-label') || 'featured-template';
-        var tplLimit = parseInt(templateGrid.getAttribute('data-limit') || '4', 10);
+        var tplLimit = parseInt(templateGrid.getAttribute('data-limit') || '3', 10);
         fetchByLabel(tplLabel, tplLimit)
             .then(function (data) {
                 templateGrid.innerHTML = '';
@@ -1352,45 +1281,163 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    /* ---- Recently Updated Guidelines ---- */
-    var guidelinesList = document.getElementById('crhGuidelinesList');
-    if (guidelinesList) {
-        var glLabel = guidelinesList.getAttribute('data-label') || 'brand-guideline';
-        var glLimit = parseInt(guidelinesList.getAttribute('data-limit') || '5', 10);
-        fetchByLabel(glLabel, glLimit)
-            .then(function (data) {
-                guidelinesList.innerHTML = '';
-                if (!data.results || !data.results.length) {
-                    var li = document.createElement('li');
-                    li.innerHTML = '<div class="crh-section-empty" style="border:none;">No recently updated guidelines. Apply the brand-guideline label to surface pages here.</div>';
-                    guidelinesList.appendChild(li);
-                    return;
-                }
-                data.results.forEach(function (item) {
-                    var li = document.createElement('li');
-                    var a = document.createElement('a');
-                    a.className = 'crh-guidelines-item';
-                    a.href = resolveWebui(item);
-                    var title = document.createElement('span');
-                    title.className = 'crh-guidelines-item-title';
-                    title.textContent = item.title;
-                    var section = document.createElement('span');
-                    section.className = 'crh-guidelines-item-section';
-                    section.textContent = ancestorSection(item);
-                    var date = document.createElement('span');
-                    date.className = 'crh-guidelines-item-date';
-                    date.textContent = formatRelative(item.version && item.version.when);
-                    a.appendChild(title);
-                    a.appendChild(section);
-                    a.appendChild(date);
-                    li.appendChild(a);
-                    guidelinesList.appendChild(li);
+    /* ---- What's New \u2014 tabbed activity panel ----
+       Two scopes: "all" (any page in space, label-free) and "guidelines"
+       (pages labelled brand-guideline). Lazy-fetched on tab activation so
+       the "guidelines" request only fires when needed. Results are cached
+       per-scope so switching back-and-forth is instant. */
+    var activityPanel = document.getElementById('crhActivity');
+    if (activityPanel) {
+        var actSpace = activityPanel.getAttribute('data-space') || 'CRH';
+        var actHomeTitle = activityPanel.getAttribute('data-home-title') || '';
+        var actAllLink = activityPanel.getAttribute('data-all-link') || '#';
+        var actGuidelinesLink = activityPanel.getAttribute('data-guidelines-link') || '#';
+        var actContent = document.getElementById('crhActivityContent');
+        var actFooterLink = document.getElementById('crhActivityFooterLink');
+        var actTabs = activityPanel.querySelectorAll('.crh-activity-tab');
+
+        var activitySectionTagMap = {
+            'brand': 'brand', 'guideline': 'brand',
+            'template': 'templates', 'asset': 'templates', 'slide': 'templates',
+            'photo': 'media', 'video': 'media', 'animation': 'media',
+            'event': 'events', 'tool': 'tools', 'resource': 'tools'
+        };
+        function activityTag(title) {
+            var lower = (title || '').toLowerCase();
+            for (var k in activitySectionTagMap) {
+                if (lower.indexOf(k) !== -1) return activitySectionTagMap[k];
+            }
+            return 'portal';
+        }
+
+        function buildActivityItem(item) {
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.className = 'crh-activity-item';
+            a.href = resolveWebui(item);
+            var section = ancestorSection(item);
+            var dot = document.createElement('span');
+            dot.className = 'crh-activity-dot';
+            dot.setAttribute('data-tag', activityTag(section));
+            var body = document.createElement('div');
+            body.className = 'crh-activity-body';
+            var title = document.createElement('span');
+            title.className = 'crh-activity-title';
+            title.textContent = item.title;
+            var sec = document.createElement('span');
+            sec.className = 'crh-activity-section';
+            sec.textContent = section;
+            body.appendChild(title);
+            body.appendChild(sec);
+            var date = document.createElement('span');
+            date.className = 'crh-activity-date';
+            date.textContent = formatRelative(item.version && item.version.when);
+            a.appendChild(dot);
+            a.appendChild(body);
+            a.appendChild(date);
+            li.appendChild(a);
+            return li;
+        }
+
+        /* Per-scope fetcher \u2014 "all" excludes the home page, "guidelines" filters by label */
+        function fetchActivity(scope, limit) {
+            var cql;
+            if (scope === 'guidelines') {
+                cql = 'space = "' + actSpace + '" AND type = page AND label = "brand-guideline" ORDER BY lastModified DESC';
+            } else {
+                cql = 'space = "' + actSpace + '" AND type = page AND title != "' +
+                      actHomeTitle.replace(/"/g, '\\"') + '" ORDER BY lastModified DESC';
+            }
+            var url = ctx + '/rest/api/content/search?cql=' + encodeURIComponent(cql) +
+                      '&limit=' + limit + '&expand=version,ancestors';
+            return fetch(url, {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json', 'X-Atlassian-Token': 'nocheck' }
+            }).then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); });
+        }
+
+        var activityCache = { all: null, guidelines: null };
+        var activityLimit = 5;
+
+        function renderActivity(scope) {
+            /* Use cache if present */
+            if (activityCache[scope]) {
+                paintActivity(activityCache[scope].results || [], scope);
+                return;
+            }
+            /* Show skeletons while fetching */
+            actContent.innerHTML = '';
+            for (var i = 0; i < 4; i++) {
+                var skel = document.createElement('li');
+                skel.innerHTML = '<div class="crh-activity-item crh-activity-skeleton">' +
+                    '<span class="crh-activity-dot"></span>' +
+                    '<div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div>' +
+                    '<span class="crh-activity-date"></span></div>';
+                actContent.appendChild(skel);
+            }
+            fetchActivity(scope, activityLimit)
+                .then(function (data) {
+                    activityCache[scope] = data;
+                    paintActivity(data.results || [], scope);
+                })
+                .catch(function (err) {
+                    try { console.warn('[CRH] Activity fetch failed:', scope, err); } catch (e) {}
+                    actContent.innerHTML =
+                        '<li><div class="crh-section-empty" style="border:none;border-radius:0;">' +
+                        'Could not load ' + (scope === 'guidelines' ? 'guidelines' : 'updates') +
+                        '.</div></li>';
                 });
-            })
-            .catch(function (err) {
-                try { console.warn('[CRH] Recent guidelines fetch failed:', err); } catch (e) {}
-                guidelinesList.innerHTML = '<li><div class="crh-section-empty" style="border:none;">Could not load recent guidelines.</div></li>';
+        }
+
+        function paintActivity(results, scope) {
+            actContent.innerHTML = '';
+            if (!results.length) {
+                var emptyText = (scope === 'guidelines')
+                    ? 'No recent guideline updates. Apply the "brand-guideline" label to surface pages here.'
+                    : 'No recent updates.';
+                actContent.innerHTML =
+                    '<li><div class="crh-section-empty" style="border:none;border-radius:0;">' +
+                    emptyText + '</div></li>';
+                return;
+            }
+            results.forEach(function (item) { actContent.appendChild(buildActivityItem(item)); });
+        }
+
+        function activateTab(scope) {
+            actTabs.forEach(function (btn) {
+                var isActive = btn.getAttribute('data-scope') === scope;
+                btn.classList.toggle('crh-activity-tab-active', isActive);
+                btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
             });
+            if (actFooterLink) {
+                actFooterLink.href = (scope === 'guidelines') ? actGuidelinesLink : actAllLink;
+                actFooterLink.textContent = (scope === 'guidelines')
+                    ? 'Browse all Brand Guidelines \u2192'
+                    : 'View all updates \u2192';
+            }
+            renderActivity(scope);
+        }
+
+        actTabs.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                activateTab(btn.getAttribute('data-scope'));
+            });
+            btn.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    var list = Array.prototype.slice.call(actTabs);
+                    var idx = list.indexOf(btn);
+                    var next = e.key === 'ArrowRight'
+                        ? list[(idx + 1) % list.length]
+                        : list[(idx - 1 + list.length) % list.length];
+                    next.focus();
+                    activateTab(next.getAttribute('data-scope'));
+                }
+            });
+        });
+
+        /* Initial load */
+        activateTab('all');
     }
 
     /* -----------------------------------------
