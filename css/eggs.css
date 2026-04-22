@@ -1,0 +1,216 @@
+/* ============================================= */
+/* EASTER EGGS                                    */
+/* ============================================= */
+/* The portal's little secrets — shhh */
+.ee-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0, 0, 0, 0.92); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    opacity: 0; animation: eeFadeIn 0.35s ease forwards;
+}
+
+@keyframes eeFadeIn { to { opacity: 1; } }
+@keyframes eeFadeOut { to { opacity: 0; } }
+@keyframes eeScaleIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes eePulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes eeSpin { to { transform: rotate(360deg); } }
+@keyframes eeGlow { 0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); } 50% { box-shadow: 0 0 40px rgba(34, 197, 94, 0.4); } }
+@keyframes eeGlowBlue { 0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); } 50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.4); } }
+@keyframes eePulsarBeat { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.4); opacity: 1; } }
+@keyframes eePulsarBeam { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ee42Pop { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes ee42Flip { from { transform: rotateY(-180deg); opacity: 0; } to { transform: rotateY(0); opacity: 1; } }
+
+.ee-overlay.ee-closing { animation: eeFadeOut 0.25s ease forwards; }
+
+.ee-modal {
+    max-width: 560px; width: 100%; border-radius: 16px;
+    padding: 32px; position: relative; overflow: hidden;
+    animation: eeScaleIn 0.35s ease 0.05s both;
+}
+
+.ee-close {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    background: rgba(255,255,255,0.1); border: none; border-radius: 8px;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.2s; color: inherit;
+}
+.ee-close:hover { background: rgba(255,255,255,0.2); }
+.ee-close svg { width: 18px; height: 18px; }
+
+.ee-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.ee-header svg { width: 28px; height: 28px; flex-shrink: 0; }
+.ee-header h2 { font-size: 24px; font-weight: 700; margin: 0; }
+
+.ee-panel {
+    padding: 20px; border-radius: 10px; margin-bottom: 20px;
+    background: rgba(0,0,0,0.4); text-align: center;
+}
+
+.ee-text { font-size: 14px; line-height: 1.7; margin-bottom: 8px; }
+.ee-text:last-child { margin-bottom: 0; }
+.ee-text strong { font-weight: 600; }
+.ee-text em { font-style: italic; }
+
+.ee-badge {
+    display: inline-block; padding: 6px 14px; border-radius: 8px;
+    font-size: 12px; margin-top: 16px; text-align: center;
+}
+
+/* Wow! Signal — green */
+.ee-wow { background: linear-gradient(135deg, #14532d, #064e3b); border: 2px solid #22c55e; animation: eeGlow 2s infinite; }
+.ee-wow .ee-header h2 { color: #4ade80; }
+.ee-wow .ee-header svg { color: #4ade80; }
+.ee-wow .ee-panel { border: 1px solid rgba(34,197,94,0.3); }
+.ee-wow .ee-signal { font-size: 36px; letter-spacing: 8px; color: #4ade80; font-family: 'SF Mono', Consolas, monospace; font-weight: 700; margin-bottom: 8px; }
+.ee-wow .ee-signal-date { font-size: 13px; color: rgba(134,239,172,0.7); }
+.ee-wow .ee-text { color: rgba(220,252,231,0.9); }
+.ee-wow .ee-text strong { color: #4ade80; }
+.ee-wow .ee-text em { color: rgba(74,222,128,0.8); }
+.ee-wow .ee-badge { background: rgba(34,197,94,0.2); border: 1px solid rgba(34,197,94,0.5); color: #4ade80; }
+
+/* Hydrogen Line — blue */
+.ee-1420 { background: linear-gradient(135deg, #1e3a5f, #1e1b4b); border: 2px solid #3b82f6; animation: eeGlowBlue 2s infinite; }
+.ee-1420 .ee-header h2 { color: #60a5fa; }
+.ee-1420 .ee-header svg { color: #60a5fa; }
+.ee-1420 .ee-panel { border: 1px solid rgba(59,130,246,0.3); }
+.ee-1420 .ee-freq { font-size: 40px; font-weight: 700; color: #60a5fa; margin-bottom: 4px; }
+.ee-1420 .ee-wavelength { font-size: 13px; color: rgba(147,197,253,0.7); }
+.ee-1420 .ee-text { color: rgba(219,234,254,0.9); }
+.ee-1420 .ee-text strong { color: #60a5fa; }
+.ee-1420 .ee-text em { color: rgba(96,165,250,0.8); }
+.ee-1420 .ee-badge { background: rgba(59,130,246,0.2); border: 1px solid rgba(59,130,246,0.5); color: #60a5fa; }
+
+/* Pulsar — purple */
+.ee-pulsar { background: linear-gradient(135deg, #4a1d6b, #500724); border: 2px solid #a855f7; }
+.ee-pulsar .ee-header h2 { color: #c084fc; }
+.ee-pulsar .ee-subtitle { font-size: 13px; color: rgba(216,180,254,0.7); margin-top: -16px; margin-bottom: 20px; }
+.ee-pulsar .ee-panel { border: 1px solid rgba(168,85,247,0.3); }
+.ee-pulsar .ee-text { color: rgba(243,232,255,0.9); }
+.ee-pulsar .ee-text strong { color: #c084fc; }
+.ee-pulsar .ee-text em { color: rgba(192,132,252,0.8); }
+.ee-pulsar .ee-badge { background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.5); color: #c084fc; }
+
+.ee-pulsar-viz {
+    position: relative; height: 160px; display: flex;
+    align-items: center; justify-content: center; margin-bottom: 20px;
+}
+.ee-pulsar-glow-outer {
+    position: absolute; width: 120px; height: 120px;
+    background: rgba(168,85,247,0.25); border-radius: 50%; filter: blur(20px);
+    animation: eePulsarBeat 0.6s infinite;
+}
+.ee-pulsar-glow-inner {
+    position: absolute; width: 80px; height: 80px;
+    background: rgba(236,72,153,0.35); border-radius: 50%; filter: blur(14px);
+    animation: eePulsarBeat 0.6s 0.1s infinite;
+}
+.ee-pulsar-core {
+    position: relative; width: 56px; height: 56px;
+    background: linear-gradient(135deg, #a855f7, #ec4899); border-radius: 50%;
+    animation: eePulsarBeam 2s linear infinite;
+}
+.ee-pulsar-beam {
+    position: absolute; top: 50%; left: 50%; height: 2px; width: 100px;
+    transform-origin: left center; transform: translateY(-50%);
+}
+.ee-pulsar-beam-1 { background: linear-gradient(to right, #a855f7, transparent); }
+.ee-pulsar-beam-2 { background: linear-gradient(to right, #ec4899, transparent); transform: translateY(-50%) rotate(180deg); }
+
+.ee-pulsar-stats { font-family: 'SF Mono', Consolas, monospace; }
+.ee-pulsar-stats .ee-period { font-size: 13px; color: #c084fc; }
+.ee-pulsar-stats .ee-count { font-size: 22px; font-weight: 700; color: #f472b6; margin-top: 6px; }
+
+/* 42 — gold */
+.ee-42 { background: linear-gradient(135deg, #713f12, #7c2d12); border: 2px solid #eab308; animation: ee42Flip 0.5s ease; }
+.ee-42-number { font-size: 120px; font-weight: 700; color: #facc15; margin-bottom: 12px; animation: ee42Pop 0.4s ease 0.2s both; }
+.ee-42 h2 { font-size: 22px; font-weight: 700; color: #fde68a; margin: 0 0 16px; }
+.ee-42 .ee-panel { border: 1px solid rgba(234,179,8,0.3); }
+.ee-42 .ee-panel em { color: rgba(253,230,138,0.9); font-size: 14px; }
+.ee-42 .ee-panel .ee-attr { color: rgba(234,179,8,0.7); font-size: 12px; margin-top: 8px; }
+.ee-42 .ee-text { color: rgba(254,249,195,0.9); }
+.ee-42 .ee-facts { list-style: disc; padding-left: 20px; margin: 8px 0; }
+.ee-42 .ee-facts li { color: rgba(253,224,71,0.8); font-size: 13px; margin-bottom: 4px; }
+.ee-42 .ee-text em { color: rgba(234,179,8,0.8); }
+.ee-42 .ee-badge { background: rgba(234,179,8,0.2); border: 1px solid rgba(234,179,8,0.5); color: #facc15; }
+
+/* "Don't show again" checkbox */
+.ee-suppress {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.5);
+    cursor: pointer; user-select: none;
+}
+.ee-suppress:hover { color: rgba(255,255,255,0.7); }
+.ee-suppress-cb {
+    width: 14px; height: 14px; accent-color: currentColor; cursor: pointer;
+    margin: 0;
+}
+
+/* --- Toast notification (discovery tracker) --- */
+.ee-toast {
+    position: fixed; bottom: 24px; left: 50%; z-index: 10000;
+    transform: translateX(-50%) translateY(20px);
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px; border-radius: 12px;
+    background: #1e293b; border: 1px solid #334155;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+    color: #e2e8f0; font-size: 14px; font-weight: 500;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    max-width: 420px; width: max-content;
+}
+.ee-toast-show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+.ee-toast-complete {
+    background: linear-gradient(135deg, #14532d, #064e3b);
+    border-color: rgba(34,197,94,0.4);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(34,197,94,0.15);
+}
+.ee-toast-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+.ee-toast-text { line-height: 1.4; }
+.ee-toast-text strong { color: #fff; font-weight: 700; }
+
+/* --- Progress bar (shown inside egg modals) --- */
+.ee-progress {
+    margin-top: 16px; padding: 0 4px;
+}
+.ee-progress-bar {
+    width: 100%; height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,0.1); overflow: hidden;
+    margin-bottom: 8px;
+}
+.ee-progress-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #818cf8, #a78bfa);
+    transition: width 0.5s ease;
+}
+.ee-progress-label {
+    font-size: 12px; color: rgba(255,255,255,0.5);
+    text-align: center; display: block;
+}
+
+/* Colour-matched progress fills per egg theme */
+.ee-wow .ee-progress-fill { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.ee-1420 .ee-progress-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.ee-pulsar .ee-progress-fill { background: linear-gradient(90deg, #a855f7, #c084fc); }
+.ee-42 .ee-progress-fill { background: linear-gradient(90deg, #eab308, #facc15); }
+
+/* Footer star reset animation */
+.ee-reset-done { color: #facc15 !important; transition: color 0.3s ease; }
+
+/* Mobile adjustments for easter eggs */
+@media (max-width: 480px) {
+    .ee-modal { padding: 24px 20px; }
+    .ee-header h2 { font-size: 20px; }
+    .ee-wow .ee-signal { font-size: 28px; letter-spacing: 6px; }
+    .ee-1420 .ee-freq { font-size: 32px; }
+    .ee-42-number { font-size: 80px; }
+    .ee-pulsar-viz { height: 120px; }
+    .ee-pulsar-core { width: 40px; height: 40px; }
+    .ee-pulsar-beam { width: 70px; }
+    .ee-toast { max-width: calc(100vw - 32px); font-size: 13px; padding: 12px 16px; }
+}
+

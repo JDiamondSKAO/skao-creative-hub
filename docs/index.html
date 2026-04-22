@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKAO Creative Hub — Demo</title>
+<meta name="description" content="Static demo of the SKAO Creative Hub — a Scroll Viewport theme for SKA Observatory's internal creative production portal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/eggs.css">
+<script>
+(function(){try{var s=localStorage.getItem('crh-theme');if(s==='dark'){document.documentElement.classList.add('dark')}else if(!s&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark')}}catch(e){}})();
+</script>
+</head>
+<body class="crh-home">
+
+<a href="#main-content" class="skip-to-content">Skip to main content</a>
+<div class="crh-progress-bar" id="crhProgressBar" role="progressbar" aria-hidden="true"></div>
+
+<header class="crh-header">
+  <div class="crh-header-bg"></div>
+  <div class="crh-header-overlay"></div>
+  <div class="crh-header-bar">
+    <div class="crh-header-inner">
+      <a href="index.html" class="crh-brand-link">
+        <img src="assets/images/skao-logo-white.png" alt="SKAO" class="crh-logo-img">
+        <span class="crh-site-title">Creative Hub</span>
+      </a>
+      <div class="crh-header-actions">
+        <button class="crh-theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="crh-theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="crh-theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <nav class="crh-nav-strip" aria-label="Main navigation">
+    <div class="crh-nav-strip-inner">
+      <ul class="crh-nav-list">
+        <li><a href="index.html" class="crh-nav-link crh-nav-active">Home</a></li>
+        <li><a href="whats-new/" class="crh-nav-link">What's New</a></li>
+        <li><a href="brand-guidelines/" class="crh-nav-link">Brand Guidelines</a></li>
+        <li><a href="templates-assets/" class="crh-nav-link">Templates &amp; Assets</a></li>
+        <li><a href="#" class="crh-nav-link">How To Work With Us</a></li>
+        <li><a href="#" class="crh-nav-link">Events Support</a></li>
+        <li><a href="#" class="crh-nav-link">Tools &amp; Resources</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main id="main-content">
+  <section class="crh-hero">
+    <div class="crh-hero-inner">
+      <div class="crh-hero-grid">
+        <div class="crh-hero-left">
+          <h1 class="crh-hero-title">Creative Hub</h1>
+          <p class="crh-hero-subtitle">Your central resource for brand guidelines, templates, and creative assets.</p>
+          <p style="margin-top:1rem;font-size:0.875rem;color:var(--slate-500);">
+            This is a <strong>static demo</strong> of the theme. The live hub lives inside SKAO's Confluence and is accessible to staff only.
+          </p>
+        </div>
+        <div class="crh-hero-right">
+          <div class="crh-support-card">
+            <h3 class="crh-support-card-title">View the source</h3>
+            <p class="crh-support-card-text">Theme code, content patterns, and documentation on GitHub.</p>
+            <a href="https://github.com/" class="crh-support-card-btn">Open repository →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="crh-home-main">
+    <div class="crh-home-inner">
+      <section class="crh-categories">
+        <div class="crh-categories-header">
+          <h2 class="crh-categories-title">Resource Categories</h2>
+          <p class="crh-categories-subtitle">Browse the hub's six core sections.</p>
+        </div>
+        <div class="crh-cat-grid">
+          <a href="whats-new/" class="crh-cat-card">
+            <div class="crh-cat-card-icon crh-cat-icon-new">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <h3 class="crh-cat-card-title">What's New</h3>
+            <p class="crh-cat-card-desc">Latest additions, changes, and announcements across the hub.</p>
+            <div class="crh-cat-card-footer"><span class="crh-cat-card-count">Demo section</span><span class="crh-cat-card-link">View →</span></div>
+          </a>
+          <a href="brand-guidelines/" class="crh-cat-card">
+            <div class="crh-cat-card-icon crh-cat-icon-brand">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5" fill="currentColor" opacity="0.7"/><circle cx="16" cy="8" r="2.5" fill="currentColor" opacity="0.9"/><circle cx="8" cy="16" r="2.5" fill="currentColor" opacity="0.5"/><circle cx="16" cy="16" r="2.5" fill="currentColor" opacity="0.6"/></svg>
+            </div>
+            <h3 class="crh-cat-card-title">Brand Guidelines</h3>
+            <p class="crh-cat-card-desc">Logo usage, colour palette, typography, co-branding rules.</p>
+            <div class="crh-cat-card-footer"><span class="crh-cat-card-count">Demo section</span><span class="crh-cat-card-link">View →</span></div>
+          </a>
+          <a href="templates-assets/" class="crh-cat-card">
+            <div class="crh-cat-card-icon crh-cat-icon-templates">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </div>
+            <h3 class="crh-cat-card-title">Templates &amp; Assets</h3>
+            <p class="crh-cat-card-desc">Documents, slide decks, photography, video, logos, print.</p>
+            <div class="crh-cat-card-footer"><span class="crh-cat-card-count">Demo section</span><span class="crh-cat-card-link">View →</span></div>
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="crh-footer">
+  <div class="crh-footer-inner">
+    <div class="crh-footer-bottom">
+      <p class="crh-footer-copyright">© 2026 SKA Observatory. Static demo build. Source on <a href="https://github.com/" style="color:rgba(255,255,255,0.7);">GitHub</a>.</p>
+    </div>
+  </div>
+</footer>
+
+<button class="crh-back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

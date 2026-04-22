@@ -1,0 +1,870 @@
+##
+## SKAO Creative Hub — Scroll Viewport Page Template
+## Apache Velocity 1.6 for Confluence Data Centre 8.5.26
+##
+## This template defines the complete HTML structure and layout for the Creative Hub portal.
+## Adapted from the Science Operations Portal theme.
+## Uses crh- class prefix throughout to avoid conflicts with Confluence AUI.
+##
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="index,follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="generator" content="Created with Scroll Viewport - K15t">
+
+    ## Context variables for JavaScript
+    <script>
+        var contextPath = '$contextPath';
+        var pageId = '$page.id';
+        #if($page.space && $page.space.key)
+            var spaceKey = '$page.space.key';
+        #else
+            var spaceKey = 'CRH';
+        #end
+    </script>
+
+    ## Resolve viewport root (home) page by walking up the hierarchy
+    #set($homePage = $page)
+    #if($homePage.parent)#set($homePage = $homePage.parent)#end
+    #if($homePage.parent)#set($homePage = $homePage.parent)#end
+    #if($homePage.parent)#set($homePage = $homePage.parent)#end
+    #if($homePage.parent)#set($homePage = $homePage.parent)#end
+    #set($homeLink = $homePage.absoluteLink)
+
+    ## Confluence panel and resource includes
+    $webPanels
+    $page.resources.meta
+    $page.resources.js
+    $page.resources.css
+    $page.resources.requireForContext('viewcontent')
+    $page.resources.require('com.atlassian.confluence.plugins.confluence-inline-tasks:inline-tasks-styles')
+
+    ## Page title and OpenGraph / Twitter meta
+    <title>$page.title — SKAO Creative Hub</title>
+    #if($isHome)
+    <meta name="description" content="The central hub for SKAO creative production — templates, brand guidelines, assets, slide decks, and creative resources.">
+    #else
+    <meta name="description" content="$page.title — SKAO Creative Hub resource page.">
+    #end
+    <meta property="og:title" content="$page.title — SKAO Creative Hub" />
+    #if($isHome)
+    <meta property="og:description" content="The central hub for SKAO creative production — templates, brand guidelines, assets, slide decks, and creative resources." />
+    #else
+    <meta property="og:description" content="$page.title — find this resource on the SKAO Creative Hub." />
+    #end
+    <meta property="og:image" content="${theme.baseUrl}/images/og-image.jpg" />
+    <meta property="og:url" content="$page.absoluteLink" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SKAO Creative Hub" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="$page.title — SKAO Creative Hub" />
+    <meta name="twitter:image" content="${theme.baseUrl}/images/og-image.jpg" />
+    <link rel="canonical" href="$page.absoluteLink" />
+
+    ## Font preconnect
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    ## Theme stylesheets
+    <link rel="stylesheet" href="${theme.baseUrl}/css/style.css">
+    <link rel="stylesheet" href="${theme.baseUrl}/css/eggs.css">
+
+    ## Matter.js for interactive 404 page — only load when needed
+    #set($checkTitle = $page.title.toLowerCase().trim())
+    #if($checkTitle == "not found" || $checkTitle == "page not found" || $checkTitle == "404")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js" defer></script>
+    #end
+
+    ## Prevent flash of unstyled content (FOUC) — theme detection
+    <script>
+        (function(){
+            try {
+                var stored = localStorage.getItem('crh-theme');
+                if (stored === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else if (!stored && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+</head>
+
+## =====================================================
+## BODY — Detect Home Page
+## =====================================================
+#set($isHome = ($page.title == $homePage.title))
+<body#if($isHome) class="crh-home"#end>
+
+## =====================================================
+## SKIP TO CONTENT — WCAG COMPLIANCE
+## =====================================================
+<a href="#main-content" class="skip-to-content">Skip to main content</a>
+<div class="crh-progress-bar" id="crhProgressBar" role="progressbar" aria-hidden="true"></div>
+
+## =====================================================
+## SEARCH MODAL OVERLAY
+## =====================================================
+<div class="crh-search-modal" id="searchModal" role="dialog" aria-modal="true" aria-labelledby="searchModalTitle" style="display:none;">
+    <div class="crh-search-modal-backdrop" id="searchBackdrop"></div>
+    <div class="crh-search-modal-dialog">
+        <div class="crh-search-modal-header">
+            <h2 id="searchModalTitle" class="crh-search-modal-title">Search the Creative Hub</h2>
+            <button class="crh-search-modal-close" id="closeSearchModal" aria-label="Close search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form class="crh-search-form" id="searchForm" role="search">
+            <div class="crh-search-input-wrapper">
+                <svg class="crh-search-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="crh-search-input"
+                    placeholder="Search templates, guidelines, brand assets..."
+                    autocomplete="off"
+                    aria-label="Search the Creative Hub">
+            </div>
+        </form>
+        <div class="crh-search-results" id="searchResults">
+            <div class="crh-search-empty">
+                <p>Start typing to search</p>
+            </div>
+        </div>
+        <div class="crh-search-modal-footer">
+            <div class="crh-search-hints">
+                <span class="crh-search-hint"><kbd>↵</kbd> Open</span>
+                <span class="crh-search-hint"><kbd>↑↓</kbd> Navigate</span>
+                <span class="crh-search-hint"><kbd>Esc</kbd> Close</span>
+                <span class="crh-search-hint"><kbd>?</kbd> Shortcuts</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+## =====================================================
+## KEYBOARD SHORTCUTS MODAL
+## =====================================================
+<div class="crh-kbd-modal" id="kbdModal" role="dialog" aria-modal="true" aria-labelledby="kbdModalTitle" style="display:none;">
+    <div class="crh-kbd-backdrop" id="kbdBackdrop"></div>
+    <div class="crh-kbd-dialog">
+        <div class="crh-kbd-header">
+            <h2 id="kbdModalTitle" class="crh-kbd-title">Keyboard Shortcuts</h2>
+            <button class="crh-kbd-close" id="closeKbdModal" aria-label="Close shortcuts">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="crh-kbd-body">
+            <div class="crh-kbd-group">
+                <h3 class="crh-kbd-group-title">Navigation</h3>
+                <ul class="crh-kbd-list">
+                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Open search</span><span class="crh-kbd-keys"><kbd>Ctrl</kbd><kbd>K</kbd></span></li>
+                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Previous page</span><span class="crh-kbd-keys"><kbd>←</kbd></span></li>
+                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Next page</span><span class="crh-kbd-keys"><kbd>→</kbd></span></li>
+                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Back to top</span><span class="crh-kbd-keys"><kbd>T</kbd></span></li>
+                </ul>
+            </div>
+            <div class="crh-kbd-group">
+                <h3 class="crh-kbd-group-title">Interface</h3>
+                <ul class="crh-kbd-list">
+                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Toggle dark mode</span><span class="crh-kbd-keys"><kbd>D</kbd></span></li>
+                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Show shortcuts</span><span class="crh-kbd-keys"><kbd>?</kbd></span></li>
+                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Close / dismiss</span><span class="crh-kbd-keys"><kbd>Esc</kbd></span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+## =====================================================
+## HEADER — Two rows: Brand bar + Navigation strip
+## =====================================================
+<header class="crh-header">
+    <div class="crh-header-bg"></div>
+    <div class="crh-header-overlay"></div>
+
+    ## ROW 1 — Brand bar
+    <div class="crh-header-bar">
+        <div class="crh-header-inner">
+            <a href="$homeLink" class="crh-brand-link" aria-label="SKAO Creative Production Hub Home">
+                <img src="${theme.baseUrl}/images/skao-logo-white.png" alt="SKAO Logo" class="crh-logo-img">
+                <span class="crh-site-title">Creative Hub</span>
+            </a>
+            <div class="crh-header-actions">
+                <button class="crh-theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                    <svg class="crh-theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    <svg class="crh-theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                </button>
+                <button class="crh-mobile-search-btn" id="openSearchModalMobile" aria-label="Search" title="Search">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <button class="crh-mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu" title="Open menu">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="4" y1="6" x2="20" y2="6"/>
+                        <line x1="4" y1="12" x2="20" y2="12"/>
+                        <line x1="4" y1="18" x2="20" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    ## ROW 2 — Navigation strip
+    ## Show first 6 child pages inline, overflow goes into "More" dropdown
+    #set($rootChildren = $homePage.children)
+    #set($maxVisible = 6)
+    ## Pre-compute current section for nav active state
+    #set($currentSection = false)
+    #foreach($sec in $rootChildren)
+        #if($page.title == $sec.title || ($page.parent && $page.parent.title == $sec.title) || ($page.parent && $page.parent.parent && $page.parent.parent.title == $sec.title) || ($page.parent && $page.parent.parent && $page.parent.parent.parent && $page.parent.parent.parent.title == $sec.title))
+            #set($currentSection = $sec)
+        #end
+    #end
+    <nav class="crh-nav-strip" id="headerNav" aria-label="Main navigation">
+        <div class="crh-nav-strip-inner">
+            <ul class="crh-nav-list">
+                <li><a href="$homeLink" class="crh-nav-link #if($isHome)crh-nav-active#end">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Home
+                </a></li>
+                #if($rootChildren && $rootChildren.size() > 0)
+                    #set($navIndex = 0)
+                    #foreach($navItem in $rootChildren)
+                        #if($navIndex < $maxVisible)
+                            <li><a href="$navItem.absoluteLink" class="crh-nav-link #if($page.title == $navItem.title || ($currentSection && $currentSection.title == $navItem.title))crh-nav-active#end" data-lastmod="$navItem.lastModificationDate">$navItem.title</a></li>
+                        #end
+                        #set($navIndex = $navIndex + 1)
+                    #end
+                    ## "More" dropdown if overflow exists
+                    #if($rootChildren.size() > $maxVisible)
+                        <li class="crh-nav-more" id="navMore">
+                            <button class="crh-nav-more-btn" id="navMoreBtn" aria-expanded="false" aria-haspopup="true">
+                                More
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="crh-nav-more-dropdown" id="navMoreDropdown" role="menu">
+                                #set($navIndex2 = 0)
+                                #foreach($navItem in $rootChildren)
+                                    #if($navIndex2 >= $maxVisible)
+                                        <a href="$navItem.absoluteLink" class="crh-nav-link #if($page.title == $navItem.title || ($currentSection && $currentSection.title == $navItem.title))crh-nav-active#end" role="menuitem">$navItem.title</a>
+                                    #end
+                                    #set($navIndex2 = $navIndex2 + 1)
+                                #end
+                            </div>
+                        </li>
+                    #end
+                #end
+            </ul>
+        </div>
+    </nav>
+</header>
+
+## =====================================================
+## 404 DETECTION — must come BEFORE homepage check.
+## The "Not Found" page has no parent, so $homePage resolves
+## to itself and $isHome would be true. Check title first.
+## =====================================================
+#set($pageTitle404 = $page.title.toLowerCase().trim())
+#set($is404 = false)
+#if($pageTitle404 == "not found" || $pageTitle404 == "page not found" || $pageTitle404 == "404")
+    #set($is404 = true)
+#end
+
+#if($is404)
+## =====================================================
+## 404 ERROR PAGE — Interactive physics-based
+## Matter.js loaded in <head> only for 404 pages
+## =====================================================
+    <div class="nf-container" id="notFoundContainer">
+        <canvas class="nf-canvas" id="nfCanvas"></canvas>
+        <div class="nf-content">
+            <h1 class="nf-title">404</h1>
+            <p class="nf-subtitle">Page Not Found</p>
+            <p class="nf-text">The page you're looking for has drifted into the creative void.</p>
+            <div class="nf-actions">
+                <a href="$homeLink" class="nf-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Return to Hub
+                </a>
+                <a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener" class="nf-btn nf-btn-outline">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Report an Issue
+                </a>
+            </div>
+        </div>
+    </div>
+
+#elseif($isHome)
+## =====================================================
+## HOME PAGE CONTENT
+## =====================================================
+
+    ## ANNOUNCEMENT BANNER
+    <div class="crh-announce-bar" id="announcementBanner">
+        <div class="crh-announce-inner">
+            <span class="crh-announce-text">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:middle;">
+                    <path d="M12 2L15.09 8.26H22L17.55 12.5L19.64 18.76L12 14.5L4.36 18.76L6.45 12.5L2 8.26H8.91L12 2Z"/>
+                </svg>
+                New Brand Guidelines 2026 are now available — <a href="#" style="text-decoration:underline;color:inherit;">View updates</a>
+            </span>
+            <button class="crh-announce-close" id="announcementClose" aria-label="Dismiss announcement">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    ## HERO SECTION — Two-column layout
+    <section class="crh-hero">
+        <div class="crh-hero-inner">
+            <div class="crh-hero-grid">
+                ## LEFT COLUMN
+                <div class="crh-hero-left">
+                    <h1 class="crh-hero-title">Creative Hub</h1>
+                    <p class="crh-hero-subtitle">Your central resource for brand guidelines, templates, and creative assets</p>
+                    <div class="crh-hero-search" id="heroSearchTrigger">
+                        <svg class="crh-hero-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <span class="crh-hero-search-placeholder">Search templates, guidelines, assets...</span>
+                        <kbd class="crh-hero-search-kbd">Ctrl+K</kbd>
+                    </div>
+                </div>
+
+                ## RIGHT COLUMN — Support Card
+                <div class="crh-hero-right">
+                    <div class="crh-support-card">
+                        <h3 class="crh-support-card-title">Need Creative Support?</h3>
+                        <p class="crh-support-card-text">Submit a request to our creative team for custom design work and consultations</p>
+                        <a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener" class="crh-support-card-btn">Submit Creative Request →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    ## Main Content Area
+    <main id="main-content" class="crh-home-main">
+        <div class="crh-home-inner">
+
+            ## HOME PAGE BODY CONTENT
+            ## Skipped on home — the homepage layout is fully defined by this template.
+            ## Any Confluence page body content (macros, text) would appear as raw unstyled
+            ## content and break the design. Edit the template to change homepage sections.
+
+            ## RECENT UPDATES SECTION
+            <section class="crh-updates" id="updates">
+                <div class="crh-updates-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:middle;">
+                        <path d="M12 2L15.09 8.26H22L17.55 12.5L19.64 18.76L12 14.5L4.36 18.76L6.45 12.5L2 8.26H8.91L12 2Z"/>
+                    </svg>
+                    <h2 style="display:inline;">Recent Updates</h2>
+                </div>
+                <div class="crh-updates-grid" id="crhUpdatesGrid" data-space="$page.space.key" data-home-title="$homePage.title">
+                    <article class="crh-update-card crh-update-skeleton"><div class="crh-skel-line crh-skel-title"></div><div class="crh-skel-line crh-skel-meta"></div></article>
+                    <article class="crh-update-card crh-update-skeleton"><div class="crh-skel-line crh-skel-title"></div><div class="crh-skel-line crh-skel-meta"></div></article>
+                    <article class="crh-update-card crh-update-skeleton"><div class="crh-skel-line crh-skel-title"></div><div class="crh-skel-line crh-skel-meta"></div></article>
+                </div>
+                #set($whatsNewLink = $homeLink)
+                #foreach($wn in $homePage.children)
+                    #if($wn.title.toLowerCase().contains("what"))
+                        #set($whatsNewLink = $wn.absoluteLink)
+                    #end
+                #end
+                <a href="$whatsNewLink" class="crh-updates-link">View all updates →</a>
+            </section>
+
+            ## RESOURCE CATEGORIES SECTION
+            <section class="crh-categories" id="browse">
+                <div class="crh-categories-header">
+                    <h2 class="crh-categories-title">Resource Categories</h2>
+                    <p class="crh-categories-subtitle">Browse our comprehensive library of brand resources and creative assets</p>
+                </div>
+
+                <div class="crh-cat-grid">
+                    #set($rootChildren = $homePage.children)
+                    #if($rootChildren && $rootChildren.size() > 0)
+                        #foreach($child in $rootChildren)
+                            <a href="$child.absoluteLink" class="crh-cat-card crh-animate-in">
+                                ## Dynamic icon assignment based on page title keywords
+                                ## Structured for 6 core sections:
+                                ## 1. What's New  2. Brand Guidelines  3. Templates & Assets
+                                ## 4. How To Work With Us  5. Events Support  6. Tools & Resources
+                                #set($childTitleLower = $child.title.toLowerCase())
+                                #if($childTitleLower.contains("what's new") || $childTitleLower.contains("update") || $childTitleLower.contains("news"))
+                                    <div class="crh-cat-card-icon crh-cat-icon-new">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                        </svg>
+                                    </div>
+                                #elseif($childTitleLower.contains("brand"))
+                                    <div class="crh-cat-card-icon crh-cat-icon-brand">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="8" cy="8" r="2.5" fill="currentColor" opacity="0.7"/>
+                                            <circle cx="16" cy="8" r="2.5" fill="currentColor" opacity="0.9"/>
+                                            <circle cx="8" cy="16" r="2.5" fill="currentColor" opacity="0.5"/>
+                                            <circle cx="16" cy="16" r="2.5" fill="currentColor" opacity="0.6"/>
+                                        </svg>
+                                    </div>
+                                #elseif($childTitleLower.contains("template") || $childTitleLower.contains("asset") || $childTitleLower.contains("slide") || $childTitleLower.contains("deck") || $childTitleLower.contains("photo") || $childTitleLower.contains("media"))
+                                    <div class="crh-cat-card-icon crh-cat-icon-templates">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                                        </svg>
+                                    </div>
+                                #elseif($childTitleLower.contains("how to") || $childTitleLower.contains("work with") || $childTitleLower.contains("request"))
+                                    <div class="crh-cat-card-icon crh-cat-icon-howto">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                        </svg>
+                                    </div>
+                                #elseif($childTitleLower.contains("event"))
+                                    <div class="crh-cat-card-icon crh-cat-icon-events">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                    </div>
+                                #elseif($childTitleLower.contains("tool") || $childTitleLower.contains("resource"))
+                                    <div class="crh-cat-card-icon crh-cat-icon-tools">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                                        </svg>
+                                    </div>
+                                #else
+                                    <div class="crh-cat-card-icon crh-cat-icon-default">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                                            <polyline points="13 2 13 9 20 9"/>
+                                        </svg>
+                                    </div>
+                                #end
+                                <h3 class="crh-cat-card-title">$child.title</h3>
+                                ## Preview of child pages for description
+                                #set($sectionChildren = $child.children)
+                                #if($sectionChildren && $sectionChildren.size() > 0)
+                                    <p class="crh-cat-card-desc">
+                                        #set($descCount = 0)
+                                        #foreach($sc in $sectionChildren)
+                                            #if($descCount < 3)
+                                                #if($descCount > 0), #end$sc.title
+                                                #set($descCount = $descCount + 1)
+                                            #end
+                                        #end
+                                        #if($sectionChildren.size() > 3), and more#end
+                                    </p>
+                                    <div class="crh-cat-card-footer">
+                                        <span class="crh-cat-card-count">$sectionChildren.size() resources</span>
+                                        <span class="crh-cat-card-link">View →</span>
+                                    </div>
+                                #end
+                            </a>
+                        #end
+                    #end
+                </div>
+            </section>
+
+            ## Creative Updates Strip
+            <section class="crh-newsletter-strip">
+                <div class="crh-newsletter-inner">
+                    <div class="crh-newsletter-content">
+                        <div>
+                            <h3>Stay in the Loop</h3>
+                            <p>Get the latest creative production updates, new templates, and asset releases via the monthly Pulse.</p>
+                        </div>
+                        <a href="#" class="crh-btn-secondary">View Latest Pulse</a>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+#else
+    ## =====================================================
+    ## CONTENT PAGE LAYOUT (Non-Home)
+    ## =====================================================
+    <div class="crh-layout">
+
+        ## Sidebar — contextual navigation
+        ## Shows only the current section, not the entire nav tree.
+        ## JS inserts "On This Page" TOC above this on leaf pages.
+        ##
+        ## Step 1: Find which root section the current page belongs to.
+        ## Walk up from $page.parent until we reach a direct child of $homePage.
+        #set($currentSection = false)
+        #set($rootChildren = $homePage.children)
+        #if($rootChildren && $rootChildren.size() > 0)
+            ## Is the page itself a root section?
+            #foreach($sec in $rootChildren)
+                #if($page.title == $sec.title)
+                    #set($currentSection = $sec)
+                #end
+            #end
+            ## Check parent
+            #if(!$currentSection && $page.parent)
+                #foreach($sec in $rootChildren)
+                    #if($page.parent.title == $sec.title)
+                        #set($currentSection = $sec)
+                    #end
+                #end
+            #end
+            ## Check grandparent
+            #if(!$currentSection && $page.parent && $page.parent.parent)
+                #foreach($sec in $rootChildren)
+                    #if($page.parent.parent.title == $sec.title)
+                        #set($currentSection = $sec)
+                    #end
+                #end
+            #end
+            ## Check great-grandparent
+            #if(!$currentSection && $page.parent && $page.parent.parent && $page.parent.parent.parent)
+                #foreach($sec in $rootChildren)
+                    #if($page.parent.parent.parent.title == $sec.title)
+                        #set($currentSection = $sec)
+                    #end
+                #end
+            #end
+        #end
+
+        <aside class="crh-sidebar" id="sidebarPanel">
+            <div class="crh-sidebar-inner">
+                ## JS inserts TOC ("On This Page") here on leaf pages
+
+                ## Section navigation — only show current section's pages
+                #if($currentSection)
+                    #set($sectionChildren = $currentSection.children)
+                    #set($hasChildren = ($sectionChildren && $sectionChildren.size() > 0))
+
+                    #if($hasChildren)
+                        <nav class="crh-sidebar-nav" aria-label="Section navigation">
+                            ## Section heading — links back to section root
+                            <a href="$currentSection.absoluteLink" class="crh-sidebar-section-link">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                                $currentSection.title
+                            </a>
+
+                            <ul class="crh-sidebar-tree">
+                                #foreach($child in $sectionChildren)
+                                    #set($isChildActive = ($page.title == $child.title))
+                                    #set($subChildren = $child.children)
+                                    #set($hasSubChildren = ($subChildren && $subChildren.size() > 0))
+
+                                    ## Check if current page is a grandchild of this child
+                                    #set($subChildActive = false)
+                                    #if($hasSubChildren)
+                                        #foreach($sc in $subChildren)
+                                            #if($page.title == $sc.title)
+                                                #set($subChildActive = true)
+                                            #end
+                                        #end
+                                    #end
+
+                                    <li class="crh-sidebar-item #if($isChildActive || $subChildActive)crh-sidebar-open#end">
+                                        <a href="$child.absoluteLink" class="crh-sidebar-link #if($isChildActive)crh-sidebar-active#end">$child.title</a>
+
+                                        ## Show grandchildren only if this child is active or contains the active page
+                                        #if($hasSubChildren && ($isChildActive || $subChildActive))
+                                            <ul class="crh-sidebar-grandchildren">
+                                                #foreach($sub in $subChildren)
+                                                    <li>
+                                                        <a href="$sub.absoluteLink" class="crh-sidebar-link crh-sidebar-leaf #if($page.title == $sub.title)crh-sidebar-active#end">$sub.title</a>
+                                                    </li>
+                                                #end
+                                            </ul>
+                                        #end
+                                    </li>
+                                #end
+                            </ul>
+                        </nav>
+                    #end
+                #end
+            </div>
+        </aside>
+
+        ## Mobile Sidebar Toggle
+        <button class="crh-sidebar-toggle" id="sidebarToggle" aria-label="Open navigation panel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>
+        </button>
+
+        ## Main Content Area
+        <main id="main-content" class="crh-main">
+            <article class="crh-content">
+
+                ## Breadcrumb Navigation
+                <nav class="crh-breadcrumbs" aria-label="Breadcrumb">
+                    ## Build ancestor chain (up to 5 levels) — start from $page.parent to avoid self-reference
+                    #set($crumbs = [])
+                    #set($walker = $page.parent)
+                    #if($walker)#set($void = $crumbs.add(0, $walker))#end
+                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
+                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
+                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
+                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
+
+                    #foreach($crumb in $crumbs)
+                        <a href="$crumb.absoluteLink" class="crh-breadcrumb-link">
+                            #if($foreach.first)
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                            #end
+                            $crumb.title
+                        </a>
+                        <svg class="crh-breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    #end
+                    <span class="crh-breadcrumb-current">$page.title</span>
+                </nav>
+
+                ## Audience / status tag strip — driven by Confluence page labels
+                ## Recognised labels: audience-staff, audience-partner, audience-internal,
+                ##                    status-draft, status-deprecated
+                #if($page.labels && $page.labels.size() > 0)
+                    #set($hasTagStrip = false)
+                    #foreach($label in $page.labels)
+                        #set($lbl = $label.name.toLowerCase())
+                        #if($lbl.startsWith("audience-") || $lbl.startsWith("status-"))
+                            #set($hasTagStrip = true)
+                        #end
+                    #end
+                    #if($hasTagStrip)
+                        <ul class="crh-audience-strip" aria-label="Page audience and status">
+                        #foreach($label in $page.labels)
+                            #set($lbl = $label.name.toLowerCase())
+                            #if($lbl == "audience-staff")
+                                <li><span class="crh-audience-tag">For staff</span></li>
+                            #elseif($lbl == "audience-partner")
+                                <li><span class="crh-audience-tag" data-variant="partner">Partner-safe</span></li>
+                            #elseif($lbl == "audience-internal")
+                                <li><span class="crh-audience-tag" data-variant="internal">Internal only</span></li>
+                            #elseif($lbl == "status-draft")
+                                <li><span class="crh-audience-tag" data-variant="draft">Draft</span></li>
+                            #elseif($lbl == "status-deprecated")
+                                <li><span class="crh-audience-tag" data-variant="deprecated">Deprecated</span></li>
+                            #end
+                        #end
+                        </ul>
+                    #end
+                #end
+
+                ## Page Title
+                <h1 class="crh-page-title">$page.title</h1>
+
+                ## Article Meta
+                <div class="crh-article-meta">
+                    #if($page.lastModificationDate)
+                        <span class="crh-article-date" data-raw-date="$page.lastModificationDate">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <span class="crh-article-date-text">Last updated</span>
+                        </span>
+                    #end
+                </div>
+
+                ## Determine section vs leaf page
+                #set($pageChildren = $page.children)
+                #set($isSectionPage = ($pageChildren && $pageChildren.size() > 0))
+
+                #if($isSectionPage)
+                    ## Section page: content + child page grid
+                    #if($page.content && $page.content.toString().trim().length() > 0)
+                        <div class="crh-content-body content-body">
+                            $page.content
+                        </div>
+                    #end
+                    <div class="crh-child-pages">
+                        <h2 class="crh-child-pages-heading">Pages in this section</h2>
+                        <div class="crh-child-grid">
+                            #foreach($childPage in $pageChildren)
+                                <a href="$childPage.absoluteLink" class="crh-child-card">
+                                    <div class="crh-child-card-content">
+                                        <h3 class="crh-child-card-title">$childPage.title</h3>
+                                        #if($childPage.excerpt && $childPage.excerpt.toString().trim().length() > 0)
+                                            <p class="crh-child-card-desc">$childPage.excerpt</p>
+                                        #end
+                                    </div>
+                                    <span class="crh-child-card-arrow">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </span>
+                                </a>
+                            #end
+                        </div>
+                    </div>
+                #else
+                    ## Leaf page: content + feedback
+                    <div class="crh-content-body content-body">
+                        #if($page.content && $page.content.toString().trim().length() > 0)
+                            $page.content
+                        #end
+                    </div>
+
+                    ## Page Feedback Widget
+                    <div class="crh-feedback-widget" id="pageFeedback">
+                        <div class="crh-feedback-question">
+                            <span class="crh-feedback-label">Was this page helpful?</span>
+                            <div class="crh-feedback-buttons">
+                                <button class="crh-feedback-btn crh-feedback-yes" data-vote="yes" aria-label="Yes, helpful">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                    Yes
+                                </button>
+                                <button class="crh-feedback-btn crh-feedback-no" data-vote="no" aria-label="No, not helpful">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
+                                    No
+                                </button>
+                            </div>
+                        </div>
+                        <div class="crh-feedback-thanks" id="pfThanks" style="display:none;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <span>Thank you for your feedback!</span>
+                        </div>
+                    </div>
+                #end
+
+                ## Previous/Next Page Navigation
+                #if($page.parent && $page.parent.children && $page.parent.children.size() > 1)
+                    #set($siblings = $page.parent.children)
+                    #set($prevPage = false)
+                    #set($nextPage = false)
+                    #set($foundCurrent = false)
+                    #foreach($sib in $siblings)
+                        #if($foundCurrent && !$nextPage)
+                            #set($nextPage = $sib)
+                        #end
+                        #if($page.title == $sib.title)
+                            #set($foundCurrent = true)
+                        #end
+                        #if(!$foundCurrent)
+                            #set($prevPage = $sib)
+                        #end
+                    #end
+                    <nav class="crh-page-nav">
+                        <div class="crh-nav-prev">
+                            #if($prevPage)
+                                <a href="$prevPage.absoluteLink" class="crh-nav-button">
+                                    <span class="crh-nav-label">Previous</span>
+                                    <span class="crh-nav-title">$prevPage.title</span>
+                                </a>
+                            #end
+                        </div>
+                        <div class="crh-nav-next">
+                            #if($nextPage)
+                                <a href="$nextPage.absoluteLink" class="crh-nav-button">
+                                    <span class="crh-nav-label">Next</span>
+                                    <span class="crh-nav-title">$nextPage.title</span>
+                                </a>
+                            #end
+                        </div>
+                    </nav>
+                #end
+
+            </article>
+        </main>
+
+    </div>
+
+#end## end #if($is404) / #elseif($isHome) / #else
+
+
+## =====================================================
+## FOOTER
+## =====================================================
+<footer class="crh-footer">
+    <div class="crh-footer-inner">
+        <div class="crh-footer-columns">
+            <div class="crh-footer-column">
+                <h4>About SKAO</h4>
+                <ul>
+                    <li><a href="https://skao.int/about">About Us</a></li>
+                    <li><a href="https://skao.int/careers">Careers</a></li>
+                    <li><a href="https://skao.int/news">News</a></li>
+                    <li><a href="https://skao.int/contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="crh-footer-column">
+                <h4>Hub Sections</h4>
+                <ul>
+                    #set($rootChildren = $homePage.children)
+                    #if($rootChildren && $rootChildren.size() > 0)
+                        #foreach($section in $rootChildren)
+                            <li><a href="$section.absoluteLink">$section.title</a></li>
+                        #end
+                    #end
+                </ul>
+            </div>
+
+            <div class="crh-footer-column">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" target="_blank" rel="noopener">Canto DAM</a></li>
+                    <li><a href="https://fonts.google.com/noto/specimen/Noto+Sans" target="_blank" rel="noopener">Brand Fonts</a></li>
+                    <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Submit a Request</a></li>
+                </ul>
+            </div>
+
+            <div class="crh-footer-column">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Creative Helpdesk</a></li>
+                    <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/298" target="_blank" rel="noopener">HSSE Helpdesk</a></li>
+                    <li><a href="mailto:comms@skao.int">comms@skao.int</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="crh-footer-bottom">
+            <p class="crh-footer-copyright">&copy; 2026 SKA Observatory. Creative production resources for the Observatory.</p>
+            <button class="crh-footer-easter-egg" id="footerStar" aria-label="Secret surprise" title="⭐">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 1.5l3 6h6.5l-5.2 4 2 6.5L10 15l-5.3 4 2-6.5L.5 7.5H7l3-6z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</footer>
+
+## =====================================================
+## BACK TO TOP BUTTON
+## =====================================================
+<button class="crh-back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="18 15 12 9 6 15"/>
+    </svg>
+</button>
+
+## Help button removed — was showing as unwanted FAB
+
+## =====================================================
+## JAVASCRIPT
+## =====================================================
+<script src="${theme.baseUrl}/js/main.js"></script>
+<script src="${theme.baseUrl}/js/eggs.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Temporary builds / local zips
+*.zip
+build/
+tmp/
+
+# Node (if a build step gets added later)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Never commit secrets
+.env
+.env.local
+*.pem
+*.key
