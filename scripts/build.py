@@ -99,8 +99,8 @@ def head(title: str, depth: int, description: str = "") -> str:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{up}assets/css/style.css">
-<link rel="stylesheet" href="{up}assets/css/eggs.css">
+<link rel="stylesheet" href="{up}assets/css/style.css?v=3">
+<link rel="stylesheet" href="{up}assets/css/eggs.css?v=3">
 <script>
 (function(){{try{{var s=localStorage.getItem('crh-theme');if(s==='dark'){{document.documentElement.classList.add('dark')}}else if(!s&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){{document.documentElement.classList.add('dark')}}}}catch(e){{}}}})();
 </script>
@@ -229,8 +229,8 @@ def footer(depth: int) -> str:
 <button class="crh-back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
-<script src="{up}assets/js/main.js"></script>
-<script src="{up}assets/js/eggs.js"></script>
+<script src="{up}assets/js/main.js?v=3"></script>
+<script src="{up}assets/js/eggs.js?v=3"></script>
 </body>
 </html>"""
 
