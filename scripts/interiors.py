@@ -22,7 +22,9 @@ def block(title,items,ordered=False):
  return '<section class="reading-section"><h2>'+title+'</h2><'+tag+'>'+''.join('<li>'+s+'</li>' for s in items)+'</'+tag+'></section>'
 def detail(title,body):return '<details class="guidance-detail"><summary>'+title+'</summary><div>'+body+'</div></details>'
 def nextstep(title,text,url,label):return '<aside class="next-step"><div><h2>'+title+'</h2><p>'+text+'</p></div>'+link(url,label,'text-link')+'</aside>'
-def missing(label,jira):return '<aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>'+label+'</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p>'+link(jira,'Ask for this resource ↗','button secondary')+'</aside>'
+def missing(label,jira):
+ detail={'Logo pack link needs completing':'The logo pack download is still being set up.','Brand Book download needs completing':'The Brand Book download is still being set up.'}.get(label,'This page does not have a download link yet.')
+ return '<aside class="availability-note" role="note"><span class="availability-icon" aria-hidden="true"></span><p><strong>Available on request.</strong> '+detail+' Ask the team for the current file before planning around it.</p>'+link(jira,'Ask for this file ↗','availability-action')+'</aside>'
 def revise(pages,jira,canto):
  def put(name,title,body):pages[name]=(title,body)
  put('resources.html','Templates and assets',intro('Choose a starting point. Open its source page to see the file, guidance or availability information.',tag='Find and reuse')+cards([

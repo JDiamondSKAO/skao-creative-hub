@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $$("[data-search]").forEach((b) => b.addEventListener("click", openSearch));
   $$("[data-hub-search]").forEach((form) => form.addEventListener("submit", (e) => {
     e.preventDefault(); openSearch({currentTarget: form.querySelector("input")});
-    input.value = form.querySelector("input").value; search();
+    input.value = form.querySelector("input").value; form.querySelector("input").value = ""; search();
   }));
   $("#closeSearch")?.addEventListener("click", () => dialog.close());
   dialog?.addEventListener("keydown", (e) => {
@@ -317,26 +317,52 @@ document.addEventListener("DOMContentLoaded", () => {
     if (rendered && rendered === input.value.trim() && first) { location.href = first.href; return; }
     search();
   });
+  // Resource catalogue: text filter plus type chips.
   const filter = $("#resourceFilter"),
-    type = $("#resourceType");
+    chips = $$("[data-type-filter]");
+  let type = "all";
   function filterResources() {
+    const words = terms(filter?.value || "");
     let n = 0;
     $$("[data-resource]").forEach((card) => {
-      const match =
-        card.textContent.toLowerCase().includes(filter.value.toLowerCase()) &&
-        (type.value === "all" || card.dataset.type === type.value);
+      const hay = card.textContent.toLowerCase();
+      const match = (type === "all" || card.dataset.type === type) &&
+        words.every((w) => expand(w).some((alt) => hay.includes(alt)));
       card.hidden = !match;
       if (match) n++;
     });
-    $("#filterStatus").textContent = n
-      ? `${n} categor${n === 1 ? "y" : "ies"} shown.`
-      : "No matching resources. Clear the filter or try another format.";
+    const status = $("#filterStatus");
+    if (status) status.textContent = n ? `Showing ${n} resource${n === 1 ? "" : "s"}.` : "";
+    const empty = $("#catalogueEmpty");
+    if (empty) empty.hidden = n > 0;
   }
   filter?.addEventListener("input", filterResources);
-  type?.addEventListener("change", filterResources);
+  chips.forEach((chip) => chip.addEventListener("click", () => {
+    type = chip.dataset.typeFilter;
+    chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+    filterResources();
+  }));
   $("#clearFilters")?.addEventListener("click", () => {
-    filter.value = ""; type.value = "all"; filterResources(); filter.focus();
+    filter.value = ""; type = "all";
+    chips.forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.typeFilter === "all")));
+    filterResources(); filter.focus();
   });
+  // Homepage search box hands over to the full search dialog as you type.
+  const hero = $("#heroSearch");
+  hero?.addEventListener("input", () => {
+    if (!hero.value) return;
+    openSearch({ currentTarget: hero });
+    input.value = hero.value;
+    hero.value = "";
+    input.dispatchEvent(new Event("input"));
+  });
+  // Header gains a shadow once the navigation is pinned.
+  const headerEl = $("header");
+  if (headerEl) {
+    const pin = () => headerEl.classList.toggle("is-pinned", scrollY > headerEl.querySelector(".brandbar").offsetHeight);
+    addEventListener("scroll", pin, { passive: true });
+    pin();
+  }
   const form = $("#briefForm");
   if (form) form.hidden = false;
   form?.addEventListener("submit", (e) => {

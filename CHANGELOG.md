@@ -1,5 +1,15 @@
 # Changes
 
+## 2.2.0 visual and layout pass
+
+- Homepage leads with a search box; typing hands straight over to the full search.
+- Navigation stays pinned while scrolling, with the search button always in reach. The masthead is more compact.
+- Interior pages open with a title band (breadcrumbs, section, title) and a sticky sidebar so "On this page" stays visible.
+- "File not available" panels are now a one-line "Available on request" notice, so guidance comes first.
+- Templates and assets gains "Everything in the Hub": every resource as a card, filterable by type and name, with on-request items marked.
+- Grouped footer: Find, Get help, Contribute.
+- Cards lift on hover; spacing, shadows and dark mode refined throughout.
+
 ## 2.1.0 finding things faster
 
 - Search ranks page titles above summaries and body text, matches every word, and understands common alternatives (PowerPoint/deck/slides, color/colour, photo/image, logo/artwork and others).
