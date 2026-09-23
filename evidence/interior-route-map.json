@@ -1,0 +1,362 @@
+{
+  "updates.html": {
+    "id": "381890661",
+    "source_title": "What's New",
+    "group": "Support",
+    "display_title": "Hub updates"
+  },
+  "archive.html": {
+    "id": "381890664",
+    "source_title": "Archive",
+    "group": "Support",
+    "display_title": "Updates archive"
+  },
+  "working-with-us.html": {
+    "id": "381891652",
+    "source_title": "How To Work With Us",
+    "group": "Creative help",
+    "display_title": "Work with Creative Production"
+  },
+  "faq.html": {
+    "id": "381891657",
+    "source_title": "FAQ",
+    "group": "Support",
+    "display_title": "Common questions"
+  },
+  "self-service.html": {
+    "id": "381891673",
+    "source_title": "Self-Service Guides",
+    "group": "Guidance",
+    "display_title": "Self-service guides"
+  },
+  "formatting-slides.html": {
+    "id": "381891678",
+    "source_title": "Formatting a Presentation",
+    "group": "Presentations",
+    "display_title": "Format a presentation"
+  },
+  "making-a-poster.html": {
+    "id": "381891681",
+    "source_title": "Making Your Own Poster",
+    "group": "Guidance",
+    "display_title": "Prepare a poster"
+  },
+  "print-preparation.html": {
+    "id": "381891685",
+    "source_title": "Preparing Files for Print",
+    "group": "Guidance",
+    "display_title": "Prepare files for print"
+  },
+  "request.html": {
+    "id": "381891661",
+    "source_title": "Submitting a Request",
+    "group": "Creative help",
+    "display_title": "Request creative help"
+  },
+  "timing.html": {
+    "id": "381891666",
+    "source_title": "Turnaround Times",
+    "group": "Creative help",
+    "display_title": "Agree scope and timing"
+  },
+  "creative-services.html": {
+    "id": "381891669",
+    "source_title": "What We Can Help With",
+    "group": "Creative help",
+    "display_title": "What we can help with"
+  },
+  "brand.html": {
+    "id": "381891606",
+    "source_title": "Brand Guidelines",
+    "group": "Brand",
+    "display_title": "Brand guidance"
+  },
+  "brand-in-practice.html": {
+    "id": "381891610",
+    "source_title": "Brand in Practice",
+    "group": "Brand",
+    "display_title": "Apply the brand"
+  },
+  "co-branding-csiro.html": {
+    "id": "381891614",
+    "source_title": "Co-Branding CSIRO",
+    "group": "Brand",
+    "display_title": "Co-branding with CSIRO"
+  },
+  "co-branding-sarao.html": {
+    "id": "381891619",
+    "source_title": "Co-Branding SARAO",
+    "group": "Brand",
+    "display_title": "Co-branding with SARAO"
+  },
+  "colours-and-type.html": {
+    "id": "381891623",
+    "source_title": "Colour Palette and Typography",
+    "group": "Brand",
+    "display_title": "Colours and typography"
+  },
+  "logo-guidance.html": {
+    "id": "381891626",
+    "source_title": "Logo Usage and Downloads",
+    "group": "Brand",
+    "display_title": "Using the SKAO logo"
+  },
+  "brand-book.html": {
+    "id": "381891631",
+    "source_title": "SKAO Brand Book",
+    "group": "Brand",
+    "display_title": "SKAO Brand Book"
+  },
+  "resources.html": {
+    "id": "381891696",
+    "source_title": "Templates & Assets",
+    "group": "Resources",
+    "display_title": "Templates and assets"
+  },
+  "documents.html": {
+    "id": "381891700",
+    "source_title": "Document Templates",
+    "group": "Resources",
+    "display_title": "Document templates"
+  },
+  "email-signatures.html": {
+    "id": "381891703",
+    "source_title": "Email Signatures",
+    "group": "Documents",
+    "display_title": "Email signatures"
+  },
+  "letterheads.html": {
+    "id": "381891706",
+    "source_title": "Letterheads",
+    "group": "Documents",
+    "display_title": "Letterheads"
+  },
+  "memos.html": {
+    "id": "381891709",
+    "source_title": "Memo Templates",
+    "group": "Documents",
+    "display_title": "Memo templates"
+  },
+  "reports.html": {
+    "id": "381891712",
+    "source_title": "Report Template",
+    "group": "Documents",
+    "display_title": "Report template"
+  },
+  "logos.html": {
+    "id": "381891715",
+    "source_title": "Logos & Icons",
+    "group": "Brand",
+    "display_title": "Logos and icons"
+  },
+  "media.html": {
+    "id": "381891718",
+    "source_title": "Photography Media",
+    "group": "Media",
+    "display_title": "Photos and video"
+  },
+  "canto-guide.html": {
+    "id": "381891721",
+    "source_title": "Accessing Canto",
+    "group": "Media",
+    "display_title": "Using the Canto library"
+  },
+  "hero-images.html": {
+    "id": "381891724",
+    "source_title": "Approved Hero Images",
+    "group": "Media",
+    "display_title": "Hero images"
+  },
+  "event-photos.html": {
+    "id": "381891751",
+    "source_title": "Event Photography",
+    "group": "Media",
+    "display_title": "Event photography"
+  },
+  "image-usage.html": {
+    "id": "381891756",
+    "source_title": "Image Usage Guidelines",
+    "group": "Media",
+    "display_title": "Use and credit imagery"
+  },
+  "telescope-images.html": {
+    "id": "381891776",
+    "source_title": "Telescope Imagery",
+    "group": "Media",
+    "display_title": "Telescope imagery"
+  },
+  "print.html": {
+    "id": "381891782",
+    "source_title": "Print Materials",
+    "group": "Creative help",
+    "display_title": "Plan print materials"
+  },
+  "business-cards.html": {
+    "id": "381891788",
+    "source_title": "Business Cards",
+    "group": "Creative help",
+    "display_title": "Request business cards"
+  },
+  "presentations.html": {
+    "id": "381891794",
+    "source_title": "Slide Decks & Presentations",
+    "group": "Presentations",
+    "display_title": "Prepare a presentation"
+  },
+  "master-deck.html": {
+    "id": "381891798",
+    "source_title": "About SKAO Master Deck",
+    "group": "Presentations",
+    "display_title": "About SKAO master deck"
+  },
+  "construction-slides.html": {
+    "id": "381891805",
+    "source_title": "Construction Progress Updates",
+    "group": "Presentations",
+    "display_title": "Construction progress slides"
+  },
+  "contribute.html": {
+    "id": "381891810",
+    "source_title": "How To Submit Your Deck",
+    "group": "Sharing",
+    "display_title": "Share material"
+  },
+  "poster-templates.html": {
+    "id": "381891817",
+    "source_title": "Poster Templates",
+    "group": "Resources",
+    "display_title": "Poster templates"
+  },
+  "science-slides.html": {
+    "id": "381891821",
+    "source_title": "Science Case Presentations",
+    "group": "Presentations",
+    "display_title": "Science case presentations"
+  },
+  "low-slides.html": {
+    "id": "381891829",
+    "source_title": "SKA-Low Overview",
+    "group": "Presentations",
+    "display_title": "SKA-Low overview"
+  },
+  "mid-slides.html": {
+    "id": "381891832",
+    "source_title": "SKA-Mid Overview",
+    "group": "Presentations",
+    "display_title": "SKA-Mid overview"
+  },
+  "specialised-slides.html": {
+    "id": "381891838",
+    "source_title": "Specialised Decks",
+    "group": "Presentations",
+    "display_title": "Specialised decks"
+  },
+  "standard-template.html": {
+    "id": "381891843",
+    "source_title": "Standard SKAO Template",
+    "group": "Presentations",
+    "display_title": "Standard SKAO template"
+  },
+  "widescreen-template.html": {
+    "id": "381891851",
+    "source_title": "Widescreen Template",
+    "group": "Presentations",
+    "display_title": "Widescreen template"
+  },
+  "video.html": {
+    "id": "381891854",
+    "source_title": "Video & Animation",
+    "group": "Media",
+    "display_title": "Video and animation"
+  },
+  "b-roll.html": {
+    "id": "381891857",
+    "source_title": "B-Roll Library",
+    "group": "Media",
+    "display_title": "B-roll footage"
+  },
+  "recordings.html": {
+    "id": "381891860",
+    "source_title": "Event Recordings",
+    "group": "Media",
+    "display_title": "Event recordings"
+  },
+  "animations.html": {
+    "id": "381891863",
+    "source_title": "Explainer Animations",
+    "group": "Media",
+    "display_title": "Explainer animations"
+  },
+  "video-request.html": {
+    "id": "381891866",
+    "source_title": "Requesting New Video Content",
+    "group": "Creative help",
+    "display_title": "Brief video or animation"
+  },
+  "events.html": {
+    "id": "381891637",
+    "source_title": "Events Support",
+    "group": "Events",
+    "display_title": "Plan event materials"
+  },
+  "event-checklist.html": {
+    "id": "381891643",
+    "source_title": "Event Planning Checklist",
+    "group": "Events",
+    "display_title": "Event materials checklist"
+  },
+  "event-safety.html": {
+    "id": "381891640",
+    "source_title": "Health and Safety",
+    "group": "Events",
+    "display_title": "Event safety responsibilities"
+  },
+  "merchandise.html": {
+    "id": "381891646",
+    "source_title": "Merchandise and Giveaways",
+    "group": "Events",
+    "display_title": "Plan merchandise"
+  },
+  "stands.html": {
+    "id": "381891649",
+    "source_title": "Stand Design and Materials",
+    "group": "Events",
+    "display_title": "Plan stand graphics"
+  },
+  "help.html": {
+    "id": "381891870",
+    "source_title": "Tools & Resources",
+    "group": "Support",
+    "display_title": "Help with the Hub"
+  },
+  "accessibility.html": {
+    "id": "381891873",
+    "source_title": "Accessibility Guidelines",
+    "group": "Guidance",
+    "display_title": "Accessibility checks"
+  },
+  "firefly.html": {
+    "id": "381891876",
+    "source_title": "Adobe Firefly",
+    "group": "Guidance",
+    "display_title": "Using AI image tools"
+  },
+  "canto-access.html": {
+    "id": "381891879",
+    "source_title": "Canto DAM Access",
+    "group": "Media",
+    "display_title": "Using the Canto library"
+  },
+  "fonts.html": {
+    "id": "381891882",
+    "source_title": "Font Downloads",
+    "group": "Brand",
+    "display_title": "Fonts"
+  },
+  "print-suppliers.html": {
+    "id": "381891885",
+    "source_title": "Print Supplier Contacts",
+    "group": "Creative help",
+    "display_title": "Work with print suppliers"
+  }
+}

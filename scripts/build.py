@@ -1,936 +1,124 @@
-#!/usr/bin/env python3
-"""
-Creative Hub — static site builder.
-
-Stamps out the docs/ folder from a single shared shell (header, nav, footer,
-scripts) plus a per-page body. Keeps docs/ in sync with the theme without
-touching 10 near-identical HTML files by hand.
-
-Usage:
-    python3 scripts/build.py              # build all pages
-    python3 scripts/build.py --help       # usage
-    python3 scripts/build.py --list       # show pages that will be built
-
-Pages are defined in PAGES below. Each page has a slug (output folder),
-title, section (drives the active nav link), breadcrumbs, and a body
-fragment (the main article content). The shell wraps the body in the
-standard header / sidebar / main / footer scaffold.
-
-The homepage has its own layout (crh-home body class, hero, category
-grid) and is kept in docs/index.html as a hand-written file — it's too
-structurally different to template well.
-"""
+"""Build the same clean shell for the local preview and Scroll Viewport package."""
 from pathlib import Path
-from dataclasses import dataclass, field
-from typing import List, Optional
-import argparse
-import sys
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-DOCS = REPO_ROOT / "docs"
-
-
-# ---------------------------------------------------------------------------
-# PAGE MODEL
-# ---------------------------------------------------------------------------
-
-@dataclass
-class SidebarLink:
-    title: str
-    href: str
-    active: bool = False
-    children: List["SidebarLink"] = field(default_factory=list)
-
-
-@dataclass
-class Crumb:
-    title: str
-    href: str
-
-
-@dataclass
-class PageNavLink:
-    label: str          # "Previous" or "Next"
-    title: str
-    href: str
-
-
-@dataclass
-class Page:
-    slug: str                               # output folder under docs/
-    title: str
-    section: str                            # one of SECTIONS keys
-    breadcrumbs: List[Crumb]
-    body: str                               # HTML fragment, drops into <article>
-    is_leaf: bool = True                    # leaf pages get feedback widget
-    sidebar: List[SidebarLink] = field(default_factory=list)
-    prev: Optional[PageNavLink] = None
-    next: Optional[PageNavLink] = None
-    audience_tags: List[str] = field(default_factory=list)
-    description: str = ""
-
-
-# ---------------------------------------------------------------------------
-# SHARED FRAGMENTS (header, footer, modals — identical across all pages)
-# ---------------------------------------------------------------------------
-
-SECTIONS = {
-    "home":               ("Home",                 "../index.html"),
-    "whats-new":          ("What\u2019s New",       "../whats-new/"),
-    "brand-guidelines":   ("Brand Guidelines",     "../brand-guidelines/"),
-    "templates-assets":   ("Templates &amp; Assets","../templates-assets/"),
-    "how-to-work-with-us":("How To Work With Us",  "../how-to-work-with-us/"),
-    "events-support":     ("Events Support",       "../events-support/"),
-    "tools-resources":    ("Tools &amp; Resources", "../tools-resources/"),
-}
-
-
-def head(title: str, depth: int, description: str = "") -> str:
-    """depth = how many levels deep (1 = docs/foo/, 2 = docs/foo/bar/). Used to prefix asset paths."""
-    up = "../" * depth
-    desc = description or "SKAO Creative Hub — a Scroll Viewport theme for SKA Observatory's internal creative production portal."
-    return f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} &mdash; SKAO Creative Hub</title>
-<meta name="description" content="{desc}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{up}assets/css/style.css?v=3">
-<link rel="stylesheet" href="{up}assets/css/eggs.css?v=3">
-<script>
-(function(){{try{{var s=localStorage.getItem('crh-theme');if(s==='dark'){{document.documentElement.classList.add('dark')}}else if(!s&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){{document.documentElement.classList.add('dark')}}}}catch(e){{}}}})();
-</script>
-</head>"""
-
-
-def header(active_section: str, depth: int) -> str:
-    """Main site header with nav strip. active_section drives the active link class."""
-    up = "../" * depth
-    nav_items = []
-    for key, (label, _) in SECTIONS.items():
-        if key == "home":
-            href = f"{up}index.html"
-        else:
-            href = f"{up}{key}/"
-        active_cls = " crh-nav-active" if key == active_section else ""
-        if key == "home":
-            nav_items.append(f'<li><a href="{href}" class="crh-nav-link{active_cls}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Home</a></li>')
-        else:
-            nav_items.append(f'<li><a href="{href}" class="crh-nav-link{active_cls}">{label}</a></li>')
-    nav_html = "\n        ".join(nav_items)
-    return f"""
-<a href="#main-content" class="skip-to-content">Skip to main content</a>
-<div class="crh-progress-bar" id="crhProgressBar" role="progressbar" aria-hidden="true"></div>
-
-<div class="crh-search-modal" id="searchModal" role="dialog" aria-modal="true" style="display:none;">
-  <div class="crh-search-modal-backdrop" id="searchBackdrop"></div>
-  <div class="crh-search-modal-dialog">
-    <div class="crh-search-modal-header">
-      <h2 class="crh-search-modal-title">Search the Creative Hub</h2>
-      <button class="crh-search-modal-close" id="closeSearchModal" aria-label="Close search">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <form class="crh-search-form" id="searchForm" role="search">
-      <div class="crh-search-input-wrapper">
-        <svg class="crh-search-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" class="crh-search-input" placeholder="Search..." autocomplete="off">
-      </div>
-    </form>
-    <div class="crh-search-results" id="searchResults">
-      <div class="crh-search-empty"><p>Search is live in Confluence. Disabled in this static demo.</p></div>
-    </div>
-  </div>
-</div>
-
-<header class="crh-header">
-  <div class="crh-header-bg"></div>
-  <div class="crh-header-overlay"></div>
-  <div class="crh-header-bar">
-    <div class="crh-header-inner">
-      <a href="{up}index.html" class="crh-brand-link" aria-label="SKAO Creative Hub Home">
-        <img src="{up}assets/images/skao-logo-white.png" alt="SKAO Logo" class="crh-logo-img">
-        <span class="crh-site-title">Creative Hub</span>
-      </a>
-      <div class="crh-header-actions">
-        <button class="crh-theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-          <svg class="crh-theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          <svg class="crh-theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-  <nav class="crh-nav-strip" aria-label="Main navigation">
-    <div class="crh-nav-strip-inner">
-      <ul class="crh-nav-list">
-        {nav_html}
-      </ul>
-    </div>
-  </nav>
-</header>
-"""
-
-
-def footer(depth: int) -> str:
-    up = "../" * depth
-    return f"""
-<footer class="crh-footer">
-  <div class="crh-footer-inner">
-    <div class="crh-footer-columns">
-      <div class="crh-footer-column">
-        <h4>About SKAO</h4>
-        <ul>
-          <li><a href="https://skao.int/about" target="_blank" rel="noopener">About Us</a></li>
-          <li><a href="https://skao.int/careers" target="_blank" rel="noopener">Careers</a></li>
-          <li><a href="https://skao.int/news" target="_blank" rel="noopener">News</a></li>
-          <li><a href="https://skao.int/contact" target="_blank" rel="noopener">Contact</a></li>
-        </ul>
-      </div>
-      <div class="crh-footer-column">
-        <h4>Hub Sections</h4>
-        <ul>
-          <li><a href="{up}whats-new/">What&rsquo;s New</a></li>
-          <li><a href="{up}brand-guidelines/">Brand Guidelines</a></li>
-          <li><a href="{up}templates-assets/">Templates &amp; Assets</a></li>
-          <li><a href="{up}how-to-work-with-us/">How To Work With Us</a></li>
-          <li><a href="{up}events-support/">Events Support</a></li>
-          <li><a href="{up}tools-resources/">Tools &amp; Resources</a></li>
-        </ul>
-      </div>
-      <div class="crh-footer-column">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" target="_blank" rel="noopener">Canto DAM</a></li>
-          <li><a href="https://fonts.google.com/noto/specimen/Noto+Sans" target="_blank" rel="noopener">Brand Fonts</a></li>
-          <li><a href="https://github.com/JDiamondSKAO/skao-creative-hub" target="_blank" rel="noopener">Source on GitHub</a></li>
-        </ul>
-      </div>
-      <div class="crh-footer-column">
-        <h4>Support</h4>
-        <ul>
-          <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Creative Helpdesk</a></li>
-          <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/298" target="_blank" rel="noopener">HSSE Helpdesk</a></li>
-          <li><a href="mailto:comms@skao.int">comms@skao.int</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="crh-footer-bottom">
-      <p class="crh-footer-copyright">&copy; 2026 SKA Observatory. Static demo build. Source on <a href="https://github.com/JDiamondSKAO/skao-creative-hub" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.75);text-decoration:underline;">GitHub</a>.</p>
-      <button class="crh-footer-easter-egg" id="footerStar" aria-label="Secret surprise" title="\u2b50">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l3 6h6.5l-5.2 4 2 6.5L10 15l-5.3 4 2-6.5L.5 7.5H7l3-6z"/></svg>
-      </button>
-    </div>
-  </div>
-</footer>
-<button class="crh-back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-</button>
-<script src="{up}assets/js/main.js?v=3"></script>
-<script src="{up}assets/js/eggs.js?v=3"></script>
-</body>
-</html>"""
-
-
-def render_breadcrumbs(crumbs: List[Crumb], current: str) -> str:
-    parts = []
-    for c in crumbs:
-        parts.append(f'<a href="{c.href}" class="crh-breadcrumb-link">{c.title}</a><svg class="crh-breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>')
-    parts.append(f'<span class="crh-breadcrumb-current">{current}</span>')
-    return '\n'.join(parts)
-
-
-def render_sidebar(links: List[SidebarLink], section_title: str, section_href: str) -> str:
-    if not links:
-        return '<aside class="crh-sidebar" id="sidebarPanel"><div class="crh-sidebar-inner"></div></aside>'
-    items = []
-    for link in links:
-        active_cls = " crh-sidebar-active" if link.active else ""
-        open_cls = " crh-sidebar-open" if link.active or any(c.active for c in link.children) else ""
-        item = f'<li class="crh-sidebar-item{open_cls}"><a href="{link.href}" class="crh-sidebar-link{active_cls}">{link.title}</a>'
-        if link.children and (link.active or any(c.active for c in link.children)):
-            child_items = []
-            for child in link.children:
-                child_active = " crh-sidebar-active" if child.active else ""
-                child_items.append(f'<li><a href="{child.href}" class="crh-sidebar-link crh-sidebar-leaf{child_active}">{child.title}</a></li>')
-            item += f'<ul class="crh-sidebar-grandchildren">{"".join(child_items)}</ul>'
-        item += '</li>'
-        items.append(item)
-    return f"""<aside class="crh-sidebar" id="sidebarPanel">
-  <div class="crh-sidebar-inner">
-    <nav class="crh-sidebar-nav" aria-label="Section navigation">
-      <a href="{section_href}" class="crh-sidebar-section-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        {section_title}
-      </a>
-      <ul class="crh-sidebar-tree">
-        {"".join(items)}
-      </ul>
-    </nav>
-  </div>
-</aside>"""
-
-
-def render_audience_strip(tags: List[str]) -> str:
-    if not tags:
-        return ""
-    variants = {
-        "staff":      ("For staff",      ""),
-        "partner":    ("Partner-safe",   "partner"),
-        "internal":   ("Internal only",  "internal"),
-        "draft":      ("Draft",          "draft"),
-        "deprecated": ("Deprecated",     "deprecated"),
-    }
-    items = []
-    for t in tags:
-        if t in variants:
-            label, variant = variants[t]
-            attr = f' data-variant="{variant}"' if variant else ''
-            items.append(f'<li><span class="crh-audience-tag"{attr}>{label}</span></li>')
-    return f'<ul class="crh-audience-strip" aria-label="Page audience and status">{"".join(items)}</ul>'
-
-
-def render_feedback() -> str:
-    return """<div class="crh-feedback-widget" id="pageFeedback">
-  <div class="crh-feedback-question">
-    <span class="crh-feedback-label">Was this page helpful?</span>
-    <div class="crh-feedback-buttons">
-      <button class="crh-feedback-btn crh-feedback-yes" data-vote="yes" aria-label="Yes, helpful"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> Yes</button>
-      <button class="crh-feedback-btn crh-feedback-no" data-vote="no" aria-label="No, not helpful"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg> No</button>
-    </div>
-  </div>
-  <div class="crh-feedback-thanks" id="pfThanks" style="display:none;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-    <span>Thank you for your feedback!</span>
-  </div>
-</div>"""
-
-
-def render_page_nav(prev: Optional[PageNavLink], next_: Optional[PageNavLink]) -> str:
-    if not prev and not next_:
-        return ""
-    prev_html = f'<a href="{prev.href}" class="crh-nav-button"><span class="crh-nav-label">Previous</span><span class="crh-nav-title">{prev.title}</span></a>' if prev else ""
-    next_html = f'<a href="{next_.href}" class="crh-nav-button"><span class="crh-nav-label">Next</span><span class="crh-nav-title">{next_.title}</span></a>' if next_ else ""
-    return f'<nav class="crh-page-nav"><div class="crh-nav-prev">{prev_html}</div><div class="crh-nav-next">{next_html}</div></nav>'
-
-
-def render_page(p: Page) -> str:
-    depth = p.slug.count("/") + 1
-    section_label, section_href = SECTIONS.get(p.section, (p.section, f"{'../' * depth}{p.section}/"))
-    sidebar_html = render_sidebar(p.sidebar, section_label, section_href)
-    breadcrumb_html = render_breadcrumbs(p.breadcrumbs, p.title)
-    tag_strip_html = render_audience_strip(p.audience_tags)
-    feedback_html = render_feedback() if p.is_leaf else ""
-    page_nav_html = render_page_nav(p.prev, p.next)
-
-    return f"""{head(p.title, depth, p.description)}
-<body>
-{header(p.section, depth)}
-<div class="crh-layout">
-  {sidebar_html}
-  <button class="crh-sidebar-toggle" id="sidebarToggle" aria-label="Open navigation panel">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-  </button>
-  <main id="main-content" class="crh-main">
-    <article class="crh-content">
-      <nav class="crh-breadcrumbs" aria-label="Breadcrumb">
-        {breadcrumb_html}
-      </nav>
-      {tag_strip_html}
-      <h1 class="crh-page-title">{p.title}</h1>
-      <div class="crh-article-meta">
-        <span class="crh-article-date">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span class="crh-article-date-text">Demo content</span>
-        </span>
-      </div>
-      <div class="crh-content-body content-body">
-        {p.body}
-      </div>
-      {feedback_html}
-      {page_nav_html}
-    </article>
-  </main>
-</div>
-{footer(depth)}"""
-
-
-# ---------------------------------------------------------------------------
-# SIDEBARS (per section — all leaf pages in a section share the same sidebar)
-# ---------------------------------------------------------------------------
-
-def brand_sidebar(active_slug: str = "") -> List[SidebarLink]:
-    return [
-        SidebarLink("Logo Usage",  "../logo-usage/",  active=(active_slug == "logo-usage")),
-        SidebarLink("Colour Palette", "../colour-palette/", active=(active_slug == "colour-palette")),
-    ]
-
-
-def templates_sidebar(active_slug: str = "") -> List[SidebarLink]:
-    return [
-        SidebarLink("Letterhead", "../letterhead/", active=(active_slug == "letterhead")),
-    ]
-
-
-def tools_sidebar(active_slug: str = "") -> List[SidebarLink]:
-    return [
-        SidebarLink("Content Patterns", "../content-patterns/", active=(active_slug == "content-patterns")),
-    ]
-
-
-# ---------------------------------------------------------------------------
-# PAGE DEFINITIONS
-# ---------------------------------------------------------------------------
-
-def section_child_grid(cards: List[tuple]) -> str:
-    """cards = [(href, title, description_or_None), ...]"""
-    items = []
-    for href, title, desc in cards:
-        desc_html = f'<p class="crh-child-card-desc">{desc}</p>' if desc else ""
-        items.append(f"""<a href="{href}" class="crh-child-card">
-          <div class="crh-child-card-content">
-            <h3 class="crh-child-card-title">{title}</h3>
-            {desc_html}
-          </div>
-          <span class="crh-child-card-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
-        </a>""")
-    return f"""<div class="crh-child-pages">
-  <h2 class="crh-child-pages-heading">Pages in this section</h2>
-  <div class="crh-child-grid">
-    {"".join(items)}
-  </div>
-</div>"""
-
-
-def empty_state(title: str, body: str) -> str:
-    return f"""<div class="crh-empty-state">
-  <h3>{title}</h3>
-  <p>{body}</p>
-</div>"""
-
-
-PAGES: List[Page] = [
-
-    # -------- WHAT'S NEW --------
-    Page(
-        slug="whats-new",
-        title="What\u2019s New",
-        section="whats-new",
-        breadcrumbs=[Crumb("Home", "../index.html")],
-        is_leaf=False,
-        audience_tags=["staff"],
-        body="""<p>Welcome to the Creative Hub changelog. Latest additions, changes, and announcements across the hub — new resources, updated guidelines, and improvements to how we work together.</p>
-
-<h3>March 2026</h3>
-<ul>
-  <li>Creative Hub restructure completed — cleaner navigation, merged Templates &amp; Assets section.</li>
-  <li>Brand Guidelines section expanded with co-branding guidance and updated tone-of-voice examples.</li>
-  <li>New Templates &amp; Assets section consolidates logos, brand templates, presentation decks, and print files in one place.</li>
-  <li>Events Support section updated with 2026&ndash;2027 event calendar and lead time guidance.</li>
-</ul>
-
-<h3>Coming next</h3>
-<ul>
-  <li>Expanded video production guidelines and asset templates.</li>
-  <li>Animation and motion design best practices section.</li>
-  <li>Case studies and project examples from recent SKAO campaigns.</li>
-</ul>
-
-<div class="crh-related-grid">
-  <a href="../brand-guidelines/">Brand Guidelines</a>
-  <a href="../templates-assets/">Templates &amp; Assets</a>
-  <a href="../tools-resources/content-patterns/">Content Patterns</a>
-</div>""",
-    ),
-
-    # -------- BRAND GUIDELINES --------
-    Page(
-        slug="brand-guidelines",
-        title="Brand Guidelines",
-        section="brand-guidelines",
-        breadcrumbs=[Crumb("Home", "../index.html")],
-        is_leaf=False,
-        audience_tags=["staff"],
-        body=f"""<p>The SKAO brand represents 16 member countries united in building the world&rsquo;s largest radio telescope. Maintaining a consistent, professional visual identity across all communications strengthens our standing as a world-class scientific organisation.</p>
-
-<p>This section provides guidance on SKAO brand standards to ensure clarity and consistency across all your work.</p>
-
-<div class="confluence-information-macro confluence-information-macro-information">
-  <div class="confluence-information-macro-body"><p><strong>The Brand Book is the foundational document for all SKAO branding.</strong> It covers brand values, visual identity, logo construction, colour palette, typography, imagery guidelines, and real-world application examples.</p></div>
-</div>
-
-<h2>What this section covers</h2>
-<ul>
-  <li><strong>Logo Usage</strong> &mdash; primary and secondary logos, clear space, sizing, and placement rules.</li>
-  <li><strong>Colour Palette</strong> &mdash; SKAO primary and secondary colours with RGB, HEX, and Pantone specifications.</li>
-</ul>
-
-{section_child_grid([
-    ("logo-usage/",     "Logo Usage",     "Primary and secondary logos, clear space, sizing, placement rules."),
-    ("colour-palette/", "Colour Palette", "Primary and secondary colours with RGB, HEX, and Pantone specifications."),
-])}""",
-    ),
-
-    Page(
-        slug="brand-guidelines/logo-usage",
-        title="Logo Usage",
-        section="brand-guidelines",
-        breadcrumbs=[Crumb("Home", "../../index.html"), Crumb("Brand Guidelines", "../")],
-        sidebar=brand_sidebar("logo-usage"),
-        audience_tags=["staff", "partner"],
-        prev=None,
-        next=PageNavLink("Next", "Colour Palette", "../colour-palette/"),
-        body="""<p>The SKAO logo is the most recognisable element of our visual identity. Correct use across materials is the single most important brand rule &mdash; everything else follows from it.</p>
-
-<h3>Logo variants</h3>
-<ul>
-  <li><strong>Primary</strong> &mdash; full colour on white or very light backgrounds.</li>
-  <li><strong>Reverse</strong> &mdash; white logo on dark or coloured backgrounds.</li>
-  <li><strong>Monochrome</strong> &mdash; black for single-colour print (e.g. internal memos, faxes).</li>
-  <li><strong>Stacked</strong> &mdash; for narrow spaces where the horizontal version doesn&rsquo;t fit.</li>
-</ul>
-
-<h3>Clear space</h3>
-<p>Always maintain clear space around the logo equal to the height of the &ldquo;S&rdquo; in &ldquo;SKAO&rdquo;. Nothing should encroach on this space &mdash; no text, images, borders, or other elements.</p>
-
-<figure class="crh-figure">
-  <div style="background:linear-gradient(135deg,#9333ea,#C8247E,#003366);aspect-ratio:16/9;border-radius:10px;display:flex;align-items:center;justify-content:center;"><img src="../../assets/images/skao-logo-white.png" alt="SKAO logo on brand gradient" style="height:80px;" class="no-dim"></div>
-  <figcaption>The SKAO primary logo on the brand gradient. Use this combination for hero sections and landing pages.<cite>SKAO Brand</cite></figcaption>
-</figure>
-
-<h3>Download the logo pack</h3>
-<p>All logo variants live in Canto. Please use the latest files &mdash; older variants (pre-2024) are deprecated.</p>
-
-<a class="crh-canto-card" href="https://skao.canto.global/" target="_blank" rel="noopener">
-  <span class="crh-canto-badge">Canto</span>
-  <span class="crh-canto-title">SKAO Logo &mdash; Primary Pack</span>
-  <span class="crh-canto-desc">EPS, SVG, PNG (colour, white, black, stacked). 12 files. Updated March 2026.</span>
-  <span class="crh-canto-arrow">Open in Canto &rarr;</span>
-</a>
-
-<div class="crh-download-card">
-  <div class="crh-download-icon" data-type="zip"></div>
-  <div class="crh-download-meta">
-    <strong class="crh-download-name">skao-logo-pack-2026.zip</strong>
-    <span class="crh-download-detail">ZIP archive &middot; 2.4 MB &middot; 12 files</span>
-  </div>
-  <a class="crh-download-btn" href="#demo" onclick="alert('Demo build \u2014 no actual file. In the live hub, this downloads from Confluence attachments.');return false;">Download</a>
-</div>
-
-<div class="crh-download-card">
-  <div class="crh-download-icon" data-type="pdf"></div>
-  <div class="crh-download-meta">
-    <strong class="crh-download-name">Logo-Usage-Guidelines.pdf</strong>
-    <span class="crh-download-detail">PDF &middot; 340 KB &middot; 8 pages</span>
-  </div>
-  <a class="crh-download-btn" href="#demo" onclick="alert('Demo build \u2014 no actual file.');return false;">Download</a>
-</div>
-
-<h3>Do and don\u2019t</h3>
-<ul>
-  <li><strong>Do</strong> maintain clear space equal to the height of the &ldquo;S&rdquo;.</li>
-  <li><strong>Do</strong> use the reverse logo on dark backgrounds for contrast.</li>
-  <li><strong>Don\u2019t</strong> stretch, skew, or rotate the logo.</li>
-  <li><strong>Don\u2019t</strong> place the logo on busy or low-contrast backgrounds.</li>
-  <li><strong>Don\u2019t</strong> recreate the logo &mdash; always use the official files.</li>
-</ul>
-
-<h3>Related pages</h3>
-<div class="crh-related-grid">
-  <a href="../colour-palette/">Colour Palette</a>
-  <a href="../../templates-assets/">Templates &amp; Assets</a>
-  <a href="../../tools-resources/content-patterns/">Content Patterns</a>
-</div>""",
-    ),
-
-    Page(
-        slug="brand-guidelines/colour-palette",
-        title="Colour Palette",
-        section="brand-guidelines",
-        breadcrumbs=[Crumb("Home", "../../index.html"), Crumb("Brand Guidelines", "../")],
-        sidebar=brand_sidebar("colour-palette"),
-        audience_tags=["staff", "partner"],
-        prev=PageNavLink("Previous", "Logo Usage", "../logo-usage/"),
-        next=None,
-        body="""<p>The SKAO colour palette carries the brand across every touchpoint &mdash; from web to print to exhibitions. Consistent application is the fastest way to make any piece of work feel unmistakably SKAO.</p>
-
-<h3>Primary palette</h3>
-<p>The three-colour gradient that appears in our header treatments. Use in full when branding moments matter. Individual colours may be used as accents or solids.</p>
-
-<div class="crh-swatch-grid">
-  <figure class="crh-swatch" data-hex="#9333ea">
-    <span class="crh-swatch-chip" style="background:#9333ea;"></span>
-    <figcaption>
-      <strong>SKAO Purple</strong>
-      <span>#9333EA \u00b7 RGB 147 51 234 \u00b7 PMS 2592 C</span>
-    </figcaption>
-  </figure>
-  <figure class="crh-swatch" data-hex="#C8247E">
-    <span class="crh-swatch-chip" style="background:#C8247E;"></span>
-    <figcaption>
-      <strong>SKAO Magenta</strong>
-      <span>#C8247E \u00b7 RGB 200 36 126 \u00b7 PMS 227 C</span>
-    </figcaption>
-  </figure>
-  <figure class="crh-swatch" data-hex="#003366">
-    <span class="crh-swatch-chip" style="background:#003366;"></span>
-    <figcaption>
-      <strong>SKAO Navy</strong>
-      <span>#003366 \u00b7 RGB 0 51 102 \u00b7 PMS 540 C</span>
-    </figcaption>
-  </figure>
-</div>
-
-<h3>Neutrals</h3>
-<p>For body text, UI chrome, and content backgrounds. Use the lightest slates for page backgrounds in light mode and the deepest for dark mode.</p>
-
-<div class="crh-swatch-grid">
-  <figure class="crh-swatch"><span class="crh-swatch-chip" style="background:#0f172a;"></span><figcaption><strong>Slate 900</strong><span>#0F172A \u00b7 Body text</span></figcaption></figure>
-  <figure class="crh-swatch"><span class="crh-swatch-chip" style="background:#475569;"></span><figcaption><strong>Slate 600</strong><span>#475569 \u00b7 Secondary text</span></figcaption></figure>
-  <figure class="crh-swatch"><span class="crh-swatch-chip" style="background:#cbd5e1;"></span><figcaption><strong>Slate 300</strong><span>#CBD5E1 \u00b7 Borders</span></figcaption></figure>
-  <figure class="crh-swatch"><span class="crh-swatch-chip" style="background:#f8fafc;border:1px solid #e2e8f0;"></span><figcaption><strong>Slate 50</strong><span>#F8FAFC \u00b7 Surfaces</span></figcaption></figure>
-</div>
-
-<h3>Usage guidance</h3>
-<ul>
-  <li>Use <strong>Purple</strong> as the primary accent on buttons, links, and interactive states.</li>
-  <li>Use <strong>Magenta</strong> for campaign moments, highlights, and emotional emphasis.</li>
-  <li>Use <strong>Navy</strong> as the grounding colour in typography-heavy contexts &mdash; letterheads, reports, publications.</li>
-  <li>Never set body text in Purple or Magenta &mdash; contrast fails WCAG at body sizes.</li>
-  <li>Always test colour combinations against WCAG AA contrast minimums (4.5:1 for body, 3:1 for large text).</li>
-</ul>
-
-<h3>Related pages</h3>
-<div class="crh-related-grid">
-  <a href="../logo-usage/">Logo Usage</a>
-  <a href="../../tools-resources/">Accessibility Guidelines</a>
-</div>""",
-    ),
-
-    # -------- TEMPLATES & ASSETS --------
-    Page(
-        slug="templates-assets",
-        title="Templates &amp; Assets",
-        section="templates-assets",
-        breadcrumbs=[Crumb("Home", "../index.html")],
-        is_leaf=False,
-        audience_tags=["staff"],
-        body=f"""<p>Ready-to-use templates, design assets, and media resources for creating professional SKAO-branded materials. Whether you&rsquo;re drafting a memo, preparing a conference presentation, or editing event video, you&rsquo;ll find what you need here.</p>
-
-<p>Most image assets are stored and managed through our <strong>Canto Digital Asset Management</strong> system. If you need access to Canto or have trouble finding something, contact the creative production team at <a href="mailto:comms@skao.int">comms@skao.int</a>.</p>
-
-<h2>What&rsquo;s here</h2>
-<ul>
-  <li><strong>Document Templates</strong> &mdash; Word templates for letterheads, report layouts, memo formats, and briefing documents.</li>
-  <li><strong>Slide Decks</strong> &mdash; PowerPoint templates and a curated library of pre-made presentations to adapt.</li>
-  <li><strong>Photography &amp; Media</strong> &mdash; Curated image collections via Canto.</li>
-  <li><strong>Video &amp; Animation</strong> &mdash; Explainer animations, B-roll footage, event recordings.</li>
-  <li><strong>Logos &amp; Icons</strong> &mdash; Official SKAO logo files in multiple formats and variants.</li>
-  <li><strong>Print Materials</strong> &mdash; Business cards, pull-up banners, exhibition panels, posters, and leaflets.</li>
-</ul>
-
-{section_child_grid([
-    ("letterhead/",  "Letterhead",  "Official letterhead template for formal correspondence."),
-])}
-
-{empty_state("More templates landing soon", "In the live hub, additional sub-sections (Slide Decks, Photography, Video, Logos, Print) each have their own landing page with curated downloads.")}""",
-    ),
-
-    Page(
-        slug="templates-assets/letterhead",
-        title="Letterhead",
-        section="templates-assets",
-        breadcrumbs=[Crumb("Home", "../../index.html"), Crumb("Templates & Assets", "../")],
-        sidebar=templates_sidebar("letterhead"),
-        audience_tags=["staff"],
-        body="""<p>Official letterhead for formal correspondence from SKA Observatory. Includes SKAO logo, registered address, and pre-formatted text styles.</p>
-
-<h3>What&rsquo;s included</h3>
-<ul>
-  <li>SKAO logo (header)</li>
-  <li>Registered address and contact details</li>
-  <li>Pre-formatted body text styles</li>
-  <li>Footer with department/contact information</li>
-  <li>Page breaks configured for multi-page letters</li>
-</ul>
-
-<h3>Download</h3>
-<div class="crh-download-card">
-  <div class="crh-download-icon" data-type="docx"></div>
-  <div class="crh-download-meta">
-    <strong class="crh-download-name">SKAO-Letterhead.docx</strong>
-    <span class="crh-download-detail">Microsoft Word \u00b7 48 KB \u00b7 v1.2</span>
-  </div>
-  <a class="crh-download-btn" href="#demo" onclick="alert('Demo build \u2014 no actual file. In the live hub this downloads from Confluence attachments.');return false;">Download</a>
-</div>
-
-<h3>Usage guidelines</h3>
-<ul>
-  <li>Do not modify logo placement or size.</li>
-  <li>Use standard fonts and styles provided.</li>
-  <li>Maintain 1-inch margins on all sides.</li>
-  <li>Update sender details in the footer before sending.</li>
-</ul>
-
-<h3>Related</h3>
-<div class="crh-related-grid">
-  <a href="../../brand-guidelines/logo-usage/">Logo Usage</a>
-  <a href="../../brand-guidelines/colour-palette/">Colour Palette</a>
-  <a href="../../tools-resources/content-patterns/">Content Patterns</a>
-</div>""",
-    ),
-
-    # -------- HOW TO WORK WITH US --------
-    Page(
-        slug="how-to-work-with-us",
-        title="How To Work With Us",
-        section="how-to-work-with-us",
-        breadcrumbs=[Crumb("Home", "../index.html")],
-        is_leaf=False,
-        audience_tags=["staff", "partner"],
-        body=f"""<p>Everything you need to know about commissioning creative work at SKAO &mdash; from submitting a request to receiving the final asset.</p>
-
-<h2>Quick links</h2>
-<ul>
-  <li><strong>Creative Helpdesk</strong> &mdash; <a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Submit a request on Jira Service Desk</a>. Response within 2 working days.</li>
-  <li><strong>Email</strong> &mdash; <a href="mailto:comms@skao.int">comms@skao.int</a> for simple questions.</li>
-</ul>
-
-<h2>Typical turnaround times</h2>
-<ul>
-  <li>Minor updates (logo swap, copy edit): 2\u20135 working days</li>
-  <li>New slide deck or poster: 1\u20132 weeks</li>
-  <li>Publication (Contact, Annual Report): 4\u20138 weeks</li>
-  <li>Events / exhibitions: 6\u201312 weeks</li>
-  <li>Video / animation: 8\u201316 weeks</li>
-</ul>
-
-{empty_state("Section under construction", "In the live hub, this section expands into FAQ, Self-Service Guides, Submitting a Request, and SLA pages.")}""",
-    ),
-
-    # -------- EVENTS SUPPORT --------
-    Page(
-        slug="events-support",
-        title="Events Support",
-        section="events-support",
-        breadcrumbs=[Crumb("Home", "../index.html")],
-        is_leaf=False,
-        audience_tags=["staff"],
-        body=f"""<p>Stand design, merchandise, checklists, and health &amp; safety guidance for SKAO events, conferences, and exhibitions.</p>
-
-<h2>Key upcoming events</h2>
-<ul>
-  <li>APRIM 2026 &mdash; Hong Kong, May/Jun</li>
-  <li>EAS 2026 &mdash; summer</li>
-  <li>IAU GA 2027 &mdash; Rome</li>
-  <li>AAS 2027 &mdash; early</li>
-</ul>
-
-{empty_state("Section under construction", "In the live hub, this section expands into Event Planning Checklist, Health &amp; Safety, Merchandise and Giveaways, and Vendor Directory pages.")}""",
-    ),
-
-    # -------- TOOLS & RESOURCES --------
-    Page(
-        slug="tools-resources",
-        title="Tools &amp; Resources",
-        section="tools-resources",
-        breadcrumbs=[Crumb("Home", "../index.html")],
-        is_leaf=False,
-        audience_tags=["staff"],
-        body=f"""<p>Access Canto, download fonts, find accessibility guidance, and use the Creative Hub&rsquo;s authoring patterns.</p>
-
-<h2>External tools</h2>
-<ul>
-  <li><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" target="_blank" rel="noopener">Canto DAM</a> &mdash; digital asset management for SKAO imagery.</li>
-  <li><a href="https://fonts.google.com/noto/specimen/Noto+Sans" target="_blank" rel="noopener">Noto Sans</a> &mdash; SKAO&rsquo;s primary typeface.</li>
-  <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Creative Helpdesk</a> &mdash; Jira Service Desk for requests.</li>
-</ul>
-
-{section_child_grid([
-    ("content-patterns/",  "Content Patterns",  "Copy-paste Confluence storage-format snippets for all hub content types."),
-])}""",
-    ),
-
-    # -------- CONTENT PATTERNS (the bonus showcase page) --------
-    Page(
-        slug="tools-resources/content-patterns",
-        title="Content Patterns",
-        section="tools-resources",
-        breadcrumbs=[Crumb("Home", "../../index.html"), Crumb("Tools & Resources", "../")],
-        sidebar=tools_sidebar("content-patterns"),
-        audience_tags=["staff"],
-        body="""<p>Every pattern on this page has a copy-ready Confluence storage-format snippet (see the full reference inside Confluence). This static demo shows each one <em>in its rendered form</em> so you can see how the theme styles them before writing any content.</p>
-
-<h2>1. Download cards</h2>
-<p>For any downloadable file &mdash; Word templates, PowerPoint decks, PDF briefs. Icon auto-selects from <code>data-type</code>.</p>
-
-<div class="crh-download-card">
-  <div class="crh-download-icon" data-type="docx"></div>
-  <div class="crh-download-meta">
-    <strong class="crh-download-name">SKAO-Letterhead.docx</strong>
-    <span class="crh-download-detail">Microsoft Word \u00b7 48 KB \u00b7 v1.2</span>
-  </div>
-  <a class="crh-download-btn" href="#demo" onclick="return false;">Download</a>
-</div>
-
-<div class="crh-download-card">
-  <div class="crh-download-icon" data-type="pptx"></div>
-  <div class="crh-download-meta">
-    <strong class="crh-download-name">SKAO-Standard-Deck.pptx</strong>
-    <span class="crh-download-detail">PowerPoint \u00b7 4.2 MB \u00b7 16:9 widescreen</span>
-  </div>
-  <a class="crh-download-btn" href="#demo" onclick="return false;">Download</a>
-</div>
-
-<div class="crh-download-card">
-  <div class="crh-download-icon" data-type="pdf"></div>
-  <div class="crh-download-meta">
-    <strong class="crh-download-name">SKAO-Brand-Book-v1.2.pdf</strong>
-    <span class="crh-download-detail">PDF \u00b7 12.8 MB \u00b7 64 pages</span>
-  </div>
-  <a class="crh-download-btn" href="#demo" onclick="return false;">Download</a>
-</div>
-
-<h2>2. Canto asset card</h2>
-<p>Use when the asset lives in Canto. Don&rsquo;t paste raw Canto links &mdash; this card makes the destination obvious.</p>
-
-<a class="crh-canto-card" href="https://skao.canto.global/" target="_blank" rel="noopener">
-  <span class="crh-canto-badge">Canto</span>
-  <span class="crh-canto-title">SKAO Logo &mdash; Primary Pack</span>
-  <span class="crh-canto-desc">EPS, SVG, PNG (colour, white, black, stacked). 12 files.</span>
-  <span class="crh-canto-arrow">Open in Canto &rarr;</span>
-</a>
-
-<h2>3. Colour swatch grid</h2>
-<p>For Brand Guidelines colour pages. Hex, RGB, and Pantone inline.</p>
-
-<div class="crh-swatch-grid">
-  <figure class="crh-swatch"><span class="crh-swatch-chip" style="background:#9333ea;"></span><figcaption><strong>SKAO Purple</strong><span>#9333EA</span></figcaption></figure>
-  <figure class="crh-swatch"><span class="crh-swatch-chip" style="background:#C8247E;"></span><figcaption><strong>SKAO Magenta</strong><span>#C8247E</span></figcaption></figure>
-  <figure class="crh-swatch"><span class="crh-swatch-chip" style="background:#003366;"></span><figcaption><strong>SKAO Navy</strong><span>#003366</span></figcaption></figure>
-</div>
-
-<h2>4. Figure with caption and credit</h2>
-
-<figure class="crh-figure">
-  <div style="background:linear-gradient(135deg,#9333ea,#C8247E,#003366);aspect-ratio:16/9;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">Image placeholder</div>
-  <figcaption>The SKA-Mid site in South Africa&rsquo;s Karoo region at dusk.<cite>SKAO / SARAO</cite></figcaption>
-</figure>
-
-<h2>5. Related links grid</h2>
-<p>For cross-linking to 3&ndash;6 related pages. Use at the end of a page.</p>
-
-<div class="crh-related-grid">
-  <a href="../../brand-guidelines/logo-usage/">Logo Usage</a>
-  <a href="../../brand-guidelines/colour-palette/">Colour Palette</a>
-  <a href="../../templates-assets/letterhead/">Letterhead</a>
-  <a href="../../whats-new/">What\u2019s New</a>
-</div>
-
-<h2>6. Callout boxes</h2>
-<p>Four standard callouts already styled by the theme. Use the Confluence macro picker &mdash; no custom class needed.</p>
-
-<div class="confluence-information-macro confluence-information-macro-information"><div class="confluence-information-macro-body"><p><strong>Info.</strong> Use for orientation &mdash; context the reader needs before continuing.</p></div></div>
-
-<div class="confluence-information-macro confluence-information-macro-tip"><div class="confluence-information-macro-body"><p><strong>Tip.</strong> Use for time-savers &mdash; shortcuts, faster workflows.</p></div></div>
-
-<div class="confluence-information-macro confluence-information-macro-note"><div class="confluence-information-macro-body"><p><strong>Note.</strong> Use for things to be aware of &mdash; version changes, archive pointers.</p></div></div>
-
-<div class="confluence-information-macro confluence-information-macro-warning"><div class="confluence-information-macro-body"><p><strong>Warning.</strong> Reserve for real consequences &mdash; legal, HSSE, brand compliance.</p></div></div>
-
-<h2>7. Audience tag strip</h2>
-<p>Driven by Confluence page labels at the top of every page. You&rsquo;ll see them rendered just under the breadcrumbs, above the page title. This page is tagged <code>For staff</code>.</p>
-
-<h2>Rules of thumb</h2>
-<ul>
-  <li><strong>One scroll per leaf page.</strong> If you need two, it&rsquo;s two pages.</li>
-  <li><strong>One callout per page, ideally zero.</strong> Every extra callout reduces the impact of the one that matters.</li>
-  <li><strong>Labels before categories.</strong> Page labels are the only thing that makes filtered search work.</li>
-  <li><strong>Canto is the DAM, not Confluence.</strong> Don&rsquo;t upload brand imagery as page attachments.</li>
-  <li><strong>Write for the reader who&rsquo;s lost, tired, and in a hurry.</strong> Lead with the answer. Put context below.</li>
-</ul>""",
-    ),
-]
-
-
-# ---------------------------------------------------------------------------
-# 404 PAGE (lives at docs/404.html, outside the standard layout)
-# ---------------------------------------------------------------------------
-
-FOUR_O_FOUR = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Page Not Found &mdash; SKAO Creative Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/skao-creative-hub/assets/css/style.css">
-<script>
-(function(){try{var s=localStorage.getItem('crh-theme');if(s==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})();
-</script>
-</head>
-<body>
-<div class="nf-container">
-  <div class="nf-content">
-    <h1 class="nf-title">404</h1>
-    <p class="nf-subtitle">Page Not Found</p>
-    <p class="nf-text">The page you\u2019re looking for has drifted into the creative void.</p>
-    <div class="nf-actions">
-      <a href="/skao-creative-hub/" class="nf-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Return to Hub
-      </a>
-      <a href="https://github.com/JDiamondSKAO/skao-creative-hub" target="_blank" rel="noopener" class="nf-btn nf-btn-outline">
-        View source on GitHub
-      </a>
-    </div>
-  </div>
-</div>
-</body>
-</html>"""
-
-
-# ---------------------------------------------------------------------------
-# BUILD
-# ---------------------------------------------------------------------------
-
-def build():
-    count = 0
-    for page in PAGES:
-        out_dir = DOCS / page.slug
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / "index.html"
-        out_path.write_text(render_page(page), encoding="utf-8")
-        count += 1
-        print(f"  wrote  docs/{page.slug}/index.html")
-
-    # 404
-    (DOCS / "404.html").write_text(FOUR_O_FOUR, encoding="utf-8")
-    count += 1
-    print(f"  wrote  docs/404.html")
-
-    print(f"\nBuilt {count} pages.")
-
-
-def list_pages():
-    for p in PAGES:
-        print(f"  {p.slug:50s}  [{p.section}]")
-    print("  404.html")
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Build the static Creative Hub demo pages.")
-    parser.add_argument("--list", action="store_true", help="List pages that would be built without writing.")
-    args = parser.parse_args()
-
-    if args.list:
-        list_pages()
-        return
-    build()
-
-
-if __name__ == "__main__":
-    main()
+import json,html,shutil,zipfile
+R=Path(__file__).resolve().parents[1];D=R/'docs';D.mkdir(exist_ok=True)
+(R/'content').mkdir(exist_ok=True)
+(R/'evidence').mkdir(exist_ok=True)
+JIRA='https://jira.skatelescope.org/servicedesk/customer/portal/364'
+CANTO='https://skao.canto.global/v/SKAOLibrary?from_main_library'
+LIVE='https://confluence.skatelescope.org/crh/'
+NAV=[('index.html','Home'),('resources.html','Templates and assets'),('brand.html','Brand guidance'),('request.html','Request help'),('contribute.html','Share material')]
+LIVE_LINKS={'index.html':LIVE,'resources.html':LIVE+'templates-assets-381891696.html','presentations.html':LIVE+'slide-decks-presentations-381891794.html','brand.html':LIVE+'brand-guidelines-381891606.html','request.html':LIVE+'submitting-a-request-381891661.html','contribute.html':LIVE+'how-to-submit-your-deck-381891810.html','events.html':LIVE+'events-support-381891637.html','help.html':LIVE+'tools-resources-381891870.html'}
+def a(h,t,cls=''):return f'<a href="{html.escape(h,quote=True)}" class="{cls}">{t}</a>'
+def card(n,title,text,href,cta):return f'<a class="card" href="{href}"><span class="card-number">{n}</span><h3>{title}</h3><p>{text}</p><span class="go">{cta} ↗</span></a>'
+def callout(title,text,link='',label=''):return f'<aside class="callout"><h2>{title}</h2><p>{text}</p>{a(link,label) if link else ""}</aside>'
+def rows(items):return '<ul class="list">'+''.join(f'<li>{a(h,f"<span>{t}<small>{d}</small></span><span aria-hidden=true>↗</span>")}</li>' for t,d,h in items)+'</ul>'
+home='''<section class="hero"><div><p class="eyebrow">For everyone at the SKAO</p><h1>Good work starts<br>with the right resources.</h1><p class="lead">Find a template, prepare a presentation or get creative support. Everything you need to make your next piece of work feel like SKAO.</p><div class="actions"><a class="button" href="resources.html">Find a resource <span aria-hidden="true">→</span></a><a class="button secondary" href="request.html">Request creative help</a></div></div><aside class="feature"><div class="deck-art" aria-hidden="true"><span>SKA Observatory</span><strong>A shared story.<br>Your next talk.</strong></div><div class="feature-copy"><p class="eyebrow">Presenting the Observatory</p><h2>Start with the slide library</h2><p>Find templates, reusable slides and the right checks before you present.</p><a href="presentations.html">Explore presentation resources →</a></div></aside></section>'''
+home+='<section class="section"><div class="section-head"><h2>What are you working on?</h2><span class="eyebrow">Start here</span></div><div class="tasks">'
+home+=card('01','A presentation','Templates, reusable slides and guidance for your audience.','presentations.html','Prepare your slides')+card('02','A document or design','Start with a template and keep the brand details consistent.','resources.html','Browse resources')+card('03','Photos or video','Find approved media and check credits and permitted use.',CANTO,'Open Canto')+card('04','An event','Plan the creative materials, briefing and production handover.','events.html','Plan your materials')+'</div></section>'
+home+='<section class="section split"><div><h2>Useful starting points</h2>'+rows([('Presentation library','Templates and reusable content','presentations.html'),('SKAO logos and brand guidance','Use the right files and colours','brand.html'),('Creative brief','Turn your idea into a clear request','request.html'),('Photos and video in Canto','Check each asset’s usage information',CANTO)])+'</div>'+callout('Something worth sharing?','Help colleagues reuse your good work. Contribute a presentation, suggest a resource or send material for review.','contribute.html','Choose a contribution route →')+'</section>'
+resources='''<p>Choose what you need to make. Templates and presentations live in the Hub; approved photography and media live in Canto.</p><div class="filters"><label>Find a resource<input id="resourceFilter" type="search" placeholder="Try slides, logo or document"></label><label>Resource type<select id="resourceType"><option value="all">All resources</option><option value="presentation">Presentations</option><option value="document">Documents</option><option value="brand">Brand</option><option value="media">Media</option></select></label></div><p id="filterStatus" class="status" role="status">6 resources shown.</p><div class="resource-grid">'''
+items=[('presentation','Presentation library','Templates, standard narrative and reusable modules.','presentations.html','Browse presentations'),('document','Document templates','Letterheads, reports and memos. Download from the current source page.',LIVE+'document-templates-381891700.html','Open template pages'),('brand','Logos and brand guidance','Logo files, typography, colours and co-branding.','brand.html','Find brand guidance'),('media','Photography and video','Approved assets with credits and usage information.',CANTO,'Open Canto'),('document','Creative request brief','Prepare purpose, scope, dates and review responsibilities.','request.html','Prepare a request'),('document','Event materials','Brief the creative work for a talk, stand or exhibition.','events.html','Plan event materials')]
+for typ,title,text,href,label in items:resources+=f'<article class="card" data-resource data-type="{typ}"><span class="tag">{typ.capitalize()}</span><h2>{title}</h2><p>{text}</p>{a(href,label)}</article>'
+resources+='</div>'
+presentations='''<p>Start with an approved release and adapt it for your audience. A downloaded copy will not update automatically, so return to the library before your next talk.</p><div class="actions">'''+a(LIVE+'slide-decks-presentations-381891794.html','Open the current slide library','button')+a('contribute.html','Contribute a presentation','button secondary')+'''</div><h2>Choose the right starting point</h2>'''+rows([('Presentation templates','For a new talk with your own content',LIVE+'slide-decks-presentations-381891794.html'),('Standard SKAO narrative','Check the library for the latest released deck',LIVE+'slide-decks-presentations-381891794.html'),('Reusable science and telescope slides','Check audience, source, review date and permitted reuse',LIVE+'slide-decks-presentations-381891794.html')])+'''<h2>Before you present</h2><ol><li>Check the version, audience and usage notes on the source page.</li><li>Keep credits, source information and speaker notes with the slides you reuse.</li><li>Check contrast, reading order and alternative text. Caption video content.</li><li>Ask the relevant content or science owner to review new claims or changes in meaning.</li></ol><h2>When to ask for a review</h2><p>Request help for high-stakes public presentations, new claims, partner-sensitive material or substantial changes. Reusing unchanged approved slides should not create another design task.</p>'''+callout('Library release pattern','Each release should show its content owner, audience, reviewed date, format, version and reuse conditions. Drafts stay separate from released files. This is the proposed publishing pattern, not a claim that every current deck is ready.')
+request='''<p>Tell us the outcome you need, the audience and the real use date. The team will confirm scope and capacity before making a delivery commitment.</p><div class="actions">'''+a(JIRA,'Go straight to the creative helpdesk','button')+'''</div><h2>Prepare a short brief</h2><p>This helper creates text for your request. Nothing is submitted or saved to the Hub. Attach files in the helpdesk after you open it.</p><noscript><p>Open the creative helpdesk to prepare your request. The optional brief helper needs JavaScript.</p></noscript><form id="briefForm" hidden><div class="form-grid">'''
+fields=[('Project','What is the work called?','input',True),('Use date','When will it be used, and why then?','input',True),('Purpose and audience','What should this help people understand or do?','textarea',True),('Outputs and scope','What do you need? Include format, quantity and what is out of scope.','textarea',True),('Content and review owners','Who supplies the content and who approves the result?','textarea',False),('Inputs and constraints','Source links, budget, rights, missing information and dependencies.','textarea',False)]
+for label,hint,kind,required in fields:request+=f'<label class="field">{label}{" *" if required else ""}<{kind} name="{label}" {"required" if required else ""} maxlength="3000"'+('>' if kind=='textarea' else ' type="text">')+('</textarea>' if kind=='textarea' else '')+f'<small>{hint}</small></label>'
+request+='''</div><button class="button" type="submit">Prepare my request</button></form><section id="draftPanel" hidden><h2 id="draftHeading" tabindex="-1">Your request draft</h2><p>Review the wording, copy it, then submit it in the helpdesk. A request is not booked until scope and timing are confirmed.</p><pre class="output" id="briefOutput"></pre><div class="actions"><button id="copyBrief" class="button" type="button">Copy request text</button>'''+a(JIRA,'Open helpdesk to submit','button secondary')+'''</div><p id="copyStatus" class="status" role="status"></p></section><h2>What happens next?</h2><ol><li>The team reviews the request and any missing inputs.</li><li>You agree the deliverable, review responsibilities and realistic timing.</li><li>Production and feedback follow the agreed route.</li></ol><p>For event logistics, attendance or registration, use the events team’s route. Creative Production handles the accepted creative materials.</p>'''
+contribute='''<p>Choose where your material belongs. Contributing a file starts a review; it does not publish it or make it approved for reuse.</p><div class="route-list">'''
+contribute+=callout('Share a presentation','Include the editable deck or its source link, title, audience, event/date, content owner and any reuse restrictions. Use the creative helpdesk to attach the file or provide an approved sharing link.',JIRA,'Submit a deck for review →')
+contribute+=callout('Contribute photos or video','Use your authorised Canto upload route if you have one. Include creator credit, date, location and usage/consent information. If upload access is missing, ask through the helpdesk. A library browsing link is not an upload portal.',CANTO,'Open Canto →')
+contribute+=callout('Suggest a correction or resource','Send the Hub page link, what needs changing and the source of the corrected information. This is also the route for missing templates and inaccessible files.',JIRA,'Send a correction or suggestion →')
+contribute+='''</div><h2>Before sharing</h2><ul><li>Check that the destination and permissions are suitable for the material.</li><li>Include restrictions and missing approvals, rather than assuming they are resolved.</li><li>Use a link to the working source when an attachment would create a competing version.</li></ul><h2>After submission</h2><p>The responsible owner checks suitability, content and rights before release. Accepted presentation releases belong in the Hub; approved media belongs in Canto. The review route and timing are confirmed for the submission.</p>'''
+brand='''<p>Use the SKAO Brand Book as the authority for visual identity. Start from existing assets and templates rather than recreating the logo or guessing colours.</p><div class="actions">'''+a(LIVE+'brand-guidelines-381891606.html','Open current brand guidance','button')+'''</div><h2>The essentials</h2><ul><li><strong>Primary colours:</strong> Blueshift Navy, #070068, and Redshift Magenta, #E70068.</li><li><strong>Typeface:</strong> Noto Sans. Use Verdana when Noto Sans is unavailable.</li><li><strong>Logo:</strong> use the supplied artwork unchanged. Keep at least half the logo’s height clear on all sides.</li><li><strong>Language:</strong> use British English, plain wording and sentence-case headings.</li></ul><h2>Colour and accessibility</h2><p>Brand colours do not make every colour pairing accessible. Use navy for body links on white. Keep magenta as an accent and check contrast for the exact foreground, background, size and weight.</p><h2>Co-branding</h2><p>For partners and related programmes, follow the applicable identity and approval guidance. Do not invent a combined logo or assume one set of rules applies to every partner.</p><h2>Source</h2><p>These essentials follow the SKAO Brand Book v2, March 2022. The existing Hub colour page contains provisional values that need reconciling before rollout.</p>'''
+events='''<p>Bring the audience, purpose and use date first. Reuse an existing kit where it does the job, then brief only what needs to change.</p><h2>Define the creative package</h2><ul><li>Presentation, stand graphics, print, video or another clearly specified output.</li><li>Venue/supplier specifications, quantity, dimensions, languages and access needs.</li><li>Content owner, final reviewer, proof dates and supplier handoff.</li><li>Confirmed budget and required permissions.</li></ul><h2>Keep responsibilities clear</h2><p>The events team owns event planning, attendance and logistics. Creative Production scopes and delivers the accepted creative materials. Supplier lead times and review dates must be confirmed for the actual job.</p><div class="actions">'''+a('request.html','Brief the creative work','button')+a(LIVE+'events-support-381891637.html','Open event guidance','button secondary')+'</div>'
+helptext='''<details><summary>Where are photographs and video?</summary><p>In Canto. Check the asset’s credit and usage information before reuse.</p></details><details><summary>Where should presentations live?</summary><p>Released presentations live in the Creative Hub. Keep draft working files separate and link to the approved source page.</p></details><details><summary>Can I upload directly here?</summary><p>This theme routes submissions to the existing helpdesk or an authorised Canto upload route. It does not create another file store.</p></details><details><summary>Is my request automatically accepted?</summary><p>No. Scope, capacity and delivery dates need to be confirmed by the team.</p></details><details><summary>A link or resource is missing</summary><p>Send the page URL and the problem to the creative helpdesk.</p></details>'''+a(JIRA,'Open the creative helpdesk','button')
+PAGES={'index.html':('Creative Hub',home),'resources.html':('Find a resource',resources),'presentations.html':('Prepare a presentation',presentations),'request.html':('Request creative help',request),'contribute.html':('Contribute material',contribute),'brand.html':('Brand guidance',brand),'events.html':('Plan event materials',events),'help.html':('Help with the Hub',helptext)}
+from journeys import revise
+PAGES=revise(PAGES,JIRA,CANTO,LIVE)
+from interiors import revise as revise_interiors, ROUTES
+PAGES, INTERIOR_META=revise_interiors(PAGES,JIRA,CANTO)
+home=PAGES['index.html'][1]
+request=PAGES['request.html'][1]
+production_presentations=PAGES['presentations.html'][1].replace(LIVE+'slide-decks-presentations-381891794.html', '#library-sections').replace('Open the current slide library', 'Browse library sections')
+svg='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>'
+def header(current):
+ links=''.join(f'<a href="{url}"'+(' aria-current="page"' if current==url else '')+f'>{label}</a>' for url,label in NAV)
+ return f'''<a href="#main-content" class="skip">Skip to main content</a><header><div class="brandbar"><div class="wrap brandrow"><a class="brand" href="index.html"><img src="images/skao-logo-white.png" width="100" alt="SKA Observatory"><span class="brand-title">Creative <strong>Hub</strong></span></a><div class="brandtools"><span class="staff-label">Resources for staff</span><button id="motionToggle" class="motion-toggle" aria-label="Pause header animation" aria-pressed="false" title="Pause header animation" hidden><span aria-hidden="true">Ⅱ</span></button><button id="themeToggle" class="icon-button" aria-label="Toggle dark mode" aria-pressed="false"><span class="theme-moon">{svg}</span><span class="theme-sun" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></span></button></div></div></div><div class="wrap navrow"><button id="menuButton" class="mobile-menu" aria-expanded="false" aria-controls="mainNav">Menu</button><nav id="mainNav" class="navlinks" aria-label="Main navigation">{links}</nav><button class="search-trigger" data-search>Search the Hub <kbd>⌘ / Ctrl K</kbd></button></div></header>'''
+def footer():return '''<footer class="footer"><div class="wrap footer-inner"><div class="footer-identity"><strong>Creative Hub</strong><span>SKA Observatory</span></div><nav aria-label="Footer support">'''+a('help.html','Help with the Hub')+a(JIRA,'Report a problem')+a(CANTO,'Canto library')+'''</nav></div></footer><dialog id="searchDialog" aria-labelledby="searchTitle"><div class="dialog-title"><h2 id="searchTitle">Search the Hub</h2><button id="closeSearch" class="close-button" aria-label="Close search">×</button></div><p class="search-scope">Searches Hub pages and guidance. Photos and video are in <a href="'''+CANTO+'''">Canto ↗</a>.</p><form id="searchForm" role="search"><label class="field">What do you need?<input id="searchInput" type="search" maxlength="120" autocomplete="off" placeholder="Try presentation, logo or request"></label></form><p id="searchStatus" role="status" class="status">Type at least two characters.</p><div id="searchResults" class="search-results"></div><div class="search-fallback"><a href="resources.html">Browse templates and assets →</a><a href="request.html">Ask for help →</a></div></dialog><script src="js/theme.js" defer></script><script src="js/main.js?v=interiors-20260923" defer></script>'''
+def shell(title,body,current,home=False):
+ sidebar='<aside class="sidebar"><h2>In the Hub</h2>'+''.join(a(u,t) for u,t in [('resources.html','Templates and assets'),('presentations.html','Presentations'),('brand.html','Brand guidance'),('events.html','Event materials'),('request.html','Request help'),('contribute.html','Share material'),('help.html','Help')])+'<nav id="toc" class="toc" aria-label="On this page"></nav></aside>'
+ main=body if home else '<div class="breadcrumbs">'+a('index.html','Creative Hub')+' / '+html.escape(title)+'</div><div class="page-head"><p class="eyebrow">'+html.escape(INTERIOR_META.get(current,{}).get('group','Creative Hub'))+'</p><h1>'+html.escape(title)+'</h1></div><div class="page-grid">'+sidebar+'<article class="content-body">'+body+'</article></div>'
+ return '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>'+html.escape(title)+' | SKAO Creative Hub</title><link rel="stylesheet" href="css/style.css?v=interiors-20260923"><script src="js/boot.js"></script></head><body data-mode="preview">'+header(current)+'<div class="wrap preview-note">Design preview · Guidance is proposed; library links open the current staff services.</div><main id="main-content" class="wrap" tabindex="-1">'+main+'</main>'+footer()+'</body></html>'
+for name,(title,body) in PAGES.items():
+ (D/name).write_text(shell(title,body,name,name=='index.html'))
+ (R/'content'/name.replace('.html','.html')).write_text(body)
+for folder in ['css','js','images','fonts']:shutil.copytree(R/folder,D/folder,dirs_exist_ok=True)
+index=[{'title':t,'href':name,'excerpt':{'request.html':'Prepare a brief and submit a creative request.','contribute.html':'Share slides, photos, video or corrections for review.'}.get(name,t),'keywords':body.replace('<',' <')} for name,(t,body) in PAGES.items()]
+(D/'search-index.json').write_text(json.dumps(index))
+# Production uses this same visual shell. Direct task panels are rendered only on home.
+prod=shell('$stringEscapeUtils.escapeHtml($page.title)','$page.content','',False)
+prod=prod.replace('data-mode="preview"','data-mode="confluence" data-context="$stringEscapeUtils.escapeHtml($contextPath)"')
+prod=prod.replace('<div class="wrap preview-note">Design preview · Guidance is proposed; library links open the current staff services.</div>','')
+# Replace article and homepage based on immutable ID, and use actual page-tree context.
+start=prod.index('<main id="main-content"');end=prod.index('</main>',start)+7
+main='''<main id="main-content" class="wrap" tabindex="-1">
+#if($page.id == $pages.home.id)
+'''+home+'''
+#else
+<div class="breadcrumbs"><a href="$pages.home.absoluteLink">Creative Hub</a>
+#foreach($ancestor in $page.ancestors)
+#if($ancestor.id != $pages.home.id) / <a href="$ancestor.absoluteLink">$stringEscapeUtils.escapeHtml($ancestor.title)</a>#end
+#end
+ / $stringEscapeUtils.escapeHtml($page.title)</div>
+<div class="page-head"><p class="eyebrow">$displayGroup</p><h1>$stringEscapeUtils.escapeHtml($page.title)</h1></div>
+<div class="page-grid"><aside class="sidebar"><h2>In the Hub</h2>
+<a href="resources.html">Templates and assets</a><a href="presentations.html">Presentations</a><a href="brand.html">Brand guidance</a><a href="events.html">Event materials</a><a href="request.html">Request help</a><a href="contribute.html">Share material</a><a href="help.html">Help</a>
+<nav id="toc" class="toc" aria-label="On this page"></nav></aside><article class="content-body">
+'''
+for i,(id,title,filename,group) in enumerate(ROUTES):
+ main+=('#if' if i==0 else '#elseif')+f'($page.id.toString() == "{id}")\n'+PAGES[filename][1]+'\n'
+main+='''#else
+$page.content
+#if($page.children.size() > 0)<section class="section" id="library-sections"><h2>Explore this section</h2><ul class="list">#foreach($child in $page.children)<li><a href="$child.absoluteLink">$stringEscapeUtils.escapeHtml($child.title)</a></li>#end</ul></section>#end
+#end
+</article></div>
+#end
+</main>'''
+prod=prod[:start]+main+prod[end:]
+PAGE_TITLES={'index.html':'SKAO Creative Hub Home','resources.html':'Templates & Assets','presentations.html':'Slide Decks & Presentations','brand.html':'Brand Guidelines','request.html':'Submitting a Request','contribute.html':'How to Submit Your Deck','events.html':'Events Support','help.html':'Tools & Resources'}
+PAGE_TITLES.update({filename:title for id,title,filename,group in ROUTES})
+for local,title in PAGE_TITLES.items():
+ prod=prod.replace('href="'+local+'"', "href=\"$link.page('CRH', '"+title+"')\"")
+prod=prod.replace('https://confluence.skatelescope.org/crh/document-templates-381891700.html', "$link.page('CRH', 'Document Templates')")
+for slug,title in [('Standard+SKAO+Template','Standard SKAO Template'),('About+SKAO+Master+Deck','About SKAO Master Deck'),('Science+Case+Presentations','Science Case Presentations')]:
+ prod=prod.replace('https://confluence.skatelescope.org/display/CRH/'+slug, "$link.page('CRH', '"+title+"')")
+for folder in ['css','js','images']:prod=prod.replace('"'+folder+'/','"${theme.baseUrl}/'+folder+'/')
+prod=prod.replace('<title>$stringEscapeUtils.escapeHtml($page.title) | SKAO Creative Hub</title>','<title>$stringEscapeUtils.escapeHtml($page.title) | SKAO Creative Hub</title>')
+prod=prod.replace('<link rel="stylesheet"', '$webPanels\n$page.resources.meta\n$page.resources.css\n$page.resources.js\n<link rel="stylesheet"',1)
+prod=prod.replace('</footer>','<div class="wrap footer-platform">$attributionLine</div></footer>')
+display_titles={'381891696':'Templates and assets','381891810':'Share material','381891794':'Prepare a presentation','381891661':'Request creative help'}
+display_titles.update({id:PAGES[filename][0] for id,title,filename,group in ROUTES})
+setup="#set($displayTitle = $page.title)\n#set($displayGroup = \"Creative Hub\")\n"
+for id,title,filename,group in ROUTES: setup+=f'#if($page.id.toString() == \"{id}\")#set($displayGroup = \"{group}\")#end\n'
+for page_id,title in display_titles.items(): setup+=f'#if($page.id.toString() == "{page_id}")#set($displayTitle = "{title}")#end\n'
+prod=setup+prod.replace('$stringEscapeUtils.escapeHtml($page.title)', '$stringEscapeUtils.escapeHtml($displayTitle)')
+routes='''<div id="hubRoutes" hidden>
+#macro(hubRoute $node)
+<a data-page-id="$node.id" href="$node.absoluteLink">$stringEscapeUtils.escapeHtml($node.title)</a>
+#foreach($child in $node.children)#hubRoute($child)#end
+#end
+#hubRoute($pages.home)
+</div>'''
+prod=prod.replace('</body>',routes+'</body>')
+(R/'page.vm').write_text(prod)
+for id,title,filename,group in ROUTES: LIVE_LINKS[filename]='https://confluence.skatelescope.org/pages/viewpage.action?pageId='+id
+# Copy the exact production article fragments for controlled import into Confluence.
+# Each route file is plain HTML for editors, not an automated publication script.
+for name,(title,body) in PAGES.items():
+ if name=='index.html':continue
+ for local,live in LIVE_LINKS.items():body=body.replace('href="'+local+'"','href="'+live+'"')
+ (R/'content'/name.replace('.html','-confluence.html')).write_text(body)
+(R/'evidence/interior-route-map.json').write_text(json.dumps({name:{**meta,'display_title':PAGES[name][0]} for name,meta in INTERIOR_META.items()},indent=2))
+print('Built',len(PAGES),'preview pages and production page.vm')

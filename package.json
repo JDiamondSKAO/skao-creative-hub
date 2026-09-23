@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "node scripts/test.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "29.1.1",
+    "velocityjs": "2.1.7"
+  }
+}

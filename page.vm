@@ -1,932 +1,272 @@
-##
-## SKAO Creative Hub — Scroll Viewport Page Template
-## Apache Velocity 1.6 for Confluence Data Centre 8.5.26
-##
-## This template defines the complete HTML structure and layout for the Creative Hub portal.
-## Adapted from the Science Operations Portal theme.
-## Uses crh- class prefix throughout to avoid conflicts with Confluence AUI.
-##
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="robots" content="index,follow">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="generator" content="Created with Scroll Viewport - K15t">
-
-    ## Context variables for JavaScript
-    <script>
-        var contextPath = '$contextPath';
-        var pageId = '$page.id';
-        #if($page.space && $page.space.key)
-            var spaceKey = '$page.space.key';
-        #else
-            var spaceKey = 'CRH';
-        #end
-    </script>
-
-    ## Resolve viewport root (home) page by walking up the hierarchy
-    #set($homePage = $page)
-    #if($homePage.parent)#set($homePage = $homePage.parent)#end
-    #if($homePage.parent)#set($homePage = $homePage.parent)#end
-    #if($homePage.parent)#set($homePage = $homePage.parent)#end
-    #if($homePage.parent)#set($homePage = $homePage.parent)#end
-    #set($homeLink = $homePage.absoluteLink)
-
-    ## Confluence panel and resource includes
-    $webPanels
-    $page.resources.meta
-    $page.resources.js
-    $page.resources.css
-    $page.resources.requireForContext('viewcontent')
-    $page.resources.require('com.atlassian.confluence.plugins.confluence-inline-tasks:inline-tasks-styles')
-
-    ## Page title and OpenGraph / Twitter meta
-    <title>$page.title — SKAO Creative Hub</title>
-    #if($isHome)
-    <meta name="description" content="The central hub for SKAO creative production — templates, brand guidelines, assets, slide decks, and creative resources.">
-    #else
-    <meta name="description" content="$page.title — SKAO Creative Hub resource page.">
-    #end
-    <meta property="og:title" content="$page.title — SKAO Creative Hub" />
-    #if($isHome)
-    <meta property="og:description" content="The central hub for SKAO creative production — templates, brand guidelines, assets, slide decks, and creative resources." />
-    #else
-    <meta property="og:description" content="$page.title — find this resource on the SKAO Creative Hub." />
-    #end
-    <meta property="og:image" content="${theme.baseUrl}/images/og-image.jpg" />
-    <meta property="og:url" content="$page.absoluteLink" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SKAO Creative Hub" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="$page.title — SKAO Creative Hub" />
-    <meta name="twitter:image" content="${theme.baseUrl}/images/og-image.jpg" />
-    <link rel="canonical" href="$page.absoluteLink" />
-
-    ## Font preconnect
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    ## Theme stylesheets
-    <link rel="stylesheet" href="${theme.baseUrl}/css/style.css">
-    <link rel="stylesheet" href="${theme.baseUrl}/css/eggs.css">
-
-    ## Matter.js for interactive 404 page — only load when needed
-    #set($checkTitle = $page.title.toLowerCase().trim())
-    #if($checkTitle == "not found" || $checkTitle == "page not found" || $checkTitle == "404")
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js" defer></script>
-    #end
-
-    ## Prevent flash of unstyled content (FOUC) — theme detection
-    <script>
-        (function(){
-            try {
-                var stored = localStorage.getItem('crh-theme');
-                if (stored === 'dark') {
-                    document.documentElement.classList.add('dark');
-                } else if (!stored && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add('dark');
-                }
-            } catch(e) {}
-        })();
-    </script>
-</head>
-
-## =====================================================
-## BODY — Detect Home Page
-## =====================================================
-#set($isHome = ($page.title == $homePage.title))
-<body#if($isHome) class="crh-home"#end>
-
-## =====================================================
-## SKIP TO CONTENT — WCAG COMPLIANCE
-## =====================================================
-<a href="#main-content" class="skip-to-content">Skip to main content</a>
-<div class="crh-progress-bar" id="crhProgressBar" role="progressbar" aria-hidden="true"></div>
-
-## =====================================================
-## SEARCH MODAL OVERLAY
-## =====================================================
-<div class="crh-search-modal" id="searchModal" role="dialog" aria-modal="true" aria-labelledby="searchModalTitle" style="display:none;">
-    <div class="crh-search-modal-backdrop" id="searchBackdrop"></div>
-    <div class="crh-search-modal-dialog">
-        <div class="crh-search-modal-header">
-            <h2 id="searchModalTitle" class="crh-search-modal-title">Search the Creative Hub</h2>
-            <button class="crh-search-modal-close" id="closeSearchModal" aria-label="Close search">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <form class="crh-search-form" id="searchForm" role="search">
-            <div class="crh-search-input-wrapper">
-                <svg class="crh-search-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input
-                    type="text"
-                    id="searchInput"
-                    class="crh-search-input"
-                    placeholder="Search templates, guidelines, brand assets..."
-                    autocomplete="off"
-                    aria-label="Search the Creative Hub">
-            </div>
-        </form>
-        <div class="crh-search-results" id="searchResults">
-            <div class="crh-search-empty">
-                <p>Start typing to search</p>
-            </div>
-        </div>
-        <div class="crh-search-modal-footer">
-            <div class="crh-search-hints">
-                <span class="crh-search-hint"><kbd>↵</kbd> Open</span>
-                <span class="crh-search-hint"><kbd>↑↓</kbd> Navigate</span>
-                <span class="crh-search-hint"><kbd>Esc</kbd> Close</span>
-                <span class="crh-search-hint"><kbd>?</kbd> Shortcuts</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-## =====================================================
-## KEYBOARD SHORTCUTS MODAL
-## =====================================================
-<div class="crh-kbd-modal" id="kbdModal" role="dialog" aria-modal="true" aria-labelledby="kbdModalTitle" style="display:none;">
-    <div class="crh-kbd-backdrop" id="kbdBackdrop"></div>
-    <div class="crh-kbd-dialog">
-        <div class="crh-kbd-header">
-            <h2 id="kbdModalTitle" class="crh-kbd-title">Keyboard Shortcuts</h2>
-            <button class="crh-kbd-close" id="closeKbdModal" aria-label="Close shortcuts">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <div class="crh-kbd-body">
-            <div class="crh-kbd-group">
-                <h3 class="crh-kbd-group-title">Navigation</h3>
-                <ul class="crh-kbd-list">
-                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Open search</span><span class="crh-kbd-keys"><kbd>Ctrl</kbd><kbd>K</kbd></span></li>
-                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Previous page</span><span class="crh-kbd-keys"><kbd>←</kbd></span></li>
-                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Next page</span><span class="crh-kbd-keys"><kbd>→</kbd></span></li>
-                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Back to top</span><span class="crh-kbd-keys"><kbd>T</kbd></span></li>
-                </ul>
-            </div>
-            <div class="crh-kbd-group">
-                <h3 class="crh-kbd-group-title">Interface</h3>
-                <ul class="crh-kbd-list">
-                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Toggle dark mode</span><span class="crh-kbd-keys"><kbd>D</kbd></span></li>
-                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Show shortcuts</span><span class="crh-kbd-keys"><kbd>?</kbd></span></li>
-                    <li class="crh-kbd-item"><span class="crh-kbd-desc">Close / dismiss</span><span class="crh-kbd-keys"><kbd>Esc</kbd></span></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-## =====================================================
-## HEADER — Two rows: Brand bar + Navigation strip
-## =====================================================
-<header class="crh-header">
-    <div class="crh-header-bg"></div>
-    <div class="crh-header-overlay"></div>
-
-    ## ROW 1 — Brand bar
-    <div class="crh-header-bar">
-        <div class="crh-header-inner">
-            <a href="$homeLink" class="crh-brand-link" aria-label="SKAO Creative Production Hub Home">
-                <img src="${theme.baseUrl}/images/skao-logo-white.png" alt="SKAO Logo" class="crh-logo-img">
-                <span class="crh-site-title">Creative Hub</span>
-            </a>
-            <div class="crh-header-actions">
-                <button class="crh-theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-                    <svg class="crh-theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                    </svg>
-                    <svg class="crh-theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"/>
-                        <line x1="12" y1="1" x2="12" y2="3"/>
-                        <line x1="12" y1="21" x2="12" y2="23"/>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                        <line x1="1" y1="12" x2="3" y2="12"/>
-                        <line x1="21" y1="12" x2="23" y2="12"/>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                    </svg>
-                </button>
-                <button class="crh-mobile-search-btn" id="openSearchModalMobile" aria-label="Search" title="Search">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                </button>
-                <button class="crh-mobile-menu-btn" id="mobileMenuBtn" aria-label="Open navigation menu" title="Open menu">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <line x1="4" y1="6" x2="20" y2="6"/>
-                        <line x1="4" y1="12" x2="20" y2="12"/>
-                        <line x1="4" y1="18" x2="20" y2="18"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    ## ROW 2 — Navigation strip
-    ## Show first 6 child pages inline, overflow goes into "More" dropdown
-    #set($rootChildren = $homePage.children)
-    #set($maxVisible = 6)
-    ## Pre-compute current section for nav active state
-    #set($currentSection = false)
-    #foreach($sec in $rootChildren)
-        #if($page.title == $sec.title || ($page.parent && $page.parent.title == $sec.title) || ($page.parent && $page.parent.parent && $page.parent.parent.title == $sec.title) || ($page.parent && $page.parent.parent && $page.parent.parent.parent && $page.parent.parent.parent.title == $sec.title))
-            #set($currentSection = $sec)
-        #end
-    #end
-    <nav class="crh-nav-strip" id="headerNav" aria-label="Main navigation">
-        <div class="crh-nav-strip-inner">
-            <ul class="crh-nav-list">
-                <li><a href="$homeLink" class="crh-nav-link #if($isHome)crh-nav-active#end">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    Home
-                </a></li>
-                #if($rootChildren && $rootChildren.size() > 0)
-                    #set($navIndex = 0)
-                    #foreach($navItem in $rootChildren)
-                        #if($navIndex < $maxVisible)
-                            <li><a href="$navItem.absoluteLink" class="crh-nav-link #if($page.title == $navItem.title || ($currentSection && $currentSection.title == $navItem.title))crh-nav-active#end" data-lastmod="$navItem.lastModificationDate">$navItem.title</a></li>
-                        #end
-                        #set($navIndex = $navIndex + 1)
-                    #end
-                    ## "More" dropdown if overflow exists
-                    #if($rootChildren.size() > $maxVisible)
-                        <li class="crh-nav-more" id="navMore">
-                            <button class="crh-nav-more-btn" id="navMoreBtn" aria-expanded="false" aria-haspopup="true">
-                                More
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                            </button>
-                            <div class="crh-nav-more-dropdown" id="navMoreDropdown" role="menu">
-                                #set($navIndex2 = 0)
-                                #foreach($navItem in $rootChildren)
-                                    #if($navIndex2 >= $maxVisible)
-                                        <a href="$navItem.absoluteLink" class="crh-nav-link #if($page.title == $navItem.title || ($currentSection && $currentSection.title == $navItem.title))crh-nav-active#end" role="menuitem">$navItem.title</a>
-                                    #end
-                                    #set($navIndex2 = $navIndex2 + 1)
-                                #end
-                            </div>
-                        </li>
-                    #end
-                #end
-            </ul>
-        </div>
-    </nav>
-</header>
-
-## =====================================================
-## 404 DETECTION — must come BEFORE homepage check.
-## The "Not Found" page has no parent, so $homePage resolves
-## to itself and $isHome would be true. Check title first.
-## =====================================================
-#set($pageTitle404 = $page.title.toLowerCase().trim())
-#set($is404 = false)
-#if($pageTitle404 == "not found" || $pageTitle404 == "page not found" || $pageTitle404 == "404")
-    #set($is404 = true)
-#end
-
-#if($is404)
-## =====================================================
-## 404 ERROR PAGE — Interactive physics-based
-## Matter.js loaded in <head> only for 404 pages
-## =====================================================
-    <div class="nf-container" id="notFoundContainer">
-        <canvas class="nf-canvas" id="nfCanvas"></canvas>
-        <div class="nf-content">
-            <h1 class="nf-title">404</h1>
-            <p class="nf-subtitle">Page Not Found</p>
-            <p class="nf-text">The page you're looking for has drifted into the creative void.</p>
-            <div class="nf-actions">
-                <a href="$homeLink" class="nf-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    Return to Hub
-                </a>
-                <a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener" class="nf-btn nf-btn-outline">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    Report an Issue
-                </a>
-            </div>
-        </div>
-    </div>
-
-#elseif($isHome)
-## =====================================================
-## HOME PAGE CONTENT
-## =====================================================
-
-    ## ANNOUNCEMENT BANNER
-    <div class="crh-announce-bar" id="announcementBanner">
-        <div class="crh-announce-inner">
-            <span class="crh-announce-text">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:middle;">
-                    <path d="M12 2L15.09 8.26H22L17.55 12.5L19.64 18.76L12 14.5L4.36 18.76L6.45 12.5L2 8.26H8.91L12 2Z"/>
-                </svg>
-                New Brand Guidelines 2026 are now available — <a href="#" style="text-decoration:underline;color:inherit;">View updates</a>
-            </span>
-            <button class="crh-announce-close" id="announcementClose" aria-label="Dismiss announcement">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    ## HERO SECTION — Two-column layout
-    <section class="crh-hero">
-        <div class="crh-hero-inner">
-            <div class="crh-hero-grid">
-                ## LEFT COLUMN
-                <div class="crh-hero-left">
-                    <h1 class="crh-hero-title">Creative Hub</h1>
-                    <p class="crh-hero-subtitle">Your central resource for brand guidelines, templates, and creative assets</p>
-                    <div class="crh-hero-search" id="heroSearchTrigger">
-                        <svg class="crh-hero-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"/>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        <span class="crh-hero-search-placeholder">Search templates, guidelines, assets...</span>
-                        <kbd class="crh-hero-search-kbd">Ctrl+K</kbd>
-                    </div>
-                </div>
-
-                ## RIGHT COLUMN — Support Card
-                <div class="crh-hero-right">
-                    <div class="crh-support-card">
-                        <h3 class="crh-support-card-title">Need Creative Support?</h3>
-                        <p class="crh-support-card-text">Submit a request to our creative team for custom design work and consultations</p>
-                        <a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener" class="crh-support-card-btn">Submit Creative Request →</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    ## Main Content Area
-    <main id="main-content" class="crh-home-main">
-        <div class="crh-home-inner">
-
-            ## HOME PAGE BODY CONTENT
-            ## Skipped on home — the homepage layout is fully defined by this template.
-            ## Any Confluence page body content (macros, text) would appear as raw unstyled
-            ## content and break the design. Edit the template to change homepage sections.
-
-            ## BENTO ROW \u2014 Essentials (left) + Featured Templates (right)
-            ## Essentials = pages labelled `essential` (compact stacked list)
-            ## Featured Templates = pages labelled `featured-template` (media-object cards)
-            <div class="crh-bento-row">
-                <div class="crh-bento-col">
-                    <section class="crh-home-section crh-popular-downloads">
-                        <div class="crh-home-section-header">
-                            <h2>
-                                <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15 8.5L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8.5L12 2z"/></svg>
-                                Essentials
-                            </h2>
-                        </div>
-                        <div class="crh-popular-list" id="crhPopularList" data-space="$page.space.key" data-label="essential" data-limit="5">
-                            <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
-                            <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
-                            <a class="crh-popular-item crh-popular-skeleton" href="#"><div class="crh-popular-icon"></div><div class="crh-popular-meta"><span class="crh-popular-title"></span><span class="crh-popular-detail"></span></div></a>
-                        </div>
-                    </section>
-                </div>
-                <div class="crh-bento-col">
-                    <section class="crh-home-section crh-featured-templates">
-                        <div class="crh-home-section-header">
-                            <h2>
-                                <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                                Featured Templates
-                            </h2>
-                            #set($templatesLink = $homeLink)
-                            #foreach($tp in $homePage.children)
-                                #if($tp.title.toLowerCase().contains("template"))
-                                    #set($templatesLink = $tp.absoluteLink)
-                                #end
-                            #end
-                            <a href="$templatesLink" class="crh-home-section-link">Browse all &rarr;</a>
-                        </div>
-                        <div class="crh-template-grid" id="crhTemplateGrid" data-space="$page.space.key" data-label="featured-template" data-limit="3">
-                            <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
-                            <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
-                            <article class="crh-template-card crh-template-skeleton"><div class="crh-template-thumb"></div><div class="crh-template-body"><span class="crh-template-title"></span><span class="crh-template-desc"></span></div></article>
-                        </div>
-                    </section>
-                </div>
-            </div>
-
-            ## WHAT'S NEW \u2014 tabbed activity panel.
-            ## Two tabs: All updates (any page in space) / Guidelines only (pages labelled brand-guideline).
-            ## Replaces the old Recent Updates card grid and Recently Updated Guidelines list.
-            #set($brandLink = $homeLink)
-            #foreach($bg in $homePage.children)
-                #if($bg.title.toLowerCase().contains("brand"))
-                    #set($brandLink = $bg.absoluteLink)
-                #end
-            #end
-            #set($whatsNewLink = $homeLink)
-            #foreach($wn in $homePage.children)
-                #if($wn.title.toLowerCase().contains("what"))
-                    #set($whatsNewLink = $wn.absoluteLink)
-                #end
-            #end
-            <section class="crh-home-section crh-activity-panel" id="crhActivity"
-                     data-space="$page.space.key"
-                     data-home-title="$homePage.title"
-                     data-all-link="$whatsNewLink"
-                     data-guidelines-link="$brandLink">
-                <div class="crh-activity-header">
-                    <h2>
-                        <svg class="crh-home-section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        What&rsquo;s New
-                    </h2>
-                    <div class="crh-activity-tabs" role="tablist" aria-label="Activity filter">
-                        <button class="crh-activity-tab crh-activity-tab-active" role="tab" aria-selected="true" data-scope="all">All updates</button>
-                        <button class="crh-activity-tab" role="tab" aria-selected="false" data-scope="guidelines">Guidelines only</button>
-                    </div>
-                </div>
-                <ol class="crh-activity-content" id="crhActivityContent" role="tabpanel">
-                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
-                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
-                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
-                    <li><div class="crh-activity-item crh-activity-skeleton"><span class="crh-activity-dot"></span><div class="crh-activity-body"><span class="crh-activity-title"></span><span class="crh-activity-section"></span></div><span class="crh-activity-date"></span></div></li>
-                </ol>
-                <div class="crh-activity-footer">
-                    <a href="$whatsNewLink" id="crhActivityFooterLink">View all updates &rarr;</a>
-                </div>
-            </section>
-
-            ## RESOURCE CATEGORIES SECTION
-            <section class="crh-categories" id="browse">
-                <div class="crh-categories-header">
-                    <h2 class="crh-categories-title">Resource Categories</h2>
-                    <p class="crh-categories-subtitle">Browse our comprehensive library of brand resources and creative assets</p>
-                </div>
-
-                <div class="crh-cat-grid">
-                    #set($rootChildren = $homePage.children)
-                    #if($rootChildren && $rootChildren.size() > 0)
-                        #foreach($child in $rootChildren)
-                            <a href="$child.absoluteLink" class="crh-cat-card crh-animate-in">
-                                ## Dynamic icon assignment based on page title keywords
-                                ## Structured for 6 core sections:
-                                ## 1. What's New  2. Brand Guidelines  3. Templates & Assets
-                                ## 4. How To Work With Us  5. Events Support  6. Tools & Resources
-                                #set($childTitleLower = $child.title.toLowerCase())
-                                #if($childTitleLower.contains("what's new") || $childTitleLower.contains("update") || $childTitleLower.contains("news"))
-                                    <div class="crh-cat-card-icon crh-cat-icon-new">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                                        </svg>
-                                    </div>
-                                #elseif($childTitleLower.contains("brand"))
-                                    <div class="crh-cat-card-icon crh-cat-icon-brand">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <circle cx="8" cy="8" r="2.5" fill="currentColor" opacity="0.7"/>
-                                            <circle cx="16" cy="8" r="2.5" fill="currentColor" opacity="0.9"/>
-                                            <circle cx="8" cy="16" r="2.5" fill="currentColor" opacity="0.5"/>
-                                            <circle cx="16" cy="16" r="2.5" fill="currentColor" opacity="0.6"/>
-                                        </svg>
-                                    </div>
-                                #elseif($childTitleLower.contains("template") || $childTitleLower.contains("asset") || $childTitleLower.contains("slide") || $childTitleLower.contains("deck") || $childTitleLower.contains("photo") || $childTitleLower.contains("media"))
-                                    <div class="crh-cat-card-icon crh-cat-icon-templates">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <rect x="3" y="3" width="7" height="7" rx="1"/>
-                                            <rect x="14" y="3" width="7" height="7" rx="1"/>
-                                            <rect x="3" y="14" width="7" height="7" rx="1"/>
-                                            <rect x="14" y="14" width="7" height="7" rx="1"/>
-                                        </svg>
-                                    </div>
-                                #elseif($childTitleLower.contains("how to") || $childTitleLower.contains("work with") || $childTitleLower.contains("request"))
-                                    <div class="crh-cat-card-icon crh-cat-icon-howto">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                                            <line x1="12" y1="17" x2="12.01" y2="17"/>
-                                        </svg>
-                                    </div>
-                                #elseif($childTitleLower.contains("event"))
-                                    <div class="crh-cat-card-icon crh-cat-icon-events">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                                            <line x1="16" y1="2" x2="16" y2="6"/>
-                                            <line x1="8" y1="2" x2="8" y2="6"/>
-                                            <line x1="3" y1="10" x2="21" y2="10"/>
-                                        </svg>
-                                    </div>
-                                #elseif($childTitleLower.contains("tool") || $childTitleLower.contains("resource"))
-                                    <div class="crh-cat-card-icon crh-cat-icon-tools">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                                        </svg>
-                                    </div>
-                                #else
-                                    <div class="crh-cat-card-icon crh-cat-icon-default">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
-                                            <polyline points="13 2 13 9 20 9"/>
-                                        </svg>
-                                    </div>
-                                #end
-                                <h3 class="crh-cat-card-title">$child.title</h3>
-                                ## Preview of child pages for description
-                                #set($sectionChildren = $child.children)
-                                #if($sectionChildren && $sectionChildren.size() > 0)
-                                    <p class="crh-cat-card-desc">
-                                        #set($descCount = 0)
-                                        #foreach($sc in $sectionChildren)
-                                            #if($descCount < 3)
-                                                #if($descCount > 0), #end$sc.title
-                                                #set($descCount = $descCount + 1)
-                                            #end
-                                        #end
-                                        #if($sectionChildren.size() > 3), and more#end
-                                    </p>
-                                    <div class="crh-cat-card-footer">
-                                        <span class="crh-cat-card-count">$sectionChildren.size() resources</span>
-                                        <span class="crh-cat-card-link">View →</span>
-                                    </div>
-                                #end
-                            </a>
-                        #end
-                    #end
-                </div>
-            </section>
-
-            ## Creative Updates Strip
-            <section class="crh-newsletter-strip">
-                <div class="crh-newsletter-inner">
-                    <div class="crh-newsletter-content">
-                        <div>
-                            <h3>Stay in the Loop</h3>
-                            <p>Get the latest creative production updates, new templates, and asset releases via the monthly Pulse.</p>
-                        </div>
-                        <a href="#" class="crh-btn-secondary">View Latest Pulse</a>
-                    </div>
-                </div>
-            </section>
-
-        </div>
-    </main>
-
+#set($displayTitle = $page.title)
+#set($displayGroup = "Creative Hub")
+#if($page.id.toString() == "381890661")#set($displayGroup = "Support")#end
+#if($page.id.toString() == "381890664")#set($displayGroup = "Support")#end
+#if($page.id.toString() == "381891652")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891657")#set($displayGroup = "Support")#end
+#if($page.id.toString() == "381891673")#set($displayGroup = "Guidance")#end
+#if($page.id.toString() == "381891678")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891681")#set($displayGroup = "Guidance")#end
+#if($page.id.toString() == "381891685")#set($displayGroup = "Guidance")#end
+#if($page.id.toString() == "381891661")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891666")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891669")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891606")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891610")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891614")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891619")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891623")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891626")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891631")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891696")#set($displayGroup = "Resources")#end
+#if($page.id.toString() == "381891700")#set($displayGroup = "Resources")#end
+#if($page.id.toString() == "381891703")#set($displayGroup = "Documents")#end
+#if($page.id.toString() == "381891706")#set($displayGroup = "Documents")#end
+#if($page.id.toString() == "381891709")#set($displayGroup = "Documents")#end
+#if($page.id.toString() == "381891712")#set($displayGroup = "Documents")#end
+#if($page.id.toString() == "381891715")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891718")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891721")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891724")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891751")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891756")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891776")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891782")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891788")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891794")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891798")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891805")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891810")#set($displayGroup = "Sharing")#end
+#if($page.id.toString() == "381891817")#set($displayGroup = "Resources")#end
+#if($page.id.toString() == "381891821")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891829")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891832")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891838")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891843")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891851")#set($displayGroup = "Presentations")#end
+#if($page.id.toString() == "381891854")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891857")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891860")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891863")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891866")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891637")#set($displayGroup = "Events")#end
+#if($page.id.toString() == "381891643")#set($displayGroup = "Events")#end
+#if($page.id.toString() == "381891640")#set($displayGroup = "Events")#end
+#if($page.id.toString() == "381891646")#set($displayGroup = "Events")#end
+#if($page.id.toString() == "381891649")#set($displayGroup = "Events")#end
+#if($page.id.toString() == "381891870")#set($displayGroup = "Support")#end
+#if($page.id.toString() == "381891873")#set($displayGroup = "Guidance")#end
+#if($page.id.toString() == "381891876")#set($displayGroup = "Guidance")#end
+#if($page.id.toString() == "381891879")#set($displayGroup = "Media")#end
+#if($page.id.toString() == "381891882")#set($displayGroup = "Brand")#end
+#if($page.id.toString() == "381891885")#set($displayGroup = "Creative help")#end
+#if($page.id.toString() == "381891696")#set($displayTitle = "Templates and assets")#end
+#if($page.id.toString() == "381891810")#set($displayTitle = "Share material")#end
+#if($page.id.toString() == "381891794")#set($displayTitle = "Prepare a presentation")#end
+#if($page.id.toString() == "381891661")#set($displayTitle = "Request creative help")#end
+#if($page.id.toString() == "381890661")#set($displayTitle = "Hub updates")#end
+#if($page.id.toString() == "381890664")#set($displayTitle = "Updates archive")#end
+#if($page.id.toString() == "381891652")#set($displayTitle = "Work with Creative Production")#end
+#if($page.id.toString() == "381891657")#set($displayTitle = "Common questions")#end
+#if($page.id.toString() == "381891673")#set($displayTitle = "Self-service guides")#end
+#if($page.id.toString() == "381891678")#set($displayTitle = "Format a presentation")#end
+#if($page.id.toString() == "381891681")#set($displayTitle = "Prepare a poster")#end
+#if($page.id.toString() == "381891685")#set($displayTitle = "Prepare files for print")#end
+#if($page.id.toString() == "381891666")#set($displayTitle = "Agree scope and timing")#end
+#if($page.id.toString() == "381891669")#set($displayTitle = "What we can help with")#end
+#if($page.id.toString() == "381891606")#set($displayTitle = "Brand guidance")#end
+#if($page.id.toString() == "381891610")#set($displayTitle = "Apply the brand")#end
+#if($page.id.toString() == "381891614")#set($displayTitle = "Co-branding with CSIRO")#end
+#if($page.id.toString() == "381891619")#set($displayTitle = "Co-branding with SARAO")#end
+#if($page.id.toString() == "381891623")#set($displayTitle = "Colours and typography")#end
+#if($page.id.toString() == "381891626")#set($displayTitle = "Using the SKAO logo")#end
+#if($page.id.toString() == "381891631")#set($displayTitle = "SKAO Brand Book")#end
+#if($page.id.toString() == "381891700")#set($displayTitle = "Document templates")#end
+#if($page.id.toString() == "381891703")#set($displayTitle = "Email signatures")#end
+#if($page.id.toString() == "381891706")#set($displayTitle = "Letterheads")#end
+#if($page.id.toString() == "381891709")#set($displayTitle = "Memo templates")#end
+#if($page.id.toString() == "381891712")#set($displayTitle = "Report template")#end
+#if($page.id.toString() == "381891715")#set($displayTitle = "Logos and icons")#end
+#if($page.id.toString() == "381891718")#set($displayTitle = "Photos and video")#end
+#if($page.id.toString() == "381891721")#set($displayTitle = "Using the Canto library")#end
+#if($page.id.toString() == "381891724")#set($displayTitle = "Hero images")#end
+#if($page.id.toString() == "381891751")#set($displayTitle = "Event photography")#end
+#if($page.id.toString() == "381891756")#set($displayTitle = "Use and credit imagery")#end
+#if($page.id.toString() == "381891776")#set($displayTitle = "Telescope imagery")#end
+#if($page.id.toString() == "381891782")#set($displayTitle = "Plan print materials")#end
+#if($page.id.toString() == "381891788")#set($displayTitle = "Request business cards")#end
+#if($page.id.toString() == "381891798")#set($displayTitle = "About SKAO master deck")#end
+#if($page.id.toString() == "381891805")#set($displayTitle = "Construction progress slides")#end
+#if($page.id.toString() == "381891817")#set($displayTitle = "Poster templates")#end
+#if($page.id.toString() == "381891821")#set($displayTitle = "Science case presentations")#end
+#if($page.id.toString() == "381891829")#set($displayTitle = "SKA-Low overview")#end
+#if($page.id.toString() == "381891832")#set($displayTitle = "SKA-Mid overview")#end
+#if($page.id.toString() == "381891838")#set($displayTitle = "Specialised decks")#end
+#if($page.id.toString() == "381891843")#set($displayTitle = "Standard SKAO template")#end
+#if($page.id.toString() == "381891851")#set($displayTitle = "Widescreen template")#end
+#if($page.id.toString() == "381891854")#set($displayTitle = "Video and animation")#end
+#if($page.id.toString() == "381891857")#set($displayTitle = "B-roll footage")#end
+#if($page.id.toString() == "381891860")#set($displayTitle = "Event recordings")#end
+#if($page.id.toString() == "381891863")#set($displayTitle = "Explainer animations")#end
+#if($page.id.toString() == "381891866")#set($displayTitle = "Brief video or animation")#end
+#if($page.id.toString() == "381891637")#set($displayTitle = "Plan event materials")#end
+#if($page.id.toString() == "381891643")#set($displayTitle = "Event materials checklist")#end
+#if($page.id.toString() == "381891640")#set($displayTitle = "Event safety responsibilities")#end
+#if($page.id.toString() == "381891646")#set($displayTitle = "Plan merchandise")#end
+#if($page.id.toString() == "381891649")#set($displayTitle = "Plan stand graphics")#end
+#if($page.id.toString() == "381891870")#set($displayTitle = "Help with the Hub")#end
+#if($page.id.toString() == "381891873")#set($displayTitle = "Accessibility checks")#end
+#if($page.id.toString() == "381891876")#set($displayTitle = "Using AI image tools")#end
+#if($page.id.toString() == "381891879")#set($displayTitle = "Using the Canto library")#end
+#if($page.id.toString() == "381891882")#set($displayTitle = "Fonts")#end
+#if($page.id.toString() == "381891885")#set($displayTitle = "Work with print suppliers")#end
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>$stringEscapeUtils.escapeHtml($displayTitle) | SKAO Creative Hub</title>$webPanels
+$page.resources.meta
+$page.resources.css
+$page.resources.js
+<link rel="stylesheet" href="${theme.baseUrl}/css/style.css?v=interiors-20260923"><script src="${theme.baseUrl}/js/boot.js"></script></head><body data-mode="confluence" data-context="$stringEscapeUtils.escapeHtml($contextPath)"><a href="#main-content" class="skip">Skip to main content</a><header><div class="brandbar"><div class="wrap brandrow"><a class="brand" href="$link.page('CRH', 'SKAO Creative Hub Home')"><img src="${theme.baseUrl}/images/skao-logo-white.png" width="100" alt="SKA Observatory"><span class="brand-title">Creative <strong>Hub</strong></span></a><div class="brandtools"><span class="staff-label">Resources for staff</span><button id="motionToggle" class="motion-toggle" aria-label="Pause header animation" aria-pressed="false" title="Pause header animation" hidden><span aria-hidden="true">Ⅱ</span></button><button id="themeToggle" class="icon-button" aria-label="Toggle dark mode" aria-pressed="false"><span class="theme-moon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></span><span class="theme-sun" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></span></button></div></div></div><div class="wrap navrow"><button id="menuButton" class="mobile-menu" aria-expanded="false" aria-controls="mainNav">Menu</button><nav id="mainNav" class="navlinks" aria-label="Main navigation"><a href="$link.page('CRH', 'SKAO Creative Hub Home')">Home</a><a href="$link.page('CRH', 'Templates & Assets')">Templates and assets</a><a href="$link.page('CRH', 'Brand Guidelines')">Brand guidance</a><a href="$link.page('CRH', 'Submitting a Request')">Request help</a><a href="$link.page('CRH', 'How To Submit Your Deck')">Share material</a></nav><button class="search-trigger" data-search>Search the Hub <kbd>⌘ / Ctrl K</kbd></button></div></header><main id="main-content" class="wrap" tabindex="-1">
+#if($page.id == $pages.home.id)
+<div class="home-journey"><section class="welcome-band journey-band"><div class="welcome-copy"><p class="eyebrow">Your creative toolkit</p><h1>Good work starts here.</h1><p class="lead">Find a template, prepare a presentation or get creative support.</p><div class="actions"><a class="button" href="#library">Find a resource →</a></div></div><a class="presentation-feature" href="$link.page('CRH', 'Slide Decks & Presentations')"><div class="feature-art" aria-hidden="true"><span>SKA OBSERVATORY</span><strong>A shared story.<br>Your next talk.</strong></div><div class="feature-copy"><p class="eyebrow">Presenting the Observatory</p><h2>Start with the slide library</h2><p>Find templates, reusable slides and the right checks before you present.</p><span class="feature-link">Explore presentation resources →</span></div></a></section><section id="library" class="toolkit-band journey-band"><div class="band-heading"><div><p class="eyebrow">01 / Find and reuse</p><h2>What do you need?</h2></div><a href="$link.page('CRH', 'Templates & Assets')" class="text-link">All templates and assets →</a></div><div class="quick-library"><a class="quick-resource slides" href="$link.page('CRH', 'Slide Decks & Presentations')"><div class="resource-art" aria-hidden="true"><span class="mini-slide"><i>SKA Observatory</i><b>A shared story.</b><em></em></span><span class="slide-back"></span></div><div class="quick-copy"><h3>Presentation slides</h3><p>Templates and reusable decks</p><span aria-hidden="true">↗</span></div></a><a class="quick-resource document" href="$link.page('CRH', 'Document Templates')"><div class="resource-art" aria-hidden="true"><span class="mini-document"><b>SKAO</b><i></i><i></i><i></i><i></i></span></div><div class="quick-copy"><h3>Document templates</h3><p>Reports, letters and memos</p><span aria-hidden="true">↗</span></div></a><a class="quick-resource identity" href="$link.page('CRH', 'Brand Guidelines')"><div class="resource-art" aria-hidden="true"><span class="mini-brand"><b>Aa</b><i></i><em></em></span></div><div class="quick-copy"><h3>Logos and branding</h3><p>Artwork and identity guidance</p><span aria-hidden="true">↗</span></div></a><a class="quick-resource media" href="https://skao.canto.global/v/SKAOLibrary?from_main_library"><div class="resource-art" aria-hidden="true"><svg viewBox="0 0 240 140" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M30 33Q92 124 154 33Z M92 79V124 M63 125H121 M92 79L108 22 M104 26L133 42"/><circle cx="176" cy="30" r="5"/><path d="M183 30H219 M176 37V60 M152 99H220 M172 89V112"/></g></svg></div><div class="quick-copy"><h3>Photos and video</h3><p>Browse the Canto library ↗</p><span aria-hidden="true">↗</span></div></a></div></section><section class="help-band journey-band"><div><p class="eyebrow">02 / Work with us</p><h2>Need a hand?</h2><p>For new creative work or a review, tell us what you need.<br class="desktop-break"> We’ll agree the scope and timing with you.</p></div><div class="help-actions"><a class="button" href="$link.page('CRH', 'Submitting a Request')">Start a creative request <span aria-hidden="true">→</span></a><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364">Already have a brief? Open the helpdesk ↗</a></div></section></div>
 #else
-    ## =====================================================
-    ## CONTENT PAGE LAYOUT (Non-Home)
-    ## =====================================================
-    <div class="crh-layout">
-
-        ## Sidebar — contextual navigation
-        ## Shows only the current section, not the entire nav tree.
-        ## JS inserts "On This Page" TOC above this on leaf pages.
-        ##
-        ## Step 1: Find which root section the current page belongs to.
-        ## Walk up from $page.parent until we reach a direct child of $homePage.
-        #set($currentSection = false)
-        #set($rootChildren = $homePage.children)
-        #if($rootChildren && $rootChildren.size() > 0)
-            ## Is the page itself a root section?
-            #foreach($sec in $rootChildren)
-                #if($page.title == $sec.title)
-                    #set($currentSection = $sec)
-                #end
-            #end
-            ## Check parent
-            #if(!$currentSection && $page.parent)
-                #foreach($sec in $rootChildren)
-                    #if($page.parent.title == $sec.title)
-                        #set($currentSection = $sec)
-                    #end
-                #end
-            #end
-            ## Check grandparent
-            #if(!$currentSection && $page.parent && $page.parent.parent)
-                #foreach($sec in $rootChildren)
-                    #if($page.parent.parent.title == $sec.title)
-                        #set($currentSection = $sec)
-                    #end
-                #end
-            #end
-            ## Check great-grandparent
-            #if(!$currentSection && $page.parent && $page.parent.parent && $page.parent.parent.parent)
-                #foreach($sec in $rootChildren)
-                    #if($page.parent.parent.parent.title == $sec.title)
-                        #set($currentSection = $sec)
-                    #end
-                #end
-            #end
-        #end
-
-        <aside class="crh-sidebar" id="sidebarPanel">
-            <div class="crh-sidebar-inner">
-                ## JS inserts TOC ("On This Page") here on leaf pages
-
-                ## Section navigation — only show current section's pages
-                #if($currentSection)
-                    #set($sectionChildren = $currentSection.children)
-                    #set($hasChildren = ($sectionChildren && $sectionChildren.size() > 0))
-
-                    #if($hasChildren)
-                        <nav class="crh-sidebar-nav" aria-label="Section navigation">
-                            ## Section heading — links back to section root
-                            <a href="$currentSection.absoluteLink" class="crh-sidebar-section-link">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                                $currentSection.title
-                            </a>
-
-                            <ul class="crh-sidebar-tree">
-                                #foreach($child in $sectionChildren)
-                                    #set($isChildActive = ($page.title == $child.title))
-                                    #set($subChildren = $child.children)
-                                    #set($hasSubChildren = ($subChildren && $subChildren.size() > 0))
-
-                                    ## Check if current page is a grandchild of this child
-                                    #set($subChildActive = false)
-                                    #if($hasSubChildren)
-                                        #foreach($sc in $subChildren)
-                                            #if($page.title == $sc.title)
-                                                #set($subChildActive = true)
-                                            #end
-                                        #end
-                                    #end
-
-                                    <li class="crh-sidebar-item #if($isChildActive || $subChildActive)crh-sidebar-open#end">
-                                        <a href="$child.absoluteLink" class="crh-sidebar-link #if($isChildActive)crh-sidebar-active#end">$child.title</a>
-
-                                        ## Show grandchildren only if this child is active or contains the active page
-                                        #if($hasSubChildren && ($isChildActive || $subChildActive))
-                                            <ul class="crh-sidebar-grandchildren">
-                                                #foreach($sub in $subChildren)
-                                                    <li>
-                                                        <a href="$sub.absoluteLink" class="crh-sidebar-link crh-sidebar-leaf #if($page.title == $sub.title)crh-sidebar-active#end">$sub.title</a>
-                                                    </li>
-                                                #end
-                                            </ul>
-                                        #end
-                                    </li>
-                                #end
-                            </ul>
-                        </nav>
-                    #end
-                #end
-            </div>
-        </aside>
-
-        ## Mobile Sidebar Toggle
-        <button class="crh-sidebar-toggle" id="sidebarToggle" aria-label="Open navigation panel">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"/>
-            </svg>
-        </button>
-
-        ## Main Content Area
-        <main id="main-content" class="crh-main">
-            <article class="crh-content">
-
-                ## Breadcrumb Navigation
-                <nav class="crh-breadcrumbs" aria-label="Breadcrumb">
-                    ## Build ancestor chain (up to 5 levels) — start from $page.parent to avoid self-reference
-                    #set($crumbs = [])
-                    #set($walker = $page.parent)
-                    #if($walker)#set($void = $crumbs.add(0, $walker))#end
-                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
-                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
-                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
-                    #if($walker && $walker.parent)#set($walker = $walker.parent)#set($void = $crumbs.add(0, $walker))#end
-
-                    #foreach($crumb in $crumbs)
-                        <a href="$crumb.absoluteLink" class="crh-breadcrumb-link">
-                            #if($foreach.first)
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                            #end
-                            $crumb.title
-                        </a>
-                        <svg class="crh-breadcrumb-sep" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                    #end
-                    <span class="crh-breadcrumb-current">$page.title</span>
-                </nav>
-
-                ## Audience / status tag strip — driven by Confluence page labels
-                ## Recognised labels: audience-staff, audience-partner, audience-internal,
-                ##                    status-draft, status-deprecated
-                #if($page.labels && $page.labels.size() > 0)
-                    #set($hasTagStrip = false)
-                    #foreach($label in $page.labels)
-                        #set($lbl = $label.name.toLowerCase())
-                        #if($lbl.startsWith("audience-") || $lbl.startsWith("status-"))
-                            #set($hasTagStrip = true)
-                        #end
-                    #end
-                    #if($hasTagStrip)
-                        <ul class="crh-audience-strip" aria-label="Page audience and status">
-                        #foreach($label in $page.labels)
-                            #set($lbl = $label.name.toLowerCase())
-                            #if($lbl == "audience-staff")
-                                <li><span class="crh-audience-tag">For staff</span></li>
-                            #elseif($lbl == "audience-partner")
-                                <li><span class="crh-audience-tag" data-variant="partner">Partner-safe</span></li>
-                            #elseif($lbl == "audience-internal")
-                                <li><span class="crh-audience-tag" data-variant="internal">Internal only</span></li>
-                            #elseif($lbl == "status-draft")
-                                <li><span class="crh-audience-tag" data-variant="draft">Draft</span></li>
-                            #elseif($lbl == "status-deprecated")
-                                <li><span class="crh-audience-tag" data-variant="deprecated">Deprecated</span></li>
-                            #end
-                        #end
-                        </ul>
-                    #end
-                #end
-
-                ## Page Title
-                <h1 class="crh-page-title">$page.title</h1>
-
-                ## Article Meta
-                <div class="crh-article-meta">
-                    #if($page.lastModificationDate)
-                        <span class="crh-article-date" data-raw-date="$page.lastModificationDate">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            <span class="crh-article-date-text">Last updated</span>
-                        </span>
-                    #end
-                </div>
-
-                ## Determine section vs leaf page
-                #set($pageChildren = $page.children)
-                #set($isSectionPage = ($pageChildren && $pageChildren.size() > 0))
-
-                #if($isSectionPage)
-                    ## Section page: content + child page grid
-                    #if($page.content && $page.content.toString().trim().length() > 0)
-                        <div class="crh-content-body content-body">
-                            $page.content
-                        </div>
-                    #end
-                    <div class="crh-child-pages">
-                        <h2 class="crh-child-pages-heading">Pages in this section</h2>
-                        <div class="crh-child-grid">
-                            #foreach($childPage in $pageChildren)
-                                <a href="$childPage.absoluteLink" class="crh-child-card">
-                                    <div class="crh-child-card-content">
-                                        <h3 class="crh-child-card-title">$childPage.title</h3>
-                                        #if($childPage.excerpt && $childPage.excerpt.toString().trim().length() > 0)
-                                            <p class="crh-child-card-desc">$childPage.excerpt</p>
-                                        #end
-                                    </div>
-                                    <span class="crh-child-card-arrow">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                                    </span>
-                                </a>
-                            #end
-                        </div>
-                    </div>
-                #else
-                    ## Leaf page: content + feedback
-                    <div class="crh-content-body content-body">
-                        #if($page.content && $page.content.toString().trim().length() > 0)
-                            $page.content
-                        #end
-                    </div>
-
-                    ## Page Feedback Widget
-                    <div class="crh-feedback-widget" id="pageFeedback">
-                        <div class="crh-feedback-question">
-                            <span class="crh-feedback-label">Was this page helpful?</span>
-                            <div class="crh-feedback-buttons">
-                                <button class="crh-feedback-btn crh-feedback-yes" data-vote="yes" aria-label="Yes, helpful">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-                                    Yes
-                                </button>
-                                <button class="crh-feedback-btn crh-feedback-no" data-vote="no" aria-label="No, not helpful">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
-                                    No
-                                </button>
-                            </div>
-                        </div>
-                        <div class="crh-feedback-thanks" id="pfThanks" style="display:none;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <span>Thank you for your feedback!</span>
-                        </div>
-                    </div>
-                #end
-
-                ## Previous/Next Page Navigation
-                #if($page.parent && $page.parent.children && $page.parent.children.size() > 1)
-                    #set($siblings = $page.parent.children)
-                    #set($prevPage = false)
-                    #set($nextPage = false)
-                    #set($foundCurrent = false)
-                    #foreach($sib in $siblings)
-                        #if($foundCurrent && !$nextPage)
-                            #set($nextPage = $sib)
-                        #end
-                        #if($page.title == $sib.title)
-                            #set($foundCurrent = true)
-                        #end
-                        #if(!$foundCurrent)
-                            #set($prevPage = $sib)
-                        #end
-                    #end
-                    <nav class="crh-page-nav">
-                        <div class="crh-nav-prev">
-                            #if($prevPage)
-                                <a href="$prevPage.absoluteLink" class="crh-nav-button">
-                                    <span class="crh-nav-label">Previous</span>
-                                    <span class="crh-nav-title">$prevPage.title</span>
-                                </a>
-                            #end
-                        </div>
-                        <div class="crh-nav-next">
-                            #if($nextPage)
-                                <a href="$nextPage.absoluteLink" class="crh-nav-button">
-                                    <span class="crh-nav-label">Next</span>
-                                    <span class="crh-nav-title">$nextPage.title</span>
-                                </a>
-                            #end
-                        </div>
-                    </nav>
-                #end
-
-            </article>
-        </main>
-
-    </div>
-
-#end## end #if($is404) / #elseif($isHome) / #else
-
-
-## =====================================================
-## FOOTER
-## =====================================================
-<footer class="crh-footer">
-    <div class="crh-footer-inner">
-        <div class="crh-footer-columns">
-            <div class="crh-footer-column">
-                <h4>About SKAO</h4>
-                <ul>
-                    <li><a href="https://skao.int/about">About Us</a></li>
-                    <li><a href="https://skao.int/careers">Careers</a></li>
-                    <li><a href="https://skao.int/news">News</a></li>
-                    <li><a href="https://skao.int/contact">Contact</a></li>
-                </ul>
-            </div>
-
-            <div class="crh-footer-column">
-                <h4>Hub Sections</h4>
-                <ul>
-                    #set($rootChildren = $homePage.children)
-                    #if($rootChildren && $rootChildren.size() > 0)
-                        #foreach($section in $rootChildren)
-                            <li><a href="$section.absoluteLink">$section.title</a></li>
-                        #end
-                    #end
-                </ul>
-            </div>
-
-            <div class="crh-footer-column">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" target="_blank" rel="noopener">Canto DAM</a></li>
-                    <li><a href="https://fonts.google.com/noto/specimen/Noto+Sans" target="_blank" rel="noopener">Brand Fonts</a></li>
-                    <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Submit a Request</a></li>
-                </ul>
-            </div>
-
-            <div class="crh-footer-column">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" target="_blank" rel="noopener">Creative Helpdesk</a></li>
-                    <li><a href="https://jira.skatelescope.org/servicedesk/customer/portal/298" target="_blank" rel="noopener">HSSE Helpdesk</a></li>
-                    <li><a href="mailto:comms@skao.int">comms@skao.int</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="crh-footer-bottom">
-            <p class="crh-footer-copyright">&copy; 2026 SKA Observatory. Creative production resources for the Observatory.</p>
-            <button class="crh-footer-easter-egg" id="footerStar" aria-label="Secret surprise" title="⭐">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10 1.5l3 6h6.5l-5.2 4 2 6.5L10 15l-5.3 4 2-6.5L.5 7.5H7l3-6z"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-</footer>
-
-## =====================================================
-## BACK TO TOP BUTTON
-## =====================================================
-<button class="crh-back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="18 15 12 9 6 15"/>
-    </svg>
-</button>
-
-## Help button removed — was showing as unwanted FAB
-
-## =====================================================
-## JAVASCRIPT
-## =====================================================
-<script src="${theme.baseUrl}/js/main.js"></script>
-<script src="${theme.baseUrl}/js/eggs.js"></script>
-
-</body>
-</html>
+<div class="breadcrumbs"><a href="$pages.home.absoluteLink">Creative Hub</a>
+#foreach($ancestor in $page.ancestors)
+#if($ancestor.id != $pages.home.id) / <a href="$ancestor.absoluteLink">$stringEscapeUtils.escapeHtml($ancestor.title)</a>#end
+#end
+ / $stringEscapeUtils.escapeHtml($displayTitle)</div>
+<div class="page-head"><p class="eyebrow">$displayGroup</p><h1>$stringEscapeUtils.escapeHtml($displayTitle)</h1></div>
+<div class="page-grid"><aside class="sidebar"><h2>In the Hub</h2>
+<a href="$link.page('CRH', 'Templates & Assets')">Templates and assets</a><a href="$link.page('CRH', 'Slide Decks & Presentations')">Presentations</a><a href="$link.page('CRH', 'Brand Guidelines')">Brand guidance</a><a href="$link.page('CRH', 'Events Support')">Event materials</a><a href="$link.page('CRH', 'Submitting a Request')">Request help</a><a href="$link.page('CRH', 'How To Submit Your Deck')">Share material</a><a href="$link.page('CRH', 'Tools & Resources')">Help</a>
+<nav id="toc" class="toc" aria-label="On this page"></nav></aside><article class="content-body">
+#if($page.id.toString() == "381890661")
+<div class="task-intro"><div><span class="eyebrow">What has changed</span><p>Use the resource pages for current files and availability. Older announcements are not evidence that a release is ready.</p></div></div><aside class="next-step"><div><h2>Looking for the latest resource?</h2><p>Open its source page and check the file and review information.</p></div><a href="$link.page('CRH', 'Templates & Assets')" class="text-link">Browse resources</a></aside><details class="guidance-detail"><summary>Older announcements</summary><div><p>The existing announcements need review before they can be used as a current release log. <a href="$link.page('CRH', 'Archive')" class="">Open archive guidance</a>.</p></div></details>
+#elseif($page.id.toString() == "381890664")
+<div class="task-intro"><div><span class="eyebrow">Historical reference</span><p>No verified release history is presented in this review build.</p></div></div><aside class="next-step"><div><h2>Need a previous version?</h2><p>Include the resource name and the version or date you need.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Ask for an earlier release ↗</a></aside>
+#elseif($page.id.toString() == "381891652")
+<div class="task-intro"><div><span class="eyebrow">How we work</span><p>Start with an existing resource. If you need new work or a review, bring a clear brief.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Prepare a request</a></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Templates & Assets')"><span class="choice-index" aria-hidden="true">01</span><h2>Use existing material</h2><p>Templates, slides, logos and media.</p><span class="choice-go">Find a resource <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'What We Can Help With')"><span class="choice-index" aria-hidden="true">02</span><h2>Scope creative work</h2><p>Understand what to bring and what needs agreement.</p><span class="choice-go">Check the scope <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Turnaround Times')"><span class="choice-index" aria-hidden="true">03</span><h2>Plan the timing</h2><p>Agree the use date, inputs and review stages.</p><span class="choice-go">Plan the work <span aria-hidden="true">→</span></span></a></div>
+#elseif($page.id.toString() == "381891657")
+<div class="task-intro"><div><span class="eyebrow">Help and next steps</span><p>Short answers to the most common Hub questions.</p></div></div><details class="guidance-detail"><summary>Where are templates and slides?</summary><div><p>Start with <a href="$link.page('CRH', 'Templates & Assets')" class="">Templates and assets</a>. The source pages show file availability. Presentation releases belong in the Hub.</p></div></details><details class="guidance-detail"><summary>Where are photos and video?</summary><div><p>Use <a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="">the Canto library ↗</a> and check each asset’s credit and permitted use.</p></div></details><details class="guidance-detail"><summary>Can I adapt material myself?</summary><div><p>Follow the release’s usage notes and keep credits. Ask the relevant content owner about changes to facts or meaning; ask Creative Production about substantial design work.</p></div></details><details class="guidance-detail"><summary>Who approves the work?</summary><div><p>Identify the appropriate content owner and final reviewer in the brief. The approval route depends on the work and should be confirmed rather than assumed.</p></div></details><details class="guidance-detail"><summary>Can I get an urgent turnaround?</summary><div><p>Explain the use date and any flexibility. <a href="$link.page('CRH', 'Turnaround Times')" class="">Scope and timing need agreement</a>.</p></div></details><aside class="next-step"><div><h2>Still stuck?</h2><p>Include the relevant page or asset link.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Ask for help ↗</a></aside>
+#elseif($page.id.toString() == "381891673")
+<div class="task-intro"><div><span class="eyebrow">Do it with confidence</span><p>Practical checks for work you can prepare using existing resources.</p></div></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Formatting a Presentation')"><span class="choice-index" aria-hidden="true">01</span><h2>Prepare slides</h2><p>Structure, sources and accessibility.</p><span class="choice-go">Read the slide guide <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Making Your Own Poster')"><span class="choice-index" aria-hidden="true">02</span><h2>Make a poster</h2><p>Choose a layout and check the output.</p><span class="choice-go">Read the poster guide <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Preparing Files for Print')"><span class="choice-index" aria-hidden="true">03</span><h2>Prepare print files</h2><p>Get the supplier specifications right.</p><span class="choice-go">Read the print guide <span aria-hidden="true">→</span></span></a></div>
+#elseif($page.id.toString() == "381891678")
+<div class="task-intro"><div><span class="eyebrow">Self-service guide</span><p>Start with a suitable template and build the talk around your audience.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="button">Find presentation resources</a></div><section class="reading-section"><h2>Build the story</h2><ul><li>Give each slide a clear purpose and use readable, concise headings.</li><li>Use the supplied layouts and keep spacing, alignment and typography consistent.</li><li>Use imagery and charts to explain the message; retain their sources and credits.</li></ul></section><section class="reading-section"><h2>Check before presenting</h2><ul><li>Try the deck on the intended display and check that text and charts are readable from the audience’s position.</li><li>Check contrast, alternative text and reading order. Caption any video.</li><li>Check facts, dates and any adapted claims with the appropriate content owner.</li></ul></section><aside class="next-step"><div><h2>Need more than formatting?</h2><p>Bring the draft and audience brief.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="text-link">Ask for a review</a></aside>
+#elseif($page.id.toString() == "381891681")
+<div class="task-intro"><div><span class="eyebrow">Self-service guide</span><p>Confirm the organiser’s dimensions and output requirements before choosing a layout.</p></div><a href="$link.page('CRH', 'Poster Templates')" class="button">Check poster templates</a></div><section class="reading-section"><h2>Prepare the content</h2><ul><li>Decide the main message, title, authors and the information the audience needs.</li><li>Use readable headings, a clear reading order and enough space around figures.</li><li>Keep credits and sources with images and charts.</li></ul></section><section class="reading-section"><h2>Prepare the output</h2><ul><li>Confirm print size, orientation and submission format with the organiser or supplier.</li><li>Check image resolution at the intended size and proof the exported file.</li><li>Confirm colour, bleed and delivery requirements with the supplier.</li></ul></section><aside class="next-step"><div><h2>Sending it to print?</h2><p>Use the actual supplier requirements.</p></div><a href="$link.page('CRH', 'Preparing Files for Print')" class="text-link">Check print preparation</a></aside>
+#elseif($page.id.toString() == "381891685")
+<div class="task-intro"><div><span class="eyebrow">Before supplier handoff</span><p>Use the supplier’s specifications for the actual product. A single export recipe does not fit every print job.</p></div></div><section class="reading-section"><h2>Confirm the specification</h2><ol><li>Finished dimensions, trim, bleed and safe area.</li><li>Colour profile and any spot colours or special finishes.</li><li>Required PDF standard, image resolution and font handling.</li><li>Proof process, quantity, final artwork deadline and delivery details.</li></ol></section><section class="reading-section"><h2>Check the exported file</h2><ul><li>Review text, page order, dimensions and image quality.</li><li>Check fonts, colour and overprint settings as appropriate to the supplier’s workflow.</li><li>Get the required content and artwork approvals before production.</li></ul></section><aside class="next-step"><div><h2>Need production support?</h2><p>Send the specification and draft artwork, with any unresolved questions.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="text-link">Brief the print work</a></aside>
+#elseif($page.id.toString() == "381891661")
+<div class="task-intro"><div><span class="eyebrow">New work or a review</span><p>Already have a brief? Send it through the creative helpdesk with your files or source links.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button">Open creative helpdesk ↗</a></div><div class="process-strip"><span><b>1</b> Describe the need</span><span><b>2</b> Submit in Jira</span><span><b>3</b> Agree scope and timing</span></div><details class="brief-builder"><summary>Need help writing the brief?</summary><div class="builder-content"><p>Use this optional helper, then copy the result into Jira. It does not submit a request.</p><p class="form-note">Fields marked * are required. Your draft is not saved and is lost if you leave or reload.</p><form id="briefForm" hidden><div class="form-grid"><label class="field">Project *<input name="Project" required maxlength="3000" type="text"><small>What is the work called?</small></label><label class="field">Use date *<input name="Use date" required maxlength="3000" type="text"><small>When will it be used, and why then?</small></label><label class="field">Purpose and audience *<textarea name="Purpose and audience" required maxlength="3000"></textarea><small>What should this help people understand or do?</small></label><label class="field">Outputs and scope *<textarea name="Outputs and scope" required maxlength="3000"></textarea><small>What do you need? Include format, quantity and what is out of scope.</small></label><label class="field">Content and review owners<textarea name="Content and review owners"  maxlength="3000"></textarea><small>Who supplies the content and who approves the result?</small></label><label class="field">Inputs and constraints<textarea name="Inputs and constraints"  maxlength="3000"></textarea><small>Source links, budget, rights, missing information and dependencies.</small></label></div><button class="button" type="submit">Prepare my request</button></form><section id="draftPanel" hidden><h2 id="draftHeading" tabindex="-1">Your request draft</h2><p>Review the wording, copy it, then submit it in the helpdesk. A request is not booked until scope and timing are confirmed.</p><pre class="output" id="briefOutput"></pre><div class="actions"><button id="copyBrief" class="button" type="button">Copy request text</button><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Open helpdesk to submit</a></div><p id="copyStatus" class="status" role="status"></p></section></div></details><noscript><p>Use the creative helpdesk directly. The optional brief helper needs JavaScript.</p></noscript><details class="guidance-detail"><summary>What makes a useful brief?</summary><div><section class="reading-section"><h2>Include these essentials</h2><ul><li>Purpose, audience and the real use date.</li><li>Outputs, formats and what is outside the scope.</li><li>Draft content, source material and any missing inputs.</li><li>Content owner, final reviewer, budget and supplier constraints.</li></ul></section></div></details><aside class="next-step"><div><h2>A request is the start of a conversation</h2><p>The team confirms capacity, scope and delivery timing after review.</p></div><a href="$link.page('CRH', 'Turnaround Times')" class="text-link">How timing is agreed</a></aside><p class="quiet-note">Planning an event? <a href="$link.page('CRH', 'Events Support')" class="">Brief the creative materials</a>. Event logistics stay with the events team.</p>
+#elseif($page.id.toString() == "381891666")
+<div class="task-intro"><div><span class="eyebrow">Planning the work</span><p>Give the actual use date and explain what depends on it. Delivery timing is agreed after the brief and capacity are reviewed.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Send the brief</a></div><section class="reading-section"><h2>What affects the schedule</h2><ul><li>When usable content and source files will be ready.</li><li>The output, complexity and amount of adaptation required.</li><li>Who reviews the work and when they can respond.</li><li>Supplier production, delivery and other dependencies.</li></ul></section><aside class="next-step"><div><h2>An urgent request?</h2><p>State the real deadline, its reason and what can be reduced. Urgency does not automatically create a delivery commitment.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Open the helpdesk ↗</a></aside>
+#elseif($page.id.toString() == "381891669")
+<div class="task-intro"><div><span class="eyebrow">Scope and responsibilities</span><p>Creative Production helps shape and produce agreed creative materials. The brief determines the work and the capacity required.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Discuss the creative work</a></div><section class="reading-section"><h2>Examples to discuss</h2><ul><li>Design and layout for publications, presentations and graphics.</li><li>Video, animation and creative digital work.</li><li>Visual identity, templates and reusable resources.</li><li>Creative materials for events, print and displays.</li></ul></section><div class="responsibility-split"><section><h2>Bring the content</h2><p>The requester supplies the purpose, audience, draft or source material and the appropriate content reviewer.</p></section><section><h2>Agree the production</h2><p>The team confirms the outputs, responsibilities, timing and any supplier requirements.</p></section></div><aside class="next-step"><div><h2>Event logistics or editorial ownership?</h2><p>Use the responsible team’s route. A creative brief does not transfer all project responsibilities to Creative Production.</p></div><a href="$link.page('CRH', 'Events Support')" class="text-link">See event responsibilities</a></aside>
+#elseif($page.id.toString() == "381891606")
+<div class="task-intro"><div><span class="eyebrow">A consistent SKAO identity</span><p>Start from the official artwork and the Brand Book. Use these essentials as a quick reference.</p></div></div><div class="brand-specimens"><div class="colour-spec navy"><strong>Blueshift Navy</strong><code>#070068</code></div><div class="colour-spec magenta"><strong>Redshift Magenta</strong><code>#E70068</code></div><div class="type-spec"><span class="type-sample" aria-hidden="true">Aa</span><strong>Noto Sans</strong><small>Fallback: Verdana</small></div></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Logos & Icons')"><span class="choice-index" aria-hidden="true">01</span><h2>Logo artwork</h2><p>Find the supplied files and choose a suitable version.</p><span class="choice-go">Find logo files <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Colour Palette and Typography')"><span class="choice-index" aria-hidden="true">02</span><h2>Colours and type</h2><p>Digital colour values and practical typography guidance.</p><span class="choice-go">Check the essentials <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'SKAO Brand Book')"><span class="choice-index" aria-hidden="true">03</span><h2>Brand Book</h2><p>The source for detailed rules and applications.</p><span class="choice-go">Open the source page <span aria-hidden="true">→</span></span></a></div><details class="guidance-detail"><summary>Working with partner brands</summary><div><p>Use the current guidance for the specific partner and application. Do not assemble a new logo lock-up from memory.</p><a href="$link.page('CRH', 'Co-Branding CSIRO')" class="">CSIRO co-branding</a> · <a href="$link.page('CRH', 'Co-Branding SARAO')" class="">SARAO co-branding</a></div></details><aside class="next-step"><div><h2>Need a second pair of eyes?</h2><p>Include the draft, intended use and partner requirements.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Ask about the brand ↗</a></aside>
+#elseif($page.id.toString() == "381891610")
+<div class="task-intro"><div><span class="eyebrow">Practical application</span><p>Use the existing templates and artwork to keep your work recognisably SKAO.</p></div></div><section class="reading-section"><h2>A quick self-check</h2><ul><li>Logo: supplied artwork, correct variant, clear space and original proportions.</li><li>Type: Noto Sans, with Verdana as fallback.</li><li>Colour: the sourced palette and readable contrast.</li><li>Images: relevant to the message, with asset-specific credits and permissions.</li></ul></section><aside class="next-step"><div><h2>Start from existing material</h2><p>Choose a template rather than rebuilding the layout.</p></div><a href="$link.page('CRH', 'Templates & Assets')" class="text-link">Find a resource</a></aside>
+#elseif($page.id.toString() == "381891614")
+<div class="task-intro"><div><span class="eyebrow">Partner identity</span><p>Confirm the current CSIRO and SKAO guidance for this particular use before preparing a combined layout.</p></div></div><aside class="next-step"><div><h2>Need the approved arrangement?</h2><p>Send the output, audience, partner and draft layout. The source page has no linked co-branding pack.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Ask for co-branding guidance ↗</a></aside><section class="reading-section"><h2>Bring to the review</h2><ul><li>The current logo files supplied by each organisation.</li><li>The proposed placement, output size and background.</li><li>The relevant partner contact or approval route.</li></ul></section><p class="quiet-note">A standard arrangement or minimum size is not assumed here. Use the confirmed guidance for the application.</p>
+#elseif($page.id.toString() == "381891619")
+<div class="task-intro"><div><span class="eyebrow">Partner identity</span><p>Confirm the current SARAO and SKAO guidance for this particular use before preparing a combined layout.</p></div></div><aside class="next-step"><div><h2>Need the approved arrangement?</h2><p>Send the output, audience, partner and draft layout. The source page has no linked co-branding pack.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Ask for co-branding guidance ↗</a></aside><section class="reading-section"><h2>Bring to the review</h2><ul><li>The current logo files supplied by each organisation.</li><li>The proposed placement, output size and background.</li><li>The relevant partner contact or approval route.</li></ul></section><p class="quiet-note">A standard arrangement or minimum size is not assumed here. Use the confirmed guidance for the application.</p>
+#elseif($page.id.toString() == "381891623")
+<div class="task-intro"><div><span class="eyebrow">Brand essentials</span><p>Use these digital values from the retained SKAO Brand Book v2, March 2022.</p></div></div><div class="brand-specimens"><div class="colour-spec navy"><strong>Blueshift Navy</strong><code>#070068</code></div><div class="colour-spec magenta"><strong>Redshift Magenta</strong><code>#E70068</code></div><div class="type-spec"><span class="type-sample" aria-hidden="true">Aa</span><strong>Noto Sans</strong><small>Fallback: Verdana</small></div></div><section class="reading-section"><h2>Apply colour carefully</h2><ul><li>Use navy for text and links on light backgrounds. Magenta works well as an accent; check each text/background pairing.</li><li>For print, use the Brand Book and the supplier’s agreed colour specifications rather than guessing CMYK or Pantone conversions.</li><li>Use labels, symbols or patterns as well as colour to communicate meaning.</li></ul></section><aside class="next-step"><div><h2>Need Noto Sans?</h2><p>Use the official font source or your organisation’s approved installation route.</p></div><a href="$link.page('CRH', 'Font Downloads')" class="text-link">Find font guidance</a></aside>
+#elseif($page.id.toString() == "381891626")
+<div class="task-intro"><div><span class="eyebrow">Brand essentials</span><p>Use official artwork, preserve its proportions and give it space.</p></div><a href="$link.page('CRH', 'Logos & Icons')" class="button">Find logo files</a></div><section class="reading-section"><h2>Before placing the logo</h2><ul><li>Choose a supplied variant suited to the background.</li><li>Leave at least half the logo’s height clear on all sides, following the retained Brand Book.</li><li>Do not stretch, recolour, redraw or add effects to the artwork.</li><li>For detailed sizing and specialist applications, use the Brand Book.</li></ul></section><aside class="next-step"><div><h2>Partner branding?</h2><p>Check the applicable partner guidance before combining identities.</p></div><a href="$link.page('CRH', 'Brand Guidelines')" class="text-link">Return to brand guidance</a></aside>
+#elseif($page.id.toString() == "381891631")
+<div class="task-intro"><div><span class="eyebrow">Source reference</span><p>The Brand Book is the detailed source for visual identity rules.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Brand Book download needs completing</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><p class="quiet-note">The quick reference in this review build uses the retained SKAO Brand Book v2, March 2022. The source page’s older version label needs reconciliation before a downloadable release is published.</p><aside class="next-step"><div><h2>Need the essentials now?</h2><p>View the sourced digital colours and typeface.</p></div><a href="$link.page('CRH', 'Colour Palette and Typography')" class="text-link">Colours and typography</a></aside>
+#elseif($page.id.toString() == "381891696")
+<div class="task-intro"><div><span class="eyebrow">Find and reuse</span><p>Choose a starting point. Open its source page to see the file, guidance or availability information.</p></div></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Slide Decks & Presentations')"><span class="choice-index" aria-hidden="true">01</span><h2>Presentation slides</h2><p>Templates and decks for talks and briefings.</p><span class="choice-go">Find slides <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Document Templates')"><span class="choice-index" aria-hidden="true">02</span><h2>Document templates</h2><p>Reports, letters, memos and email signatures.</p><span class="choice-go">Find a template <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Brand Guidelines')"><span class="choice-index" aria-hidden="true">03</span><h2>Logos and branding</h2><p>Artwork, colours and practical identity guidance.</p><span class="choice-go">Get the brand details <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Photography Media')"><span class="choice-index" aria-hidden="true">04</span><h2>Photos and video</h2><p>Find media and check credit and usage details in Canto.</p><span class="choice-go">Find media <span aria-hidden="true">→</span></span></a></div><aside class="next-step"><div><h2>Missing a resource?</h2><p>Send the page link and describe what you need.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="text-link">Ask for help</a></aside>
+#elseif($page.id.toString() == "381891700")
+<div class="task-intro"><div><span class="eyebrow">Start from a template</span><p>Choose the document you need. Each source page shows whether a file is available.</p></div></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Letterheads')"><span class="choice-index" aria-hidden="true">01</span><h2>Letterhead</h2><p>Formal correspondence.</p><span class="choice-go">Check the letterhead <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Report Template')"><span class="choice-index" aria-hidden="true">02</span><h2>Report</h2><p>Longer documents and structured reports.</p><span class="choice-go">Check the report template <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Memo Templates')"><span class="choice-index" aria-hidden="true">03</span><h2>Memo</h2><p>Short internal documents.</p><span class="choice-go">Check the memo template <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Email Signatures')"><span class="choice-index" aria-hidden="true">04</span><h2>Email signature</h2><p>Consistent contact details.</p><span class="choice-go">Check signature files <span aria-hidden="true">→</span></span></a></div><aside class="next-step"><div><h2>Need another format?</h2><p>Describe the document, audience and intended use.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="text-link">Ask for a template</a></aside>
+#elseif($page.id.toString() == "381891703")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>Signature files and setup guidance for your email application.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check that it is the appropriate released template for your use.</li><li>Create a separate working copy and use the supplied styles.</li><li>Review the finished document before sharing.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Document Templates')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891706")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>A starting point for formal SKAO correspondence.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check that it is the appropriate released template for your use.</li><li>Create a separate working copy and use the supplied styles.</li><li>Review the finished document before sharing.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Document Templates')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891709")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>A starting point for concise internal memos.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check that it is the appropriate released template for your use.</li><li>Create a separate working copy and use the supplied styles.</li><li>Review the finished document before sharing.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Document Templates')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891712")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>A starting point for structured reports.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check that it is the appropriate released template for your use.</li><li>Create a separate working copy and use the supplied styles.</li><li>Review the finished document before sharing.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Document Templates')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891715")
+<div class="task-intro"><div><span class="eyebrow">Official artwork</span><p>Use supplied artwork unchanged. Choose the variant for your background and output.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Logo pack link needs completing</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>Choose the right file</h2><ul><li>Use vector artwork where the output or supplier requires it.</li><li>Use the supplied light or dark background variant; do not recolour the logo yourself.</li><li>Keep the original proportions and follow the Brand Book’s clear-space guidance.</li></ul></section><aside class="next-step"><div><h2>Need usage guidance?</h2><p>Check the identity rules before placing the artwork.</p></div><a href="$link.page('CRH', 'Logo Usage and Downloads')" class="text-link">Read logo guidance</a></aside>
+#elseif($page.id.toString() == "381891718")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find media in Canto, then check each asset’s details before downloading.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Start with a subject, site or event; narrow by media type and date.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside>
+#elseif($page.id.toString() == "381891721")
+<div class="task-intro"><div><span class="eyebrow">Find and use media</span><p>Canto is the source library for media. The Hub provides guidance and routes to it.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><section class="reading-section"><h2>Find, check, download</h2><ol><li>Search for a subject, event or location, then narrow the results with available filters.</li><li>Open an asset and read its credits, use restrictions and available download formats.</li><li>Download the appropriate version and keep the source link with your work.</li></ol></section><details class="guidance-detail"><summary>I can’t access or download a file</summary><div><p>Send the library or asset link and the error message through <a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="">the creative helpdesk</a>. Do not include passwords. Browsing and download permissions may differ.</p></div></details><details class="guidance-detail"><summary>I want to upload material</summary><div><p>Use the authorised upload route provided for your material. <a href="$link.page('CRH', 'How To Submit Your Deck')" class="">See how to contribute</a>.</p></div></details><aside class="next-step"><div><h2>Looking for presentation slides?</h2><p>Presentation releases belong in the Hub.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Find presentation resources</a></aside>
+#elseif($page.id.toString() == "381891724")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find a strong image for a cover, banner or presentation.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Search by subject and check the crop, resolution and use restrictions.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside>
+#elseif($page.id.toString() == "381891751")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find photos from a specific event.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Search by event name and date; check the rights and consent information for images of people.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside>
+#elseif($page.id.toString() == "381891756")
+<div class="task-intro"><div><span class="eyebrow">Credits and permitted use</span><p>Read the information on the individual asset before reusing it.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Check the asset in Canto ↗</a></div><section class="reading-section"><h2>Check these details</h2><ul><li>Credit: copy the required wording from the asset record; do not guess a generic SKAO or partner credit.</li><li>Rights: check the intended use, audience, restrictions and any consent information.</li><li>Format: use a suitable download, not a screenshot or watermarked preview.</li><li>Meaning: retain context and identify artist impressions or visualisations appropriately.</li></ul></section><aside class="next-step"><div><h2>Missing or unclear information?</h2><p>Share the asset link and your intended use before publishing.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Ask about the asset ↗</a></aside>
+#elseif($page.id.toString() == "381891776")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find images of SKA-Low, SKA-Mid and construction activity.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Search by telescope, location and date. Distinguish photography from artist impressions.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside>
+#elseif($page.id.toString() == "381891782")
+<div class="task-intro"><div><span class="eyebrow">Plan the work</span><p>Define what needs producing before asking for artwork or a quote.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Prepare the creative brief</a></div><section class="reading-section"><h2>Include in the brief</h2><ul><li>Output, dimensions, quantity and intended audience.</li><li>Existing artwork or draft content and image sources.</li><li>Delivery location, use date and supplier deadlines.</li><li>Budget, final reviewer and any finishing requirements.</li></ul></section><aside class="next-step"><div><h2>Agree before producing</h2><p>The team confirms scope and capacity; supplier timing, cost and approval are agreed for the actual job.</p></div><a href="$link.page('CRH', 'Turnaround Times')" class="text-link">How timing is agreed</a></aside>
+#elseif($page.id.toString() == "381891788")
+<div class="task-intro"><div><span class="eyebrow">Plan the work</span><p>Confirm the required contact details, quantity and delivery need.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Prepare the creative brief</a></div><section class="reading-section"><h2>Include in the brief</h2><ul><li>Name and job title, checked by the requester.</li><li>Business contact details for the card.</li><li>Quantity, language requirements and delivery location.</li><li>Required use date and the person who will approve the proof.</li></ul></section><aside class="next-step"><div><h2>Agree before producing</h2><p>The team confirms scope and capacity; supplier timing, cost and approval are agreed for the actual job.</p></div><a href="$link.page('CRH', 'Turnaround Times')" class="text-link">How timing is agreed</a></aside>
+#elseif($page.id.toString() == "381891794")
+<div class="task-intro"><div><span class="eyebrow">Slides and talks</span><p>Choose the material that fits your audience, then check its source before reuse.</p></div></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Standard SKAO Template')"><span class="choice-index" aria-hidden="true">01</span><h2>Start a new presentation</h2><p>Use your own content with the standard layout.</p><span class="choice-go">Check template availability <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'About SKAO Master Deck')"><span class="choice-index" aria-hidden="true">02</span><h2>Introduce SKAO</h2><p>Find a general overview to adapt for your audience.</p><span class="choice-go">Check the master deck <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Science Case Presentations')"><span class="choice-index" aria-hidden="true">03</span><h2>Explain the science</h2><p>Find source material for a science-focused talk.</p><span class="choice-go">Explore science slides <span aria-hidden="true">→</span></span></a></div><aside class="source-check"><span class="eyebrow">Before downloading</span><h2>Check the release, not just the page date</h2><p>Look for a real file, its version, content owner and review date. Some source pages are still awaiting files; their availability is shown when you open them.</p></aside><details class="guidance-detail"><summary>More presentation resources</summary><div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'SKA-Low Overview')"><span class="choice-index" aria-hidden="true">01</span><h2>Telescope overviews</h2><p>SKA-Low and SKA-Mid source material.</p><span class="choice-go">Start with SKA-Low <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Construction Progress Updates')"><span class="choice-index" aria-hidden="true">02</span><h2>Construction updates</h2><p>Dated progress slides and milestones.</p><span class="choice-go">Check updates <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Specialised Decks')"><span class="choice-index" aria-hidden="true">03</span><h2>Specialised decks</h2><p>Topic-specific material.</p><span class="choice-go">Explore topics <span aria-hidden="true">→</span></span></a></div><a href="$link.page('CRH', 'SKA-Mid Overview')" class="">SKA-Mid overview</a> · <a href="$link.page('CRH', 'Widescreen Template')" class="">Widescreen template</a></div></details><details class="guidance-detail"><summary>Before you present</summary><div><section class="reading-section"><h2>Four useful checks</h2><ol><li>Keep credits, source information and speaker notes with reused slides.</li><li>Check facts against the source review date and ask the content or science owner about changes in meaning.</li><li>Check contrast, reading order and alternative text; caption video.</li><li>Check the presentation on the actual display or delivery format.</li></ol></section></div></details><div class="reuse-decision"><h2>Reuse, adapt or ask?</h2><p>Use released material within its usage notes. Ask the content owner about changed claims; ask Creative Production about substantial design work.</p><a href="$link.page('CRH', 'Submitting a Request')" class="">Request creative help</a> · <a href="$link.page('CRH', 'How To Submit Your Deck')" class="">Share a presentation</a></div>
+#elseif($page.id.toString() == "381891798")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>An overview for institutional introductions and general briefings.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891805")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>Dated source material for progress updates and milestone briefings.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891810")
+<div class="task-intro"><div><span class="eyebrow">Make good work reusable</span><p>Choose what you are sharing. Submission starts a review; it does not publish or approve a file.</p></div></div><div class="sharing-paths"><section><span class="route-label">01 / Presentations</span><h2>Send a deck for review</h2><p>Attach the editable deck or a suitable source link.</p><section class="reading-section"><h2>Include</h2><ul><li>Title, intended audience and event or use date.</li><li>Content owner, source information and reuse restrictions.</li></ul></section><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button">Send a presentation ↗</a></section><section><span class="route-label">02 / Photos and video</span><h2>Use your Canto upload route</h2><p>Include a useful title, creator, location and rights information. Use the authorised upload link supplied for your material.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for the upload route ↗</a><p class="quiet-note">The <a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="">Canto library ↗</a> is for browsing, not uploading.</p></section></div><aside class="next-step"><div><h2>A correction, rather than a file?</h2><p>Send the page URL, the change needed and its source.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Report a correction ↗</a></aside><details class="guidance-detail"><summary>What happens after sharing?</summary><div><p>The responsible owner checks the material before release. Presentation releases belong in the Hub; media remains in Canto. Keep working files at their source so a new attachment does not become a competing version.</p></div></details>
+#elseif($page.id.toString() == "381891817")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>Starting layouts for conference and research posters. Confirm size and orientation with the organiser.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check that it is the appropriate released template for your use.</li><li>Create a separate working copy and use the supplied styles.</li><li>Review the finished document before sharing.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Templates & Assets')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891821")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>Source material for science-focused talks and academic audiences.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available slides</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891829")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>Source material about the SKA-Low telescope.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891832")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>Source material about the SKA-Mid telescope.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891838")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>Topic-specific decks for particular audiences.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891843")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>A starting layout for a presentation using your own content.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891851")
+<div class="task-intro"><div><span class="eyebrow">Resource source</span><p>A 16:9 starting layout for suitable screens and webinars.</p></div></div><aside class="availability-note"><span class="availability-label">File not available on this page</span><h2>Ask for the available file</h2><p>The source page currently has no usable download link. Ask for the available file before planning around it.</p><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="button secondary">Ask for this resource ↗</a></aside><section class="reading-section"><h2>When you receive the file</h2><ul><li>Check its version, content owner and intended use.</li><li>Save your working copy separately and retain credits and sources.</li><li>Check that facts and figures are current for your audience.</li></ul></section><aside class="next-step"><div><h2>Choose a different starting point</h2><p>Return to the resource collection.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Back to the collection</a></aside>
+#elseif($page.id.toString() == "381891854")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find existing footage or animation before requesting a new production.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Search for the topic or event and filter for video.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside><aside class="next-step"><div><h2>Need new video?</h2><p>Bring the audience, message and source material.</p></div><a href="$link.page('CRH', 'Requesting New Video Content')" class="text-link">Prepare a video brief</a></aside>
+#elseif($page.id.toString() == "381891857")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find footage for an edit or presentation.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Search by subject and location; check duration, format, audio and usage restrictions.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside>
+#elseif($page.id.toString() == "381891860")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find a recorded talk, webinar or event session.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Search by event, speaker and date. Check permission for the intended audience and any excerpt.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside>
+#elseif($page.id.toString() == "381891863")
+<div class="task-intro"><div><span class="eyebrow">Media in Canto</span><p>Find an existing explanation of a topic or technology.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><div class="media-handoff"><span aria-hidden="true">↗</span><div><h2>Search in the source library</h2><p>Search by subject and check whether the science and technical depiction remain current.</p><p class="quiet-note">This opens the general staff library. A verified collection-specific link is not yet available here.</p></div></div><section class="reading-section"><h2>Before using an asset</h2><ul><li>Read the credit, copyright and usage information on the asset.</li><li>Check that it suits your intended audience and use. Availability alone is not permission for every use.</li><li>Choose an appropriate download format; keep the credit with your working file.</li></ul></section><aside class="next-step"><div><h2>Can’t find or access the material?</h2><p>Include your search terms, intended use and the link or error shown.</p></div><a href="$link.page('CRH', 'Canto DAM Access')" class="text-link">Get help with Canto</a></aside>
+#elseif($page.id.toString() == "381891866")
+<div class="task-intro"><div><span class="eyebrow">Plan the work</span><p>Check existing footage first, then explain what a new piece needs to achieve.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Prepare the creative brief</a></div><section class="reading-section"><h2>Include in the brief</h2><ul><li>Audience, message and where the piece will be used.</li><li>Existing footage, draft script, images and source information.</li><li>Length or format constraints and accessibility needs.</li><li>Content reviewer, use date, budget and any filming dependencies.</li></ul></section><aside class="next-step"><div><h2>Agree before producing</h2><p>The team confirms scope and capacity; supplier timing, cost and approval are agreed for the actual job.</p></div><a href="$link.page('CRH', 'Turnaround Times')" class="text-link">How timing is agreed</a></aside>
+#elseif($page.id.toString() == "381891637")
+<div class="task-intro"><div><span class="eyebrow">Creative support for events</span><p>Start with the audience, purpose and use date. Reuse existing material before commissioning something new.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Brief the creative work</a></div><div class="responsibility-split"><section><h2>Creative materials</h2><p>Presentation design, stand graphics, print, signage or video within an agreed brief.</p></section><section><h2>Event organisation</h2><p>Registration, attendance, travel, staffing and logistics remain with the events team.</p></section></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Event Planning Checklist')"><span class="choice-index" aria-hidden="true">01</span><h2>Prepare the package</h2><p>Gather specifications, content and review dates.</p><span class="choice-go">Use the checklist <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Stand Design and Materials')"><span class="choice-index" aria-hidden="true">02</span><h2>Stand graphics</h2><p>Brief an existing kit or a new visual layout.</p><span class="choice-go">Plan the stand <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Print Materials')"><span class="choice-index" aria-hidden="true">03</span><h2>Print or merchandise</h2><p>Confirm purpose, quantity and supplier requirements.</p><span class="choice-go">Plan print materials <span aria-hidden="true">→</span></span></a></div><details class="guidance-detail"><summary>Before committing to production</summary><div><section class="reading-section"><h2>Confirm with the responsible teams</h2><ul><li>Venue and supplier specifications, dimensions and delivery requirements.</li><li>Content owner, proof reviewer and budget approval.</li><li>Supplier lead time and the final artwork deadline.</li><li>Applicable safety requirements with the event organiser and HSSE.</li></ul></section><a href="$link.page('CRH', 'Health and Safety')" class="">Find the HSSE route</a> · <a href="$link.page('CRH', 'Merchandise and Giveaways')" class="">Merchandise guidance</a></div></details>
+#elseif($page.id.toString() == "381891643")
+<div class="task-intro"><div><span class="eyebrow">Plan, review, hand over</span><p>Work back from the use date with the event organiser and supplier. Confirm the actual deadlines rather than relying on a generic countdown.</p></div></div><section class="reading-section"><h2>1. Define</h2><ul><li>Audience, purpose, venue and outputs.</li><li>Existing resources or event kit that can be reused.</li><li>Content owner, organiser, supplier and final reviewer.</li></ul></section><section class="reading-section"><h2>2. Prepare</h2><ul><li>Supplier templates, dimensions, formats and artwork deadline.</li><li>Draft content, source images and required credits.</li><li>Budget and the applicable approvals.</li></ul></section><section class="reading-section"><h2>3. Review and hand over</h2><ul><li>Content and artwork proof reviewed by the agreed people.</li><li>Supplier-ready file checked against the specification.</li><li>Delivery and on-site arrangements confirmed by the event organiser.</li></ul></section><aside class="next-step"><div><h2>Ready to brief the work?</h2><p>Include the dependencies and anything still missing.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="text-link">Prepare a creative brief</a></aside>
+#elseif($page.id.toString() == "381891640")
+<div class="task-intro"><div><span class="eyebrow">Specialist guidance</span><p>Use the event organiser and SKAO HSSE team for current safety requirements and approval.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/298" class="button">Open HSSE helpdesk ↗</a></div><div class="responsibility-split"><section><h2>Event organiser and HSSE</h2><p>Confirm the applicable assessments, approvals and operational arrangements.</p></section><section><h2>Creative Production</h2><p>Include the relevant design and material requirements in the creative brief, and refer specialist questions to the responsible people.</p></section></div><p class="quiet-note">This Hub page is a route to the responsible team, not a safety procedure or an approval.</p>
+#elseif($page.id.toString() == "381891646")
+<div class="task-intro"><div><span class="eyebrow">Plan the work</span><p>Start with the purpose and audience. Check existing stock before commissioning new items.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Prepare the creative brief</a></div><section class="reading-section"><h2>Include in the brief</h2><ul><li>Why the item is useful for the audience.</li><li>Available stock or an existing design that could be reused.</li><li>Quantity, budget, destination and use date.</li><li>Supplier requirements, material choices and the artwork reviewer.</li></ul></section><aside class="next-step"><div><h2>Agree before producing</h2><p>The team confirms scope and capacity; supplier timing, cost and approval are agreed for the actual job.</p></div><a href="$link.page('CRH', 'Turnaround Times')" class="text-link">How timing is agreed</a></aside>
+#elseif($page.id.toString() == "381891649")
+<div class="task-intro"><div><span class="eyebrow">Plan the work</span><p>Check the existing kit and the venue’s specification before briefing new graphics.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Prepare the creative brief</a></div><section class="reading-section"><h2>Include in the brief</h2><ul><li>Available stand system and reusable graphics.</li><li>Venue dimensions, supplier artwork templates and display restrictions.</li><li>Audience, key messages and draft content.</li><li>Artwork reviewer, supplier deadline and event organiser contacts.</li></ul></section><aside class="next-step"><div><h2>Agree before producing</h2><p>The team confirms scope and capacity; supplier timing, cost and approval are agreed for the actual job.</p></div><a href="$link.page('CRH', 'Turnaround Times')" class="text-link">How timing is agreed</a></aside>
+#elseif($page.id.toString() == "381891870")
+<div class="task-intro"><div><span class="eyebrow">Support and useful tools</span><p>Find the right service or recover from a missing file or access problem.</p></div></div><div class="choice-grid"><a class="choice-card" href="$link.page('CRH', 'Canto DAM Access')"><span class="choice-index" aria-hidden="true">01</span><h2>Find photos or video</h2><p>Search and download from the staff media library.</p><span class="choice-go">Get to Canto <span aria-hidden="true">→</span></span></a><a class="choice-card" href="$link.page('CRH', 'Submitting a Request')"><span class="choice-index" aria-hidden="true">02</span><h2>Request creative work</h2><p>Brief new work or ask for a review.</p><span class="choice-go">Open the request guide <span aria-hidden="true">→</span></span></a><a class="choice-card" href="https://jira.skatelescope.org/servicedesk/customer/portal/364"><span class="choice-index" aria-hidden="true">03</span><h2>A missing or broken resource</h2><p>Send the exact page link and what happened.</p><span class="choice-go">Report a problem ↗ <span aria-hidden="true">→</span></span></a></div><details class="guidance-detail"><summary>Where should I look for presentations?</summary><div><p>Start with <a href="$link.page('CRH', 'Slide Decks & Presentations')" class="">presentation resources</a>. Released decks belong in the Hub. A page description is not a file download.</p></div></details><details class="guidance-detail"><summary>Why can I browse but not upload?</summary><div><p>Browsing, downloading and contributing can have different permissions. Ask for the <a href="$link.page('CRH', 'How To Submit Your Deck')" class="">appropriate contribution route</a> rather than treating a library link as an upload form.</p></div></details><details class="guidance-detail"><summary>Is my request booked once submitted?</summary><div><p>No. The team confirms scope, capacity and delivery timing after review. <a href="$link.page('CRH', 'Turnaround Times')" class="">Read how timing is agreed</a>.</p></div></details><section class="reading-section"><h2>Practical guides</h2><div class="resource-links"><a href="$link.page('CRH', 'Accessibility Guidelines')" class="">Accessibility checks</a><a href="$link.page('CRH', 'Font Downloads')" class="">Fonts</a><a href="$link.page('CRH', 'Preparing Files for Print')" class="">Preparing print files</a><a href="$link.page('CRH', 'Events Support')" class="">Event materials</a><a href="$link.page('CRH', 'Adobe Firefly')" class="">AI image tools</a></div></section>
+#elseif($page.id.toString() == "381891873")
+<div class="task-intro"><div><span class="eyebrow">Make the work usable</span><p>Build accessibility into the document or presentation, then check the exported result.</p></div></div><section class="reading-section"><h2>Content and structure</h2><ul><li>Use clear headings, descriptive links and a logical reading order.</li><li>Give informative images alternative text that conveys their purpose. Decorative images should be ignored by assistive technology, for example with empty alt text in HTML.</li><li>Caption video and provide an appropriate text alternative for audio.</li></ul></section><section class="reading-section"><h2>Appearance and interaction</h2><ul><li>Use readable contrast: WCAG’s minimum is generally 4.5:1 for normal text and 3:1 for qualifying large text.</li><li>Do not rely on colour alone. Use labels, symbols or patterns too.</li><li>Check keyboard access and focus visibility for interactive content.</li></ul></section><aside class="next-step"><div><h2>Check the relevant standard</h2><p>These checks are a starting point, not a claim that the work passes a full accessibility audit.</p></div><a href="https://www.w3.org/WAI/WCAG22/quickref/" class="text-link">Open the W3C reference ↗</a></aside>
+#elseif($page.id.toString() == "381891876")
+<div class="task-intro"><div><span class="eyebrow">Concept development</span><p>Use the current SKAO AI policy and approved tools before starting a task.</p></div></div><section class="reading-section"><h2>Before using a tool</h2><ul><li>Check whether the material is suitable for the approved service.</li><li>Use only data permitted by the current SKAO AI policy; do not upload confidential or personal material.</li><li>Verify factual accuracy, rights and suitability before using generated imagery in a deliverable.</li><li>Keep concept imagery clearly distinguished from photography or verified scientific representations.</li></ul></section><aside class="next-step"><div><h2>Need advice on a creative use?</h2><p>Describe the purpose and proposed output without sending unsuitable source material.</p></div><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="text-link">Ask the creative team ↗</a></aside><p class="quiet-note">Tool availability, model versions and credit allocations are not confirmed by this page. Check the current approved service and account.</p>
+#elseif($page.id.toString() == "381891879")
+<div class="task-intro"><div><span class="eyebrow">Find and use media</span><p>Canto is the source library for media. The Hub provides guidance and routes to it.</p></div><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="button">Open the Canto library ↗</a></div><section class="reading-section"><h2>Find, check, download</h2><ol><li>Search for a subject, event or location, then narrow the results with available filters.</li><li>Open an asset and read its credits, use restrictions and available download formats.</li><li>Download the appropriate version and keep the source link with your work.</li></ol></section><details class="guidance-detail"><summary>I can’t access or download a file</summary><div><p>Send the library or asset link and the error message through <a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="">the creative helpdesk</a>. Do not include passwords. Browsing and download permissions may differ.</p></div></details><details class="guidance-detail"><summary>I want to upload material</summary><div><p>Use the authorised upload route provided for your material. <a href="$link.page('CRH', 'How To Submit Your Deck')" class="">See how to contribute</a>.</p></div></details><aside class="next-step"><div><h2>Looking for presentation slides?</h2><p>Presentation releases belong in the Hub.</p></div><a href="$link.page('CRH', 'Slide Decks & Presentations')" class="text-link">Find presentation resources</a></aside>
+#elseif($page.id.toString() == "381891882")
+<div class="task-intro"><div><span class="eyebrow">Typography</span><p>Use Noto Sans for the SKAO identity, with Verdana as the fallback.</p></div><a href="https://fonts.google.com/noto/specimen/Noto+Sans" class="button">Open Noto Sans at Google Fonts ↗</a></div><section class="reading-section"><h2>Use in your work</h2><ul><li>Follow the template’s existing text styles where available.</li><li>Use your organisation’s approved installation route on a managed device.</li><li>Check the font in the exported or shared file, particularly when moving between applications.</li></ul></section><aside class="next-step"><div><h2>Can’t install the font?</h2><p>Use the fallback and ask for help through your usual IT support route.</p></div><a href="$link.page('CRH', 'Colour Palette and Typography')" class="text-link">Return to typography guidance</a></aside>
+#elseif($page.id.toString() == "381891885")
+<div class="task-intro"><div><span class="eyebrow">Production handoff</span><p>Confirm the supplier, specification, budget and approvals for the actual job.</p></div><a href="$link.page('CRH', 'Submitting a Request')" class="button">Brief print support</a></div><section class="reading-section"><h2>Before placing an order</h2><ul><li>Check the applicable procurement process with the responsible team.</li><li>Agree who obtains the quote, approves expenditure and places the order.</li><li>Confirm who signs off content and the final artwork proof.</li><li>Agree production and delivery dates with the supplier.</li></ul></section><p class="quiet-note">This page does not publish a supplier approval list or purchasing thresholds. Use the current procurement guidance.</p>
+#else
+$page.content
+#if($page.children.size() > 0)<section class="section" id="library-sections"><h2>Explore this section</h2><ul class="list">#foreach($child in $page.children)<li><a href="$child.absoluteLink">$stringEscapeUtils.escapeHtml($child.title)</a></li>#end</ul></section>#end
+#end
+</article></div>
+#end
+</main><footer class="footer"><div class="wrap footer-inner"><div class="footer-identity"><strong>Creative Hub</strong><span>SKA Observatory</span></div><nav aria-label="Footer support"><a href="$link.page('CRH', 'Tools & Resources')" class="">Help with the Hub</a><a href="https://jira.skatelescope.org/servicedesk/customer/portal/364" class="">Report a problem</a><a href="https://skao.canto.global/v/SKAOLibrary?from_main_library" class="">Canto library</a></nav></div><div class="wrap footer-platform">$attributionLine</div></footer><dialog id="searchDialog" aria-labelledby="searchTitle"><div class="dialog-title"><h2 id="searchTitle">Search the Hub</h2><button id="closeSearch" class="close-button" aria-label="Close search">×</button></div><p class="search-scope">Searches Hub pages and guidance. Photos and video are in <a href="https://skao.canto.global/v/SKAOLibrary?from_main_library">Canto ↗</a>.</p><form id="searchForm" role="search"><label class="field">What do you need?<input id="searchInput" type="search" maxlength="120" autocomplete="off" placeholder="Try presentation, logo or request"></label></form><p id="searchStatus" role="status" class="status">Type at least two characters.</p><div id="searchResults" class="search-results"></div><div class="search-fallback"><a href="$link.page('CRH', 'Templates & Assets')">Browse templates and assets →</a><a href="$link.page('CRH', 'Submitting a Request')">Ask for help →</a></div></dialog><script src="${theme.baseUrl}/js/theme.js" defer></script><script src="${theme.baseUrl}/js/main.js?v=interiors-20260923" defer></script><div id="hubRoutes" hidden>
+#macro(hubRoute $node)
+<a data-page-id="$node.id" href="$node.absoluteLink">$stringEscapeUtils.escapeHtml($node.title)</a>
+#foreach($child in $node.children)#hubRoute($child)#end
+#end
+#hubRoute($pages.home)
+</div></body></html>

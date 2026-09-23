@@ -1,25 +1,16 @@
-# macOS
 .DS_Store
 ._*
-
-# Editors
-.vscode/
-.idea/
-*.swp
-*~
-
-# Temporary builds / local zips
-*.zip
-build/
-tmp/
-
-# Node (if a build step gets added later)
 node_modules/
-package-lock.json
-yarn.lock
-
-# Never commit secrets
-.env
-.env.local
+__pycache__/
+*.pyc
+.env*
 *.pem
 *.key
+release/
+content/
+evidence/*
+!evidence/interior-route-map.json
+# Internal working reports stay in the vault.
+/*.md
+!/README.md
+!/CHANGELOG.md
