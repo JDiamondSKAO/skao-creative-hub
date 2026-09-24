@@ -182,6 +182,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
    {title:'Off-site link',src:`/download/attachments/${mediaId}/canto-4.jpg`,href:'https://evil.example/asset/4'}]},
   {id:'a2',name:'Future visions',path:'Asset library - Staff / Future visions',count:5,href:'https://skao.canto.global/album/a2',assets:[
    {title:'SKA Africa concept',src:`/download/attachments/${mediaId}/canto-5.jpg`,href:'https://skao.canto.global/asset/5'}]}]};
+ const curatedManifest={...cantoManifest,highlights:['h1','h2','h3','h4'].map(i=>({title:'Pick '+i,alt:'Curated '+i+' alt text',src:`/download/attachments/${mediaId}/canto-${i}.jpg`,href:'https://skao.canto.global/v/SKAOLibrary/album/a1?column=image&id='+i}))};
  const runCanto=async(file,m)=>{const d=dom(file,'confluence'),w=d.window;
   w.fetch=async u=>{const s=String(u);if(s.includes('/rest/api/content/search')){const cql=new URL(s,'http://localhost').searchParams.get('cql');return {ok:true,json:async()=>({results:cql.includes('canto-showcase.json')&&m?[{title:'canto-showcase.json',_links:{download:`/download/attachments/${mediaId}/canto-showcase.json`}}]:[]})};}
    if(s.includes('canto-showcase.json'))return {ok:true,json:async()=>m};return {ok:false,json:async()=>({})};};
@@ -196,6 +197,9 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const cHero=await runCanto('hero-images.html',cantoManifest);assert(cHero.window.document.querySelector('.canto-strip').hidden,'no matching album, nothing shown');cHero.window.close();
  const cNone=await runCanto('media.html',null);assert(cNone.window.document.querySelector('.canto-gallery').hidden,'no cantoManifest, nothing shown');cNone.window.close();
  require('child_process').execFileSync('python3',[path.join(root,'scripts/canto_sync.py'),'--self-test'],{stdio:'pipe'});
+ const cCur=await runCanto('media.html',curatedManifest),cc=cCur.window.document;
+ assert.deepEqual([...cc.querySelectorAll('.canto-gallery .canto-tile img')].map(i=>i.alt),['Curated h1 alt text','Curated h2 alt text','Curated h3 alt text','Curated h4 alt text'],'Highlights come from the curated list, with description alt text');
+ assert(cc.querySelector('.canto-tile').href.includes('/v/SKAOLibrary/album/a1?column=image&id=h1'),'tiles open the asset view in the portal');cCur.window.close();
  pass('Canto showcase renders synced albums safely, matches topic pages by album and stays hidden without data; sync self-test passes');
  const result={status:'PASS',checks};fs.writeFileSync(path.join(root,'evidence/tests.json'),JSON.stringify(result,null,2));console.log(result);
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -32,12 +32,12 @@ stand = spec.get('canto_standin')
 if real.exists():
     manifest = json.loads(real.read_text())
     page = (stand or {}).get('page', 'media.html')
-    for al in manifest['albums']:
-        for item in al['assets']:
-            f = real.parent / item['thumb']
-            if f.exists(): out.append({'page': page, 'title': item['thumb'], 'path': str(f), 'size': f.stat().st_size, 'labels': [], 'when': manifest['generated']})
+    thumbs = {i['thumb'] for al in manifest['albums'] for i in al['assets']} | {i['thumb'] for i in manifest.get('highlights', [])}
+    for name in sorted(thumbs):
+        f = real.parent / name
+        if f.exists(): out.append({'page': page, 'title': name, 'path': str(f), 'size': f.stat().st_size, 'labels': [], 'when': manifest['generated']})
     out.append({'page': page, 'title': real.name, 'path': str(real), 'size': real.stat().st_size, 'labels': [], 'when': manifest['generated']})
-    print(f'Canto: {sum(len(a["assets"]) for a in manifest["albums"])} real images in {len(manifest["albums"])} albums from build/canto')
+    print(f'Canto: {len(thumbs)} real images ({len(manifest.get("highlights", []))} highlights) in {len(manifest["albums"])} collections from build/canto')
     stand = None
 if stand:
     import sys; sys.path.insert(0, str(ROOT / 'scripts'))

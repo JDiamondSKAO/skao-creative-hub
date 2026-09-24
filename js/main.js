@@ -596,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const asset = (a) => {
       const src = typeof a?.src === "string" && a.src.startsWith("/download/attachments/") ? safeLink(ctx + a.src) : null;
       const href = typeof a?.href === "string" && CANTO.test(a.href) ? a.href : null;
-      return src && href ? { src, href, title: String(a.title || "Untitled"), credit: String(a.credit || ""), video: a.kind === "video", w: Number(a.width) || 0, h: Number(a.height) || 0 } : null;
+      return src && href ? { src, href, title: String(a.title || "Untitled"), alt: String(a.alt || a.title || ""), credit: String(a.credit || ""), video: a.kind === "video", w: Number(a.width) || 0, h: Number(a.height) || 0 } : null;
     };
     const albums = (Array.isArray(manifest?.albums) ? manifest.albums : []).map((al) => ({
       name: String(al.name || "Album"), path: String(al.path || al.name || "Album"), count: Number(al.count) || 0,
@@ -604,6 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
       assets: (Array.isArray(al.assets) ? al.assets : []).map(asset).filter(Boolean),
     })).filter((al) => al.assets.length);
     if (!albums.length) return;
+    const curated = (Array.isArray(manifest?.highlights) ? manifest.highlights : []).map(asset).filter(Boolean);
     // Drop the folder levels every album shares, so tabs read "Telescopes" rather than "Asset library - Staff / Telescopes".
     const parts = albums.map((al) => al.path.split(" / "));
     let shared = 0;
@@ -613,7 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const li = document.createElement("li"), link = document.createElement("a"), img = document.createElement("img"), cap = document.createElement("span");
       link.className = "canto-tile"; link.href = a.href; link.target = "_blank"; link.rel = "noopener";
       link.setAttribute("aria-label", a.title + (a.video ? ", video" : "") + ", opens in Canto");
-      img.src = a.src; img.alt = a.title; img.loading = "lazy"; img.decoding = "async";
+      img.src = a.src; img.alt = a.alt || a.title; img.loading = "lazy"; img.decoding = "async";
       if (a.w && a.h) { img.width = a.w; img.height = a.h; }
       cap.className = "canto-caption"; cap.textContent = a.title;
       link.append(img, cap);
@@ -635,7 +636,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const showcase = matches.filter((al) => !/\b(events?|videos?)\b/i.test(al.name));
         const source = showcase.length ? showcase : matches, all = [], seen = new Set();
         const take = (wantVideo) => { for (let i = 0; all.length < 12 && source.some((al) => al.assets[i]); i++) source.forEach((al) => { const a = al.assets[i]; if (a && a.video === wantVideo && !seen.has(a.src) && all.length < 12) { seen.add(a.src); all.push(a); } }); };
-        take(false); take(true);
+        if (curated.length >= 4) curated.slice(0, curated.length >= 8 ? Math.min(12, curated.length - curated.length % 4) : curated.length).forEach((a) => { if (!seen.has(a.src)) { seen.add(a.src); all.push(a); } });
+        else { take(false); take(true); }
         const tabs = slot.querySelector(".canto-tabs"), openHome = open?.href;
         const choose = (btn, list, href) => {
           tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));

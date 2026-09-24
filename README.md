@@ -52,8 +52,12 @@ python3 scripts/canto_sync.py                               # publish to the Pho
 ```
 
 - Run it on a schedule (for example daily) or from a Canto webhook. Keep credentials in the scheduler's secrets, never in this repository.
-- Only images in albums under the folder are published. Thumbnails are resized to 640 px and stripped of embedded metadata (including location).
-- `CANTO_ASSET_URL` and `CANTO_ALBUM_URL` set where tiles link (defaults: `https://{domain}.canto.global/asset/{id}` and `/album/{id}`). Use portal links if staff reach Canto through the SKAO Library portal.
+- **What is shown.** Only approved, credited assets of at least 2,000 px (videos only in video collections), and never anything whose description or tags say it is not cleared (for example "heritage review", "pending", "embargo", "draft"). Collections come from the folder structure (SKA-Low, SKA-Mid, Hero shots, Events 2026…); collections with fewer than 3 suitable assets are left out.
+- **How it is chosen.** Assets are scored on description quality, tags, landscape shape, resolution, recency and strong subjects (aerials, dishes, stations, night sky), with weak subjects (vehicles, offices, screenshots) lower. No more than a few per album, one per numbered frame sequence, one per title, identical files and visually near-identical images once. People-tagged assets rank lower outside Events.
+- **Highlights.** The first tab is a separate pick across the image collections: images without people, at most 1 composite, 2 night skies, 3 aerials and 2 artist impressions, shown in full rows of 4.
+- **Editorial control in Canto.** Tag an asset **Hub feature** to pin it to Highlights. Add the **People** keyword where people are the subject (canto-metadata-assistant's people detection can apply it). Keep titles and descriptions meaningful; file-like names fall back to the first sentence of the description.
+- **Click-through.** Each tile opens that asset in the SKAO Library portal via the album it came from; collection links open the folder. Thumbnails are resized to 640 px and stripped of embedded metadata (including location).
+- `CANTO_PORTAL` (default `SKAOLibrary`) sets the portal tiles open in.
 - Albums appear on topic pages when their name contains the page's keywords (`CANTO_STRIPS` in `scripts/polish.py`).
 - Local test mode uses the real dry-run output in `build/canto` when it exists (rerun `scripts/dev_fixtures.py` after a dry run), otherwise stand-in albums from local images (`canto_standin` in `dev/brandbank-map.json`).
 

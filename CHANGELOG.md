@@ -1,5 +1,13 @@
 # Changes
 
+## 2.12.0 curated Canto showcase
+
+- Tiles open the asset's own view in the SKAO Library portal (`/v/SKAOLibrary/album/{album}?column=image&id={asset}`), found by testing the portal; collection links open their folder.
+- The sync curates instead of taking the newest: approved, credited, at least 2,000 px, never uncleared wording (heritage review, pending, embargo, draft…), scored on description, tags, shape, resolution, recency and subject. Per-album caps, one per numbered frame sequence, one per title, and identical files and visually near-identical images removed.
+- Highlights is its own pick: images without people, a subject mix (at most 1 composite, 2 night skies, 3 aerials, 2 artist impressions), shown in full rows.
+- Titles fall back to the description where Canto's name is a file name; descriptions become alt text, and tag-list descriptions are ignored. People-focused descriptions count as people when the People keyword is missing.
+- Editors can pin assets by tagging them "Hub feature" in Canto.
+
 ## 2.11.1 Canto sync tested against SKAO's Canto
 
 - Client credentials use `https://oauth.canto.global/oauth/api/oauth2/token` with `app_id` and `app_secret` and read the camelCase reply (`accessToken`, `expiresIn`). App ID and Secret are preferred over a generated token because they renew themselves.
