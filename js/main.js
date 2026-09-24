@@ -596,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const asset = (a) => {
       const src = typeof a?.src === "string" && a.src.startsWith("/download/attachments/") ? safeLink(ctx + a.src) : null;
       const href = typeof a?.href === "string" && CANTO.test(a.href) ? a.href : null;
-      return src && href ? { src, href, title: String(a.title || "Untitled"), credit: String(a.credit || ""), w: Number(a.width) || 0, h: Number(a.height) || 0 } : null;
+      return src && href ? { src, href, title: String(a.title || "Untitled"), credit: String(a.credit || ""), video: a.kind === "video", w: Number(a.width) || 0, h: Number(a.height) || 0 } : null;
     };
     const albums = (Array.isArray(manifest?.albums) ? manifest.albums : []).map((al) => ({
       name: String(al.name || "Album"), path: String(al.path || al.name || "Album"), count: Number(al.count) || 0,
@@ -612,11 +612,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const tile = (a) => {
       const li = document.createElement("li"), link = document.createElement("a"), img = document.createElement("img"), cap = document.createElement("span");
       link.className = "canto-tile"; link.href = a.href; link.target = "_blank"; link.rel = "noopener";
-      link.setAttribute("aria-label", a.title + ", opens in Canto");
+      link.setAttribute("aria-label", a.title + (a.video ? ", video" : "") + ", opens in Canto");
       img.src = a.src; img.alt = a.title; img.loading = "lazy"; img.decoding = "async";
       if (a.w && a.h) { img.width = a.w; img.height = a.h; }
       cap.className = "canto-caption"; cap.textContent = a.title;
       link.append(img, cap);
+      if (a.video) { const v = document.createElement("span"); v.className = "canto-video"; v.textContent = "Video"; link.append(v); }
       if (a.credit) { const c = document.createElement("small"); c.className = "canto-credit"; c.textContent = /^(©|\(c\)|credit)/i.test(a.credit) ? a.credit : "© " + a.credit; link.append(c); }
       li.append(link); return li;
     };
@@ -630,15 +631,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!matches.length) return;
       const open = slot.querySelector(".canto-open");
       if (slot.classList.contains("canto-gallery")) {
-        // Newest first across albums, then one tab per album.
-        const all = []; for (let i = 0; all.length < 12 && matches.some((al) => al.assets[i]); i++) matches.forEach((al) => { if (al.assets[i] && all.length < 12) all.push(al.assets[i]); });
+        // Highlights: photos from the image collections in turn (not events or video reels), no repeats.
+        const showcase = matches.filter((al) => !/\b(events?|videos?)\b/i.test(al.name));
+        const source = showcase.length ? showcase : matches, all = [], seen = new Set();
+        const take = (wantVideo) => { for (let i = 0; all.length < 12 && source.some((al) => al.assets[i]); i++) source.forEach((al) => { const a = al.assets[i]; if (a && a.video === wantVideo && !seen.has(a.src) && all.length < 12) { seen.add(a.src); all.push(a); } }); };
+        take(false); take(true);
         const tabs = slot.querySelector(".canto-tabs"), openHome = open?.href;
         const choose = (btn, list, href) => {
           tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
           fill(slot, list, 12); if (open) open.href = href || openHome;
         };
-        const mk = (label, n, list, href) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label + " "; const c = document.createElement("span"); c.textContent = n; b.append(c); b.addEventListener("click", () => choose(b, list, href)); return b; };
-        const first = mk("All", matches.reduce((n, al) => n + (al.count || al.assets.length), 0), all, null);
+        const mk = (label, n, list, href) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label + (n === "" ? "" : " "); if (n !== "") { const c = document.createElement("span"); c.textContent = n; b.append(c); } b.addEventListener("click", () => choose(b, list, href)); return b; };
+        const first = mk("Highlights", "", all, null);
         tabs.replaceChildren(first, ...matches.map((al) => mk(al.path, al.count || al.assets.length, al.assets, al.href)));
         tabs.hidden = matches.length < 2;
         choose(first, all, null);

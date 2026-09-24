@@ -325,7 +325,8 @@ def latest_strip():
 
 # Canto showcase slots: the gallery on Photos and video, and strips on topic pages
 # matched to album names. They stay hidden until the synced manifest has matching albums.
-CANTO_STRIPS = {'telescope-images.html': 'telescope telescopes ska-low ska-mid', 'hero-images.html': 'hero heroes banner', 'event-photos.html': 'event events'}
+CANTO_STRIPS = {'telescope-images.html': 'telescope telescopes ska-low ska-mid', 'hero-images.html': 'hero heroes banner', 'event-photos.html': 'event events',
+ 'animations.html': 'animation animations', 'video.html': 'video videos'}
 
 def canto_gallery(canto):
  return ('<section class="canto-gallery" data-canto="" hidden aria-labelledby="cantoHeading"><div class="canto-head"><div><p class="eyebrow">Staff media library</p>'

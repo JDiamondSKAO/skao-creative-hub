@@ -1,5 +1,14 @@
 # Changes
 
+## 2.11.1 Canto sync tested against SKAO's Canto
+
+- Client credentials use `https://oauth.canto.global/oauth/api/oauth2/token` with `app_id` and `app_secret` and read the camelCase reply (`accessToken`, `expiresIn`). App ID and Secret are preferred over a generated token because they renew themselves.
+- Albums are listed with `/search?scheme=album` (paged; counts from `size`), because `/api/v1/album` returns the web app on this tenant.
+- The 43 albums under Staff media library are grouped into collections by path (SKA-Low, SKA-Mid, Hero shots, Artist impressions and animations, Events 2026, Events 2025, Booth videos, Promo videos). Preferred collections come first (`CANTO_ORDER`), the rest by newest asset, and collections with fewer than 3 images or videos are left out (`CANTO_MIN_ASSETS`).
+- Videos appear with their poster frame and a Video badge. Explainer animations and Video and animation get strips too.
+- The gallery opens on Highlights: photos from the image collections without repeats; events and videos keep their own tabs.
+- HTTPS verification uses certifi when Python has no certificate bundle (python.org builds on macOS). `--env FILE` reads settings from a local file.
+
 ## 2.11.0 Canto showcase
 
 - Photos and video leads with a gallery of approved images from the Canto Staff media library folder, with album tabs, titles and credits. Tiles open the asset in Canto.

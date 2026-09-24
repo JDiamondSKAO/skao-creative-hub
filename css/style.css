@@ -1074,3 +1074,5 @@ body .content-body a.canto-tile:any-link {position:relative;display:block;aspect
 @media(max-width:1000px){.canto-grid{grid-template-columns:repeat(3,minmax(0,1fr));}.canto-grid.small{grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:600px){.canto-grid,.canto-grid.small{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(prefers-reduced-motion:reduce){.canto-tile img{transition:none;}.canto-tile:hover img{transform:none;}}
+.canto-video {position:absolute;top:8px;left:8px;z-index:1;display:inline-flex;align-items:center;gap:5px;padding:2px 8px 2px 6px;border-radius:999px;background:#000000a6;color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.04em;}
+.canto-video:before {content:"";width:0;height:0;border-left:7px solid #fff;border-top:4px solid transparent;border-bottom:4px solid transparent;}

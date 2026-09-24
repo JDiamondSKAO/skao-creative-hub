@@ -187,7 +187,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
    if(s.includes('canto-showcase.json'))return {ok:true,json:async()=>m};return {ok:false,json:async()=>({})};};
   w.document.body.dataset.mode='confluence';w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();return d;};
  const cMedia=await runCanto('media.html',cantoManifest),kq2=s=>cMedia.window.document.querySelector(s),kqa=s=>[...cMedia.window.document.querySelectorAll(s)];
- assert(!kq2('.canto-gallery').hidden);assert.deepEqual(kqa('.canto-tabs button').map(b=>b.firstChild.textContent.trim()),['All','Telescopes','Future visions'],'shared folder levels dropped from tab names');
+ assert(!kq2('.canto-gallery').hidden);assert.deepEqual(kqa('.canto-tabs button').map(b=>b.firstChild.textContent.trim()),['Highlights','Telescopes','Future visions'],'shared folder levels dropped from tab names');
  assert.equal(kqa('.canto-gallery .canto-tile').length,3,'off-site images and links are dropped');assert(kqa('.canto-tile').every(a=>a.href.startsWith('https://skao.canto.global/')&&a.target==='_blank'));
  assert(kqa('.canto-tile img').every(i=>i.src.startsWith('http://localhost/download/attachments/')));assert(!kq2('.canto-tile img[onerror]')&&!kq2('.canto-caption img'));
  assert.equal(kq2('.canto-credit').textContent,'© SKAO');kqa('.canto-tabs button')[2].click();assert.equal(kqa('.canto-tile').length,1);assert.equal(kq2('.canto-open').href,'https://skao.canto.global/album/a2');

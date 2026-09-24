@@ -43,7 +43,7 @@ python3 scripts/dev_server.py --no-announcement  # no announcement banner
 Photos and video shows a gallery of the Canto **Staff media library** folder, and Telescope imagery, Hero images and Event photography show matching albums. Staff browsers never talk to Canto: `scripts/canto_sync.py` copies web-sized previews and a manifest (`canto-showcase.json`) into attachments on one Hub page, and the theme reads them from Confluence. Tiles open the asset in Canto.
 
 ```sh
-export CANTO_DOMAIN=skao CANTO_API_KEY=...            # or CANTO_APP_ID / CANTO_APP_SECRET
+export CANTO_DOMAIN=skao CANTO_APP_ID=... CANTO_APP_SECRET=...   # or CANTO_API_KEY (a generated token)
 export CANTO_FOLDER_PATH="Staff media library"
 python3 scripts/canto_sync.py --dry-run --out build/canto   # check what would be published
 python3 scripts/canto_sync.py --dry-run --env dev/canto.env   # same, reading settings from a local file (dev/ is not in Git)
