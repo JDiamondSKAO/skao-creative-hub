@@ -92,7 +92,8 @@ def sidebar(current, titles):
   key, label, landing, members, groups = sec
   out += f'<nav class="section-nav" aria-label="{label} pages"><h2>{label}</h2><a class="section-home" href="{landing}">{html.escape(titles[landing])}</a>'
   for g, pages in groups:
-   out += f'<h3>{g}</h3><ul>' + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul>'
+   out += (f'<details class="nav-group" open><summary><span>{g}</span><small>{len(pages)}</small></summary><ul>'
+    + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul></details>')
   out += '</nav>'
  else:
   out += '<nav class="section-nav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
@@ -200,10 +201,9 @@ def directory(name, pages, summaries):
  waiting = sum(m in STATE.get('on_request', ()) for m in listed)
  out = '<div class="directory">'
  if waiting:
-  out += (f'<p class="dir-note"><span class="dir-dot" aria-hidden="true"></span><span>Items marked with a dot are <strong>on request</strong>: the file is not downloadable from the Hub yet, '
-   f'so ask Creative Production for the current version. <a href="{STATE["jira"]}">Ask the team ↗</a></span></p>')
+  out += '<p class="dir-legend"><span class="dir-dot" aria-hidden="true"></span>On request: not downloadable from the Hub yet</p>'
  for g, items in groups:
-  out += f'<section class="dir-group"><h2>{g}</h2><ul class="dir-list">'
+  out += f'<section class="dir-group"><h2>{g} <span class="dir-count">{len(items)}</span></h2><ul class="dir-list">'
   for m in items:
    out += (f'<li><a class="dir-row" href="{m}"><span class="dir-text"><strong>{html.escape(pages[m][0])}</strong>'
     f'<span>{html.escape(summaries[m])}</span></span>{row_meta(m, key)}</a></li>')
@@ -218,6 +218,46 @@ def unfold(body):
   return f'<section class="landing-note"><h2>{m.group(1)}</h2>{inner}</section>'
  return re.sub(r'<details class="guidance-detail"><summary>(.*?)</summary><div>(.*?)</div></details>', open_detail, body, flags=re.S)
 
+VOID = {'br', 'img', 'input', 'hr', 'meta', 'link', 'source', 'wbr'}
+
+def top_level(fragment):
+ """Split an HTML fragment into its top-level elements."""
+ parts, depth, start = [], 0, None
+ for m in re.finditer(r'<(/?)([a-zA-Z][a-zA-Z0-9]*)[^>]*?(/?)>', fragment):
+  closing, tag, selfclose = m.group(1), m.group(2).lower(), m.group(3)
+  if tag in VOID or selfclose: continue
+  if not closing:
+   if depth == 0: start = m.start()
+   depth += 1
+  else:
+   depth -= 1
+   if depth == 0 and start is not None:
+    parts.append(fragment[start:m.end()]); start = None
+ return parts
+
+def rail(rest, waiting):
+ """Status and advice beside the list: headings visible, detail on demand."""
+ items = []
+ for el in top_level(rest):
+  if 'responsibility-split' in el[:60]:
+   title, body = 'Who does what', el
+  else:
+   h = re.search(r'<h2[^>]*>(.*?)</h2>', el, re.S)
+   if not h: continue
+   title, body = text(h.group(1)), el.replace(h.group(0), '', 1)
+  body = re.sub(r'<span class="eyebrow">.*?</span>', '', body, count=1, flags=re.S)
+  items.append((title, body))
+ if not (items or waiting): return ''
+ out = '<aside class="landing-rail" aria-label="Help with this section">'
+ if waiting:
+  out += (f'<div class="rail-status"><p><span class="dir-dot" aria-hidden="true"></span><strong>Need a file marked on request?</strong> '
+   f'Creative Production will send you the current version.</p><a class="button" href="{STATE["jira"]}">Ask for a file ↗</a></div>')
+ if items:
+  out += '<div class="rail-guides"><h2 class="rail-title">Before you start</h2>' + ''.join(
+   f'<details class="rail-item"{" open" if i == 0 else ""}><summary>{html.escape(t)}</summary><div class="rail-body">{b}</div></details>'
+   for i, (t, b) in enumerate(items)) + '</div>'
+ return out + '</aside>'
+
 def landing(name, body, pages, summaries):
  # Cards that only pointed at a few section pages give way to the full directory.
  body = re.sub(r'<details class="guidance-detail"><summary>[^<]*</summary><div><div class="choice-grid">.*?</details>', '', body, flags=re.S)
@@ -226,8 +266,8 @@ def landing(name, body, pages, summaries):
  d = directory(name, pages, summaries)
  # Quick answers (brand swatches, the Canto hand-off) stay first; the directory follows.
  def after(head, rest):
-  rest = rest.strip()
-  return head + d + (f'<div class="landing-guidance">{rest}</div>' if rest else '')
+  side = rail(rest.strip(), 'dir-legend' in d)
+  return head + (f'<div class="landing-layout"><div class="landing-main">{d}</div>{side}</div>' if side else d)
  for marker in ['<div class="type-spec">', '<div class="media-handoff">']:
   at = body.find(marker)
   if at >= 0:

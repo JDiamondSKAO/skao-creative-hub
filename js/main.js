@@ -364,6 +364,21 @@ document.addEventListener("DOMContentLoaded", () => {
     hero.value = "";
     input.dispatchEvent(new Event("input"));
   });
+  // Sidebar: only the group holding this page stays open.
+  const groups = $$(".section-nav details.nav-group");
+  if (groups.some((g) => g.querySelector("a[aria-current]"))) groups.forEach((g) => { g.open = !!g.querySelector("a[aria-current]"); });
+  // Pages with several questions get one control to open or close them all.
+  const body = $(".content-body");
+  const questions = body ? [...body.querySelectorAll(":scope > details.guidance-detail")] : [];
+  if (questions.length >= 3) {
+    const toggle = document.createElement("button");
+    toggle.type = "button"; toggle.className = "expand-all";
+    const label = () => { toggle.textContent = questions.every((d) => d.open) ? "Collapse all" : "Expand all"; };
+    toggle.addEventListener("click", () => { const open = !questions.every((d) => d.open); questions.forEach((d) => { d.open = open; }); label(); });
+    questions.forEach((d) => d.addEventListener("toggle", label));
+    label();
+    questions[0].before(toggle);
+  }
   // Checklists: ticks stay in this browser only.
   $$("[data-checklist]").forEach((bar) => {
     const key = "crh-check:" + bar.dataset.checklist;
@@ -394,6 +409,36 @@ document.addEventListener("DOMContentLoaded", () => {
     d.querySelector("input, textarea")?.focus({ preventScroll: true });
   }));
   openTarget(location.hash.slice(1));
+  // Announcement: the newest Hub page labelled "announcement". Dismissal lasts until that page changes.
+  const banner = $("#announcement");
+  if (banner) loadAnnouncement(banner);
+  async function loadAnnouncement(el) {
+    const link = $("#announcementLink"), KEY = "crh-announce-dismissed";
+    let item;
+    if (document.body.dataset.mode === "preview") {
+      item = { key: "example:1", title: "Example announcement: the newest Hub page labelled “announcement” appears here", href: link.href };
+    } else {
+      try {
+        const ctx = document.body.dataset.context || "";
+        const cql = 'type=page AND space="CRH" AND label="announcement" ORDER BY lastmodified DESC';
+        const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: "1", expand: "version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+        if (!res.ok) return;
+        const r = ((await res.json()).results || [])[0];
+        if (!r || !r.title) return;
+        item = { key: String(r.id) + ":" + String(r.version?.number || ""), title: String(r.title), href: ctx + (r._links?.webui || "/pages/viewpage.action?pageId=" + encodeURIComponent(r.id)) };
+      } catch { return; }
+    }
+    try { if (localStorage.getItem(KEY) === item.key) return; } catch {}
+    link.textContent = item.title;
+    const href = safeLink(item.href);
+    if (href) link.href = href;
+    el.hidden = false;
+    el.querySelector(".announce-close").addEventListener("click", () => {
+      el.hidden = true;
+      try { localStorage.setItem(KEY, item.key); } catch {}
+      (document.querySelector("#main-content") || document.body).focus?.({ preventScroll: true });
+    });
+  }
   // Latest approved assets on the homepage.
   const latest = $("#latestAssets");
   if (latest) loadLatest(latest);

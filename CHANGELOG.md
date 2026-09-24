@@ -1,5 +1,14 @@
 # Changes
 
+## 2.7.0 progressive disclosure, announcements, footer
+
+- Section landing pages put the page list on the left and a sticky help panel on the right: an "Ask for a file" action when items are on request, then the section's advice as one-line headings that open on demand (first one open). On phones the panel follows the list.
+- "On request" is a one-line legend above the list; group labels show their page count.
+- Detail-page sidebars open only the group that holds the current page; other groups show their count and open on click.
+- Pages with three or more questions (Common questions, Help) get an "Expand all" control. All question blocks share one hairline accordion style, and open smoothly where supported (no motion with reduced-motion settings).
+- Announcement banner returns under the header on every page. It shows the newest CRH page labelled `announcement` and links to it; editors control it from Confluence. Dismissal is remembered per page version, so an updated announcement shows again. The preview shows a marked example.
+- Footer in two tiers: identity with a "Can't find what you need?" request action, then a quiet bar of five secondary links.
+
 ## 2.6.0 landing pages as lists
 
 - Section landing pages list their pages as grouped rows (group label on the left, title and one-line summary on the right) instead of equal-weight cards, so they scan top to bottom and odd counts leave no gaps.
