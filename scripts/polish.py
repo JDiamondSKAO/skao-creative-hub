@@ -137,7 +137,7 @@ def asset_panel(name, body, jira):
   f'<span class="eyebrow">{label}</span><p class="asset-purpose">{m.group(1)}</p>'
   '<dl class="asset-facts"><div><dt>Status</dt><dd><span class="status-pill">Available on request</span> ' + detail + '</dd></div>'
   '<div class="how-to-get"><dt>How to get it</dt><dd>Ask Creative Production through the helpdesk for the current version.</dd></div>'
-  + ''.join(f'<div><dt>{label}</dt><dd>' + ('<ul class="variant-list">' + ''.join(f'<li>{v}</li>' for v in value) + '</ul>' if isinstance(value, list) else value) + '</dd></div>'
+  + ''.join(f'<div data-fact="{label.lower()}"><dt>{label}</dt><dd>' + ('<ul class="variant-list">' + ''.join(f'<li>{v}</li>' for v in value) + '</ul>' if isinstance(value, list) else value) + '</dd></div>'
     for label, value in brandkit.PACK.get(name, [])) + '</dl>'
   f'<div class="asset-actions"><a class="button" href="{jira}">Ask for this file ↗</a><a class="text-link" href="{guide}">{guide_label}</a></div>'
   '<div class="asset-downloads" data-downloads hidden></div></div></div>')

@@ -1,5 +1,12 @@
 # Changes
 
+## 2.10.2 downloads as choices
+
+- Downloads move out of the resource panel into their own section under it, so the panel stays compact and its artwork no longer stretches.
+- Files are grouped by the choice people are making: by information classification (Unrestricted to Strictly Confidential, with the proper labels), by office and layout, then by file type, with partner versions last.
+- One row per version with a button per format (for example A0 → DOCX, PDF, AI). Labels drop words every file in the group shares, so rows read "Confidential", "Bradford Office" or "ukSRC". Each button states the format and size.
+- Once files are listed, the panel's version chips and "How to get it" row give way to them, and "When you receive the file" reads "Before you use the file".
+
 ## 2.10.1 local test mode and fixes found with real files
 
 - Local test mode (`scripts/dev_server.py`) simulates Confluence so downloads, Just added, the announcement banner and search can be tested with real brand-bank files.

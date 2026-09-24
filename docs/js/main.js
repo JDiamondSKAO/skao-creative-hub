@@ -477,31 +477,102 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     const mine = pageId ? byPage.get(String(pageId)) : null;
     if (!mine?.length) return;
-    const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
-    const list = document.createElement("ul"); list.className = "download-list";
-    mine.forEach((f) => {
-      const href = safeLink(ctx + (f._links?.download || "")); if (!href) return;
-      const li = document.createElement("li"), a = document.createElement("a"), badge = document.createElement("span"), name = document.createElement("span"), meta = document.createElement("small");
-      const title = String(f.title || "");
-      badge.className = "file-badge"; badge.textContent = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toUpperCase(); badge.dataset.ext = badge.textContent.toLowerCase();
-      name.textContent = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").replace(/\s+/g, " ").trim() || title; name.title = title; meta.textContent = size(f.extensions?.fileSize);
-      a.href = href; a.setAttribute("download", ""); a.append(badge, name, meta); li.append(a); list.append(li);
-    });
-    if (!list.children.length) return;
-    const h = document.createElement("h3"); h.textContent = "Downloads";
+    const section = renderDownloads(mine, ctx);
+    if (!section) return;
     if (!panel) {
-      // Pages without a resource panel get a downloads section under their introduction.
-      const intro = $(".content-body > .task-intro"), section = document.createElement("section");
-      section.className = "page-downloads"; section.append(h, list);
+      const intro = $(".content-body > .task-intro");
       if (intro) intro.after(section); else $(".content-body")?.prepend(section);
       return;
     }
     const pill = panel.querySelector(".status-pill"), dd = pill?.closest("dd");
-    if (dd) { dd.replaceChildren(); const ok = document.createElement("span"); ok.className = "status-pill ready"; ok.textContent = "Available"; dd.append(ok, " Download the current files below."); }
-    panel.querySelector(".how-to-get")?.remove();
+    if (dd) { dd.replaceChildren(); const ok = document.createElement("span"); ok.className = "status-pill ready"; ok.textContent = "Available"; dd.append(ok, " Choose a file below."); }
+    panel.querySelectorAll('.how-to-get, [data-fact=versions], [data-fact=sizes], [data-fact="partner versions"]').forEach((el) => el.remove());
     const ask = panel.querySelector(".asset-actions .button");
     if (ask) { ask.classList.add("secondary"); ask.textContent = "Ask about this file ↗"; }
-    slot.replaceChildren(h, list); slot.hidden = false;
+    panel.after(section);
+    $$(".content-body .reading-section h2").forEach((h) => { if (h.textContent === "When you receive the file") h.textContent = "Before you use the file"; });
+  }
+  // Downloads grouped by the choice people are making: classification, office, partner, then file type.
+  function renderDownloads(files, ctx) {
+    const CLASSES = ["Unrestricted", "Staff Resources", "SKAO Staff Only", "For Project Use", "Confidential", "Strictly Confidential"];
+    const KINDS = [["Templates", /^(pptx?|potx|key|docx?|dotx)$/], ["Guides and PDFs", /^pdf$/], ["ZIP packs", /^zip$/], ["Video", /^(mp4|mov|m4v)$/], ["Motion templates", /^mogrt$/], ["Artwork", /^(ai|eps|indd|psd|svg)$/], ["Images", /^(png|jpe?g|gif|webp)$/]];
+    const FORMAT_ORDER = ["pptx", "potx", "key", "docx", "dotx", "pdf", "ai", "eps", "svg", "png", "jpg", "zip", "mp4", "mov", "mogrt"];
+    const partnerPage = /co-branding/i.test($(".page-head h1")?.textContent || "");
+    const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+    const pattern = (label) => new RegExp("(^|[\\s_-])" + label.replace(/ /g, "[\\s_-]+") + "($|[\\s_.-])", "i");
+    const tidy = (label) => {
+      let t = label.replace(/_+/g, " ").replace(/\s+/g, " ").trim();
+      if (t && t === t.toUpperCase()) t = t.toLowerCase();
+      t = t.charAt(0).toUpperCase() + t.slice(1);
+      return t.replace(/\b(skao|sarao|csiro|rcn|pdf|ska)\b/gi, (m) => m.toUpperCase()).replace(/\bsrcnet\b/gi, "SRCNet")
+        .replace(/\b([a-z]{2,3})src\b/gi, (m, c) => c.toLowerCase() + "SRC").replace(/\ba([0-5])\b/gi, "A$1");
+    };
+    // Words that name the brand or the file type rather than the version.
+    const NOISE = new Set(["skao", "ska", "template", "templates", "letterhead", "wordletterhead", "ppt", "logofiles", "signature", "file", "files"]);
+    // Split joined words ("KeynoteTemplate") but keep codes such as "ukSRC" whole.
+    const words = (base) => tidy(base.replace(/PowerPoint/g, "Powerpoint").replace(/([a-z])([A-Z][a-z])/g, "$1 $2").replace(/[()]/g, " ")).split(" ").filter((w) => /[\p{L}\p{N}]/u.test(w));
+    const variants = new Map();
+    files.forEach((f) => {
+      const title = String(f.title || ""), ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "").toLowerCase();
+      const href = safeLink(ctx + (f._links?.download || ""));
+      if (!href) return;
+      const base = title.replace(/\.[a-z0-9]+$/i, "");
+      const w = words(base), key = w.filter((x) => !/^(keynote|powerpoint)$/i.test(x)).join(" ").toLowerCase();
+      if (!variants.has(key)) variants.set(key, { base, words: w.filter((x) => !/^(keynote|powerpoint)$/i.test(x)), files: [] });
+      variants.get(key).files.push({ title, ext, href, size: size(f.extensions?.fileSize) });
+    });
+    if (!variants.size) return null;
+    [...variants.values()].forEach((v) => {
+      v.cls = [...CLASSES].sort((x, y) => y.length - x.length).find((c) => pattern(c).test(v.base));
+      const kinds = [...new Set(v.files.map((i) => KINDS.find(([, re]) => re.test(i.ext))?.[0] || "Other files"))];
+      v.group = kinds.length > 1 ? "Files" : kinds[0];
+      if (v.cls) v.group = "By information classification";
+      else if (!partnerPage && /\b(sarao|csiro|srcnet|rcn)\b|[a-z]src\b/i.test(v.words.join(" "))) v.group = "Partner versions";
+      else if (v.group === "Templates" && /office|landscape|portrait/i.test(v.base)) v.group = "By office and layout";
+    });
+    const ORDER = ["By information classification", "By office and layout", "Files", ...KINDS.map(([k]) => k), "Other files", "Partner versions"];
+    const groups = ORDER.map((name) => [name, [...variants.values()].filter((v) => v.group === name)]).filter(([, g]) => g.length);
+    const total = [...variants.values()].reduce((n, v) => n + v.files.length, 0);
+    const section = document.createElement("section"); section.className = "downloads"; section.setAttribute("aria-labelledby", "downloadsHeading");
+    const head = document.createElement("div"); head.className = "downloads-head";
+    const h2 = document.createElement("h2"); h2.id = "downloadsHeading"; h2.textContent = "Downloads";
+    const count = document.createElement("p"); count.textContent = total + (total === 1 ? " file" : " files");
+    head.append(h2, count); section.append(head);
+    const wrap = document.createElement("div"); wrap.className = "dl-groups" + (groups.length > 1 ? " multi" : "");
+    groups.forEach(([name, list]) => {
+      // Drop words every version in the group shares, when they are brand/type words or the group is large enough.
+      let lead = 0, tail = 0;
+      const strippable = (word) => NOISE.has(word.toLowerCase()) || list.length >= 3;
+      const at = (v, i) => v.words[i]?.toLowerCase();
+      if (list.length > 1) {
+        while (list.every((v) => v.words.length - lead - tail > 1 && at(v, lead) === at(list[0], lead)) && strippable(list[0].words[lead])) lead++;
+        while (list.every((v) => v.words.length - lead - tail > 1 && at(v, v.words.length - 1 - tail) === at(list[0], list[0].words.length - 1 - tail)) && strippable(list[0].words[list[0].words.length - 1 - tail])) tail++;
+      }
+      list.forEach((v, n) => {
+        const label = v.cls || v.words.slice(lead, v.words.length - tail).join(" ") || tidy(v.base);
+        v.label = /^[a-z]+(\s|$)/.test(label) ? label.charAt(0).toUpperCase() + label.slice(1) : label;
+        v.rank = v.cls ? CLASSES.indexOf(v.cls) : n;
+      });
+      const g = document.createElement("section"); g.className = "dl-group";
+      if (groups.length > 1) { const h3 = document.createElement("h3"); h3.textContent = name; g.append(h3); }
+      const ul = document.createElement("ul");
+      list.sort((x, y) => x.rank - y.rank).forEach((row) => {
+        const li = document.createElement("li"); li.className = "dl-row";
+        const label = document.createElement("span"); label.className = "dl-label"; label.textContent = row.label;
+        const formats = document.createElement("span"); formats.className = "dl-files";
+        row.files.sort((x, y) => (FORMAT_ORDER.indexOf(x.ext) + 99) % 99 - (FORMAT_ORDER.indexOf(y.ext) + 99) % 99).forEach((i) => {
+          const a = document.createElement("a"); a.className = "dl-file"; a.href = i.href; a.setAttribute("download", ""); a.title = i.title;
+          a.setAttribute("aria-label", `Download ${row.label}, ${(i.ext || "file").toUpperCase()}${i.size ? ", " + i.size : ""}`);
+          const b = document.createElement("b"); b.textContent = (i.ext || "file").toUpperCase(); b.dataset.ext = i.ext;
+          const small = document.createElement("small"); small.textContent = i.size;
+          a.append(b, small); formats.append(a);
+        });
+        li.append(label, formats); ul.append(li);
+      });
+      g.append(ul); wrap.append(g);
+    });
+    section.append(wrap);
+    return section;
   }
   // Latest approved assets on the homepage.
   const latest = $("#latestAssets");
