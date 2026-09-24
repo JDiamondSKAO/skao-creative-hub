@@ -22,6 +22,30 @@ document.addEventListener("DOMContentLoaded", () => {
     if (new URL(a.href).pathname.replace(/\/$/, "") === currentPath) a.setAttribute("aria-current", "page");
   });
   if ($(".start-hero")) navItems[0]?.setAttribute("aria-current", "page");
+  // Section menus: one open at a time; Escape or a click elsewhere closes them.
+  const navButtons = $$(".nav-button");
+  const panelOf = (b) => document.getElementById(b.getAttribute("aria-controls"));
+  const closeMenus = (except) => navButtons.forEach((b) => {
+    if (b === except) return;
+    b.setAttribute("aria-expanded", "false");
+    panelOf(b).hidden = true;
+  });
+  navButtons.forEach((b) => {
+    if (panelOf(b)?.querySelector('a[aria-current="page"]')) b.dataset.current = "true";
+    b.addEventListener("click", () => {
+      const open = b.getAttribute("aria-expanded") !== "true";
+      closeMenus(b);
+      b.setAttribute("aria-expanded", String(open));
+      panelOf(b).hidden = !open;
+    });
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".nav-item")) closeMenus(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const open = navButtons.find((b) => b.getAttribute("aria-expanded") === "true");
+    if (open) { closeMenus(); open.focus(); }
+  });
+  document.addEventListener("focusin", (e) => { if (!e.target.closest(".nav-item")) closeMenus(); });
   const menu = $("#menuButton"),
     nav = $("#mainNav");
   menu?.addEventListener("click", () => {
@@ -499,7 +523,7 @@ document.addEventListener("DOMContentLoaded", () => {
     route.textContent="Ask for the available resource ↗";
     notice.append(title,text,route); article.prepend(notice);
   }
-  if (article && toc && !filter) {
+  if (article && toc && !filter && !article.querySelector(".directory")) {
     const pageTitle = document.querySelector(".page-head h1");
     const first = article.querySelector("h1");
     if (

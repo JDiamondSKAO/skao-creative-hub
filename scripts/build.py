@@ -39,22 +39,22 @@ from journeys import revise
 PAGES=revise(PAGES,JIRA,CANTO,LIVE)
 from interiors import revise as revise_interiors, ROUTES
 PAGES, INTERIOR_META=revise_interiors(PAGES,JIRA,CANTO)
-from polish import revise as revise_polish, text, summary, sidebar as section_sidebar, section_of, SECTIONS, EXTRA
+from polish import revise as revise_polish, text, summary, sidebar as section_sidebar, section_of, SECTIONS, EXTRA, members_of, nav as mega_nav
 PAGES,SOURCE_TITLES=revise_polish(PAGES,INTERIOR_META,JIRA)
 home=PAGES['index.html'][1]
 request=PAGES['request.html'][1]
 production_presentations=PAGES['presentations.html'][1].replace(LIVE+'slide-decks-presentations-381891794.html', '#library-sections').replace('Open the current slide library', 'Browse library sections')
 svg='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>'
 def header(current):
- links=''.join(f'<a href="{url}"'+(' aria-current="page"' if current==url else '')+f'>{label}</a>' for url,label in NAV)
+ links=mega_nav(current)
  return f'''<a href="#main-content" class="skip">Skip to main content</a><header><div class="brandbar"><div class="wrap brandrow"><a class="brand" href="index.html"><img src="images/skao-logo-white.png" width="100" alt="SKA Observatory"><span class="brand-title">Creative <strong>Hub</strong></span></a><div class="brandtools"><span class="staff-label">Resources for staff</span><button id="motionToggle" class="motion-toggle" aria-label="Pause header animation" aria-pressed="false" title="Pause header animation" hidden><span aria-hidden="true">Ⅱ</span></button><button id="themeToggle" class="icon-button" aria-label="Toggle dark mode" aria-pressed="false"><span class="theme-moon">{svg}</span><span class="theme-sun" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></span></button></div></div></div><div class="wrap navrow"><button id="menuButton" class="mobile-menu" aria-expanded="false" aria-controls="mainNav">Menu</button><nav id="mainNav" class="navlinks" aria-label="Main navigation">{links}</nav><button class="search-trigger" data-search><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search the Hub</span> <kbd data-shortcut>Ctrl K</kbd></button></div></header>'''
-def footer():return '''<footer class="footer"><div class="wrap footer-grid"><div class="footer-identity"><strong>Creative Hub</strong><span>SKA Observatory</span><p>Templates, brand guidance and creative support for everyone at the SKAO.</p></div><nav aria-label="Find resources"><h2>Find</h2>'''+a('resources.html','Templates and assets')+a('presentations.html','Presentations')+a('brand.html','Brand guidance')+a(CANTO,'Photos and video in Canto ↗')+'''</nav><nav aria-label="Get help"><h2>Get help</h2>'''+a('request.html','Request creative help')+a('timing.html','How timing is agreed')+a('faq.html','FAQ')+a('help.html','Help with the Hub')+'''</nav><nav aria-label="Contribute"><h2>Contribute</h2>'''+a('contribute.html','Share material')+a(JIRA,'Report a problem ↗')+'''</nav></div></footer><dialog id="searchDialog" aria-labelledby="searchTitle"><div class="dialog-title"><h2 id="searchTitle">Search the Hub</h2><button id="closeSearch" class="close-button" aria-label="Close search">×</button></div><p class="search-scope">Searches Hub pages and guidance. Photos and video are in <a href="'''+CANTO+'''">Canto ↗</a>.</p><form id="searchForm" role="search"><label class="field">What do you need?<input id="searchInput" type="search" maxlength="120" autocomplete="off" placeholder="Try presentation, logo or request"></label></form><div id="searchSuggest" class="search-suggest"><div id="recentPages" hidden><h3>Recently viewed</h3><div id="recentList" class="suggest-list"></div></div><div><h3>Quick links</h3><div class="suggest-list"><a href="logos.html">SKAO logo files</a><a href="standard-template.html">Presentation template</a><a href="colours-and-type.html">Brand colours and type</a><a href="fonts.html">Fonts</a><a href="email-signatures.html">Email signature</a><a href="documents.html">Document templates</a><a href="request.html">Request creative help</a><a href="'''+CANTO+'''">Photos and video in Canto ↗</a></div></div></div><p id="searchStatus" role="status" class="status"></p><div id="searchResults" class="search-results"></div><div class="search-fallback"><a href="resources.html">Browse templates and assets →</a><a href="request.html">Ask for help →</a></div></dialog><p id="copyAnnounce" class="visually-hidden" role="status"></p><script src="js/theme.js" defer></script><script src="js/main.js?v=journeys-20260924" defer></script>'''
+def footer():return '''<footer class="footer"><div class="wrap footer-grid"><div class="footer-identity"><strong>Creative Hub</strong><span>SKA Observatory</span><p>Templates, brand guidance and creative support for everyone at the SKAO.</p></div><nav aria-label="Find resources"><h2>Find</h2>'''+a('presentations.html','Presentations')+a('documents.html','Documents')+a('brand.html','Brand')+a('media.html','Photos and video')+a('resources.html','Everything in the Hub')+'''</nav><nav aria-label="Get help"><h2>Get help</h2>'''+a('request.html','Request creative help')+a('timing.html','How timing is agreed')+a('faq.html','Common questions')+a('help.html','Help with the Hub')+'''</nav><nav aria-label="Contribute"><h2>Contribute</h2>'''+a('contribute.html','Share material')+a('updates.html','Hub updates')+a(JIRA,'Report a problem ↗')+a(CANTO,'Canto library ↗')+'''</nav></div></footer><dialog id="searchDialog" aria-labelledby="searchTitle"><div class="dialog-title"><h2 id="searchTitle">Search the Hub</h2><button id="closeSearch" class="close-button" aria-label="Close search">×</button></div><p class="search-scope">Searches Hub pages and guidance. Photos and video are in <a href="'''+CANTO+'''">Canto ↗</a>.</p><form id="searchForm" role="search"><label class="field">What do you need?<input id="searchInput" type="search" maxlength="120" autocomplete="off" placeholder="Try presentation, logo or request"></label></form><div id="searchSuggest" class="search-suggest"><div id="recentPages" hidden><h3>Recently viewed</h3><div id="recentList" class="suggest-list"></div></div><div><h3>Quick links</h3><div class="suggest-list"><a href="logos.html">SKAO logo files</a><a href="standard-template.html">Presentation template</a><a href="colours-and-type.html">Brand colours and type</a><a href="fonts.html">Fonts</a><a href="email-signatures.html">Email signature</a><a href="documents.html">Document templates</a><a href="request.html">Request creative help</a><a href="'''+CANTO+'''">Photos and video in Canto ↗</a></div></div></div><p id="searchStatus" role="status" class="status"></p><div id="searchResults" class="search-results"></div><div class="search-fallback"><a href="resources.html">Browse templates and assets →</a><a href="request.html">Ask for help →</a></div></dialog><p id="copyAnnounce" class="visually-hidden" role="status"></p><script src="js/theme.js" defer></script><script src="js/main.js?v=ia-20260924" defer></script>'''
 def shell(title,body,current,home=False):
  sidebar=section_sidebar(current,SOURCE_TITLES)
  sec=section_of(current)
  crumb=(a(sec[2],sec[1])+' / ') if sec and sec[2]!=current else ''
  main=body if home else '<div class="page-band"><div class="breadcrumbs">'+a('index.html','Creative Hub')+' / '+crumb+html.escape(title)+'</div><div class="page-head"><p class="eyebrow">'+html.escape(INTERIOR_META.get(current,{}).get('group','Creative Hub'))+'</p><h1>'+html.escape(title)+'</h1></div></div><div class="page-grid">'+sidebar+'<article class="content-body">'+body+'</article></div>'
- return '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>'+html.escape(title)+' | SKAO Creative Hub</title><link rel="stylesheet" href="css/style.css?v=journeys-20260924"><script src="js/boot.js"></script></head><body data-mode="preview">'+header(current)+'<div class="wrap preview-note">Design preview · Guidance is proposed; library links open the current staff services.</div><main id="main-content" class="wrap" tabindex="-1">'+main+'</main>'+footer()+'</body></html>'
+ return '<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>'+html.escape(title)+' | SKAO Creative Hub</title><link rel="stylesheet" href="css/style.css?v=ia-20260924"><script src="js/boot.js"></script></head><body data-mode="preview">'+header(current)+'<div class="wrap preview-note">Design preview · Guidance is proposed; library links open the current staff services.</div><main id="main-content" class="wrap" tabindex="-1">'+main+'</main>'+footer()+'</body></html>'
 for name,(title,body) in PAGES.items():
  (D/name).write_text(shell(title,body,name,name=='index.html'))
  (R/'content'/name.replace('.html','.html')).write_text(body)
@@ -80,9 +80,11 @@ main='''<main id="main-content" class="wrap" tabindex="-1">
 <div class="page-grid">
 '''
 ROUTE_IDS={filename:id for id,title,filename,group in ROUTES}
-for n,(key,label,landing,members) in enumerate(SECTIONS):
- cond=' || '.join(f'$page.id.toString() == "{ROUTE_IDS[m]}"' for m in members+[x for x,k in EXTRA.items() if k==key])
- main+=('#if' if n==0 else '#elseif')+f'({cond})\n'+section_sidebar(landing if landing in members else members[0],SOURCE_TITLES)+'\n'
+for n,sec in enumerate(SECTIONS):
+ key,landing=sec[0],sec[2]
+ members=[m for m in members_of(sec) if section_of(m)[0]==key]+[x for x,k in EXTRA.items() if k==key]
+ cond=' || '.join(f'$page.id.toString() == "{ROUTE_IDS[m]}"' for m in members)
+ main+=('#if' if n==0 else '#elseif')+f'({cond})\n'+section_sidebar(landing,SOURCE_TITLES)+'\n'
 main+='#else\n'+section_sidebar('',SOURCE_TITLES)+'\n#end\n'
 main+='''<article class="content-body">
 '''
@@ -96,6 +98,19 @@ $page.content
 #end
 </main>'''
 prod=prod[:start]+main+prod[end:]
+# Route pages show their Hub section in the breadcrumb, matching the sidebar.
+ancestors="""#foreach($ancestor in $page.ancestors)
+#if($ancestor.id != $pages.home.id) / <a href="$ancestor.absoluteLink">$stringEscapeUtils.escapeHtml($ancestor.title)</a>#end
+#end"""
+assert ancestors in prod
+crumbs=''
+for n,sec in enumerate(SECTIONS):
+ key,label,landing=sec[0],sec[1],sec[2]
+ members=[m for m in members_of(sec) if section_of(m)[0]==key and m!=landing]+[x for x,k in EXTRA.items() if k==key]
+ cond=' || '.join(f'$page.id.toString() == "{ROUTE_IDS[m]}"' for m in members)
+ crumbs+=('#if' if n==0 else '#elseif')+f'({cond}) / <a href="{landing}">{label}</a>\n'
+crumbs+=f'#elseif($page.id.toString() == "{ROUTE_IDS[SECTIONS[0][2]]}"'+''.join(f' || $page.id.toString() == "{ROUTE_IDS[sec[2]]}"' for sec in SECTIONS[1:])+')\n#else\n'+ancestors+'\n#end'
+prod=prod.replace(ancestors,crumbs,1)
 PAGE_TITLES={'index.html':'SKAO Creative Hub Home','resources.html':'Templates & Assets','presentations.html':'Slide Decks & Presentations','brand.html':'Brand Guidelines','request.html':'Submitting a Request','contribute.html':'How to Submit Your Deck','events.html':'Events Support','help.html':'Tools & Resources'}
 PAGE_TITLES.update({filename:title for id,title,filename,group in ROUTES})
 for local,title in PAGE_TITLES.items():

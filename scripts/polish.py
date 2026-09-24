@@ -16,24 +16,61 @@ def summary(body):
 
 SEARCH_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
 
-# Navigation sections: key, label, landing page, pages in reading order.
+# Information architecture: the top menu, sidebars, landing directories and
+# homepage all use these sections and groups, so staff meet one structure.
+# (key, menu label, landing page, [(group, [pages])]). A page listed in more
+# than one section belongs to the first; later listings are cross-links.
 SECTIONS = [
- ('presentations', 'Presentations', 'presentations.html', ['presentations.html', 'standard-template.html', 'widescreen-template.html', 'master-deck.html', 'science-slides.html', 'low-slides.html', 'mid-slides.html', 'construction-slides.html', 'specialised-slides.html', 'formatting-slides.html']),
- ('documents', 'Documents', 'documents.html', ['documents.html', 'letterheads.html', 'memos.html', 'reports.html', 'email-signatures.html', 'poster-templates.html']),
- ('brand', 'Brand', 'brand.html', ['brand.html', 'logos.html', 'logo-guidance.html', 'colours-and-type.html', 'fonts.html', 'brand-in-practice.html', 'co-branding-csiro.html', 'co-branding-sarao.html', 'brand-book.html']),
- ('media', 'Photos and video', 'media.html', ['media.html', 'canto-access.html', 'hero-images.html', 'telescope-images.html', 'event-photos.html', 'image-usage.html', 'video.html', 'b-roll.html', 'recordings.html', 'animations.html']),
- ('events', 'Events', 'events.html', ['events.html', 'event-checklist.html', 'stands.html', 'merchandise.html', 'event-safety.html']),
- ('guides', 'How-to guides', 'self-service.html', ['self-service.html', 'making-a-poster.html', 'print-preparation.html', 'accessibility.html', 'firefly.html']),
- ('services', 'Creative services', 'working-with-us.html', ['working-with-us.html', 'creative-services.html', 'request.html', 'timing.html', 'video-request.html', 'print.html', 'print-suppliers.html', 'business-cards.html']),
- ('support', 'Help', 'help.html', ['help.html', 'faq.html', 'contribute.html', 'updates.html', 'archive.html']),
+ ('presentations', 'Presentations', 'presentations.html', [
+  ('Templates', ['standard-template.html', 'widescreen-template.html']),
+  ('Decks to reuse', ['master-deck.html', 'science-slides.html', 'low-slides.html', 'mid-slides.html', 'construction-slides.html', 'specialised-slides.html']),
+  ('How to', ['formatting-slides.html'])]),
+ ('documents', 'Documents', 'documents.html', [
+  ('Templates', ['letterheads.html', 'memos.html', 'reports.html', 'email-signatures.html']),
+  ('Posters', ['poster-templates.html'])]),
+ ('brand', 'Brand', 'brand.html', [
+  ('Artwork and files', ['logos.html', 'fonts.html', 'brand-book.html']),
+  ('Using the brand', ['logo-guidance.html', 'colours-and-type.html', 'brand-in-practice.html']),
+  ('Partner brands', ['co-branding-csiro.html', 'co-branding-sarao.html'])]),
+ ('media', 'Photos and video', 'media.html', [
+  ('Photos', ['canto-access.html', 'hero-images.html', 'telescope-images.html', 'event-photos.html']),
+  ('Video', ['video.html', 'b-roll.html', 'recordings.html', 'animations.html']),
+  ('Using media', ['image-usage.html'])]),
+ ('events', 'Events', 'events.html', [
+  ('Plan', ['event-checklist.html', 'event-safety.html']),
+  ('Materials', ['stands.html', 'merchandise.html', 'print.html'])]),
+ ('guides', 'How-to guides', 'self-service.html', [
+  ('Print and posters', ['making-a-poster.html', 'print-preparation.html']),
+  ('Good practice', ['accessibility.html', 'firefly.html', 'formatting-slides.html'])]),
+ ('help', 'Get help', 'working-with-us.html', [
+  ('Ask the team', ['request.html', 'creative-services.html', 'timing.html']),
+  ('Specific requests', ['video-request.html', 'print.html', 'print-suppliers.html', 'business-cards.html']),
+  ('Help with the Hub', ['help.html', 'faq.html', 'contribute.html', 'updates.html', 'archive.html'])]),
 ]
 # Pages that belong to a section without being listed (duplicate source titles).
 EXTRA = {'canto-guide.html': 'media'}
 
+def members_of(section):
+ key, label, landing, groups = section
+ out = [landing]
+ for g, pages in groups:
+  out += [p for p in pages if p not in out]
+ return out
+
+# Where a cross-listed page lives when first listing is not its natural home.
+HOME = {'print.html': 'help'}
+
 def section_of(name):
- for key, label, landing, members in SECTIONS:
-  if name in members or EXTRA.get(name) == key: return key, label, landing, members
+ """Primary section of a page: (key, label, landing, members, groups)."""
+ for sec in sorted(SECTIONS, key=lambda x: x[0] != HOME.get(name)):
+  if name in members_of(sec) or EXTRA.get(name) == sec[0]:
+   key, label, landing, groups = sec
+   return key, label, landing, members_of(sec), groups
  return None
+
+def primary(name, key):
+ sec = section_of(name)
+ return bool(sec) and sec[0] == key
 
 # Catalogue filters, in the order staff usually look for things.
 TYPES = [
@@ -50,35 +87,32 @@ CHECKLISTS = {'event-checklist.html', 'print-preparation.html', 'making-a-poster
 
 def sidebar(current, titles):
  sec = section_of(current)
- others = [(landing, label) for key, label, landing, _ in SECTIONS if not sec or key != sec[0]]
  out = '<aside class="sidebar">'
  if sec:
-  key, label, landing, members = sec
-  out += f'<nav class="section-nav" aria-label="{label} pages"><h2><a href="{landing}">{label}</a></h2><ul>'
-  out += ''.join(f'<li><a href="{m}">{"Overview" if m == landing else html.escape(titles[m])}</a></li>' for m in members)
-  out += '</ul></nav><details class="other-sections"><summary>Other sections</summary>'
+  key, label, landing, members, groups = sec
+  out += f'<nav class="section-nav" aria-label="{label} pages"><h2>{label}</h2><a class="section-home" href="{landing}">{html.escape(titles[landing])}</a>'
+  for g, pages in groups:
+   out += f'<h3>{g}</h3><ul>' + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul>'
+  out += '</nav>'
  else:
-  out += '<nav class="section-nav" aria-label="Hub sections"><h2>Sections</h2><div>'
- out += ''.join(f'<a href="{u}">{t}</a>' for u, t in [('resources.html', 'Templates and assets')] + others)
- out += '</details>' if sec else '</div></nav>'
+  out += '<nav class="section-nav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
+   f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">Everything in the Hub</a></li></ul></nav>'
  return out + '<nav id="toc" class="toc" aria-label="On this page"></nav></aside>'
 
 def related(name, pages, summaries):
  sec = section_of(name)
  if not sec: return ''
- key, label, landing, members = sec
- if name == landing:
-  if 'choice-grid' in pages[name][1]: return ''
-  picks, heading, lead = [m for m in members if m != name], 'In this section', ''
- else:
-  rest = [m for m in members if m != landing]
+ key, label, landing, members, groups = sec
+ if name == landing: return ''
+ if True:
+  rest = [m for m in members if m != landing and primary(m, key)]
   at = rest.index(name) if name in rest else -1
   picks = [rest[(at + i) % len(rest)] for i in range(1, min(4, len(rest)))] if rest else []
   heading = 'More in ' + label
  cards = ''.join(
   f'<a class="related-card" href="{m}">' + ('<span class="related-next">Next</span>' if i == 0 and name != landing else '') +
   f'<strong>{html.escape(pages[m][0])}</strong><span>{html.escape(summaries[m])}</span></a>' for i, m in enumerate(picks))
- more = '' if name == landing else f'<a class="related-all" href="{landing}">All {label.lower() if key != "support" else "help"} pages →</a>'
+ more = f'<a class="related-all" href="{landing}">{html.escape(pages[landing][0])} →</a>'
  return f'<nav class="section-next" aria-label="{heading}"><div class="section-next-head"><h2>{heading}</h2>{more}</div><div class="related-grid">{cards}</div></nav>'
 
 # Resource pages: one panel with purpose, status and how to get the file.
@@ -149,6 +183,84 @@ def request_routes(body, jira):
  body = body.replace('<div class="process-strip">', routes + '<div class="process-strip">', 1)
  return body.replace('<details class="brief-builder">', '<details class="brief-builder" id="brief-builder">', 1)
 
+STATE = {}  # titles and summaries, filled by revise() for the header menus
+
+def status_pill(name):
+ return '<span class="status-pill">On request</span>' if name in STATE.get('on_request', ()) else ''
+
+def directory(name, pages, summaries):
+ sec = section_of(name)
+ key, label, landing, members, groups = sec
+ out = '<div class="directory">'
+ for g, items in groups:
+  out += f'<section class="dir-group"><h2>{g}</h2><div class="dir-grid">'
+  for m in items:
+   out += (f'<a class="dir-card" href="{m}"><strong>{html.escape(pages[m][0])}</strong><span>{html.escape(summaries[m])}</span>'
+    + status_pill(m) + ('' if primary(m, key) else '<small class="dir-cross">In ' + section_of(m)[1] + '</small>') + '</a>')
+  out += '</div></section>'
+ return out + '</div>'
+
+def unfold(body):
+ """Landing pages show their short advice instead of hiding it."""
+ def open_detail(m):
+  inner = m.group(2)
+  if '<h2' in inner: return f'<section class="landing-note">{inner}</section>'
+  return f'<section class="landing-note"><h2>{m.group(1)}</h2>{inner}</section>'
+ return re.sub(r'<details class="guidance-detail"><summary>(.*?)</summary><div>(.*?)</div></details>', open_detail, body, flags=re.S)
+
+def landing(name, body, pages, summaries):
+ # Cards that only pointed at a few section pages give way to the full directory.
+ body = re.sub(r'<details class="guidance-detail"><summary>[^<]*</summary><div><div class="choice-grid">.*?</details>', '', body, flags=re.S)
+ body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)
+ body = unfold(body)
+ d = directory(name, pages, summaries)
+ # Quick answers (brand swatches, the Canto hand-off) stay first; the directory follows.
+ for marker in ['<div class="type-spec">', '<div class="media-handoff">']:
+  at = body.find(marker)
+  if at >= 0:
+   close = body.find('</div></div>', at) + 12
+   return body[:close] + d + body[close:]
+ m = re.search(r'<div class="task-intro">.*?</div>(?:<a [^>]*class="button"[^>]*>.*?</a>)?</div>', body, re.S)
+ return body[:m.end()] + d + body[m.end():] if m else d + body
+
+CHEVRON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+
+def nav(current=''):
+ titles, summaries = STATE['titles'], STATE['summaries']
+ cur = section_of(current)
+ out = ''
+ for key, label, landing_page, groups in SECTIONS:
+  here = ' data-current="true"' if cur and cur[0] == key else ''
+  out += (f'<div class="nav-item"><button type="button" class="nav-button" aria-expanded="false" aria-controls="menu-{key}"{here}>{label}{CHEVRON}</button>'
+   f'<div class="mega" id="menu-{key}" hidden><div class="mega-inner"><div class="mega-intro"><strong>{label}</strong><p>{html.escape(summaries[landing_page])}</p>'
+   f'<a class="mega-home" href="{landing_page}">{html.escape(titles[landing_page])} →</a></div>')
+  for g, pages in groups:
+   out += f'<div class="mega-group"><h3>{g}</h3><ul>' + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul></div>'
+  out += '</div></div></div>'
+ return out
+
+TILES = [
+ ('presentations', 'slides', 'Templates, reusable decks and formatting help.', ['standard-template.html', 'master-deck.html', 'formatting-slides.html']),
+ ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'email-signatures.html', 'poster-templates.html']),
+ ('brand', 'brand', 'Logos, colours, fonts and partner rules.', ['logos.html', 'colours-and-type.html', 'fonts.html']),
+ ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'hero-images.html', 'image-usage.html']),
+ ('events', 'events', 'Stands, print and merchandise for events.', ['event-checklist.html', 'stands.html', 'merchandise.html']),
+ ('guides', 'guides', 'Do-it-yourself checks for common jobs.', ['making-a-poster.html', 'print-preparation.html', 'accessibility.html']),
+]
+TILE_ART = {**ART,
+ 'events': '<span class="art-events"><i></i><b>SKAO</b><em></em></span>',
+ 'guides': '<span class="art-guides"><i></i><i></i><i></i></span>'}
+
+def home_tiles(home, titles):
+ media_svg = re.search(r'<a class="quick-resource media"[^>]*><div class="resource-art" aria-hidden="true">(.*?)</div>', home, re.S)
+ art = {**TILE_ART, 'media': media_svg.group(1) if media_svg else ''}
+ out = '<div class="section-tiles">'
+ for key, kind, desc, links in TILES:
+  sec = next(x for x in SECTIONS if x[0] == key)
+  out += (f'<article class="section-tile kind-{kind}"><a class="tile-main" href="{sec[2]}"><div class="tile-art" aria-hidden="true">{art[kind]}</div>'
+   f'<h3>{sec[1]}</h3><p>{desc}</p></a><ul class="tile-links">' + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in links) + '</ul></article>')
+ return out + '</div>'
+
 def latest_band():
  return ('<section class="latest-band journey-band" aria-labelledby="latestHeading"><div class="band-heading"><div><p class="eyebrow" id="latestEyebrow">03 / Just added</p>'
   '<h2 id="latestHeading">Latest approved assets</h2><p class="latest-lead" id="latestLead">The newest approved files uploaded to the Creative Hub.</p></div>'
@@ -160,14 +272,17 @@ def revise(pages, meta, jira):
  titles = {n: t for n, (t, b) in pages.items()}
  summaries = {n: summary(b) for n, (t, b) in pages.items()}
  on_request = {n for n, (t, b) in pages.items() if 'availability-note' in b}
+ STATE.update(titles=titles, summaries=summaries, on_request=on_request)
  for name in meta:
   title, body = pages[name]
   if name in on_request: body = asset_panel(name, body, jira)
   if name in CHECKLISTS: body = checklist(name, body)
   if name == 'request.html': body = request_routes(body, jira)
   pages[name] = (title, body)
+ landings = {sec[2] for sec in SECTIONS}
  for name in meta:
   title, body = pages[name]
+  if name in landings: body = landing(name, body, pages, summaries)
   pages[name] = (title, body + related(name, pages, summaries))
  title, body = pages['resources.html']
  body = body.replace('<div class="choice-grid">', '<div class="choice-grid compact">', 1)
@@ -180,6 +295,8 @@ def revise(pages, meta, jira):
  assert old in home
  home = home.replace(old, '<form class="hero-search" data-hub-search role="search"><label for="heroSearch" class="visually-hidden">Search the Creative Hub</label>' + SEARCH_ICON +
   '<input id="heroSearch" type="search" autocomplete="off" placeholder="Search templates, logos, guidance…"><button class="button" type="submit">Search</button></form>')
+ home = re.sub(r'<div class="quick-library">.*?</div></section>', lambda m: home_tiles(home, titles) + '</section>', home, count=1, flags=re.S)
+ home = home.replace('<h2>What do you need?</h2>', '<h2>Browse by section</h2>', 1)
  assert home.endswith('</div>')
  pages['index.html'] = (title, home[:-6] + latest_band() + '</div>')
  return pages, titles
