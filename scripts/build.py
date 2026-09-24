@@ -5,7 +5,7 @@ R=Path(__file__).resolve().parents[1];D=R/'docs';D.mkdir(exist_ok=True)
 (R/'content').mkdir(exist_ok=True)
 (R/'evidence').mkdir(exist_ok=True)
 JIRA='https://jira.skatelescope.org/servicedesk/customer/portal/364'
-CANTO='https://skao.canto.global/v/SKAOLibrary?from_main_library'
+CANTO='https://skao.canto.global/v/SKAOStaff'
 LIVE='https://confluence.skatelescope.org/crh/'
 NAV=[('index.html','Home'),('resources.html','Templates and assets'),('brand.html','Brand guidance'),('request.html','Request help'),('contribute.html','Share material')]
 LIVE_LINKS={'index.html':LIVE,'resources.html':LIVE+'templates-assets-381891696.html','presentations.html':LIVE+'slide-decks-presentations-381891794.html','brand.html':LIVE+'brand-guidelines-381891606.html','request.html':LIVE+'submitting-a-request-381891661.html','contribute.html':LIVE+'how-to-submit-your-deck-381891810.html','events.html':LIVE+'events-support-381891637.html','help.html':LIVE+'tools-resources-381891870.html'}

@@ -333,7 +333,8 @@ def canto_gallery(canto):
   '<h2 id="cantoHeading">Approved photos and artwork</h2></div>'
   f'<a class="text-link canto-open" href="{canto}" target="_blank" rel="noopener">Open in Canto ↗</a></div>'
   '<div class="canto-tabs" role="group" aria-label="Show album"></div><ul class="canto-grid"></ul>'
-  '<p class="canto-note">Select an image to open it in Canto, where you’ll find its credit, usage notes and downloads.</p></section>')
+  '<p class="canto-note">Select an image to open it in Canto, where you’ll find its credit, usage notes and downloads. '
+  'First time? On the Canto sign-in page, choose Register Now and use your SKAO email address.</p></section>')
 
 def canto_strip(words, canto):
  return (f'<section class="canto-strip" data-canto="{words}" hidden><div class="canto-head"><h2>In the staff media library</h2>'

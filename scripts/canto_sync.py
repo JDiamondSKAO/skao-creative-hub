@@ -20,9 +20,9 @@ Environment
   CANTO_DOMAIN        subdomain, e.g. "skao"
   CANTO_API_KEY       direct API token, or CANTO_APP_ID and CANTO_APP_SECRET
   CANTO_FOLDER_PATH   namePath prefix to publish (default "Staff media library")
-  CANTO_PORTAL        portal that shows the staff folder, e.g. "SKAOStaff". Tiles then open the asset in that
-                      portal (/v/{portal}/album/{album}?column=image&id={id}), which staff without a Canto
-                      login can use. Unset: links open the asset over its album in the Canto library
+  CANTO_PORTAL        private portal that shows the staff folder (default "SKAOStaff"). Tiles open the asset in
+                      that portal (/v/{portal}/album/{album}?column=image&id={id}); staff sign in as Consumers
+                      with access to that portal only. "library": links open the asset over its album in the Canto library
                       (/album/{album}?column=image&id=..., so closing returns to that album), which needs a Canto login with access to the folder.
                       Don't point this at a portal that doesn't include the staff folder: Canto then says the
                       album "cannot be accessed" and offers to remove the file's record.
@@ -425,7 +425,8 @@ def run(args):
     log('Canto auth: ' + ('client credentials (App ID and App Secret)' if env('CANTO_APP_ID') and env('CANTO_APP_SECRET') else 'generated access token'))
     canto = Canto(domain, env('CANTO_API_KEY'), env('CANTO_APP_ID'), env('CANTO_APP_SECRET'), env('CANTO_OAUTH_URL'))
     feature = env('CANTO_FEATURE_TAG', 'Hub feature')
-    portal = env('CANTO_PORTAL')
+    portal = env('CANTO_PORTAL', 'SKAOStaff')
+    if portal.lower() == 'library': portal = ''
     asset_url, album_url, folder_url = link_templates(portal)
     asset_url, album_url, folder_url = env('CANTO_ASSET_URL') or asset_url, env('CANTO_ALBUM_URL') or album_url, env('CANTO_FOLDER_URL') or folder_url
     log('Links open ' + (f'the "{portal}" portal' if portal else 'the Canto library (staff need a Canto login)'))

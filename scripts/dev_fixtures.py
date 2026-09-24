@@ -53,7 +53,7 @@ if stand:
             aid = f'standin{i}x{j}'; sources[aid] = p
             assets.append({'id': aid, 'name': p.name, 'scheme': 'image', 'copyright': ''})
         albums.append((album, assets))
-    portal = stand.get('link', 'https://skao.canto.global/v/SKAOLibrary')
+    portal = stand.get('link', 'https://skao.canto.global/v/SKAOStaff')
     manifest = canto_sync.build_manifest(albums, 'skao', page_id, 'Staff media library', asset_url=portal, album_url=portal)
     for al in manifest['albums']:
         for item in al['assets']:

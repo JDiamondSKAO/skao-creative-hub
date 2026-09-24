@@ -1,5 +1,11 @@
 # Changes
 
+## 2.13.0 SKAO Staff portal
+
+- Canto tiles, album links and every general Canto link now open the private SKAO Staff portal, which shows only the Staff media library to staff signed in as Consumers. Closing an asset returns to its album in the portal.
+- The gallery note tells first-time visitors to choose Register Now and use their SKAO email address.
+- `CANTO_PORTAL` defaults to `SKAOStaff`; set it to `library` for main-library links.
+
 ## 2.12.2 Canto assets open in their album
 
 - Tiles open the asset over its own album (`/album/{album}?column=image&id={asset}`), so closing it returns to that album rather than to every image in Canto.
