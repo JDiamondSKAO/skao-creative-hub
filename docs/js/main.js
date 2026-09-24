@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const navItems = $$("#mainNav a");
   const currentPath = location.pathname.replace(/\/$/, "");
-  [...navItems, ...$$(".sidebar > a")].forEach(a => {
+  [...navItems, ...$$(".sidebar a:not(#toc a)")].forEach(a => {
     if (new URL(a.href).pathname.replace(/\/$/, "") === currentPath) a.setAttribute("aria-current", "page");
   });
   if ($(".start-hero")) navItems[0]?.setAttribute("aria-current", "page");
@@ -356,6 +356,103 @@ document.addEventListener("DOMContentLoaded", () => {
     hero.value = "";
     input.dispatchEvent(new Event("input"));
   });
+  // Checklists: ticks stay in this browser only.
+  $$("[data-checklist]").forEach((bar) => {
+    const key = "crh-check:" + bar.dataset.checklist;
+    const boxes = $$(".check-list input[type=checkbox]");
+    const progress = bar.querySelector(".checklist-progress"), meter = bar.querySelector(".checklist-meter i");
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
+    boxes.forEach((b, i) => { b.checked = saved.includes(i); });
+    const update = () => {
+      const done = boxes.filter((b) => b.checked).length;
+      progress.textContent = `${done} of ${boxes.length} done`;
+      if (meter) meter.style.width = (boxes.length ? (100 * done) / boxes.length : 0) + "%";
+      bar.classList.toggle("is-complete", done === boxes.length);
+      try { localStorage.setItem(key, JSON.stringify(boxes.map((b, i) => (b.checked ? i : -1)).filter((i) => i >= 0))); } catch {}
+    };
+    boxes.forEach((b) => b.addEventListener("change", update));
+    bar.querySelector("[data-checklist-reset]")?.addEventListener("click", () => { boxes.forEach((b) => { b.checked = false; }); update(); });
+    update();
+  });
+  $$("[data-print]").forEach((b) => b.addEventListener("click", () => print()));
+  // Links to a collapsed section open it.
+  const openTarget = (id) => { const d = id && document.getElementById(id); if (d && d.tagName === "DETAILS") { d.open = true; return d; } };
+  $$("[data-open-details]").forEach((a) => a.addEventListener("click", (e) => {
+    const d = openTarget(a.hash.slice(1));
+    if (!d) return;
+    e.preventDefault();
+    d.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    d.querySelector("input, textarea")?.focus({ preventScroll: true });
+  }));
+  openTarget(location.hash.slice(1));
+  // Latest approved assets on the homepage.
+  const latest = $("#latestAssets");
+  if (latest) loadLatest(latest);
+  async function loadLatest(box) {
+    const DELIVERABLE = /\.(pptx?|potx|key|docx?|dotx|pdf|zip|ai|eps|svg|indd|idml|xlsx|mp4|mov)$/i;
+    const fmtDate = (v) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(v)); } catch { return ""; } };
+    const fmtSize = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+    const status = (msg) => { const p = document.createElement("p"); p.className = "latest-status"; p.textContent = msg; box.replaceChildren(p); };
+    function card(r, example) {
+      const a = document.createElement("article"); a.className = "asset-card";
+      const ext = (r.title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toUpperCase();
+      const badge = document.createElement("span"); badge.className = "file-badge"; badge.dataset.ext = ext.toLowerCase(); badge.textContent = ext;
+      const h = document.createElement("h3"), link = document.createElement("a");
+      link.textContent = r.title.replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ");
+      const href = example ? null : safeLink(r.download);
+      if (href) link.href = href; else link.setAttribute("aria-disabled", "true");
+      h.append(link);
+      const meta = document.createElement("p"); meta.className = "asset-meta";
+      meta.textContent = [r.when && "Added " + fmtDate(r.when), fmtSize(r.size)].filter(Boolean).join(" · ");
+      a.append(badge, h, meta);
+      if (r.pageTitle) {
+        const from = document.createElement("p"), pl = document.createElement("a");
+        from.className = "asset-source"; from.append("From ");
+        pl.textContent = r.pageTitle; const ph = example ? null : safeLink(r.pageHref);
+        if (ph) pl.href = ph;
+        from.append(pl); a.append(from);
+      }
+      if (example) { const t = document.createElement("span"); t.className = "example-tag"; t.textContent = "Example"; a.append(t); }
+      return a;
+    }
+    if (document.body.dataset.mode === "preview") {
+      $("#latestLead").textContent = "Preview only: in Confluence this shows the newest files labelled “" + box.dataset.approvalLabel + "” in the Creative Hub space.";
+      box.replaceChildren(...[
+        { title: "Presentation-template.potx", when: Date.now() - 2 * 864e5, size: 4.2 * 1048576, pageTitle: "Standard SKAO template" },
+        { title: "Letterhead-A4.dotx", when: Date.now() - 6 * 864e5, size: 310 * 1024, pageTitle: "Letterheads" },
+        { title: "Poster-A0-portrait.pdf", when: Date.now() - 11 * 864e5, size: 2.8 * 1048576, pageTitle: "Poster templates" },
+      ].map((r) => card(r, true)));
+      return;
+    }
+    const ctx = document.body.dataset.context || "";
+    const query = async (cql, limit) => {
+      const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: String(limit), expand: "container,version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+      if (!res.ok) throw Error(String(res.status));
+      return ((await res.json()).results || []).map((r) => ({
+        title: String(r.title || ""),
+        when: r.version?.when,
+        size: r.extensions?.fileSize,
+        download: r._links?.download ? ctx + r._links.download : "",
+        pageTitle: r.container?.title ? String(r.container.title) : "",
+        pageHref: r.container?._links?.webui ? ctx + r.container._links.webui : "",
+      }));
+    };
+    try {
+      const label = cqlLiteral(box.dataset.approvalLabel || "approved");
+      let rows = await query(`type=attachment AND space="CRH" AND label="${label}" ORDER BY created DESC`, 6);
+      if (!rows.length) {
+        // Nothing labelled yet: show recent deliverable files, not page images, and say so.
+        rows = (await query('type=attachment AND space="CRH" ORDER BY created DESC', 50)).filter((r) => DELIVERABLE.test(r.title)).slice(0, 6);
+        $("#latestHeading").textContent = "Latest files in the Hub";
+        $("#latestLead").textContent = "Recently uploaded files. Check the source page for approval and usage notes before reuse.";
+      }
+      if (!rows.length) { status("No new files yet. Browse templates and assets for everything in the Hub."); return; }
+      box.replaceChildren(...rows.map((r) => card(r, false)));
+    } catch (e) {
+      status(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the latest files." : "The latest files could not be loaded. Browse templates and assets instead.");
+    }
+  }
   // Header gains a shadow once the navigation is pinned.
   const headerEl = $("header");
   if (headerEl) {
@@ -413,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     )
       first.remove();
     const headings = [...article.querySelectorAll("h2")].filter(
-      (h) => !h.closest("[hidden], details, .choice-card"),
+      (h) => !h.closest("[hidden], details, .choice-card, .section-next, .catalogue"),
     );
     if (headings.length > 2) {
       const h = document.createElement("strong");

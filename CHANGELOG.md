@@ -1,5 +1,15 @@
 # Changes
 
+## 2.3.0 page journeys and latest assets
+
+- Homepage "03 / Just added" band lists the newest Confluence attachments labelled `approved` in the CRH space. If none are labelled yet, it shows recent deliverable files (slides, documents, PDFs, artwork, video; never page images) and says so. Links stay on the Confluence origin; uploader names are not shown. The preview shows marked examples only.
+- Every section (Presentations, Documents, Brand, Photos and video, Events, How-to guides, Creative services, Help) has its own sidebar listing its pages, with other sections tucked away. Breadcrumbs include the section in the preview.
+- Every page ends with "More in {section}": the next page and two more, with summaries. Section landing pages without cards list their whole section.
+- The 15 template and file pages open with a resource panel: purpose, status, how to get it, and a link to the relevant guidance.
+- Event checklist, print preparation, poster and accessibility pages are tick-off checklists with progress, clear and print. Ticks stay in the viewer's browser.
+- Request help starts with two routes: submit an existing brief, or write one with the helper.
+- Media pages' Canto hand-off panel is styled. Print styles hide navigation.
+
 ## 2.2.0 visual and layout pass
 
 - Homepage leads with a search box; typing hands straight over to the full search.
