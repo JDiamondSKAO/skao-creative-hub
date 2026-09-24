@@ -22,8 +22,8 @@ Environment
   CANTO_FOLDER_PATH   namePath prefix to publish (default "Staff media library")
   CANTO_PORTAL        portal that shows the staff folder, e.g. "SKAOStaff". Tiles then open the asset in that
                       portal (/v/{portal}/album/{album}?column=image&id={id}), which staff without a Canto
-                      login can use. Unset: links open the Canto library itself (/smartalbum/image?column=image&id=...,
-                      as canto-metadata-assistant), which needs a Canto login with access to the folder.
+                      login can use. Unset: links open the asset over its album in the Canto library
+                      (/album/{album}?column=image&id=..., so closing returns to that album), which needs a Canto login with access to the folder.
                       Don't point this at a portal that doesn't include the staff folder: Canto then says the
                       album "cannot be accessed" and offers to remove the file's record.
   CANTO_ASSET_URL, CANTO_ALBUM_URL, CANTO_FOLDER_URL  override any of the three link templates
@@ -299,7 +299,9 @@ def alt_for(asset):
     if is_list_description(desc): desc = ''
     return (desc if len(desc) <= 160 else desc[:157].rsplit(' ', 1)[0] + '…') or title_for(asset)
 
-ASSET_URL = 'https://{domain}.canto.global/smartalbum/{kind}?column={kind}&id={id}'
+# The asset opens over its own album, so closing it returns to that album rather than to every image in Canto.
+ASSET_URL = 'https://{domain}.canto.global/album/{album}?column={kind}&id={id}'
+ANY_ASSET_URL = 'https://{domain}.canto.global/smartalbum/{kind}?column={kind}&id={id}'
 ALBUM_URL = 'https://{domain}.canto.global/album/{id}'
 FOLDER_URL = 'https://{domain}.canto.global/folder/{id}'
 
@@ -311,7 +313,8 @@ def link_templates(portal=''):
 
 def asset_link(domain, asset, album_id='', template=None):
     kind = 'video' if str(asset.get('scheme', '')).lower() == 'video' else 'image'
-    return (template or ASSET_URL).format(domain=domain, kind=kind, id=asset['id'], album=album_id)
+    template = template or (ASSET_URL if album_id else ANY_ASSET_URL)
+    return template.format(domain=domain, kind=kind, id=asset['id'], album=album_id)
 
 def build_manifest(albums, domain, page_id, folder_path, asset_url=None, album_url=None, generated=None):
     """albums: [(album, [assets])]. Returns the manifest the theme reads."""
@@ -524,7 +527,7 @@ def self_test():
     m = build_manifest([(albums[0], assets)], 'skao', '123', 'Staff media library', generated='t')
     item = m['albums'][0]['assets'][0]
     assert [i['kind'] for i in m['albums'][0]['assets']] == ['image', 'video'] and item['title'] == 'SKA Low station' and item['credit'] == 'SKAO'
-    assert item['src'] == '/download/attachments/123/canto-x1.jpg' and item['href'] == 'https://skao.canto.global/smartalbum/image?column=image&id=x1'
+    assert item['src'] == '/download/attachments/123/canto-x1.jpg' and item['href'] == 'https://skao.canto.global/album/a1?column=image&id=x1'
     assert m['albums'][0]['path'] == 'Asset library - Staff / Telescopes'
     assert build_manifest([(albums[0], [])], 'skao', '1', 'x')['albums'] == []
     staff = [{'id': 'l1', 'name': 'Stations', 'namePath': 'Staff media library/Asset library - Staff/Image bank - Staff/SKA-Low/Stations', 'size': 30, 'time': '2026'},
@@ -577,7 +580,7 @@ def self_test():
         assert [k['thumb'] for k in kept] == ['a', 'c'], ('resized copies and crops count as the same image', [k['thumb'] for k in kept])
     except ImportError:
         pass
-    assert asset_link('skao', {'id': 'x1', 'scheme': 'video'}, 'S980K') == 'https://skao.canto.global/smartalbum/video?column=video&id=x1'
+    assert asset_link('skao', {'id': 'x1', 'scheme': 'video'}, 'S980K') == 'https://skao.canto.global/album/S980K?column=video&id=x1'
     assert asset_link('skao', {'id': 'x2'}) == 'https://skao.canto.global/smartalbum/image?column=image&id=x2'
     pa, pal, pf = link_templates('SKAOStaff')
     assert asset_link('skao', {'id': 'x1', 'scheme': 'video'}, 'S980K', pa) == 'https://skao.canto.global/v/SKAOStaff/album/S980K?column=video&id=x1'

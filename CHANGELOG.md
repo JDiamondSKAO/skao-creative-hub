@@ -1,5 +1,9 @@
 # Changes
 
+## 2.12.2 Canto assets open in their album
+
+- Tiles open the asset over its own album (`/album/{album}?column=image&id={asset}`), so closing it returns to that album rather than to every image in Canto.
+
 ## 2.12.1 Canto links open the staff library
 
 - Tiles open the asset in the Canto library (`/smartalbum/image?column=image&id={asset}`, the format canto-metadata-assistant uses), and collection links open their album or folder. 2.12.0 linked to the SKAO Library portal, which doesn't include the staff folder, so Canto said the album "cannot be accessed" and offered to remove the file's record.
