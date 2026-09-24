@@ -226,7 +226,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         rows = rank(index, q);
       } else {
-        const labels={"381891696":"Templates and assets","381891810":"Share material","381891794":"Prepare a presentation","381891661":"Request creative help"};
+        // Show the Hub's page titles, which can differ from the Confluence page names.
+        let labels = {};
+        try { labels = JSON.parse($("#hubTitles")?.textContent || "{}"); } catch {}
         const local = rank(localRoutes().map((r) => ({ ...r, title: labels[r.id] || r.title })), q);
         if (local.length) { results.replaceChildren(); renderRows(local); }
         const ctx = document.body.dataset.context || "";
@@ -261,6 +263,11 @@ document.addEventListener("DOMContentLoaded", () => {
           href: routes.get(String(r.id))?.href || ctx + (r._links?.webui || "/pages/viewpage.action?pageId=" + encodeURIComponent(r.id)),
           hits: terms(q),
         }));
+        // Title matches first, whatever order the API returns; everything Confluence found stays listed.
+        const wanted = terms(q).flatMap(expand);
+        const titleScore = (r) => wanted.filter((t) => r.title.toLowerCase().includes(t)).length;
+        remote.forEach((r, i) => { r.order = i; });
+        remote.sort((a, b) => titleScore(b) - titleScore(a) || a.order - b.order);
         const seen = new Set(local.map((r) => r.href));
         rows = [...local, ...remote.filter((r) => !seen.has(r.href))];
       }
@@ -442,8 +449,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Files uploaded to a Hub page and labelled "approved" become downloads, and "On request" clears.
   refreshAvailability();
   async function refreshAvailability() {
-    const panel = $(".asset-panel[data-page-id]"), rows = $$("a[data-page-id]");
-    if (!panel && !rows.length) return;
+    const panel = $(".asset-panel[data-page-id]"), rows = $$("a[data-page-id]"), pageId = panel?.dataset.pageId || document.body.dataset.pageId;
+    if (!panel && !rows.length && !pageId) return;
     const slot = panel?.querySelector("[data-downloads]");
     if (document.body.dataset.mode === "preview") {
       if (slot) {
@@ -468,8 +475,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const meta = a.querySelector(".dir-meta");
       if (meta) { meta.className = "dir-meta ready"; meta.title = "Download available"; meta.textContent = a.classList.contains("resource-row") ? "Available" : ""; if (!meta.textContent) { const t = document.createElement("span"); t.className = "visually-hidden"; t.textContent = "Download available"; meta.append(t); } }
     });
-    const mine = panel ? byPage.get(panel.dataset.pageId || document.body.dataset.pageId) : null;
-    if (!panel || !mine?.length) return;
+    const mine = pageId ? byPage.get(String(pageId)) : null;
+    if (!mine?.length) return;
     const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
     const list = document.createElement("ul"); list.className = "download-list";
     mine.forEach((f) => {
@@ -477,16 +484,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const li = document.createElement("li"), a = document.createElement("a"), badge = document.createElement("span"), name = document.createElement("span"), meta = document.createElement("small");
       const title = String(f.title || "");
       badge.className = "file-badge"; badge.textContent = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toUpperCase(); badge.dataset.ext = badge.textContent.toLowerCase();
-      name.textContent = title; meta.textContent = size(f.extensions?.fileSize);
+      name.textContent = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").replace(/\s+/g, " ").trim() || title; name.title = title; meta.textContent = size(f.extensions?.fileSize);
       a.href = href; a.setAttribute("download", ""); a.append(badge, name, meta); li.append(a); list.append(li);
     });
     if (!list.children.length) return;
+    const h = document.createElement("h3"); h.textContent = "Downloads";
+    if (!panel) {
+      // Pages without a resource panel get a downloads section under their introduction.
+      const intro = $(".content-body > .task-intro"), section = document.createElement("section");
+      section.className = "page-downloads"; section.append(h, list);
+      if (intro) intro.after(section); else $(".content-body")?.prepend(section);
+      return;
+    }
     const pill = panel.querySelector(".status-pill"), dd = pill?.closest("dd");
     if (dd) { dd.replaceChildren(); const ok = document.createElement("span"); ok.className = "status-pill ready"; ok.textContent = "Available"; dd.append(ok, " Download the current files below."); }
     panel.querySelector(".how-to-get")?.remove();
     const ask = panel.querySelector(".asset-actions .button");
     if (ask) { ask.classList.add("secondary"); ask.textContent = "Ask about this file ↗"; }
-    const h = document.createElement("h3"); h.textContent = "Downloads";
     slot.replaceChildren(h, list); slot.hidden = false;
   }
   // Latest approved assets on the homepage.
@@ -498,13 +512,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const fmtSize = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
     const strip = box.closest(".latest-strip");
     const status = (msg) => { if (strip) { strip.hidden = true; return; } const p = document.createElement("p"); p.className = "latest-status"; p.textContent = msg; box.replaceChildren(p); };
-    const show = (cards) => { box.replaceChildren(...cards); if (strip) strip.hidden = false; };
+    const show = (cards) => { box.replaceChildren(...(strip ? cards.slice(0, 3) : cards)); if (strip) strip.hidden = false; };
     function card(r, example) {
       const a = document.createElement("article"); a.className = "asset-card";
       const ext = (r.title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toUpperCase();
       const badge = document.createElement("span"); badge.className = "file-badge"; badge.dataset.ext = ext.toLowerCase(); badge.textContent = ext;
       const h = document.createElement("h3"), link = document.createElement("a");
-      link.textContent = r.title.replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ");
+      link.textContent = r.title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").replace(/\s+/g, " ").trim();
       const href = example ? null : safeLink(r.download);
       if (href) link.href = href; else link.setAttribute("aria-disabled", "true");
       h.append(link);

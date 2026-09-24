@@ -1007,3 +1007,13 @@ body .content-body .download-list a:any-link:hover {background:var(--bg);}
 .swatch span {padding:0 10px 8px;font-size:.68rem;font-weight:700;color:var(--link);}
 @media(max-width:700px){.swatch-row{grid-template-columns:repeat(3,minmax(0,1fr));}}
 .asset-panel .downloads-note,.task-intro .downloads-note {font-size:.8rem;line-height:1.5;margin:0;}
+.page-downloads {margin:0 0 28px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);}
+.content-body .page-downloads h3 {margin:0 0 8px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+body .content-body .page-downloads .download-list a:any-link:hover {background:var(--bg);}
+
+/* Header stability: no blur on the sticky layer, and the decorative lens on its own layer */
+header {background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;}
+.brandbar {contain:paint;isolation:isolate;}
+.brandbar:before,.brandbar:after {will-change:transform;backface-visibility:hidden;}
+header.is-pinned .brandbar:before,header.is-pinned .brandbar:after {animation-play-state:paused;}
+.checklist-bar {background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;}

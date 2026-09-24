@@ -1,5 +1,13 @@
 # Changes
 
+## 2.10.1 local test mode and fixes found with real files
+
+- Local test mode (`scripts/dev_server.py`) simulates Confluence so downloads, Just added, the announcement banner and search can be tested with real brand-bank files.
+- Any Hub page with approved attachments shows a Downloads section, not only resource pages.
+- Just added shows at most three files; file names drop underscores but keep hyphens.
+- Search puts title matches first whatever order Confluence returns, and shows Hub page titles rather than Confluence page names.
+- Header flicker fixed: the sticky header no longer uses a blur filter, and the decorative lens runs on its own layer and pauses while the bar is scrolled away.
+
 ## 2.10.0 brand bank details and live downloads
 
 Content checked against the SKAO brand bank (September 2026). No files are published from this repository.

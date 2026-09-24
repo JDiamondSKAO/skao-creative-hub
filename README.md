@@ -24,6 +24,20 @@ npm test
 
 Checks cover every interior template route, local links, search behaviour, request draft handling and theme switching. Browser testing is also required for visual changes.
 
+## Local test mode (simulated Confluence)
+
+The static preview can't show features that depend on Confluence: downloads from approved attachments, the Just added strip, the announcement banner and Confluence search. Local test mode serves the built Hub in its Confluence mode with a small stand-in for the Confluence REST API.
+
+```sh
+python3 scripts/build.py
+python3 scripts/dev_fixtures.py        # reads dev/brandbank-map.json, writes dev/fixtures.json
+python3 scripts/dev_server.py          # http://127.0.0.1:8767
+python3 scripts/dev_server.py --no-approved      # nothing labelled "approved": fallbacks
+python3 scripts/dev_server.py --no-announcement  # no announcement banner
+```
+
+`dev/` is excluded from Git. The map points at local files, which are streamed on download and never copied into the repository.
+
 ## Build packages
 
 ```sh
