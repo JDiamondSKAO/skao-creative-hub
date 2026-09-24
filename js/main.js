@@ -446,7 +446,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const DELIVERABLE = /\.(pptx?|potx|key|docx?|dotx|pdf|zip|ai|eps|svg|indd|idml|xlsx|mp4|mov)$/i;
     const fmtDate = (v) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(v)); } catch { return ""; } };
     const fmtSize = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
-    const status = (msg) => { const p = document.createElement("p"); p.className = "latest-status"; p.textContent = msg; box.replaceChildren(p); };
+    const strip = box.closest(".latest-strip");
+    const status = (msg) => { if (strip) { strip.hidden = true; return; } const p = document.createElement("p"); p.className = "latest-status"; p.textContent = msg; box.replaceChildren(p); };
+    const show = (cards) => { box.replaceChildren(...cards); if (strip) strip.hidden = false; };
     function card(r, example) {
       const a = document.createElement("article"); a.className = "asset-card";
       const ext = (r.title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toUpperCase();
@@ -470,8 +472,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return a;
     }
     if (document.body.dataset.mode === "preview") {
-      $("#latestLead").textContent = "Preview examples. In Confluence this lists the newest files labelled “" + box.dataset.approvalLabel + "”.";
-      box.replaceChildren(...[
+      $("#latestLead").textContent = "Examples in this preview";
+      show([
         { title: "Presentation-template.potx", when: Date.now() - 2 * 864e5, size: 4.2 * 1048576, pageTitle: "Standard SKAO template" },
         { title: "Letterhead-A4.dotx", when: Date.now() - 6 * 864e5, size: 310 * 1024, pageTitle: "Letterheads" },
         { title: "Poster-A0-portrait.pdf", when: Date.now() - 11 * 864e5, size: 2.8 * 1048576, pageTitle: "Poster templates" },
@@ -498,10 +500,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Nothing labelled yet: show recent deliverable files, not page images, and say so.
         rows = (await query('type=attachment AND space="CRH" ORDER BY created DESC', 50)).filter((r) => DELIVERABLE.test(r.title)).slice(0, 6);
         $("#latestHeading").textContent = "Latest files in the Hub";
-        $("#latestLead").textContent = "Recently uploaded files. Check the source page for approval and usage notes before reuse.";
+        $("#latestLead").textContent = "Recent uploads: check approval on the source page";
       }
       if (!rows.length) { status("No new files yet. Browse templates and assets for everything in the Hub."); return; }
-      box.replaceChildren(...rows.map((r) => card(r, false)));
+      show(rows.map((r) => card(r, false)));
     } catch (e) {
       status(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the latest files." : "The latest files could not be loaded. Browse templates and assets instead.");
     }

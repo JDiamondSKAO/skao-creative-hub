@@ -312,11 +312,12 @@ def home_tiles(home, titles):
  return out + '</ul>'
 
 
-def latest_panel():
- return ('<section class="hero-latest" aria-labelledby="latestHeading"><p class="eyebrow" id="latestEyebrow">Just added</p>'
-  '<h2 id="latestHeading">Latest approved assets</h2><p class="latest-lead" id="latestLead">The newest approved files in the Creative Hub.</p>'
-  '<div id="latestAssets" class="latest-list" data-approval-label="approved"><p class="latest-status">Loading the latest files…</p></div>'
-  '<noscript><p class="latest-status">Turn on JavaScript to see the latest files, or browse <a href="resources.html">templates and assets</a>.</p></noscript></section>')
+def latest_strip():
+ """One quiet line of the newest files; hidden until there is something to show."""
+ return ('<section class="latest-strip" id="latestStrip" aria-labelledby="latestHeading" hidden><div class="strip-label"><h2 id="latestHeading">Just added</h2>'
+  '<p class="latest-lead" id="latestLead">Newest approved files</p></div>'
+  '<div id="latestAssets" class="strip-items" data-approval-label="approved"></div>'
+  '<a class="strip-all" href="resources.html">See all <span aria-hidden="true">→</span></a></section>')
 
 def revise(pages, meta, jira):
  titles = {n: t for n, (t, b) in pages.items()}
@@ -349,9 +350,8 @@ def revise(pages, meta, jira):
  home = re.sub(r'<div class="quick-library">.*?</div></section>', lambda m: home_tiles(home, titles) + '</section>', home, count=1, flags=re.S)
  home = home.replace('<h2>What do you need?</h2>', '<h2>Browse the Hub</h2>', 1).replace('<p class="eyebrow">01 / Find and reuse</p>', '', 1)
  home = home.replace('<span>Jump to</span>', '<span>Quick links</span>', 1)
- home = home.replace('<a href="email-signatures.html">Email signature</a></nav>', '<a href="email-signatures.html">Email signature</a><a href="request.html">Request help</a></nav>', 1)
  # The newest files take the promo card's place; the help band gives way to the footer's help row.
- home = re.sub(r'<a class="presentation-feature".*?</a>(</section>)', lambda m: latest_panel() + m.group(1), home, count=1, flags=re.S)
+ home = home.replace('</section><section id="library"', '</section>' + latest_strip() + '<section id="library"', 1)
  home = re.sub(r'<section class="help-band journey-band">.*?</section>', '', home, count=1, flags=re.S)
  assert home.endswith('</div>')
  pages['index.html'] = (title, home)

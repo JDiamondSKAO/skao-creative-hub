@@ -1,5 +1,12 @@
 # Changes
 
+## 2.9.0 homepage polish and a proper footer
+
+- The Presentations feature card is back in the hero.
+- Latest approved files move to a slim "Just added" strip under the hero: three files in one line with type, name, date and "See all". It stays hidden when there is nothing new (no auto-rotating carousel; see NN/g research on auto-forwarding carousels).
+- Footer rebuilt: a navy help band ("Need new work or a review?" with Request creative help and Report a problem), then a brand bar with the SKAO logo and five links. It holds together at every width.
+- "Request help" leaves the quick links because the footer band covers it; five quick links fit on one row.
+
 ## 2.8.0 leaner homepage
 
 - The hero pairs search and quick links with the newest approved files, which replace the Presentations promo card. What changes most now sits where people look first.
