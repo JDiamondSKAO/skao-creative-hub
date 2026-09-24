@@ -5,6 +5,7 @@ resource catalogue and the homepage search and latest-assets bands. It only
 reorganises reviewed content; it never invents files or availability.
 """
 import html, re
+import brandkit
 
 def text(fragment):
  fragment = re.sub(r'<span[^>]*aria-hidden="?true"?[^>]*>.*?</span>', '', fragment, flags=re.S)
@@ -132,11 +133,14 @@ def asset_panel(name, body, jira):
  kind, label, guide, guide_label = ASSET_KIND.get(sec[0] if sec else '', ASSET_KIND['documents'])
  if name == 'poster-templates.html': guide, guide_label = 'making-a-poster.html', 'Prepare a poster'
  detail = re.search(r'</strong> (.*?) Ask the team', n.group(0), re.S).group(1)
- panel = (f'<div class="task-intro asset-panel"><div class="asset-art {kind}" aria-hidden="true">{ART[kind]}</div><div class="asset-info">'
+ panel = (f'<div class="task-intro asset-panel" data-page-id="{STATE["ids"].get(name, "")}"><div class="asset-art {kind}" aria-hidden="true">{ART[kind]}</div><div class="asset-info">'
   f'<span class="eyebrow">{label}</span><p class="asset-purpose">{m.group(1)}</p>'
   '<dl class="asset-facts"><div><dt>Status</dt><dd><span class="status-pill">Available on request</span> ' + detail + '</dd></div>'
-  '<div><dt>How to get it</dt><dd>Ask Creative Production through the helpdesk for the current version.</dd></div></dl>'
-  f'<div class="asset-actions"><a class="button" href="{jira}">Ask for this file ↗</a><a class="text-link" href="{guide}">{guide_label}</a></div></div></div>')
+  '<div class="how-to-get"><dt>How to get it</dt><dd>Ask Creative Production through the helpdesk for the current version.</dd></div>'
+  + ''.join(f'<div><dt>{label}</dt><dd>' + ('<ul class="variant-list">' + ''.join(f'<li>{v}</li>' for v in value) + '</ul>' if isinstance(value, list) else value) + '</dd></div>'
+    for label, value in brandkit.PACK.get(name, [])) + '</dl>'
+  f'<div class="asset-actions"><a class="button" href="{jira}">Ask for this file ↗</a><a class="text-link" href="{guide}">{guide_label}</a></div>'
+  '<div class="asset-downloads" data-downloads hidden></div></div></div>')
  body = body.replace(m.group(0), panel).replace(n.group(0), '')
  return re.sub(r'<aside class="next-step"><div><h2>Choose a different starting point</h2>.*?</aside>', '', body, flags=re.S)
 
@@ -164,7 +168,7 @@ def catalogue(pages, meta, summaries, on_request):
    if title in seen: continue
    seen.add(title)
    status = '<span class="dir-meta req">On request</span>' if name in on_request else '<span class="dir-meta"></span>'
-   cards.append(f'<li><a class="resource-row" href="{name}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-type">{label}</span>{status}</a></li>')
+   cards.append(f'<li><a class="resource-row" href="{name}" data-page-id="{STATE["ids"].get(name, "")}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-type">{label}</span>{status}</a></li>')
    counts[key] = counts.get(key, 0) + 1
  chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
   f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label, _ in TYPES if counts.get(key))
@@ -205,7 +209,7 @@ def directory(name, pages, summaries):
  for g, items in groups:
   out += f'<section class="dir-group"><h2>{g} <span class="dir-count">{len(items)}</span></h2><ul class="dir-list">'
   for m in items:
-   out += (f'<li><a class="dir-row" href="{m}"><span class="dir-text"><strong>{html.escape(pages[m][0])}</strong>'
+   out += (f'<li><a class="dir-row" href="{m}" data-page-id="{STATE["ids"].get(m, "")}"><span class="dir-text"><strong>{html.escape(pages[m][0])}</strong>'
     f'<span>{html.escape(summaries[m])}</span></span>{row_meta(m, key)}</a></li>')
   out += '</ul></section>'
  return out + '</div>'
@@ -320,10 +324,11 @@ def latest_strip():
   '<a class="strip-all" href="resources.html">See all <span aria-hidden="true">→</span></a></section>')
 
 def revise(pages, meta, jira):
+ pages = brandkit.apply(pages)
  titles = {n: t for n, (t, b) in pages.items()}
  summaries = {n: summary(b) for n, (t, b) in pages.items()}
  on_request = {n for n, (t, b) in pages.items() if 'availability-note' in b}
- STATE.update(titles=titles, summaries=summaries, on_request=on_request, jira=jira)
+ STATE.update(titles=titles, summaries=summaries, on_request=on_request, jira=jira, ids={n: m['id'] for n, m in meta.items()})
  for name in meta:
   title, body = pages[name]
   if name in on_request: body = asset_panel(name, body, jira)

@@ -439,6 +439,56 @@ document.addEventListener("DOMContentLoaded", () => {
       (document.querySelector("#main-content") || document.body).focus?.({ preventScroll: true });
     });
   }
+  // Files uploaded to a Hub page and labelled "approved" become downloads, and "On request" clears.
+  refreshAvailability();
+  async function refreshAvailability() {
+    const panel = $(".asset-panel[data-page-id]"), rows = $$("a[data-page-id]");
+    if (!panel && !rows.length) return;
+    const slot = panel?.querySelector("[data-downloads]");
+    if (document.body.dataset.mode === "preview") {
+      if (slot) {
+        const p = document.createElement("p"); p.className = "downloads-note";
+        p.textContent = "Preview: in Confluence, files attached to this page and labelled “approved” are listed here as downloads.";
+        slot.replaceChildren(p); slot.hidden = false;
+      }
+      return;
+    }
+    const ctx = document.body.dataset.context || "";
+    let files = [];
+    try {
+      const cql = 'type=attachment AND space="CRH" AND label="approved" ORDER BY title';
+      const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: "200", expand: "container,version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+      if (!res.ok) return;
+      files = (await res.json()).results || [];
+    } catch { return; }
+    const byPage = new Map();
+    files.forEach((f) => { const id = String(f.container?.id || ""); if (id) byPage.set(id, [...(byPage.get(id) || []), f]); });
+    rows.forEach((a) => {
+      if (!byPage.has(a.dataset.pageId)) return;
+      const meta = a.querySelector(".dir-meta");
+      if (meta) { meta.className = "dir-meta ready"; meta.title = "Download available"; meta.textContent = a.classList.contains("resource-row") ? "Available" : ""; if (!meta.textContent) { const t = document.createElement("span"); t.className = "visually-hidden"; t.textContent = "Download available"; meta.append(t); } }
+    });
+    const mine = panel ? byPage.get(panel.dataset.pageId || document.body.dataset.pageId) : null;
+    if (!panel || !mine?.length) return;
+    const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+    const list = document.createElement("ul"); list.className = "download-list";
+    mine.forEach((f) => {
+      const href = safeLink(ctx + (f._links?.download || "")); if (!href) return;
+      const li = document.createElement("li"), a = document.createElement("a"), badge = document.createElement("span"), name = document.createElement("span"), meta = document.createElement("small");
+      const title = String(f.title || "");
+      badge.className = "file-badge"; badge.textContent = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toUpperCase(); badge.dataset.ext = badge.textContent.toLowerCase();
+      name.textContent = title; meta.textContent = size(f.extensions?.fileSize);
+      a.href = href; a.setAttribute("download", ""); a.append(badge, name, meta); li.append(a); list.append(li);
+    });
+    if (!list.children.length) return;
+    const pill = panel.querySelector(".status-pill"), dd = pill?.closest("dd");
+    if (dd) { dd.replaceChildren(); const ok = document.createElement("span"); ok.className = "status-pill ready"; ok.textContent = "Available"; dd.append(ok, " Download the current files below."); }
+    panel.querySelector(".how-to-get")?.remove();
+    const ask = panel.querySelector(".asset-actions .button");
+    if (ask) { ask.classList.add("secondary"); ask.textContent = "Ask about this file ↗"; }
+    const h = document.createElement("h3"); h.textContent = "Downloads";
+    slot.replaceChildren(h, list); slot.hidden = false;
+  }
   // Latest approved assets on the homepage.
   const latest = $("#latestAssets");
   if (latest) loadLatest(latest);

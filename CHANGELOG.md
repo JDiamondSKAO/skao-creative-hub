@@ -1,5 +1,16 @@
 # Changes
 
+## 2.10.0 brand bank details and live downloads
+
+Content checked against the SKAO brand bank (September 2026). No files are published from this repository.
+
+- Resource pages list what the pack contains. The Standard SKAO template comes in six versions, one per information classification label, all 16:9, plus SKAO–SARAO and SRCNet versions. Also covered: letterheads (office, landscape, classification and SKAO–CSIRO versions), email signatures (full-colour and white logo), posters (A0, A1 and A2 in Illustrator, Word and PDF), logos (lettermark and pictorial mark, colourways, formats, co-brand and SRCNet regional centre logos) and the Brand Book (March 2022).
+- The Widescreen template page explains that it is the same 16:9 layout as the Standard template.
+- Colours: CMYK and Pantone join hex and RGB for Blueshift Navy (2745 C) and Redshift Magenta (213 C), and the Science, Technology and Sites accent palettes are copyable swatches.
+- Logo guidance adds the minimum sizes (20 mm in print, 50 px on screen) and when to use the single-colour logo. Fonts adds which Noto Sans weight to use. Co-branding pages describe the partner packs. Video and Merchandise list the existing kits and designs.
+- Files attached to a Hub page and labelled `approved` now appear as downloads on that page, clear its "On request" marker on landing pages and in Templates and assets, and show in Just added. Only same-site links are used.
+- References to "Brand Book v2" are replaced with "March 2022".
+
 ## 2.9.0 homepage polish and a proper footer
 
 - The Presentations feature card is back in the hero.

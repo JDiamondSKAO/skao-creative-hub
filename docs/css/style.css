@@ -969,3 +969,41 @@ body .footer .footer-base nav a:any-link:hover {color:#fff;text-decoration:under
 .dark .footer-platform {background:#0a0b16;}
 body .footer-platform a:any-link {color:#d9d6f0;}
 @media(max-width:800px){.footer-cta-inner{grid-template-columns:1fr;padding-block:30px;}.footer .footer-base nav{justify-content:flex-start;}body .footer .footer-cta-copy h2{font-size:1.35rem;}}
+
+/* ===== Brand bank details ===== */
+.variant-list {list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;}
+.variant-list li {padding:2px 10px;border:1px solid var(--line);border-radius:999px;background:var(--bg);font-size:.78rem;line-height:1.6;color:var(--ink);}
+.asset-facts dd a {font-weight:600;}
+.status-pill.ready {background:#1b8a5a1f;color:#136c45;}
+.dark .status-pill.ready {background:#3fd08a26;color:#7fe0b0;}
+.dir-meta.ready {color:#136c45;}
+.dir-meta.ready:before {content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#1b8a5a;}
+.dark .dir-meta.ready {color:#7fe0b0;}
+.asset-downloads {margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+.content-body .asset-downloads h3 {margin:0 0 8px;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.download-list {list-style:none;margin:0;padding:0;display:grid;gap:4px;}
+body .content-body .download-list a:any-link {display:flex;align-items:center;gap:12px;padding:8px 10px;margin:0 -10px;border-radius:8px;color:var(--ink);text-decoration:none;}
+body .content-body .download-list a:any-link:hover {background:var(--bg);}
+.download-list .file-badge {grid-row:auto;width:32px;height:38px;font-size:.55rem;border-radius:4px 9px 4px 4px;}
+.download-list span:not(.file-badge) {flex:1;min-width:0;font-weight:600;color:var(--link);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.download-list small {color:var(--muted);}
+.downloads-note {margin:0;padding:10px 12px;border:1px dashed var(--line);border-radius:8px;font-size:.8rem;color:var(--muted);}
+/* Accent palettes */
+.accent-palettes {margin:30px 0;}
+.content-body .accent-palettes h2 {margin:0 0 6px;}
+.accent-palettes > p {margin:0 0 14px;color:var(--muted);font-size:.92rem;}
+.palette {border:0;border-top:1px solid var(--line);padding:0;}
+.palette:last-child {border-bottom:1px solid var(--line);}
+.palette summary {display:flex;align-items:baseline;gap:12px;padding:14px 4px;list-style:none;cursor:pointer;font-weight:700;color:var(--ink);min-height:0;}
+.palette summary::-webkit-details-marker {display:none;}
+.palette summary small {font-weight:400;color:var(--muted);font-size:.82rem;}
+.palette summary:after {content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;align-self:center;}
+.palette[open] summary:after {transform:rotate(-135deg);}
+.swatch-row {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:0 0 18px;}
+.swatch {display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg);cursor:pointer;font:inherit;text-align:left;}
+.swatch:hover {border-color:var(--link);}
+.swatch-chip {display:block;height:48px;background:var(--c);}
+.swatch code {padding:7px 10px 0;font-size:.78rem;color:var(--ink);}
+.swatch span {padding:0 10px 8px;font-size:.68rem;font-weight:700;color:var(--link);}
+@media(max-width:700px){.swatch-row{grid-template-columns:repeat(3,minmax(0,1fr));}}
+.asset-panel .downloads-note,.task-intro .downloads-note {font-size:.8rem;line-height:1.5;margin:0;}
