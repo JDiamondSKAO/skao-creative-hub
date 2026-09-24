@@ -1,5 +1,14 @@
 # Changes
 
+## 2.8.0 leaner homepage
+
+- The hero pairs search and quick links with the newest approved files, which replace the Presentations promo card. What changes most now sits where people look first.
+- One search on the homepage: the header search button is hidden there (Cmd/Ctrl K still works).
+- "Browse the Hub" is a compact index: small thumbnail, section name and what it contains. It replaces the six large picture tiles, and the "01 / 02 / 03" numbering is gone.
+- The "Need a hand?" band is removed; the footer's help row on every page carries its wording ("Need new work or a review?") and the request button. "Request help" joins the quick links.
+- Announcement banner text is centred, with the close button at the right edge.
+- Unused homepage styles removed (about 6 KB).
+
 ## 2.7.0 progressive disclosure, announcements, footer
 
 - Section landing pages put the page list on the left and a sticky help panel on the right: an "Ask for a file" action when items are on request, then the section's advice as one-line headings that open on demand (first one open). On phones the panel follows the list.

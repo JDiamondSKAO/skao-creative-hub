@@ -301,20 +301,21 @@ TILE_ART = {**ART,
  'guides': '<span class="art-guides"><i></i><i></i><i></i></span>'}
 
 def home_tiles(home, titles):
+ """A compact index of the sections: small picture, name and what is inside."""
  media_svg = re.search(r'<a class="quick-resource media"[^>]*><div class="resource-art" aria-hidden="true">(.*?)</div>', home, re.S)
  art = {**TILE_ART, 'media': media_svg.group(1) if media_svg else ''}
- out = '<div class="section-tiles">'
+ out = '<ul class="section-index">'
  for key, kind, desc, links in TILES:
   sec = next(x for x in SECTIONS if x[0] == key)
-  out += (f'<article class="section-tile kind-{kind}"><a class="tile-main" href="{sec[2]}"><div class="tile-art" aria-hidden="true">{art[kind]}</div>'
-   f'<h3>{sec[1]}</h3><p>{desc}</p></a></article>')
- return out + '</div>'
+  out += (f'<li><a class="index-item kind-{kind}" href="{sec[2]}"><span class="index-art" aria-hidden="true">{art[kind]}</span>'
+   f'<span class="index-text"><strong>{sec[1]}</strong><span>{desc}</span></span></a></li>')
+ return out + '</ul>'
 
-def latest_band():
- return ('<section class="latest-band journey-band" aria-labelledby="latestHeading"><div class="band-heading"><div><p class="eyebrow" id="latestEyebrow">03 / Just added</p>'
-  '<h2 id="latestHeading">Latest approved assets</h2><p class="latest-lead" id="latestLead">The newest approved files uploaded to the Creative Hub.</p></div>'
-  '</div>'
-  '<div id="latestAssets" class="latest-grid" data-approval-label="approved"><p class="latest-status">Loading the latest files…</p></div>'
+
+def latest_panel():
+ return ('<section class="hero-latest" aria-labelledby="latestHeading"><p class="eyebrow" id="latestEyebrow">Just added</p>'
+  '<h2 id="latestHeading">Latest approved assets</h2><p class="latest-lead" id="latestLead">The newest approved files in the Creative Hub.</p>'
+  '<div id="latestAssets" class="latest-list" data-approval-label="approved"><p class="latest-status">Loading the latest files…</p></div>'
   '<noscript><p class="latest-status">Turn on JavaScript to see the latest files, or browse <a href="resources.html">templates and assets</a>.</p></noscript></section>')
 
 def revise(pages, meta, jira):
@@ -346,8 +347,12 @@ def revise(pages, meta, jira):
  home = home.replace(old, '<form class="hero-search" data-hub-search role="search"><label for="heroSearch" class="visually-hidden">Search the Creative Hub</label>' + SEARCH_ICON +
   '<input id="heroSearch" type="search" autocomplete="off" placeholder="Search templates, logos, guidance…"><button class="button" type="submit">Search</button></form>')
  home = re.sub(r'<div class="quick-library">.*?</div></section>', lambda m: home_tiles(home, titles) + '</section>', home, count=1, flags=re.S)
- home = home.replace('<h2>What do you need?</h2>', '<h2>Browse by section</h2>', 1)
- home = home.replace('<span>Jump to</span>', '<span>Quick links</span>', 1).replace('>All templates and assets →<', '>All templates and assets →<', 1)
+ home = home.replace('<h2>What do you need?</h2>', '<h2>Browse the Hub</h2>', 1).replace('<p class="eyebrow">01 / Find and reuse</p>', '', 1)
+ home = home.replace('<span>Jump to</span>', '<span>Quick links</span>', 1)
+ home = home.replace('<a href="email-signatures.html">Email signature</a></nav>', '<a href="email-signatures.html">Email signature</a><a href="request.html">Request help</a></nav>', 1)
+ # The newest files take the promo card's place; the help band gives way to the footer's help row.
+ home = re.sub(r'<a class="presentation-feature".*?</a>(</section>)', lambda m: latest_panel() + m.group(1), home, count=1, flags=re.S)
+ home = re.sub(r'<section class="help-band journey-band">.*?</section>', '', home, count=1, flags=re.S)
  assert home.endswith('</div>')
- pages['index.html'] = (title, home[:-6] + latest_band() + '</div>')
+ pages['index.html'] = (title, home)
  return pages, titles

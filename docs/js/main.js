@@ -470,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return a;
     }
     if (document.body.dataset.mode === "preview") {
-      $("#latestLead").textContent = "Preview only: in Confluence this shows the newest files labelled “" + box.dataset.approvalLabel + "” in the Creative Hub space.";
+      $("#latestLead").textContent = "Preview examples. In Confluence this lists the newest files labelled “" + box.dataset.approvalLabel + "”.";
       box.replaceChildren(...[
         { title: "Presentation-template.potx", when: Date.now() - 2 * 864e5, size: 4.2 * 1048576, pageTitle: "Standard SKAO template" },
         { title: "Letterhead-A4.dotx", when: Date.now() - 6 * 864e5, size: 310 * 1024, pageTitle: "Letterheads" },
