@@ -44,6 +44,8 @@ def attachments(approved_only):
 def search(cql, limit):
     if 'type=attachment' in cql:
         rows = attachments('label="approved"' in cql)
+        wanted = re.search(r'title="((?:[^"\\]|\\.)*)"', cql)
+        if wanted: rows = [r for r in rows if r['title'] == wanted.group(1)]
         rows.sort(key=lambda r: r['title'].lower()) if 'ORDER BY title' in cql else rows.sort(key=lambda r: r['_when'], reverse=True)
         return rows[:limit]
     if 'label="announcement"' in cql:

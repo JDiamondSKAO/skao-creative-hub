@@ -4,7 +4,7 @@ R=Path(__file__).resolve().parents[1]
 (R/'release').mkdir(exist_ok=True)
 files=[R/'page.vm']+[p for d in ['css','js','images','fonts'] for p in (R/d).rglob('*') if p.is_file()]
 plugin=ET.Element('atlassian-plugin',{'key':'skao-creative-hub-v2','name':'SKAO Creative Hub v2 - Scroll Sites Theme','plugins-version':'2'})
-info=ET.SubElement(plugin,'plugin-info');ET.SubElement(info,'version').text='2.10.2'
+info=ET.SubElement(plugin,'plugin-info');ET.SubElement(info,'version').text='2.11.0'
 theme=ET.SubElement(plugin,'scroll-viewport-theme',{'key':'skao-creative-hub-v2','name':'SKAO Creative Hub v2'})
 for p in files:
  name=str(p.relative_to(R));ET.SubElement(theme,'resource',{'name':name,'location':name})

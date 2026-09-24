@@ -17,3 +17,6 @@ evidence/*
 
 # Local test mode data (paths to internal files)
 /dev/
+
+# Canto sync dry-run output
+/build/

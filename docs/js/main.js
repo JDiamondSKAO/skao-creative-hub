@@ -574,6 +574,86 @@ document.addEventListener("DOMContentLoaded", () => {
     section.append(wrap);
     return section;
   }
+  // Canto showcase: images synced from the staff media folder into a Hub page's attachments.
+  loadCanto();
+  async function loadCanto() {
+    const slots = $$("[data-canto]");
+    if (!slots.length || document.body.dataset.mode === "preview") return;
+    const ctx = document.body.dataset.context || "";
+    const CANTO = /^https:\/\/[a-z0-9-]+\.canto\.global\//i;
+    let manifest;
+    try {
+      const cql = 'type=attachment AND space="CRH" AND title="canto-showcase.json"';
+      const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: "1" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+      if (!res.ok) return;
+      const hit = ((await res.json()).results || [])[0];
+      const url = hit && safeLink(ctx + (hit._links?.download || ""));
+      if (!url) return;
+      const m = await fetch(url, { credentials: "same-origin" });
+      if (!m.ok) return;
+      manifest = await m.json();
+    } catch { return; }
+    const asset = (a) => {
+      const src = typeof a?.src === "string" && a.src.startsWith("/download/attachments/") ? safeLink(ctx + a.src) : null;
+      const href = typeof a?.href === "string" && CANTO.test(a.href) ? a.href : null;
+      return src && href ? { src, href, title: String(a.title || "Untitled"), credit: String(a.credit || ""), w: Number(a.width) || 0, h: Number(a.height) || 0 } : null;
+    };
+    const albums = (Array.isArray(manifest?.albums) ? manifest.albums : []).map((al) => ({
+      name: String(al.name || "Album"), path: String(al.path || al.name || "Album"), count: Number(al.count) || 0,
+      href: typeof al.href === "string" && CANTO.test(al.href) ? al.href : null,
+      assets: (Array.isArray(al.assets) ? al.assets : []).map(asset).filter(Boolean),
+    })).filter((al) => al.assets.length);
+    if (!albums.length) return;
+    // Drop the folder levels every album shares, so tabs read "Telescopes" rather than "Asset library - Staff / Telescopes".
+    const parts = albums.map((al) => al.path.split(" / "));
+    let shared = 0;
+    while (parts.every((p) => p.length - shared > 1 && p[shared] === parts[0][shared])) shared++;
+    albums.forEach((al, i) => { al.path = parts[i].slice(shared).join(" / ") || al.name; });
+    const tile = (a) => {
+      const li = document.createElement("li"), link = document.createElement("a"), img = document.createElement("img"), cap = document.createElement("span");
+      link.className = "canto-tile"; link.href = a.href; link.target = "_blank"; link.rel = "noopener";
+      link.setAttribute("aria-label", a.title + ", opens in Canto");
+      img.src = a.src; img.alt = a.title; img.loading = "lazy"; img.decoding = "async";
+      if (a.w && a.h) { img.width = a.w; img.height = a.h; }
+      cap.className = "canto-caption"; cap.textContent = a.title;
+      link.append(img, cap);
+      if (a.credit) { const c = document.createElement("small"); c.className = "canto-credit"; c.textContent = /^(©|\(c\)|credit)/i.test(a.credit) ? a.credit : "© " + a.credit; link.append(c); }
+      li.append(link); return li;
+    };
+    const fill = (slot, list, max) => {
+      const grid = slot.querySelector(".canto-grid");
+      grid.replaceChildren(...list.slice(0, max).map(tile));
+    };
+    slots.forEach((slot) => {
+      const words = (slot.dataset.canto || "").toLowerCase().split(/\s+/).filter(Boolean);
+      const matches = words.length ? albums.filter((al) => words.some((w) => new RegExp("(^|[^a-z0-9])" + escapeRe(w) + "([^a-z0-9]|$)", "i").test(al.path + " " + al.name))) : albums;
+      if (!matches.length) return;
+      const open = slot.querySelector(".canto-open");
+      if (slot.classList.contains("canto-gallery")) {
+        // Newest first across albums, then one tab per album.
+        const all = []; for (let i = 0; all.length < 12 && matches.some((al) => al.assets[i]); i++) matches.forEach((al) => { if (al.assets[i] && all.length < 12) all.push(al.assets[i]); });
+        const tabs = slot.querySelector(".canto-tabs"), openHome = open?.href;
+        const choose = (btn, list, href) => {
+          tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+          fill(slot, list, 12); if (open) open.href = href || openHome;
+        };
+        const mk = (label, n, list, href) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label + " "; const c = document.createElement("span"); c.textContent = n; b.append(c); b.addEventListener("click", () => choose(b, list, href)); return b; };
+        const first = mk("All", matches.reduce((n, al) => n + (al.count || al.assets.length), 0), all, null);
+        tabs.replaceChildren(first, ...matches.map((al) => mk(al.path, al.count || al.assets.length, al.assets, al.href)));
+        tabs.hidden = matches.length < 2;
+        choose(first, all, null);
+      } else {
+        const al = matches[0];
+        fill(slot, matches.flatMap((m) => m.assets), 6);
+        if (open && al.href && matches.length === 1) open.href = al.href;
+        const h = slot.querySelector("h2"); if (h && matches.length === 1) h.textContent = "In the staff media library: " + al.path;
+      }
+      slot.hidden = false;
+      // The synced album replaces the generic "search Canto" box on the landing, and its caveat elsewhere.
+      const hand = $(".content-body .media-handoff");
+      if (slot.classList.contains("canto-gallery")) hand?.remove(); else hand?.querySelector(".quiet-note")?.remove();
+    });
+  }
   // Latest approved assets on the homepage.
   const latest = $("#latestAssets");
   if (latest) loadLatest(latest);

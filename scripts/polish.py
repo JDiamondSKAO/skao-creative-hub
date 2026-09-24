@@ -323,7 +323,22 @@ def latest_strip():
   '<div id="latestAssets" class="strip-items" data-approval-label="approved"></div>'
   '<a class="strip-all" href="resources.html">See all <span aria-hidden="true">→</span></a></section>')
 
-def revise(pages, meta, jira):
+# Canto showcase slots: the gallery on Photos and video, and strips on topic pages
+# matched to album names. They stay hidden until the synced manifest has matching albums.
+CANTO_STRIPS = {'telescope-images.html': 'telescope telescopes ska-low ska-mid', 'hero-images.html': 'hero heroes banner', 'event-photos.html': 'event events'}
+
+def canto_gallery(canto):
+ return ('<section class="canto-gallery" data-canto="" hidden aria-labelledby="cantoHeading"><div class="canto-head"><div><p class="eyebrow">Staff media library</p>'
+  '<h2 id="cantoHeading">Approved photos and artwork</h2></div>'
+  f'<a class="text-link canto-open" href="{canto}" target="_blank" rel="noopener">Open in Canto ↗</a></div>'
+  '<div class="canto-tabs" role="group" aria-label="Show album"></div><ul class="canto-grid"></ul>'
+  '<p class="canto-note">Select an image to open it in Canto, where you’ll find its credit, usage notes and downloads.</p></section>')
+
+def canto_strip(words, canto):
+ return (f'<section class="canto-strip" data-canto="{words}" hidden><div class="canto-head"><h2>In the staff media library</h2>'
+  f'<a class="text-link canto-open" href="{canto}" target="_blank" rel="noopener">Open album in Canto ↗</a></div><ul class="canto-grid small"></ul></section>')
+
+def revise(pages, meta, jira, canto=''):
  pages = brandkit.apply(pages)
  titles = {n: t for n, (t, b) in pages.items()}
  summaries = {n: summary(b) for n, (t, b) in pages.items()}
@@ -340,6 +355,14 @@ def revise(pages, meta, jira):
   title, body = pages[name]
   if name in landings: body = landing(name, body, pages, summaries)
   pages[name] = (title, body + related(name, pages, summaries))
+ # Canto slots go in after the landing layout exists, so they never land in the side panel.
+ title, body = pages['media.html']
+ at = body.find('<div class="landing-layout">')
+ pages['media.html'] = (title, body[:at] + canto_gallery(canto) + body[at:] if at >= 0 else body + canto_gallery(canto))
+ for name, words in CANTO_STRIPS.items():
+  title, body = pages[name]
+  m = re.search(r'<div class="media-handoff">.*?</div></div>', body, re.S)
+  pages[name] = (title, body[:m.end()] + canto_strip(words, canto) + body[m.end():] if m else body)
  title, body = pages['resources.html']
  body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Every template, guide and service in the Hub in one list. Filter by type or name, then open a page to see the file, guidance or availability.', 1)
  body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)

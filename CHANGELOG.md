@@ -1,5 +1,13 @@
 # Changes
 
+## 2.11.0 Canto showcase
+
+- Photos and video leads with a gallery of approved images from the Canto Staff media library folder, with album tabs, titles and credits. Tiles open the asset in Canto.
+- Telescope imagery, Hero images and Event photography show a strip from the matching album, linking to the album in Canto.
+- `scripts/canto_sync.py` publishes 640 px previews (metadata stripped) and `canto-showcase.json` as attachments on one Hub page, so browsers never need a Canto token or an expiring Canto link. Adapted from canto-metadata-assistant's client: bearer token or OAuth client credentials, album namePath, directUrlPreview, retry with backoff. The Canto token is never forwarded to the CDN on redirect.
+- The theme only shows images served from Hub attachments and links that go to canto.global, and stays hidden when there is no manifest or no matching album.
+- Local test mode builds stand-in albums with the sync's own code.
+
 ## 2.10.2 downloads as choices
 
 - Downloads move out of the resource panel into their own section under it, so the panel stays compact and its artwork no longer stretches.

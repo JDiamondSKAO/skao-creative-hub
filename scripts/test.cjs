@@ -173,5 +173,29 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(gs['Partner versions'].includes('RCN Template:PPTX/KEY')&&gs['Partner versions'].some(r=>r.startsWith('SKAO ukSRC')||r.startsWith('ukSRC')),JSON.stringify(gs['Partner versions']));
  assert(gq.querySelector('.dl-file').getAttribute('aria-label').startsWith('Download '));gd.window.close();
  pass('Downloads group by classification, office and partner, merge formats into one row and use readable labels');
+ const mediaId=routes['media.html'].id;
+ const cantoManifest={version:1,albums:[
+  {id:'a1',name:'Telescopes',path:'Asset library - Staff / Telescopes',count:40,href:'https://skao.canto.global/album/a1',assets:[
+   {title:'SKA-Low at dawn',credit:'SKAO',src:`/download/attachments/${mediaId}/canto-1.jpg`,href:'https://skao.canto.global/asset/1',width:640,height:480},
+   {title:'<img src=x onerror=alert(1)>',src:`/download/attachments/${mediaId}/canto-2.jpg`,href:'https://skao.canto.global/asset/2'},
+   {title:'Off-site image',src:'https://evil.example/x.jpg',href:'https://skao.canto.global/asset/3'},
+   {title:'Off-site link',src:`/download/attachments/${mediaId}/canto-4.jpg`,href:'https://evil.example/asset/4'}]},
+  {id:'a2',name:'Future visions',path:'Asset library - Staff / Future visions',count:5,href:'https://skao.canto.global/album/a2',assets:[
+   {title:'SKA Africa concept',src:`/download/attachments/${mediaId}/canto-5.jpg`,href:'https://skao.canto.global/asset/5'}]}]};
+ const runCanto=async(file,m)=>{const d=dom(file,'confluence'),w=d.window;
+  w.fetch=async u=>{const s=String(u);if(s.includes('/rest/api/content/search')){const cql=new URL(s,'http://localhost').searchParams.get('cql');return {ok:true,json:async()=>({results:cql.includes('canto-showcase.json')&&m?[{title:'canto-showcase.json',_links:{download:`/download/attachments/${mediaId}/canto-showcase.json`}}]:[]})};}
+   if(s.includes('canto-showcase.json'))return {ok:true,json:async()=>m};return {ok:false,json:async()=>({})};};
+  w.document.body.dataset.mode='confluence';w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();return d;};
+ const cMedia=await runCanto('media.html',cantoManifest),kq2=s=>cMedia.window.document.querySelector(s),kqa=s=>[...cMedia.window.document.querySelectorAll(s)];
+ assert(!kq2('.canto-gallery').hidden);assert.deepEqual(kqa('.canto-tabs button').map(b=>b.firstChild.textContent.trim()),['All','Telescopes','Future visions'],'shared folder levels dropped from tab names');
+ assert.equal(kqa('.canto-gallery .canto-tile').length,3,'off-site images and links are dropped');assert(kqa('.canto-tile').every(a=>a.href.startsWith('https://skao.canto.global/')&&a.target==='_blank'));
+ assert(kqa('.canto-tile img').every(i=>i.src.startsWith('http://localhost/download/attachments/')));assert(!kq2('.canto-tile img[onerror]')&&!kq2('.canto-caption img'));
+ assert.equal(kq2('.canto-credit').textContent,'© SKAO');kqa('.canto-tabs button')[2].click();assert.equal(kqa('.canto-tile').length,1);assert.equal(kq2('.canto-open').href,'https://skao.canto.global/album/a2');
+ assert(!kq2('.media-handoff'),'gallery replaces the generic Canto box');cMedia.window.close();
+ const cTel=await runCanto('telescope-images.html',cantoManifest);assert(!cTel.window.document.querySelector('.canto-strip').hidden);assert.equal(cTel.window.document.querySelector('.canto-strip .canto-open').href,'https://skao.canto.global/album/a1');cTel.window.close();
+ const cHero=await runCanto('hero-images.html',cantoManifest);assert(cHero.window.document.querySelector('.canto-strip').hidden,'no matching album, nothing shown');cHero.window.close();
+ const cNone=await runCanto('media.html',null);assert(cNone.window.document.querySelector('.canto-gallery').hidden,'no cantoManifest, nothing shown');cNone.window.close();
+ require('child_process').execFileSync('python3',[path.join(root,'scripts/canto_sync.py'),'--self-test'],{stdio:'pipe'});
+ pass('Canto showcase renders synced albums safely, matches topic pages by album and stays hidden without data; sync self-test passes');
  const result={status:'PASS',checks};fs.writeFileSync(path.join(root,'evidence/tests.json'),JSON.stringify(result,null,2));console.log(result);
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -38,6 +38,24 @@ python3 scripts/dev_server.py --no-announcement  # no announcement banner
 
 `dev/` is excluded from Git. The map points at local files, which are streamed on download and never copied into the repository.
 
+## Canto showcase
+
+Photos and video shows a gallery of the Canto **Staff media library** folder, and Telescope imagery, Hero images and Event photography show matching albums. Staff browsers never talk to Canto: `scripts/canto_sync.py` copies web-sized previews and a manifest (`canto-showcase.json`) into attachments on one Hub page, and the theme reads them from Confluence. Tiles open the asset in Canto.
+
+```sh
+export CANTO_DOMAIN=skao CANTO_API_KEY=...            # or CANTO_APP_ID / CANTO_APP_SECRET
+export CANTO_FOLDER_PATH="Staff media library"
+python3 scripts/canto_sync.py --dry-run --out build/canto   # check what would be published
+export CONFLUENCE_BASE=https://confluence.skatelescope.org CONFLUENCE_TOKEN=... CONFLUENCE_PAGE_ID=381891718
+python3 scripts/canto_sync.py                               # publish to the Photos and video page
+```
+
+- Run it on a schedule (for example daily) or from a Canto webhook. Keep credentials in the scheduler's secrets, never in this repository.
+- Only images in albums under the folder are published. Thumbnails are resized to 640 px and stripped of embedded metadata (including location).
+- `CANTO_ASSET_URL` and `CANTO_ALBUM_URL` set where tiles link (defaults: `https://{domain}.canto.global/asset/{id}` and `/album/{id}`). Use portal links if staff reach Canto through the SKAO Library portal.
+- Albums appear on topic pages when their name contains the page's keywords (`CANTO_STRIPS` in `scripts/polish.py`).
+- Local test mode builds stand-in albums from local images (`canto_standin` in `dev/brandbank-map.json`).
+
 ## Build packages
 
 ```sh
