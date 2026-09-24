@@ -604,6 +604,8 @@ document.addEventListener("DOMContentLoaded", () => {
       assets: (Array.isArray(al.assets) ? al.assets : []).map(asset).filter(Boolean),
     })).filter((al) => al.assets.length);
     if (!albums.length) return;
+    const folderHref = typeof manifest.href === "string" && CANTO.test(manifest.href) ? manifest.href : null;
+    if (folderHref) $$(".canto-gallery .canto-open").forEach((a) => { a.href = folderHref; });
     const curated = (Array.isArray(manifest?.highlights) ? manifest.highlights : []).map(asset).filter(Boolean);
     // Drop the folder levels every album shares, so tabs read "Telescopes" rather than "Asset library - Staff / Telescopes".
     const parts = albums.map((al) => al.path.split(" / "));
@@ -651,7 +653,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         const al = matches[0];
         fill(slot, matches.flatMap((m) => m.assets), 6);
-        if (open && al.href && matches.length === 1) open.href = al.href;
+        if (open) open.href = (matches.length === 1 && al.href) || folderHref || open.href;
         const h = slot.querySelector("h2"); if (h && matches.length === 1) h.textContent = "In the staff media library: " + al.path;
       }
       slot.hidden = false;

@@ -20,8 +20,13 @@ Environment
   CANTO_DOMAIN        subdomain, e.g. "skao"
   CANTO_API_KEY       direct API token, or CANTO_APP_ID and CANTO_APP_SECRET
   CANTO_FOLDER_PATH   namePath prefix to publish (default "Staff media library")
-  CANTO_PORTAL        portal staff browse in (default SKAOLibrary). Tiles open the asset's own view there:
-                      https://{domain}.canto.global/v/{portal}/album/{album}?column={scheme}&id={id}
+  CANTO_PORTAL        portal that shows the staff folder, e.g. "SKAOStaff". Tiles then open the asset in that
+                      portal (/v/{portal}/album/{album}?column=image&id={id}), which staff without a Canto
+                      login can use. Unset: links open the Canto library itself (/smartalbum/image?column=image&id=...,
+                      as canto-metadata-assistant), which needs a Canto login with access to the folder.
+                      Don't point this at a portal that doesn't include the staff folder: Canto then says the
+                      album "cannot be accessed" and offers to remove the file's record.
+  CANTO_ASSET_URL, CANTO_ALBUM_URL, CANTO_FOLDER_URL  override any of the three link templates
   CANTO_FEATURE_TAG   Canto tag or keyword that pins an asset to Highlights (default "Hub feature")
   CANTO_POOL          newest assets considered per album (default 100)
   CANTO_GROUP_DEPTH   path levels below the folder that define a collection (default 3)
@@ -294,14 +299,23 @@ def alt_for(asset):
     if is_list_description(desc): desc = ''
     return (desc if len(desc) <= 160 else desc[:157].rsplit(' ', 1)[0] + '…') or title_for(asset)
 
-def portal_link(domain, portal, album_id, asset):
+ASSET_URL = 'https://{domain}.canto.global/smartalbum/{kind}?column={kind}&id={id}'
+ALBUM_URL = 'https://{domain}.canto.global/album/{id}'
+FOLDER_URL = 'https://{domain}.canto.global/folder/{id}'
+
+def link_templates(portal=''):
+    """(asset, album, folder) link templates: the Canto library, or a portal when one is named."""
+    if not portal: return ASSET_URL, ALBUM_URL, FOLDER_URL
+    base = 'https://{domain}.canto.global/v/' + re.sub(r'[^A-Za-z0-9_-]', '', portal)
+    return base + '/album/{album}?column={kind}&id={id}', base + '/album/{id}', base + '/folder/{id}'
+
+def asset_link(domain, asset, album_id='', template=None):
     kind = 'video' if str(asset.get('scheme', '')).lower() == 'video' else 'image'
-    return f'https://{domain}.canto.global/v/{portal}/album/{album_id}?column={kind}&id={asset["id"]}'
+    return (template or ASSET_URL).format(domain=domain, kind=kind, id=asset['id'], album=album_id)
 
 def build_manifest(albums, domain, page_id, folder_path, asset_url=None, album_url=None, generated=None):
     """albums: [(album, [assets])]. Returns the manifest the theme reads."""
-    asset_url = asset_url or 'https://{domain}.canto.global/asset/{id}'
-    album_url = album_url or 'https://{domain}.canto.global/album/{id}'
+    album_url = album_url or ALBUM_URL
     out = {'version': 1, 'generated': generated or datetime.now(timezone.utc).isoformat(timespec='seconds'),
            'source': f'Canto: {folder_path}', 'albums': []}
     for album, assets in albums:
@@ -313,7 +327,7 @@ def build_manifest(albums, domain, page_id, folder_path, asset_url=None, album_u
                           'kind': 'video' if str(a.get('scheme', '')).lower() == 'video' else 'image',
                           'width': a.get('width'), 'height': a.get('height'), 'thumb': thumb,
                           'src': f'/download/attachments/{page_id}/{quote(thumb)}',
-                          'href': asset_url.format(domain=domain, id=a['id'])})
+                          'href': asset_link(domain, a, album.get('id'), asset_url)})
         if items:
             out['albums'].append({'id': str(album.get('id')), 'name': album.get('name') or 'Album',
                                   'path': display_path(album.get('namePath'), folder_path) or album.get('name') or 'Album',
@@ -407,14 +421,18 @@ def run(args):
         sys.exit('Canto credentials missing: set CANTO_API_KEY (generated access token), or both CANTO_APP_ID and CANTO_APP_SECRET.')
     log('Canto auth: ' + ('client credentials (App ID and App Secret)' if env('CANTO_APP_ID') and env('CANTO_APP_SECRET') else 'generated access token'))
     canto = Canto(domain, env('CANTO_API_KEY'), env('CANTO_APP_ID'), env('CANTO_APP_SECRET'), env('CANTO_OAUTH_URL'))
-    portal, feature = env('CANTO_PORTAL', 'SKAOLibrary'), env('CANTO_FEATURE_TAG', 'Hub feature')
+    feature = env('CANTO_FEATURE_TAG', 'Hub feature')
+    portal = env('CANTO_PORTAL')
+    asset_url, album_url, folder_url = link_templates(portal)
+    asset_url, album_url, folder_url = env('CANTO_ASSET_URL') or asset_url, env('CANTO_ALBUM_URL') or album_url, env('CANTO_FOLDER_URL') or folder_url
+    log('Links open ' + (f'the "{portal}" portal' if portal else 'the Canto library (staff need a Canto login)'))
     pool_size, min_assets = int(env('CANTO_POOL', 100)), int(env('CANTO_MIN_ASSETS', 3))
     preferred = [o.strip() for o in (env('CANTO_ORDER') or 'SKA-Low,SKA-Mid,Hero shots').split(',')]
     albums = select_albums(canto.albums(), folder)
     groups = collections(albums, folder, int(env('CANTO_GROUP_DEPTH', 3)), preferred)
     log(f'{len(albums)} albums under "{folder}", in {len(groups)} collections')
     pools = {al['id']: canto.album_assets(al['id'], pool_size) for g in groups for al in g['albums']}
-    link = lambda album_id, asset: portal_link(domain, portal, album_id, asset)
+    link = lambda album_id, asset: asset_link(domain, asset, album_id, asset_url)
     def item(asset, album_id):
         thumb = f'{THUMB_PREFIX}{re.sub(r"[^A-Za-z0-9_-]", "", str(asset["id"]))}.jpg'
         return {'id': str(asset['id']), 'title': title_for(asset), 'alt': alt_for(asset), 'credit': str(asset.get('copyright') or '').strip(),
@@ -422,6 +440,12 @@ def run(args):
                 'width': asset.get('width'), 'height': asset.get('height'), 'thumb': thumb,
                 'src': f'/download/attachments/{page_id}/{quote(thumb)}', 'href': link(album_id, asset)}
     manifest = {'version': 2, 'generated': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'source': f'Canto: {folder}', 'highlights': [], 'albums': []}
+    root = next((a for a in albums if a.get('idPath')), None)
+    if root:
+        parts, ids = str(root.get('namePath')).split('/'), str(root.get('idPath')).split('/')
+        top = next((i for i, p in enumerate(parts) if p.strip().lower() == folder.split('/')[-1].strip().lower()), None)
+        if top is not None and len(ids) == len(parts): manifest['href'] = folder_url.format(domain=domain, id=ids[top])
+    if portal and not env('CANTO_FOLDER_URL'): manifest['href'] = link_templates(portal)[1].split('/album/')[0].format(domain=domain)
     sources, showcase = {}, []
     for g in groups:
         video_ok = bool(re.search(r'video|animation', g['name'], re.I))
@@ -434,11 +458,11 @@ def run(args):
             log(f'  {g["name"]}: skipped ({len(chosen)} suitable of {g["size"]})'); continue
         if not people_ok: showcase += [(a, al, g['name']) for a, al in cands]
         biggest = max(g['albums'], key=lambda al: int(al.get('size') or 0))
-        href = f'https://{domain}.canto.global/v/{portal}/album/{biggest["id"]}'
+        href = album_url.format(domain=domain, id=biggest['id'])
         if len(g['albums']) > 1:
             parts, ids = str(biggest.get('namePath') or '').split('/'), str(biggest.get('idPath') or '').split('/')
             idx = next((i for i, p in enumerate(parts) if p.strip() == g['key'][-1]), None)
-            if idx is not None and len(ids) == len(parts): href = f'https://{domain}.canto.global/v/{portal}/folder/{ids[idx]}'
+            if idx is not None and len(ids) == len(parts): href = folder_url.format(domain=domain, id=ids[idx])
         for asset, album_id in chosen: sources[str(asset['id'])] = asset
         manifest['albums'].append({'id': str(biggest.get('id')), 'name': g['name'], 'path': g['name'], 'count': g['size'], 'href': href,
                                    'assets': [item(a, al) for a, al in chosen], '_newest': max(str(a.get('time') or '') for a, _ in chosen)})
@@ -500,7 +524,7 @@ def self_test():
     m = build_manifest([(albums[0], assets)], 'skao', '123', 'Staff media library', generated='t')
     item = m['albums'][0]['assets'][0]
     assert [i['kind'] for i in m['albums'][0]['assets']] == ['image', 'video'] and item['title'] == 'SKA Low station' and item['credit'] == 'SKAO'
-    assert item['src'] == '/download/attachments/123/canto-x1.jpg' and item['href'] == 'https://skao.canto.global/asset/x1'
+    assert item['src'] == '/download/attachments/123/canto-x1.jpg' and item['href'] == 'https://skao.canto.global/smartalbum/image?column=image&id=x1'
     assert m['albums'][0]['path'] == 'Asset library - Staff / Telescopes'
     assert build_manifest([(albums[0], [])], 'skao', '1', 'x')['albums'] == []
     staff = [{'id': 'l1', 'name': 'Stations', 'namePath': 'Staff media library/Asset library - Staff/Image bank - Staff/SKA-Low/Stations', 'size': 30, 'time': '2026'},
@@ -553,7 +577,11 @@ def self_test():
         assert [k['thumb'] for k in kept] == ['a', 'c'], ('resized copies and crops count as the same image', [k['thumb'] for k in kept])
     except ImportError:
         pass
-    assert portal_link('skao', 'SKAOLibrary', 'S980K', {'id': 'x1', 'scheme': 'video'}) == 'https://skao.canto.global/v/SKAOLibrary/album/S980K?column=video&id=x1'
+    assert asset_link('skao', {'id': 'x1', 'scheme': 'video'}, 'S980K') == 'https://skao.canto.global/smartalbum/video?column=video&id=x1'
+    assert asset_link('skao', {'id': 'x2'}) == 'https://skao.canto.global/smartalbum/image?column=image&id=x2'
+    pa, pal, pf = link_templates('SKAOStaff')
+    assert asset_link('skao', {'id': 'x1', 'scheme': 'video'}, 'S980K', pa) == 'https://skao.canto.global/v/SKAOStaff/album/S980K?column=video&id=x1'
+    assert pal.format(domain='skao', id='A1') == 'https://skao.canto.global/v/SKAOStaff/album/A1' and link_templates('') == (ASSET_URL, ALBUM_URL, FOLDER_URL)
     skies = [({**base, 'id': f'n{i}', 'name': f'Night sky {chr(65 + i)}', 'description': 'The Milky Way over the stations at night, a long description.', 'md5': f'n{i}'}, f'N{i}') for i in range(4)]
     mixed = pick(skies + other, 5, 'Hub feature', mix_subjects=True)
     assert sum(1 for a, _ in mixed if subject_of(a) == 'night') == 2, 'at most two night skies in a mixed pick'

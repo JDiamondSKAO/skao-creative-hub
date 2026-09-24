@@ -1,5 +1,11 @@
 # Changes
 
+## 2.12.1 Canto links open the staff library
+
+- Tiles open the asset in the Canto library (`/smartalbum/image?column=image&id={asset}`, the format canto-metadata-assistant uses), and collection links open their album or folder. 2.12.0 linked to the SKAO Library portal, which doesn't include the staff folder, so Canto said the album "cannot be accessed" and offered to remove the file's record.
+- "Open in Canto" on Photos and video, and "Open album in Canto" on topic pages, open the staff folder when a strip spans several albums.
+- `CANTO_PORTAL` switches every link to a portal instead (for example a staff portal), for staff without a Canto login.
+
 ## 2.12.0 curated Canto showcase
 
 - Tiles open the asset's own view in the SKAO Library portal (`/v/SKAOLibrary/album/{album}?column=image&id={asset}`), found by testing the portal; collection links open their folder.
