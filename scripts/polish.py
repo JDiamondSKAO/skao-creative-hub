@@ -157,13 +157,13 @@ def checklist(name, body):
 def catalogue(pages, meta, summaries, on_request):
  cards, counts, seen = [], {}, set()
  for key, label, groups in TYPES:
-  for name, m in meta.items():
+  for name, m in sorted(meta.items(), key=lambda kv: pages[kv[0]][0].lower()):
    if m['group'] not in groups or name in SKIP: continue
    title = pages[name][0]
    if title in seen: continue
    seen.add(title)
-   status = '<span class="resource-status">On request</span>' if name in on_request else ''
-   cards.append(f'<a class="resource-card" href="{name}" data-resource data-type="{key}"><span class="resource-type">{label}</span><h3>{html.escape(title)}</h3><p>{html.escape(summaries[name])}</p>{status}</a>')
+   status = '<span class="dir-meta req">On request</span>' if name in on_request else '<span class="dir-meta"></span>'
+   cards.append(f'<li><a class="resource-row" href="{name}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-type">{label}</span>{status}</a></li>')
    counts[key] = counts.get(key, 0) + 1
  chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
   f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label, _ in TYPES if counts.get(key))
@@ -171,7 +171,7 @@ def catalogue(pages, meta, summaries, on_request):
   '<label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Filter resources by name</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Filter by name, e.g. letterhead"></label></div>'
   '<div class="type-chips" role="group" aria-label="Show resource type">' + chips + '</div>'
   '<p id="filterStatus" class="filter-status" role="status"></p>'
-  '<div class="resource-grid">' + ''.join(cards) + '</div>'
+  '<ul class="resource-list">' + ''.join(cards) + '</ul>'
   '<div id="catalogueEmpty" class="catalogue-empty" hidden><p>Nothing matches that filter.</p><button type="button" id="clearFilters" class="button secondary">Show everything</button></div></section>')
 
 def request_routes(body, jira):
@@ -188,16 +188,26 @@ STATE = {}  # titles and summaries, filled by revise() for the header menus
 def status_pill(name):
  return '<span class="status-pill">On request</span>' if name in STATE.get('on_request', ()) else ''
 
+def row_meta(m, key):
+ if m in STATE.get('on_request', ()): return '<span class="dir-meta req" title="On request"><span class="visually-hidden">On request</span></span>'
+ if not primary(m, key): return '<span class="dir-meta">In ' + section_of(m)[1] + '</span>'
+ return ''
+
 def directory(name, pages, summaries):
- sec = section_of(name)
- key, label, landing, members, groups = sec
+ """A section as grouped link lists: label left, title and summary right."""
+ key, label, landing, members, groups = section_of(name)
+ listed = [m for g, items in groups for m in items]
+ waiting = sum(m in STATE.get('on_request', ()) for m in listed)
  out = '<div class="directory">'
+ if waiting:
+  out += (f'<p class="dir-note"><span class="dir-dot" aria-hidden="true"></span><span>Items marked with a dot are <strong>on request</strong>: the file is not downloadable from the Hub yet, '
+   f'so ask Creative Production for the current version. <a href="{STATE["jira"]}">Ask the team ↗</a></span></p>')
  for g, items in groups:
-  out += f'<section class="dir-group"><h2>{g}</h2><div class="dir-grid">'
+  out += f'<section class="dir-group"><h2>{g}</h2><ul class="dir-list">'
   for m in items:
-   out += (f'<a class="dir-card" href="{m}"><strong>{html.escape(pages[m][0])}</strong><span>{html.escape(summaries[m])}</span>'
-    + status_pill(m) + ('' if primary(m, key) else '<small class="dir-cross">In ' + section_of(m)[1] + '</small>') + '</a>')
-  out += '</div></section>'
+   out += (f'<li><a class="dir-row" href="{m}"><span class="dir-text"><strong>{html.escape(pages[m][0])}</strong>'
+    f'<span>{html.escape(summaries[m])}</span></span>{row_meta(m, key)}</a></li>')
+  out += '</ul></section>'
  return out + '</div>'
 
 def unfold(body):
@@ -215,13 +225,16 @@ def landing(name, body, pages, summaries):
  body = unfold(body)
  d = directory(name, pages, summaries)
  # Quick answers (brand swatches, the Canto hand-off) stay first; the directory follows.
+ def after(head, rest):
+  rest = rest.strip()
+  return head + d + (f'<div class="landing-guidance">{rest}</div>' if rest else '')
  for marker in ['<div class="type-spec">', '<div class="media-handoff">']:
   at = body.find(marker)
   if at >= 0:
    close = body.find('</div></div>', at) + 12
-   return body[:close] + d + body[close:]
+   return after(body[:close], body[close:])
  m = re.search(r'<div class="task-intro">.*?</div>(?:<a [^>]*class="button"[^>]*>.*?</a>)?</div>', body, re.S)
- return body[:m.end()] + d + body[m.end():] if m else d + body
+ return after(body[:m.end()], body[m.end():]) if m else d + body
 
 def nav(current=''):
  """Top menu: one link per section. The landing page lists everything in it."""
@@ -268,7 +281,7 @@ def revise(pages, meta, jira):
  titles = {n: t for n, (t, b) in pages.items()}
  summaries = {n: summary(b) for n, (t, b) in pages.items()}
  on_request = {n for n, (t, b) in pages.items() if 'availability-note' in b}
- STATE.update(titles=titles, summaries=summaries, on_request=on_request)
+ STATE.update(titles=titles, summaries=summaries, on_request=on_request, jira=jira)
  for name in meta:
   title, body = pages[name]
   if name in on_request: body = asset_panel(name, body, jira)
@@ -281,6 +294,7 @@ def revise(pages, meta, jira):
   if name in landings: body = landing(name, body, pages, summaries)
   pages[name] = (title, body + related(name, pages, summaries))
  title, body = pages['resources.html']
+ body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Every template, guide and service in the Hub in one list. Filter by type or name, then open a page to see the file, guidance or availability.', 1)
  body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)
  at = body.find('<aside class="next-step">')
  cat = catalogue(pages, meta, summaries, on_request)

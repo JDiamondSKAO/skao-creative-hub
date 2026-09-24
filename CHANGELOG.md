@@ -1,5 +1,13 @@
 # Changes
 
+## 2.6.0 landing pages as lists
+
+- Section landing pages list their pages as grouped rows (group label on the left, title and one-line summary on the right) instead of equal-weight cards, so they scan top to bottom and odd counts leave no gaps.
+- "On request" is explained once in a short note; rows carry a small dot, with the words kept for screen readers.
+- Supporting advice (release checks, useful checks, reuse guidance, contacts) sits under the list as light columns instead of stacked boxes.
+- Templates and assets is a filterable list with title, type and status columns, alphabetical within each type.
+- Unused card styles removed.
+
 ## 2.5.0 lighter navigation
 
 Same seven sections and groups, with each list shown once. Typical pages drop from 91–109 links to 26–32.

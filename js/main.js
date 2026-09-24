@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const hay = card.textContent.toLowerCase();
       const match = (type === "all" || card.dataset.type === type) &&
         words.every((w) => expand(w).some((alt) => hay.includes(alt)));
-      card.hidden = !match;
+      (card.closest("li") || card).hidden = !match;
       if (match) n++;
     });
     const status = $("#filterStatus");
