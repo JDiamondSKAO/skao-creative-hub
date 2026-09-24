@@ -96,7 +96,7 @@ def sidebar(current, titles):
   out += '</nav>'
  else:
   out += '<nav class="section-nav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
-   f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">Everything in the Hub</a></li></ul></nav>'
+   f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">Templates and assets</a></li></ul></nav>'
  return out + '<nav id="toc" class="toc" aria-label="On this page"></nav></aside>'
 
 def related(name, pages, summaries):
@@ -167,7 +167,7 @@ def catalogue(pages, meta, summaries, on_request):
    counts[key] = counts.get(key, 0) + 1
  chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
   f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label, _ in TYPES if counts.get(key))
- return ('<section class="catalogue" aria-labelledby="catalogueHeading"><div class="catalogue-head"><h2 id="catalogueHeading">Everything in the Hub</h2>'
+ return ('<section class="catalogue" aria-labelledby="catalogueHeading"><div class="catalogue-head"><h2 id="catalogueHeading">All resources</h2>'
   '<label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Filter resources by name</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Filter by name, e.g. letterhead"></label></div>'
   '<div class="type-chips" role="group" aria-label="Show resource type">' + chips + '</div>'
   '<p id="filterStatus" class="filter-status" role="status"></p>'
@@ -223,21 +223,17 @@ def landing(name, body, pages, summaries):
  m = re.search(r'<div class="task-intro">.*?</div>(?:<a [^>]*class="button"[^>]*>.*?</a>)?</div>', body, re.S)
  return body[:m.end()] + d + body[m.end():] if m else d + body
 
-CHEVRON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
-
 def nav(current=''):
- titles, summaries = STATE['titles'], STATE['summaries']
+ """Top menu: one link per section. The landing page lists everything in it."""
  cur = section_of(current)
  out = ''
  for key, label, landing_page, groups in SECTIONS:
-  here = ' data-current="true"' if cur and cur[0] == key else ''
-  out += (f'<div class="nav-item"><button type="button" class="nav-button" aria-expanded="false" aria-controls="menu-{key}"{here}>{label}{CHEVRON}</button>'
-   f'<div class="mega" id="menu-{key}" hidden><div class="mega-inner"><div class="mega-intro"><strong>{label}</strong><p>{html.escape(summaries[landing_page])}</p>'
-   f'<a class="mega-home" href="{landing_page}">{html.escape(titles[landing_page])} →</a></div>')
-  for g, pages in groups:
-   out += f'<div class="mega-group"><h3>{g}</h3><ul>' + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul></div>'
-  out += '</div></div></div>'
+  state = ' aria-current="page"' if current == landing_page else ' aria-current="true"' if cur and cur[0] == key else ''
+  out += f'<a href="{landing_page}"{state}>{label}</a>'
  return out
+
+# Pages shown full width: they list a whole section, so a sidebar would repeat them.
+FULL_WIDTH = {sec[2] for sec in SECTIONS} | {'resources.html'}
 
 TILES = [
  ('presentations', 'slides', 'Templates, reusable decks and formatting help.', ['standard-template.html', 'master-deck.html', 'formatting-slides.html']),
@@ -258,13 +254,13 @@ def home_tiles(home, titles):
  for key, kind, desc, links in TILES:
   sec = next(x for x in SECTIONS if x[0] == key)
   out += (f'<article class="section-tile kind-{kind}"><a class="tile-main" href="{sec[2]}"><div class="tile-art" aria-hidden="true">{art[kind]}</div>'
-   f'<h3>{sec[1]}</h3><p>{desc}</p></a><ul class="tile-links">' + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in links) + '</ul></article>')
+   f'<h3>{sec[1]}</h3><p>{desc}</p></a></article>')
  return out + '</div>'
 
 def latest_band():
  return ('<section class="latest-band journey-band" aria-labelledby="latestHeading"><div class="band-heading"><div><p class="eyebrow" id="latestEyebrow">03 / Just added</p>'
   '<h2 id="latestHeading">Latest approved assets</h2><p class="latest-lead" id="latestLead">The newest approved files uploaded to the Creative Hub.</p></div>'
-  '<a href="resources.html" class="text-link">Browse everything →</a></div>'
+  '</div>'
   '<div id="latestAssets" class="latest-grid" data-approval-label="approved"><p class="latest-status">Loading the latest files…</p></div>'
   '<noscript><p class="latest-status">Turn on JavaScript to see the latest files, or browse <a href="resources.html">templates and assets</a>.</p></noscript></section>')
 
@@ -285,7 +281,7 @@ def revise(pages, meta, jira):
   if name in landings: body = landing(name, body, pages, summaries)
   pages[name] = (title, body + related(name, pages, summaries))
  title, body = pages['resources.html']
- body = body.replace('<div class="choice-grid">', '<div class="choice-grid compact">', 1)
+ body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)
  at = body.find('<aside class="next-step">')
  cat = catalogue(pages, meta, summaries, on_request)
  pages['resources.html'] = (title, body[:at] + cat + body[at:] if at >= 0 else body + cat)
@@ -297,6 +293,7 @@ def revise(pages, meta, jira):
   '<input id="heroSearch" type="search" autocomplete="off" placeholder="Search templates, logos, guidance…"><button class="button" type="submit">Search</button></form>')
  home = re.sub(r'<div class="quick-library">.*?</div></section>', lambda m: home_tiles(home, titles) + '</section>', home, count=1, flags=re.S)
  home = home.replace('<h2>What do you need?</h2>', '<h2>Browse by section</h2>', 1)
+ home = home.replace('<span>Jump to</span>', '<span>Quick links</span>', 1).replace('>All templates and assets →<', '>All templates and assets →<', 1)
  assert home.endswith('</div>')
  pages['index.html'] = (title, home[:-6] + latest_band() + '</div>')
  return pages, titles

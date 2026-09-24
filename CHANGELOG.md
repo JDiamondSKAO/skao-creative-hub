@@ -1,5 +1,16 @@
 # Changes
 
+## 2.5.0 lighter navigation
+
+Same seven sections and groups, with each list shown once. Typical pages drop from 91–109 links to 26–32.
+
+- Top menu: seven plain links to the section landing pages, with the current section underlined. The drop-down panels are gone; each landing page lists its whole section, so every page is within two clicks.
+- Section landing pages and Templates and assets are full width with no sidebar, because they are the list. Detail pages keep the grouped section sidebar.
+- Homepage section tiles are single links; "Quick links" (renamed from "Jump to") covers the most common tasks. The latest-assets band no longer repeats the catalogue link.
+- Templates and assets drops its four starting-point cards; the type filters do the same job.
+- Footer: six links in one row. Search quick links match the homepage quick links.
+- Labels are consistent: "Templates and assets" everywhere; the catalogue heading is "All resources".
+
 ## 2.4.0 one structure everywhere
 
 - One information architecture drives the top menu, sidebars, breadcrumbs, landing pages and homepage: Presentations, Documents, Brand, Photos and video, Events, How-to guides, Get help, each split into named groups (for example Templates / Decks to reuse / How to).
