@@ -26,8 +26,19 @@ for page, patterns in spec['pages'].items():
             st = p.stat()
             out.append({'page': page, 'title': p.name, 'path': str(p), 'size': st.st_size, 'labels': ['approved'],
                         'when': datetime.fromtimestamp(st.st_mtime, timezone.utc).isoformat()})
-# Stand-in Canto showcase: real images run through the sync's own manifest and thumbnail code.
+# Canto showcase: real dry-run output from scripts/canto_sync.py if present, otherwise stand-ins.
+real = ROOT / 'build' / 'canto' / 'canto-showcase.json'
 stand = spec.get('canto_standin')
+if real.exists():
+    manifest = json.loads(real.read_text())
+    page = (stand or {}).get('page', 'media.html')
+    for al in manifest['albums']:
+        for item in al['assets']:
+            f = real.parent / item['thumb']
+            if f.exists(): out.append({'page': page, 'title': item['thumb'], 'path': str(f), 'size': f.stat().st_size, 'labels': [], 'when': manifest['generated']})
+    out.append({'page': page, 'title': real.name, 'path': str(real), 'size': real.stat().st_size, 'labels': [], 'when': manifest['generated']})
+    print(f'Canto: {sum(len(a["assets"]) for a in manifest["albums"])} real images in {len(manifest["albums"])} albums from build/canto')
+    stand = None
 if stand:
     import sys; sys.path.insert(0, str(ROOT / 'scripts'))
     import canto_sync

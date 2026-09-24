@@ -46,6 +46,7 @@ Photos and video shows a gallery of the Canto **Staff media library** folder, an
 export CANTO_DOMAIN=skao CANTO_API_KEY=...            # or CANTO_APP_ID / CANTO_APP_SECRET
 export CANTO_FOLDER_PATH="Staff media library"
 python3 scripts/canto_sync.py --dry-run --out build/canto   # check what would be published
+python3 scripts/canto_sync.py --dry-run --env dev/canto.env   # same, reading settings from a local file (dev/ is not in Git)
 export CONFLUENCE_BASE=https://confluence.skatelescope.org CONFLUENCE_TOKEN=... CONFLUENCE_PAGE_ID=381891718
 python3 scripts/canto_sync.py                               # publish to the Photos and video page
 ```
@@ -54,7 +55,7 @@ python3 scripts/canto_sync.py                               # publish to the Pho
 - Only images in albums under the folder are published. Thumbnails are resized to 640 px and stripped of embedded metadata (including location).
 - `CANTO_ASSET_URL` and `CANTO_ALBUM_URL` set where tiles link (defaults: `https://{domain}.canto.global/asset/{id}` and `/album/{id}`). Use portal links if staff reach Canto through the SKAO Library portal.
 - Albums appear on topic pages when their name contains the page's keywords (`CANTO_STRIPS` in `scripts/polish.py`).
-- Local test mode builds stand-in albums from local images (`canto_standin` in `dev/brandbank-map.json`).
+- Local test mode uses the real dry-run output in `build/canto` when it exists (rerun `scripts/dev_fixtures.py` after a dry run), otherwise stand-in albums from local images (`canto_standin` in `dev/brandbank-map.json`).
 
 ## Build packages
 
