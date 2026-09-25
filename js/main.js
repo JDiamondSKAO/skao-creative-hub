@@ -441,6 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
     d.querySelector("input, textarea")?.focus({ preventScroll: true });
   }));
   openTarget(location.hash.slice(1));
+  addEventListener("hashchange", () => openTarget(location.hash.slice(1)));
   // Announcement: the newest Hub page labelled "announcement". Dismissal lasts until that page changes.
   const banner = $("#announcement");
   if (banner) loadAnnouncement(banner);
@@ -889,14 +890,14 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await navigator.clipboard.writeText(b.dataset.copy);
       label.textContent = "Copied";
-      if (status) status.textContent = b.dataset.copy + " copied to clipboard.";
+      if (status) status.textContent = (b.dataset.copyLabel || b.dataset.copy) + " copied to clipboard.";
     } catch {
       const code = b.querySelector("code") || b, range = document.createRange();
       range.selectNodeContents(code);
       getSelection().removeAllRanges();
       getSelection().addRange(range);
       label.textContent = mac ? "Press ⌘C" : "Press Ctrl C";
-      if (status) status.textContent = "Clipboard unavailable. " + b.dataset.copy + " is selected; copy it with your keyboard.";
+      if (status) status.textContent = "Clipboard unavailable. " + (b.dataset.copyLabel || b.dataset.copy) + " is selected; copy it with your keyboard.";
     }
     clearTimeout(b._t);
     b._t = setTimeout(() => { label.textContent = before; }, 2400);

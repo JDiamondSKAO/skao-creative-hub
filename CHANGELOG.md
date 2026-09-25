@@ -1,5 +1,15 @@
 # Changes
 
+## 2.15.0 Get help, simplified
+
+- Get help is one page instead of thirteen. It opens with a single button to the creative helpdesk, then "What to include" (with a "Copy as a template" button for the helpdesk form) and "Asking for something specific?" for video, print and business cards. A "Good to know" panel beside it covers what happens next and what the team can help with, each said once.
+- Common questions absorbs Help with the Hub (seven questions, no repeats) and Share material is three plain routes with one helpdesk button.
+- Replaced pages keep their addresses and point to the part of Get help that now holds them, which opens on arrival. Search still finds them by their old names. Work with print suppliers moves to How-to guides › Print and posters.
+- Hub updates and Updates archive leave the menus and footer; the announcement banner and Just added cover what's new.
+- Generic "ask the team" boxes that only repeated the footer are gone.
+- The footer band has one call to action, straight to the helpdesk, and speaks to bigger work: "Planning something bigger? Most everyday work can start right here in the Hub. For campaigns, flagship events or new publications, bring Creative Production in early so we can shape it with you."
+- The previous text of all thirteen pages is kept in `archive/get-help-v2.14.html`, and the whole Hub before this change is at the git tag `pre-get-help-simplify`.
+
 ## 2.14.0 Header, section menus and motion
 
 - Header, refined rather than redesigned: the pause and theme controls are a matching pair of round buttons (the pause control has real pause and play icons), and the "Resources for staff" label is gone. The current section no longer shifts its neighbours when it turns bold.

@@ -5,6 +5,7 @@ resource catalogue and the homepage search and latest-assets bands. It only
 reorganises reviewed content; it never invents files or availability.
 """
 import html, re
+from gethelp import MOVED
 import brandkit
 
 def text(fragment):
@@ -39,14 +40,12 @@ SECTIONS = [
   ('Using media', ['image-usage.html'])]),
  ('events', 'Events', 'events.html', [
   ('Plan', ['event-checklist.html', 'event-safety.html']),
-  ('Materials', ['stands.html', 'merchandise.html', 'print.html'])]),
+  ('Materials', ['stands.html', 'merchandise.html'])]),
  ('guides', 'How-to guides', 'self-service.html', [
-  ('Print and posters', ['making-a-poster.html', 'print-preparation.html']),
+  ('Print and posters', ['making-a-poster.html', 'print-preparation.html', 'print-suppliers.html']),
   ('Good practice', ['accessibility.html', 'firefly.html', 'formatting-slides.html'])]),
  ('help', 'Get help', 'working-with-us.html', [
-  ('Ask the team', ['request.html', 'creative-services.html', 'timing.html']),
-  ('Specific requests', ['video-request.html', 'print.html', 'print-suppliers.html', 'business-cards.html']),
-  ('Help with the Hub', ['help.html', 'faq.html', 'contribute.html', 'updates.html', 'archive.html'])]),
+  ('More help', ['faq.html', 'contribute.html'])]),
 ]
 # Pages that belong to a section without being listed (duplicate source titles).
 EXTRA = {'canto-guide.html': 'media'}
@@ -59,7 +58,7 @@ def members_of(section):
  return out
 
 # Where a cross-listed page lives when first listing is not its natural home.
-HOME = {'print.html': 'help'}
+HOME = {}
 
 def section_of(name):
  """Primary section of a page: (key, label, landing, members, groups)."""
@@ -83,7 +82,7 @@ TYPES = [
  ('guides', 'How-to guides', {'Guidance'}),
  ('services', 'Creative services', {'Creative help'}),
 ]
-SKIP = {'resources.html', 'request.html'}
+SKIP = {'resources.html'} | set(MOVED)
 CHECKLISTS = {'event-checklist.html', 'print-preparation.html', 'making-a-poster.html', 'accessibility.html'}
 
 def sidebar(current, titles):

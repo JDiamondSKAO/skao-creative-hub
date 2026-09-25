@@ -1326,3 +1326,12 @@ body .rail-body .rail-links a:any-link:hover {border-color:color-mix(in srgb,var
 /* No icons in the panel: text lines up with the heading, and colour alone marks each kind */
 .rail-item summary {gap:12px;padding:13px 18px;}
 .rail-body {padding:0 18px 16px;}
+/* ===== Get help ===== */
+.copy-template-row {display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:.88rem;color:var(--muted);}
+.copy-template {display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);font:inherit;font-size:.84rem;font-weight:700;cursor:pointer;}
+.copy-template:hover {border-color:color-mix(in srgb,var(--link) 45%,var(--line));background:var(--surface);}
+.copy-template:active {transform:scale(.97);}
+.get-help-layout {margin-top:8px;}
+.get-help-layout .landing-main > .reading-section:first-child {margin-top:0;}
+.get-help-more {margin-top:40px;}
+.rail-body ol + p,.rail-body ul + p {margin-top:10px!important;}
