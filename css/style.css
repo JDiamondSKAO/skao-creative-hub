@@ -1313,3 +1313,20 @@ body a.strip-all:any-link:hover {border-color:color-mix(in srgb,var(--link) 45%,
 .strip-meta {display:flex;white-space:pre;}
 .strip-file {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .strip-when {flex:none;}
+/* Item colours stay muted and never borrow the heading's magenta: slate, sage, ochre */
+.rail-item {--accent:#4a6f9c;}
+.rail-item[data-kind="check"] {--accent:#3f7d5e;}
+.rail-item[data-kind="ask"] {--accent:#9a6b2f;}
+.dark .rail-item {--accent:#9db8d8;}
+.dark .rail-item[data-kind="check"] {--accent:#93c4a8;}
+.dark .rail-item[data-kind="ask"] {--accent:#d6b07a;}
+.rail-item[open] {background:color-mix(in srgb,var(--accent) 3.5%,var(--bg));}
+.dark .rail-item[open] {background:color-mix(in srgb,var(--accent) 5%,var(--bg));}
+.rail-item[open]:before {opacity:.45;}
+.rail-item summary:hover {background:color-mix(in srgb,var(--accent) 4%,transparent);}
+.rail-icon,.dark .rail-icon {background:color-mix(in srgb,var(--accent) 11%,var(--bg));}
+.rail-item[open] .rail-icon,.dark .rail-item[open] .rail-icon {background:color-mix(in srgb,var(--accent) 15%,var(--bg));}
+body .rail-body .rail-links a:any-link {border-color:color-mix(in srgb,var(--accent) 22%,var(--line));}
+body .rail-body .rail-links a:any-link:hover {border-color:color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent) 5%,var(--bg));}
+/* Keyboard focus sits inside the row, so the panel's rounded edge never clips it */
+.rail-item summary:focus-visible {outline:2px solid var(--focus);outline-offset:-2px;border-radius:4px;}
