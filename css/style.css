@@ -1384,3 +1384,52 @@ body .rail-body .rail-links a:any-link:hover {border-color:color-mix(in srgb,var
  .brief-head,.brief-list,.brief-extras {padding-left:16px;padding-right:16px;}
 }
 .brief-extra {padding:0;}
+
+/* ===== 2.15.2 review feedback ===== */
+/* Photos and video tile: a light card like its neighbours, a photo in the brand gradient with a play button */
+.index-item.kind-media .index-art {background:#e7f1f5;color:inherit;}
+.dark .index-item.kind-media .index-art {background:#1b2b36;}
+.art-media {position:relative;display:block;width:108px;height:80px;}
+.art-media i {position:absolute;left:0;top:0;right:22px;bottom:12px;border-radius:9px;background:linear-gradient(135deg,#070068,#58005f 58%,#e70068);box-shadow:0 5px 12px #07006833;overflow:hidden;}
+.art-media i:before {content:"";position:absolute;left:14px;bottom:10px;width:36px;height:18px;border:4px solid #fff;border-bottom:0;border-radius:40px 40px 0 0;opacity:.95;}
+.art-media i:after {content:"";position:absolute;right:16px;top:12px;width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:-30px 8px 0 -2px #ffffffb3;}
+.art-media b {position:absolute;right:0;bottom:0;width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:0 4px 10px #07006833;}
+.art-media b:before {content:"";position:absolute;left:17px;top:13px;border-left:13px solid #e70068;border-top:8px solid transparent;border-bottom:8px solid transparent;}
+
+/* Announcement: loud enough to notice, in the masthead colours */
+.announce,.dark .announce {background:linear-gradient(90deg,#070068,#3d0a6b 55%,#aa005c);border-bottom:0;}
+body .announce-text a,body .announce-text a:visited,.dark body .announce-text a {color:#fff;}
+.announce-tag {background:#fff;color:#c4005a;}
+.announce-close {color:#ffffffcc;}
+.announce-close:hover,.dark .announce-close:hover {background:#ffffff26;color:#fff;}
+.announce-close:focus-visible,.announce-text a:focus-visible {outline-color:#fff;}
+
+/* All resources: each type keeps one colour, on its filter and on its rows */
+:where(.type-chips button,.resource-row) {--c:var(--muted);}
+[data-type-filter="presentations"],[data-type="presentations"] {--c:#c2410c;}
+[data-type-filter="documents"],[data-type="documents"] {--c:#1d4ed8;}
+[data-type-filter="brand"],[data-type="brand"] {--c:#be185d;}
+[data-type-filter="media"],[data-type="media"] {--c:#0e7490;}
+[data-type-filter="events"],[data-type="events"] {--c:#7c3aed;}
+[data-type-filter="guides"],[data-type="guides"] {--c:#15803d;}
+[data-type-filter="services"],[data-type="services"] {--c:#475569;}
+.dark [data-type-filter="presentations"],.dark [data-type="presentations"] {--c:#fb923c;}
+.dark [data-type-filter="documents"],.dark [data-type="documents"] {--c:#93b4ff;}
+.dark [data-type-filter="brand"],.dark [data-type="brand"] {--c:#f472b6;}
+.dark [data-type-filter="media"],.dark [data-type="media"] {--c:#5fc4d6;}
+.dark [data-type-filter="events"],.dark [data-type="events"] {--c:#c4b5fd;}
+.dark [data-type-filter="guides"],.dark [data-type="guides"] {--c:#6fd08f;}
+.dark [data-type-filter="services"],.dark [data-type="services"] {--c:#cbd5e1;}
+.type-chips button:not([data-type-filter="all"]):before {content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--c);}
+.type-chips button[aria-pressed="true"]:not([data-type-filter="all"]):before {box-shadow:0 0 0 2px #ffffffcc;}
+.type-chips button:not([data-type-filter="all"]):hover {border-color:color-mix(in srgb,var(--c) 55%,var(--line));}
+.resource-row .resource-type {display:inline-flex;align-items:center;gap:7px;color:color-mix(in srgb,var(--c) 80%,var(--ink));}
+.resource-row .resource-type:before {content:"";width:7px;height:7px;border-radius:50%;background:var(--c);}
+
+/* Presentations: the share card sits under the advice */
+.landing-rail .share-feature {margin-top:0;}
+.landing-rail .share-feature .feature-art {padding:22px 24px;}
+.landing-rail .share-feature .feature-art strong {margin-top:18px;font-size:1.45rem;}
+.landing-rail .share-feature .feature-copy {padding:18px 22px 20px;}
+.landing-rail .share-feature .feature-copy h2 {margin:10px 0 8px;font-size:1.15rem;}
+.landing-rail .share-feature .feature-copy > p:not(.eyebrow) {margin-bottom:14px;font-size:.86rem;}

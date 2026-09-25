@@ -171,7 +171,7 @@ def catalogue(pages, meta, summaries, on_request):
    counts[key] = counts.get(key, 0) + 1
  chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
   f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label, _ in TYPES if counts.get(key))
- return ('<section class="catalogue" aria-labelledby="catalogueHeading"><div class="catalogue-head"><h2 id="catalogueHeading">All resources</h2>'
+ return ('<section class="catalogue" aria-labelledby="catalogueHeading"><div class="catalogue-head"><h2 id="catalogueHeading">Filter by type or name</h2>'
   '<label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Filter resources by name</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Filter by name, e.g. letterhead"></label></div>'
   '<div class="type-chips" role="group" aria-label="Show resource type">' + chips + '</div>'
   '<p id="filterStatus" class="filter-status" role="status"></p>'
@@ -303,12 +303,12 @@ TILES = [
 ]
 TILE_ART = {**ART,
  'events': '<span class="art-events"><i></i><b>SKAO</b><em></em></span>',
- 'guides': '<span class="art-guides"><i></i><i></i><i></i></span>'}
+ 'guides': '<span class="art-guides"><i></i><i></i><i></i></span>',
+ 'media': '<span class="art-media"><i></i><b></b></span>'}
 
 def home_tiles(home, titles):
  """A compact index of the sections: small picture, name and what is inside."""
- media_svg = re.search(r'<a class="quick-resource media"[^>]*><div class="resource-art" aria-hidden="true">(.*?)</div>', home, re.S)
- art = {**TILE_ART, 'media': media_svg.group(1) if media_svg else ''}
+ art = TILE_ART
  out = '<ul class="section-index">'
  for key, kind, desc, links in TILES:
   sec = next(x for x in SECTIONS if x[0] == key)

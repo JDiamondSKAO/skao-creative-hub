@@ -1,5 +1,13 @@
 # Changes
 
+## 2.15.2 Review board feedback
+
+- Templates and assets is now called All resources, which is what it is: every template, guide and service in one filterable list. Its links across the Hub use the new name, and its list heading reads "Filter by type or name".
+- Each resource type has one colour, shown as a dot on its filter and on its rows (slides orange, documents blue, brand pink, media teal, events purple, guides green, services slate).
+- The announcement banner is a navy-to-magenta band with white text, so it is noticed.
+- The Photos and video tile on the homepage is a light card like its neighbours: a photo in the brand gradient with a play button.
+- Presentations has a "Help build the library" card under its advice, inviting staff to share decks through Share material.
+
 ## 2.15.1 Get help layout
 
 - The page follows one flow: a short intro with the helpdesk button, then the brief as a single card beside what to expect.

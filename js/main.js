@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rendered = count ? q : "";
       message.textContent = count
         ? `${count} result${count === 1 ? "" : "s"}.` + (matchMedia("(pointer: fine)").matches ? " Use ↑ ↓ to move, Enter to open." : "")
-        : "No matching pages. Try another word, browse templates and assets, or ask the team.";
+        : "No matching pages. Try another word or browse all resources.";
     } catch (e) {
       if (id === serial && dialog.open)
         message.textContent =
@@ -790,10 +790,10 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#latestHeading").textContent = "Latest files in the Hub";
         $("#latestLead").textContent = "Recent uploads: check approval on the source page";
       }
-      if (!rows.length) { status("No new files yet. Browse templates and assets for everything in the Hub."); return; }
+      if (!rows.length) { status("No new files yet. Browse all resources for everything in the Hub."); return; }
       show(strip ? stripItems(rows, false) : rows.map((r) => card(r, false)));
     } catch (e) {
-      status(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the latest files." : "The latest files could not be loaded. Browse templates and assets instead.");
+      status(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the latest files." : "The latest files could not be loaded. Browse all resources instead.");
     }
   }
   // Header gains a shadow once the navigation is pinned.
