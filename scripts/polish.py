@@ -231,13 +231,8 @@ def top_level(fragment):
     parts.append(fragment[start:m.end()]); start = None
  return parts
 
-# Help panel items come in three kinds, each with its own mark and tint: guidance to know,
+# Help panel items come in three kinds, each with its own tint: guidance to know,
 # checks to run through, and a prompt to ask the team.
-RAIL_ICONS = {k: f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">{d}</svg>' for k, d in {
- 'info': '<path d="M12 11v6.5"/><circle cx="12" cy="6.8" r=".6" fill="currentColor"/>',
- 'check': '<path d="m5.5 12.5 4 4 9-9.5"/>',
- 'ask': '<path d="M6.5 5h11A2.5 2.5 0 0 1 20 7.5v6a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V16h-1A2.5 2.5 0 0 1 4 13.5v-6A2.5 2.5 0 0 1 6.5 5Z"/>'}.items()}
-
 def rail_kind(title, body):
  if '<ol' in body or '<ul' in body: return 'check'
  return 'ask' if title.rstrip().endswith('?') else 'info'
@@ -263,9 +258,8 @@ def rail(rest):
  if not items: return ''
  out = '<aside class="landing-rail" aria-label="Help with this section">'
  if items:
-  out += ('<div class="rail-guides"><h2 class="rail-title"><span class="rail-title-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'
-   '<path d="M5 21V4"/><path d="M5 4.5c4-2 7 2 11 0v8.5c-4 2-7-2-11 0"/></svg></span>Before you start</h2>') + ''.join(
-   f'<details class="rail-item" data-kind="{rail_kind(t, b)}"{" open" if i == 0 else ""}><summary><span class="rail-icon" aria-hidden="true">{RAIL_ICONS[rail_kind(t, b)]}</span>'
+  out += ('<div class="rail-guides"><h2 class="rail-title">Before you start</h2>') + ''.join(
+   f'<details class="rail-item" data-kind="{rail_kind(t, b)}"{" open" if i == 0 else ""}><summary>'
    f'<span class="rail-label">{html.escape(t)}</span></summary><div class="rail-body">{rail_links(b)}</div></details>'
    for i, (t, b) in enumerate(items)) + '</div>'
  return out + '</aside>'

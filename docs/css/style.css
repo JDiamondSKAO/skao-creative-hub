@@ -1241,10 +1241,6 @@ html:active-view-transition-type(hub-page)::view-transition-new(root) {animation
 .rail-item summary {justify-content:flex-start;gap:11px;padding:13px 16px 13px 16px;transition:background-color var(--t) var(--ease-soft);}
 .rail-item summary:hover {background:color-mix(in srgb,var(--accent) 6%,transparent);}
 .rail-label {flex:1;min-width:0;}
-.rail-icon {flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:color-mix(in srgb,var(--accent) 13%,var(--bg));color:var(--accent);transition:transform var(--t) var(--ease-out),background-color var(--t) var(--ease-soft);}
-.dark .rail-icon {background:color-mix(in srgb,var(--accent) 18%,var(--bg));}
-.rail-item[open] .rail-icon {background:color-mix(in srgb,var(--accent) 18%,var(--bg));}
-.rail-item summary:hover .rail-icon {transform:scale(1.06);}
 .rail-item summary:after {transition:transform var(--t-slow) var(--ease-out),border-color var(--t) var(--ease-soft);}
 .rail-item[open] summary:after {border-color:var(--accent);}
 .rail-body {padding:0 18px 16px 53px;font-size:.86rem;line-height:1.62;}
@@ -1275,8 +1271,6 @@ body .rail-body .rail-links a:any-link:active {transform:scale(.97);}
 .dark .rail-guides:before {background:linear-gradient(90deg,#8e88ff,#c86bd0 50%,#ff85bc);}
 .content-body .rail-title {display:flex;align-items:center;gap:8px;padding:18px 18px 12px;background:linear-gradient(180deg,color-mix(in srgb,var(--magenta) 7%,var(--bg)),var(--bg));color:var(--magenta);font-size:.72rem;letter-spacing:.11em;}
 .dark .content-body .rail-title {background:linear-gradient(180deg,color-mix(in srgb,#ff85bc 10%,var(--bg)),var(--bg));color:#ff85bc;}
-.rail-title-icon {display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--magenta);color:#fff;}
-.dark .rail-title-icon {background:#ff85bc;color:#1a0b14;}
 @keyframes rail-in {from{opacity:0;transform:translateY(10px);}}
 .landing-rail {animation:rail-in .55s var(--ease-out) .18s both;}
 
@@ -1324,9 +1318,11 @@ body a.strip-all:any-link:hover {border-color:color-mix(in srgb,var(--link) 45%,
 .dark .rail-item[open] {background:color-mix(in srgb,var(--accent) 5%,var(--bg));}
 .rail-item[open]:before {opacity:.45;}
 .rail-item summary:hover {background:color-mix(in srgb,var(--accent) 4%,transparent);}
-.rail-icon,.dark .rail-icon {background:color-mix(in srgb,var(--accent) 11%,var(--bg));}
-.rail-item[open] .rail-icon,.dark .rail-item[open] .rail-icon {background:color-mix(in srgb,var(--accent) 15%,var(--bg));}
 body .rail-body .rail-links a:any-link {border-color:color-mix(in srgb,var(--accent) 22%,var(--line));}
 body .rail-body .rail-links a:any-link:hover {border-color:color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent) 5%,var(--bg));}
 /* Keyboard focus sits inside the row, so the panel's rounded edge never clips it */
 .rail-item summary:focus-visible {outline:2px solid var(--focus);outline-offset:-2px;border-radius:4px;}
+
+/* No icons in the panel: text lines up with the heading, and colour alone marks each kind */
+.rail-item summary {gap:12px;padding:13px 18px;}
+.rail-body {padding:0 18px 16px;}
