@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
       motion.setAttribute("aria-pressed", String(paused));
       motion.setAttribute("aria-label", paused ? "Resume header animation" : "Pause header animation");
       motion.title = paused ? "Resume header animation" : "Pause header animation";
-      motion.querySelector("span").textContent = paused ? "▷" : "Ⅱ";
     });
   }
   const navItems = $$("#mainNav a");
@@ -29,6 +28,32 @@ document.addEventListener("DOMContentLoaded", () => {
     navItems.forEach((a) => {
       if (!a.hasAttribute("aria-current") && new URL(a.href).pathname.replace(/\/$/, "") === home) a.setAttribute("aria-current", "true");
     });
+  }
+  // One underline slides to the link under the pointer or focus, then settles back on the current section.
+  const topNav = $("#mainNav"), bar = topNav?.querySelector(".nav-indicator");
+  if (bar) {
+    const home = () => topNav.querySelector("a[aria-current]");
+    const place = (a) => {
+      if (!a || !a.offsetWidth) { topNav.classList.remove("has-mark"); return; }
+      if (!topNav.classList.contains("has-mark")) {
+        topNav.classList.add("no-slide");
+        setTimeout(() => topNav.classList.remove("no-slide"), 50);
+      }
+      topNav.style.setProperty("--mark-x", a.offsetLeft + "px");
+      topNav.style.setProperty("--mark-w", a.offsetWidth + "px");
+      topNav.classList.add("has-mark");
+      topNav.classList.toggle("mark-away", a !== home());
+    };
+    navItems.forEach((a) => {
+      a.addEventListener("pointerenter", () => place(a));
+      a.addEventListener("focus", () => place(a));
+    });
+    topNav.addEventListener("pointerleave", () => place(home()));
+    topNav.addEventListener("focusout", (e) => { if (!topNav.contains(e.relatedTarget)) place(home()); });
+    const settle = () => place(home());
+    if ("ResizeObserver" in window) new ResizeObserver(settle).observe(topNav);
+    document.fonts?.ready.then(settle);
+    settle();
   }
   const menu = $("#menuButton"),
     nav = $("#mainNav");
@@ -439,18 +464,26 @@ document.addEventListener("DOMContentLoaded", () => {
     link.textContent = item.title;
     const href = safeLink(item.href);
     if (href) link.href = href;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches || !el.animate;
+    const grow = (from, to, done) => {
+      const h = el.scrollHeight + "px";
+      el.style.overflow = "hidden";
+      el.animate([{ height: from ? h : "0px", opacity: from }, { height: to ? h : "0px", opacity: to }], { duration: to ? 320 : 220, easing: "cubic-bezier(.16,1,.3,1)" })
+        .finished.then(() => { el.style.overflow = ""; done?.(); });
+    };
     el.hidden = false;
+    if (!still) grow(0, 1);
     el.querySelector(".announce-close").addEventListener("click", () => {
-      el.hidden = true;
+      if (still) el.hidden = true; else grow(1, 0, () => { el.hidden = true; });
       try { localStorage.setItem(KEY, item.key); } catch {}
       (document.querySelector("#main-content") || document.body).focus?.({ preventScroll: true });
     });
   }
-  // Files uploaded to a Hub page and labelled "approved" become downloads, and "On request" clears.
+  // Files uploaded to a Hub page and labelled "approved" become its downloads.
   refreshAvailability();
   async function refreshAvailability() {
-    const panel = $(".asset-panel[data-page-id]"), rows = $$("a[data-page-id]"), pageId = panel?.dataset.pageId || document.body.dataset.pageId;
-    if (!panel && !rows.length && !pageId) return;
+    const panel = $(".asset-panel[data-page-id]"), pageId = panel?.dataset.pageId || document.body.dataset.pageId;
+    if (!panel && !pageId) return;
     const slot = panel?.querySelector("[data-downloads]");
     if (document.body.dataset.mode === "preview") {
       if (slot) {
@@ -470,11 +503,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch { return; }
     const byPage = new Map();
     files.forEach((f) => { const id = String(f.container?.id || ""); if (id) byPage.set(id, [...(byPage.get(id) || []), f]); });
-    rows.forEach((a) => {
-      if (!byPage.has(a.dataset.pageId)) return;
-      const meta = a.querySelector(".dir-meta");
-      if (meta) { meta.className = "dir-meta ready"; meta.title = "Download available"; meta.textContent = a.classList.contains("resource-row") ? "Available" : ""; if (!meta.textContent) { const t = document.createElement("span"); t.className = "visually-hidden"; t.textContent = "Download available"; meta.append(t); } }
-    });
     const mine = pageId ? byPage.get(String(pageId)) : null;
     if (!mine?.length) return;
     const section = renderDownloads(mine, ctx);
@@ -484,8 +512,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (intro) intro.after(section); else $(".content-body")?.prepend(section);
       return;
     }
-    const pill = panel.querySelector(".status-pill"), dd = pill?.closest("dd");
-    if (dd) { dd.replaceChildren(); const ok = document.createElement("span"); ok.className = "status-pill ready"; ok.textContent = "Available"; dd.append(ok, " Choose a file below."); }
     panel.querySelectorAll('.how-to-get, [data-fact=versions], [data-fact=sizes], [data-fact="partner versions"]').forEach((el) => el.remove());
     const ask = panel.querySelector(".asset-actions .button");
     if (ask) { ask.classList.add("secondary"); ask.textContent = "Ask about this file ↗"; }

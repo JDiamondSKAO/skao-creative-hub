@@ -1,5 +1,20 @@
 # Changes
 
+## 2.14.0 Header, section menus and motion
+
+- Header, refined rather than redesigned: the pause and theme controls are a matching pair of round buttons (the pause control has real pause and play icons), and the "Resources for staff" label is gone. The current section no longer shifts its neighbours when it turns bold.
+- One underline slides to the section under the pointer or keyboard focus and settles back on the current one, which keeps a faint mark meanwhile.
+- Once the brand bar scrolls away, a small SKAO logo leads the pinned bar back home. Below 1,200 px the search box shortens to its icon and shortcut, so nothing overflows.
+- The phone menu icon turns into a close mark and the menu slides open.
+- The announcement is quieter: a soft tint, an underline that draws in on hover, and it slides open and closed.
+- Section menus hide nothing: a plain section heading, an "Overview" link to the landing page, then every page under small uppercase group labels. Small capitals now only ever mean a label.
+- Status dots, the "On request" key, the status pill and the "Need a file marked on request?" box are removed; the footer's "Need new work or a review?" band is the route for help. Resource pages keep "How to get it" until their files are uploaded.
+- "Before you start" items are marked by kind: guidance (blue, i), checks (green, tick, with green step numbers or ticks), and ask-the-team prompts (pink, speech bubble). The open item takes a faint tint of its colour, and loose "A · B" links become small buttons.
+- The "Before you start" heading leads the panel: the masthead gradient along its top edge, a magenta flag and label on a soft tint, a gentle lift off the page, and a one-time slide-in after the page loads.
+- Motion: one set of timings for every hover; link underlines fill in on hover; arrows travel a few pixels toward where the link goes; buttons lift and press; focus rings snap in; accordions fade as they open; search rises in; Canto images zoom more slowly. In Chrome and Safari, moving between Hub pages fades the new page in while the header holds still. All of it stops with reduced-motion settings.
+- Stylesheet and script URLs carry a hash of their contents, so a browser can't pair new pages with an old cached stylesheet.
+- `scripts/package.py` now also builds the flat upload for the space theme editor (via `staging_files.py`) and checks its paths. The flat zips handed over for 2.12.1 to 2.13.0 were flattened by hand with folder paths left in `page.vm`; use this one instead.
+
 ## 2.13.0 SKAO Staff portal
 
 - Canto tiles, album links and every general Canto link now open the private SKAO Staff portal, which shows only the Staff media library to staff signed in as Consumers. Closing an asset returns to its album in the portal.

@@ -91,10 +91,13 @@ def sidebar(current, titles):
  out = '<aside class="sidebar">'
  if sec:
   key, label, landing, members, groups = sec
-  out += f'<nav class="section-nav" aria-label="{label} pages"><h2>{label}</h2><a class="section-home" href="{landing}">{html.escape(titles[landing])}</a>'
+  # Every page is listed: sections are short, so nothing hides behind a toggle. The heading is a
+  # heading, "Overview" is the landing page, and small capitals only ever mean a group label.
+  out += (f'<nav class="section-nav" aria-label="{label} pages"><h2>{label}</h2>'
+   f'<ul class="nav-overview"><li><a class="section-home" href="{landing}" title="{html.escape(titles[landing])}">Overview</a></li></ul>')
   for g, pages in groups:
-   out += (f'<details class="nav-group" open><summary><span>{g}</span><small>{len(pages)}</small></summary><ul>'
-    + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul></details>')
+   out += (f'<div class="nav-group"><h3>{g}</h3><ul>'
+    + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul></div>')
   out += '</nav>'
  else:
   out += '<nav class="section-nav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
@@ -132,11 +135,9 @@ def asset_panel(name, body, jira):
  sec = section_of(name)
  kind, label, guide, guide_label = ASSET_KIND.get(sec[0] if sec else '', ASSET_KIND['documents'])
  if name == 'poster-templates.html': guide, guide_label = 'making-a-poster.html', 'Prepare a poster'
- detail = re.search(r'</strong> (.*?) Ask the team', n.group(0), re.S).group(1)
  panel = (f'<div class="task-intro asset-panel" data-page-id="{STATE["ids"].get(name, "")}"><div class="asset-art {kind}" aria-hidden="true">{ART[kind]}</div><div class="asset-info">'
   f'<span class="eyebrow">{label}</span><p class="asset-purpose">{m.group(1)}</p>'
-  '<dl class="asset-facts"><div><dt>Status</dt><dd><span class="status-pill">Available on request</span> ' + detail + '</dd></div>'
-  '<div class="how-to-get"><dt>How to get it</dt><dd>Ask Creative Production through the helpdesk for the current version.</dd></div>'
+  '<dl class="asset-facts"><div class="how-to-get"><dt>How to get it</dt><dd>Ask Creative Production through the helpdesk for the current version.</dd></div>'
   + ''.join(f'<div data-fact="{label.lower()}"><dt>{label}</dt><dd>' + ('<ul class="variant-list">' + ''.join(f'<li>{v}</li>' for v in value) + '</ul>' if isinstance(value, list) else value) + '</dd></div>'
     for label, value in brandkit.PACK.get(name, [])) + '</dl>'
   f'<div class="asset-actions"><a class="button" href="{jira}">Ask for this file ↗</a><a class="text-link" href="{guide}">{guide_label}</a></div>'
@@ -167,8 +168,7 @@ def catalogue(pages, meta, summaries, on_request):
    title = pages[name][0]
    if title in seen: continue
    seen.add(title)
-   status = '<span class="dir-meta req">On request</span>' if name in on_request else '<span class="dir-meta"></span>'
-   cards.append(f'<li><a class="resource-row" href="{name}" data-page-id="{STATE["ids"].get(name, "")}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-type">{label}</span>{status}</a></li>')
+   cards.append(f'<li><a class="resource-row" href="{name}" data-page-id="{STATE["ids"].get(name, "")}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-type">{label}</span></a></li>')
    counts[key] = counts.get(key, 0) + 1
  chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
   f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label, _ in TYPES if counts.get(key))
@@ -190,22 +190,14 @@ def request_routes(body, jira):
 
 STATE = {}  # titles and summaries, filled by revise() for the header menus
 
-def status_pill(name):
- return '<span class="status-pill">On request</span>' if name in STATE.get('on_request', ()) else ''
-
 def row_meta(m, key):
- if m in STATE.get('on_request', ()): return '<span class="dir-meta req" title="On request"><span class="visually-hidden">On request</span></span>'
  if not primary(m, key): return '<span class="dir-meta">In ' + section_of(m)[1] + '</span>'
  return ''
 
 def directory(name, pages, summaries):
  """A section as grouped link lists: label left, title and summary right."""
  key, label, landing, members, groups = section_of(name)
- listed = [m for g, items in groups for m in items]
- waiting = sum(m in STATE.get('on_request', ()) for m in listed)
  out = '<div class="directory">'
- if waiting:
-  out += '<p class="dir-legend"><span class="dir-dot" aria-hidden="true"></span>On request: not downloadable from the Hub yet</p>'
  for g, items in groups:
   out += f'<section class="dir-group"><h2>{g} <span class="dir-count">{len(items)}</span></h2><ul class="dir-list">'
   for m in items:
@@ -239,7 +231,24 @@ def top_level(fragment):
     parts.append(fragment[start:m.end()]); start = None
  return parts
 
-def rail(rest, waiting):
+# Help panel items come in three kinds, each with its own mark and tint: guidance to know,
+# checks to run through, and a prompt to ask the team.
+RAIL_ICONS = {k: f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">{d}</svg>' for k, d in {
+ 'info': '<path d="M12 11v6.5"/><circle cx="12" cy="6.8" r=".6" fill="currentColor"/>',
+ 'check': '<path d="m5.5 12.5 4 4 9-9.5"/>',
+ 'ask': '<path d="M6.5 5h11A2.5 2.5 0 0 1 20 7.5v6a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V16h-1A2.5 2.5 0 0 1 4 13.5v-6A2.5 2.5 0 0 1 6.5 5Z"/>'}.items()}
+
+def rail_kind(title, body):
+ if '<ol' in body or '<ul' in body: return 'check'
+ return 'ask' if title.rstrip().endswith('?') else 'info'
+
+def rail_links(body):
+ """Links left loose at the end of a panel item ("A · B") become a row of small buttons."""
+ run = r'(?:<a [^>]*>(?:(?!</a>).)*</a>\s*(?:·\s*)?)+'
+ return re.sub('(' + run + r')(?=\s*</(?:section|div|aside)>)',
+  lambda m: '<p class="rail-links">' + re.sub(r'</a>\s*·\s*', '</a>', m.group(1)).strip() + '</p>', body, flags=re.S)
+
+def rail(rest):
  """Status and advice beside the list: headings visible, detail on demand."""
  items = []
  for el in top_level(rest):
@@ -251,14 +260,13 @@ def rail(rest, waiting):
    title, body = text(h.group(1)), el.replace(h.group(0), '', 1)
   body = re.sub(r'<span class="eyebrow">.*?</span>', '', body, count=1, flags=re.S)
   items.append((title, body))
- if not (items or waiting): return ''
+ if not items: return ''
  out = '<aside class="landing-rail" aria-label="Help with this section">'
- if waiting:
-  out += (f'<div class="rail-status"><p><span class="dir-dot" aria-hidden="true"></span><strong>Need a file marked on request?</strong> '
-   f'Creative Production will send you the current version.</p><a class="button" href="{STATE["jira"]}">Ask for a file ↗</a></div>')
  if items:
-  out += '<div class="rail-guides"><h2 class="rail-title">Before you start</h2>' + ''.join(
-   f'<details class="rail-item"{" open" if i == 0 else ""}><summary>{html.escape(t)}</summary><div class="rail-body">{b}</div></details>'
+  out += ('<div class="rail-guides"><h2 class="rail-title"><span class="rail-title-icon" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'
+   '<path d="M5 21V4"/><path d="M5 4.5c4-2 7 2 11 0v8.5c-4 2-7-2-11 0"/></svg></span>Before you start</h2>') + ''.join(
+   f'<details class="rail-item" data-kind="{rail_kind(t, b)}"{" open" if i == 0 else ""}><summary><span class="rail-icon" aria-hidden="true">{RAIL_ICONS[rail_kind(t, b)]}</span>'
+   f'<span class="rail-label">{html.escape(t)}</span></summary><div class="rail-body">{rail_links(b)}</div></details>'
    for i, (t, b) in enumerate(items)) + '</div>'
  return out + '</aside>'
 
@@ -270,7 +278,7 @@ def landing(name, body, pages, summaries):
  d = directory(name, pages, summaries)
  # Quick answers (brand swatches, the Canto hand-off) stay first; the directory follows.
  def after(head, rest):
-  side = rail(rest.strip(), 'dir-legend' in d)
+  side = rail(rest.strip())
   return head + (f'<div class="landing-layout"><div class="landing-main">{d}</div>{side}</div>' if side else d)
  for marker in ['<div class="type-spec">', '<div class="media-handoff">']:
   at = body.find(marker)
@@ -286,7 +294,7 @@ def nav(current=''):
  out = ''
  for key, label, landing_page, groups in SECTIONS:
   state = ' aria-current="page"' if current == landing_page else ' aria-current="true"' if cur and cur[0] == key else ''
-  out += f'<a href="{landing_page}"{state}>{label}</a>'
+  out += f'<a href="{landing_page}" data-label="{label}"{state}>{label}</a>'
  return out
 
 # Pages shown full width: they list a whole section, so a sidebar would repeat them.
