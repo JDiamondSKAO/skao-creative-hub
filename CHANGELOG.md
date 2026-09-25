@@ -1,5 +1,29 @@
 # Changes
 
+## 2.16.0 Third round of board feedback
+
+- **Main cards on resource pages** no longer carry "Ask for this file". Pages without files yet say "Not yet available to download". Once the approved files load, the card shows the version, the last updated date and "Approved by Communications", read from the files themselves (Brand Book keeps its edition instead of a version).
+- **Intro buttons** such as "Open Noto Sans at Google Fonts", "Find logo files" and "Open the Canto library" sit under their text instead of on the far right.
+- **Before you use the file** is now a card beside the downloads rather than a list below them.
+- **New pages.** Partner templates (Presentations › Templates) holds the SKAO–SARAO and SRCNet templates. Partner logos (Brand › Artwork and files) holds the SRCNet network and regional centre logos. Standard SKAO template and Logos and icons now list SKAO files only, with links across. Both pages are matched by title in Confluence until their page IDs are known.
+- **Standard and Widescreen templates** mention the Google Slides version; the link is to follow.
+- **Letterheads** are grouped by information classification, then by site: United Kingdom (Global Headquarters, Jodrell Bank) and Australia (Geraldton offices), each with its site colour.
+- **Video and animation** downloads are grouped by use: landscape and portrait logo intros, logo animations, lower thirds and framing guides.
+- **Co-branding with CSIRO and SARAO** lead with "Prior approval needed", which links to Communications, and list only the co-branding guidelines and the office letterheads. Logo files for co-branded work come from Communications once a use is approved.
+- **Photos and video pages** show a view-only slideshow of approved images from Canto instead of clickable tiles, with pause, previous and next controls, and the "Open the Canto library" button under it. It stays still for people who prefer reduced motion. Canto images now sync at 1280 px.
+- **Using the Canto library** is one page, written for staff new to Canto (register with your SKAO email, then sign in). The duplicate "Accessing Canto" page points to it.
+- **Email signatures** are removed from Documents, the menus and the homepage quick links, because IT now looks after them. The old address explains this.
+- **Colours and typography** open all three accent palettes.
+- **Apply the brand** ends with a "Want a second opinion?" card to reach Creative Production.
+- **Using the SKAO logo** explains the logo use request form for people outside the SKAO; the link is to follow.
+- **Work with print suppliers** asks Communications for trusted suppliers for your location and job.
+- **Using AI image tools** starts with the SKAO AI policy; the link is to follow.
+- **Deck descriptions.** Construction progress covers both sites; Specialised decks are shared by staff and approved by Communications.
+- **Get help.** The helpdesk button closes the brief card. "What we can help with" is removed for now. "What happens next" has four steps: brief received, scope agreed, production, review and delivery.
+- **Share material** has no helpdesk button; its intro links to the helpdesk instead.
+- Search ranks titles that start with your words first.
+- Removed content is kept in `archive/removed-v2.15.html`.
+
 ## 2.15.3 Second round of board feedback
 
 - The Photos and video tile is redrawn in the family's style: two photo prints, the front one a night sky with a dish, and a small play badge for video.

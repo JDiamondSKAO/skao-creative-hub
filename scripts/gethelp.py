@@ -8,13 +8,14 @@ content. The full previous text is kept in archive/get-help-v2.14.html and at
 the git tag pre-get-help-simplify.
 """
 import html, re
+import links
 
 HOME = 'working-with-us.html'
 
 # Old page -> where its content lives now, and what that part is called.
 MOVED = {
  'request.html': (HOME, 'Get help'),
- 'creative-services.html': (HOME + '#what-we-do', 'What we can help with'),
+ 'creative-services.html': (HOME, 'Get help'),
  'timing.html': (HOME + '#what-happens-next', 'What happens next'),
  'video-request.html': (HOME + '#video', 'Video or animation'),
  'print.html': (HOME + '#print', 'Print'),
@@ -22,6 +23,14 @@ MOVED = {
  'help.html': ('faq.html', 'Common questions'),
  'updates.html': ('index.html', 'Just added, on the homepage'),
  'archive.html': ('index.html', 'Just added, on the homepage'),
+ 'email-signatures.html': ('documents.html', 'Documents'),
+ 'canto-guide.html': ('canto-access.html', 'Using the Canto library'),
+}
+
+# Retired pages say why, rather than only where to go: (eyebrow, message, searchable).
+RETIRED = {
+ 'email-signatures.html': ('Now looked after by IT', 'Email signatures are now managed by IT. For a new or updated signature, contact the IT service desk.', True),
+ 'canto-guide.html': ('This page has moved', 'All the Canto guidance is now on one page: Using the Canto library.', False),
 }
 
 TEMPLATE = '\n'.join([
@@ -38,7 +47,7 @@ def details(key, title, items, extra=''):
 
 def page(jira):
  intro = ('<div class="task-intro gh-intro"><div><p>Most everyday work can start from the Hub’s templates and guides. '
-  'For new work or a review, send a brief to the creative helpdesk.</p></div>' + link(jira, 'Open the creative helpdesk ↗', 'button') + '</div>')
+  'For new work or a review, send a brief to the creative helpdesk.</p></div></div>')
  copy = (f'<button type="button" class="copy-template" data-copy="{html.escape(TEMPLATE, quote=True)}" data-copy-label="Request template">'
   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg>'
   '<span>Copy as a template</span></button>')
@@ -50,7 +59,7 @@ def page(jira):
  extra = lambda key, title, items, note='': (f'<details class="brief-extra" id="{key}"><summary>{title}</summary><div><ul>'
   + ''.join(f'<li>{i}</li>' for i in items) + '</ul>' + (f'<p>{note}</p>' if note else '') + '</div></details>')
  brief = ('<section class="brief-card" id="what-to-include" aria-labelledby="briefHeading"><div class="brief-head"><div>'
-  '<h2 id="briefHeading">What to include in your brief</h2><p>Copy it, paste it into the helpdesk form and fill in the gaps.</p></div>' + copy + '</div>'
+  '<h2 id="briefHeading">What to include in your brief</h2><p>Copy the template, paste it into the helpdesk form and fill in the gaps.</p></div>' + copy + '</div>'
   '<dl class="brief-list">' + ''.join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in rows) + '</dl>'
   '<div class="brief-extras" id="specific"><h3>Also include, for</h3>'
   + extra('video', 'Video or animation', [
@@ -70,21 +79,17 @@ def page(jira):
      'The contact details for the card.',
      'How many, in which languages, and where to deliver them.',
      'Who will approve the proof.'])
-  + '</div></section>')
- steps = [('We reply', 'The team reads your brief and replies, often with a question or two.'),
-  ('You agree the details', 'What will be made, who reviews it and when it’s delivered.'),
-  ('Work starts', 'Once that’s agreed.')]
+  + '</div><div class="brief-send"><p><strong>Ready to send it?</strong> Submit your brief through the creative helpdesk, with any files attached.</p>'
+  + link(jira, 'Open the creative helpdesk ↗', 'button') + '</div></section>')
+ steps = [('Brief received', 'Creative Production reviews your brief and replies to confirm it, with any questions.'),
+  ('Scope agreed', 'Together we confirm the deliverables, the reviewers and the delivery date.'),
+  ('Production', 'Work begins once the scope is agreed.'),
+  ('Review and delivery', 'You review drafts at the agreed points. Final files follow your approval.')]
  side = ('<aside class="gh-side" aria-label="What to expect">'
   '<section id="what-happens-next"><h2>What happens next</h2><ol class="gh-steps">'
   + ''.join(f'<li><strong>{t}</strong><span>{d}</span></li>' for t, d in steps) + '</ol>'
-  '<p class="gh-note">Timing depends on when the content is ready, how complex the work is, how quickly reviewers respond and any supplier deadlines.</p>'
-  '<p class="gh-urgent"><strong>Urgent?</strong> Give the real deadline, the reason for it and what could be cut back. A date isn’t fixed until it’s agreed.</p></section>'
-  '<section id="what-we-do"><h2>What we can help with</h2><ul class="gh-scope">'
-  '<li>Design and layout for publications, presentations and graphics</li>'
-  '<li>Video, animation and digital work</li>'
-  '<li>Visual identity, templates and reusable resources</li>'
-  '<li>Creative materials for events, print and displays</li></ul>'
-  '<p class="gh-note">You bring the purpose, the content and the person who approves it. Event logistics and editorial decisions stay with the teams that own them.</p></section>'
+  '<p class="gh-note">Timelines depend on when the content is ready, the complexity of the work, review turnaround and any supplier lead times.</p>'
+  '<p class="gh-urgent"><strong>Working to a fixed deadline?</strong> State the date, the reason for it and which elements could be simplified. A delivery date is confirmed once the scope is agreed.</p></section>'
   '</aside>')
  more = ('<nav class="gh-more" aria-label="More help">'
   '<a class="dir-row" href="faq.html"><span class="dir-text"><strong>Common questions</strong><span>Where things are, who approves work, and what to do if something is missing.</span></span></a>'
@@ -104,8 +109,7 @@ def faq(jira):
 
 def share(jira):
  return ('<div class="task-intro"><div><span class="eyebrow">Make good work reusable</span>'
-  '<p>Sharing starts a review: nothing is published until its owner has checked it.</p></div>'
-  + link(jira, 'Open the creative helpdesk ↗', 'button') + '</div>'
+  '<p>Send it through ' + link(jira, 'the creative helpdesk') + '. Sharing starts a review: nothing is published until its owner has checked it.</p></div></div>'
   '<section class="reading-section"><h2>What to send</h2><ul>'
   '<li><strong>A presentation:</strong> the editable deck or a link to it, with its audience, event date, content owner and any limits on reuse.</li>'
   '<li><strong>Photos or video:</strong> use the upload link you were given, with a title, creator, location and rights information. '
@@ -113,9 +117,14 @@ def share(jira):
   '<li><strong>A correction:</strong> the page link, what should change and where the correct information comes from.</li></ul>'
   '<p>Keep working files where they are, so a new copy doesn’t become a competing version.</p></section>')
 
-def moved(title, target):
+def moved(title, target, name=''):
  url, part = target
  where = 'Get help' if url.startswith(HOME) else part
+ if name in RETIRED:
+  eyebrow, message, _ = RETIRED[name]
+  action = (link(links.IT_SERVICE_DESK, 'Open the IT service desk ↗', 'button') if name == 'email-signatures.html' and links.IT_SERVICE_DESK
+   else link(url, 'Go to ' + html.escape(where) + ' →', 'button'))
+  return f'<div class="task-intro moved-note"><div><span class="eyebrow">{eyebrow}</span><p>{html.escape(message)}</p></div>{action}</div>'
  return ('<div class="task-intro moved-note"><div><span class="eyebrow">This page has moved</span>'
   f'<p>{html.escape(title)} is now part of {html.escape(where)}' + (f', under “{html.escape(part)}”' if url.startswith(HOME + '#') else '') + '.</p></div>'
   + link(url, 'Go to ' + html.escape(where) + ' →', 'button') + '</div>')
@@ -148,7 +157,7 @@ SHARE_ROW = ('<li><a class="dir-row dir-add" href="contribute.html"><span class=
 
 def apply(pages, jira):
  for name, target in MOVED.items():
-  if name in pages: pages[name] = (pages[name][0], moved(pages[name][0], target))
+  if name in pages: pages[name] = (pages[name][0], moved(pages[name][0], target, name))
  pages[HOME] = ('Get help', page(jira))
  pages['faq.html'] = ('Common questions', faq(jira))
  pages['contribute.html'] = ('Share material', share(jira))

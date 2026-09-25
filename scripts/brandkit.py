@@ -6,6 +6,7 @@ Confluence attachments labelled "approved", which the theme lists as
 downloads.
 """
 import re
+from links import pending, GOOGLE_SLIDES
 
 CLASSIFICATIONS = ['Unrestricted', 'Staff Resources', 'SKAO Staff Only', 'For Project Use', 'Confidential', 'Strictly Confidential']
 
@@ -15,19 +16,20 @@ PACK = {
   ('Format', 'PowerPoint (.pptx), 16:9 widescreen'),
   ('Versions', CLASSIFICATIONS),
   ('Choose', 'Use the version whose label matches your content’s information classification.'),
-  ('Partner versions', 'SKAO–SARAO presentation template; SRCNet PowerPoint and Keynote templates.'),
+  ('Google Slides', 'Also available as a Google Slides template. ' + pending(GOOGLE_SLIDES, 'Open in Google Slides')),
  ],
  'widescreen-template.html': [
   ('Format', 'PowerPoint (.pptx), 16:9'),
   ('Note', 'The current SKAO presentation templates are all 16:9, so this is the same layout as the <a href="standard-template.html">Standard SKAO template</a>.'),
+  ('Google Slides', 'Also available as a Google Slides template. ' + pending(GOOGLE_SLIDES, 'Open in Google Slides')),
+ ],
+ 'partner-templates.html': [
+  ('Format', 'PowerPoint (.pptx), 16:9; the SRCNet template also comes as Keynote (.key)'),
+  ('Partners', ['SKAO–SARAO', 'SRCNet']),
  ],
  'letterheads.html': [
   ('Format', 'Word (.docx)'),
   ('Versions', ['One per office address', 'Landscape layout', 'Classification-labelled versions', 'SKAO–CSIRO co-branded']),
- ],
- 'email-signatures.html': [
-  ('Format', 'Signature images (PNG)'),
-  ('Versions', ['Full-colour logo', 'White logo']),
  ],
  'poster-templates.html': [
   ('Sizes', ['A0', 'A1', 'A2']),
@@ -37,13 +39,46 @@ PACK = {
   ('Marks', ['Logo (lettermark)', 'Pictorial mark (roundel)']),
   ('Colours', ['Blueshift Navy', 'White', 'Black', 'Full colour: RGB for screen, CMYK for print']),
   ('Formats', 'AI, EPS, PDF, PNG and SVG, with and without the exclusion zone'),
-  ('Also available', 'SKAO–CSIRO and SKAO–SARAO co-brand logos; SRCNet regional centre logos (10 centres).'),
+ ],
+ 'partner-logos.html': [
+  ('Includes', ['SRCNet logo and avatar', 'SRCNet regional centre logos']),
+  ('Colours', ['Full colour', 'Black', 'White']),
+  ('Formats', 'AI, EPS and PNG'),
  ],
  'brand-book.html': [
   ('Edition', 'March 2022, PDF, 62 pages'),
   ('Covers', 'Identity, logo use, colour, typography and brand architecture'),
   ('Related', 'SKAO–CSIRO and SKAO–SARAO co-branding guidelines (PDF).'),
  ],
+}
+
+# How a page's downloads are grouped, where file type alone would not say enough.
+# Rules are tried in order against each file name (case-insensitive); files matching none
+# fall back to the automatic groups. "label" names the row outright; "strip" removes words
+# from the name to make the row label; "note" sits under the group heading.
+# "site" gives a group its site colour, so offices read by where they are.
+OFFICES_UK = {'group': 'United Kingdom', 'note': 'Global Headquarters, Jodrell Bank', 'match': 'landscape|jodrell', 'label': 'Landscape layout', 'site': 'uk'}
+DOWNLOAD_GROUPS = {
+ 'letterheads.html': [OFFICES_UK,
+  {'group': 'Australia', 'note': 'Geraldton offices', 'match': 'bradford|chapman|kensington', 'site': 'au'}],
+ 'co-branding-csiro.html': [
+  {'group': 'Co-branding guidelines', 'match': 'guideline', 'label': 'SKAO–CSIRO guidelines'},
+  {'group': 'Australia', 'note': 'Geraldton and Perth offices', 'match': 'bradford|chapman|kensington', 'site': 'au', 'strip': r'\bv\d+\b|\bskao:csiro\b'},
+  OFFICES_UK],
+ 'co-branding-sarao.html': [
+  {'group': 'Co-branding guidelines', 'match': 'guideline', 'label': 'SKAO–SARAO guidelines'}],
+ 'partner-templates.html': [
+  {'group': 'SKAO–SARAO', 'note': 'With the South African Radio Astronomy Observatory', 'match': 'sarao', 'label': 'Presentation template'},
+  {'group': 'SRCNet', 'note': 'For the SKA Regional Centre Network', 'match': 'rcn|srcnet', 'label': 'Presentation template'}],
+ 'partner-logos.html': [
+  {'group': 'SRCNet', 'note': 'The network logo and avatar', 'match': 'srcnet_(logo|avatar)', 'strip': r'\bsrcnet\b|\brgb\b|\bmono'},
+  {'group': 'SRCNet regional centres', 'note': 'One logo pack per centre', 'match': 'src'}],
+ 'video.html': [
+  {'group': 'Logo intros and outros: landscape', 'note': '16:9, for most video', 'match': '^logo_flare(?!_portrai)'},
+  {'group': 'Logo intros and outros: portrait', 'note': '9:16, for social stories and reels', 'match': '^logo_flare_portrai', 'strip': r'\bportrai[tr]\b'},
+  {'group': 'Logo animations', 'note': 'Short animated logo, for the start or end of a film', 'match': 'logo (animation|intro)'},
+  {'group': 'Lower thirds', 'note': 'Motion graphics templates for Premiere Pro', 'match': 'lower_thirds'},
+  {'group': 'Framing guides', 'match': 'safe_zone'}],
 }
 
 # Primary colours from the Brand Book colour pages.
@@ -73,7 +108,7 @@ def accent_palettes():
  out = ('<section class="accent-palettes"><h2>Accent palettes</h2><p>Use accents alongside the two primary colours, '
   'which should make up most of any design. Select a colour to copy its hex value.</p>')
  for i, (name, use, colours) in enumerate(ACCENTS):
-  out += (f'<details class="palette"{" open" if i == 0 else ""}><summary><span>{name}</span><small>{len(colours)} colours · for {use}</small></summary><div class="swatch-row">'
+  out += (f'<details class="palette" open><summary><span>{name}</span><small>{len(colours)} colours · for {use}</small></summary><div class="swatch-row">'
    + ''.join(f'<button type="button" class="swatch" data-copy="{h}" style="--c:{h}" title="Pantone {p}" aria-label="Copy {h}, Pantone {p}"><i class="swatch-chip"></i><code>{h}</code><span>Copy</span></button>' for h, p in colours)
    + '</div></details>')
  return out + '</section>'
@@ -127,12 +162,8 @@ def apply(pages):
   return re.sub(r'<p class="quiet-note">The quick reference in this review build uses the retained SKAO Brand Book v2, March 2022\..*?</p>', '', body, count=1, flags=re.S)
  edit('brand-book.html', brand_book)
 
- for name, extra in [('co-branding-csiro.html', 'SKAO–CSIRO letterheads'), ('co-branding-sarao.html', 'the SKAO–SARAO presentation template')]:
-  edit(name, lambda n, b, extra=extra: rep(b, 'The source page has no linked co-branding pack.',
-   f'A co-branding pack is available on request: the joint guidelines (PDF), both organisations’ logo files and {extra}.', n))
-
  def video(name, body):
-  kit = ('<section class="reading-section"><h2>Brand video kit</h2><p>For your own edits, ask Creative Production for:</p><ul>'
+  kit = ('<section class="reading-section"><h2>Brand video kit</h2><p>For your own edits, the kit includes:</p><ul>'
    '<li>Logo intro and outro animations, landscape and portrait, with title and statement versions.</li>'
    '<li>Lower thirds and motion graphics templates for Premiere Pro (.mogrt).</li>'
    '<li>Safe-zone guides for framing.</li></ul></section>')

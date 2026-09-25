@@ -4,7 +4,7 @@ Adds section navigation, related pages, resource panels, checklists, the
 resource catalogue and the homepage search and latest-assets bands. It only
 reorganises reviewed content; it never invents files or availability.
 """
-import html, re
+import html, json, re
 from gethelp import MOVED
 import brandkit
 
@@ -24,14 +24,14 @@ SEARCH_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" strok
 # than one section belongs to the first; later listings are cross-links.
 SECTIONS = [
  ('presentations', 'Presentations', 'presentations.html', [
-  ('Templates', ['standard-template.html', 'widescreen-template.html']),
+  ('Templates', ['standard-template.html', 'widescreen-template.html', 'partner-templates.html']),
   ('Decks to reuse', ['master-deck.html', 'science-slides.html', 'low-slides.html', 'mid-slides.html', 'construction-slides.html', 'specialised-slides.html']),
   ('How to', ['formatting-slides.html'])]),
  ('documents', 'Documents', 'documents.html', [
-  ('Templates', ['letterheads.html', 'memos.html', 'reports.html', 'email-signatures.html']),
+  ('Templates', ['letterheads.html', 'memos.html', 'reports.html']),
   ('Posters', ['poster-templates.html'])]),
  ('brand', 'Brand', 'brand.html', [
-  ('Artwork and files', ['logos.html', 'fonts.html', 'brand-book.html']),
+  ('Artwork and files', ['logos.html', 'partner-logos.html', 'fonts.html', 'brand-book.html']),
   ('Using the brand', ['logo-guidance.html', 'colours-and-type.html', 'brand-in-practice.html']),
   ('Partner brands', ['co-branding-csiro.html', 'co-branding-sarao.html'])]),
  ('media', 'Photos and video', 'media.html', [
@@ -48,7 +48,7 @@ SECTIONS = [
   ('More help', ['faq.html', 'contribute.html'])]),
 ]
 # Pages that belong to a section without being listed (duplicate source titles).
-EXTRA = {'canto-guide.html': 'media'}
+EXTRA = {}
 
 def members_of(section):
  key, label, landing, groups = section
@@ -127,6 +127,14 @@ ART = {'slides': '<span class="art-slide"><i>SKA Observatory</i><b>A shared stor
  'document': '<span class="art-doc"><b>SKAO</b><i></i><i></i><i></i></span>',
  'brand': '<span class="art-brand"><b>Aa</b><i></i><em></em></span>'}
 
+# Who signs off the files labelled "approved" on a resource page.
+APPROVER = 'Communications'
+# Links beside the guide link on a resource page's card.
+CARD_LINKS = {'standard-template.html': [('partner-templates.html', 'Partner templates')],
+ 'logos.html': [('partner-logos.html', 'Partner logos')],
+ 'partner-logos.html': [('logos.html', 'SKAO logos')],
+ 'construction-slides.html': [('low-slides.html', 'SKA-Low overview'), ('mid-slides.html', 'SKA-Mid overview')]}
+
 def asset_panel(name, body, jira):
  m = re.search(r'<div class="task-intro"><div>(?:<span class="eyebrow">.*?</span>)?<p>(.*?)</p></div></div>', body, re.S)
  n = re.search(r'<aside class="availability-note".*?</aside>', body, re.S)
@@ -134,12 +142,18 @@ def asset_panel(name, body, jira):
  sec = section_of(name)
  kind, label, guide, guide_label = ASSET_KIND.get(sec[0] if sec else '', ASSET_KIND['documents'])
  if name == 'poster-templates.html': guide, guide_label = 'making-a-poster.html', 'Prepare a poster'
+ facts = brandkit.PACK.get(name, [])
+ # Version, date and approver come from the approved files themselves, so they are hidden until those load.
+ release = [('version', 'Version', ''), ('updated', 'Last updated', ''), ('approved', 'Approved by', APPROVER)]
+ if any(l.lower() == 'edition' for l, _ in facts): release = release[1:]
+ links = ''.join(f'<a class="text-link" href="{h}">{t}</a>' for h, t in [(guide, guide_label)] + CARD_LINKS.get(name, []))
  panel = (f'<div class="task-intro asset-panel" data-page-id="{STATE["ids"].get(name, "")}"><div class="asset-art {kind}" aria-hidden="true">{ART[kind]}</div><div class="asset-info">'
   f'<span class="eyebrow">{label}</span><p class="asset-purpose">{m.group(1)}</p>'
-  '<dl class="asset-facts"><div class="how-to-get"><dt>How to get it</dt><dd>Ask Creative Production through the helpdesk for the current version.</dd></div>'
+  '<dl class="asset-facts"><div class="how-to-get"><dt>Availability</dt><dd>Not yet available to download. The files appear here once they are approved.</dd></div>'
   + ''.join(f'<div data-fact="{label.lower()}"><dt>{label}</dt><dd>' + ('<ul class="variant-list">' + ''.join(f'<li>{v}</li>' for v in value) + '</ul>' if isinstance(value, list) else value) + '</dd></div>'
-    for label, value in brandkit.PACK.get(name, [])) + '</dl>'
-  f'<div class="asset-actions"><a class="button" href="{jira}">Ask for this file ↗</a><a class="text-link" href="{guide}">{guide_label}</a></div>'
+    for label, value in facts)
+  + ''.join(f'<div data-fact="{key}" class="release-fact" hidden><dt>{label}</dt><dd>{value}</dd></div>' for key, label, value in release) + '</dl>'
+  f'<div class="asset-actions">{links}</div>'
   '<div class="asset-downloads" data-downloads hidden></div></div></div>')
  body = body.replace(m.group(0), panel).replace(n.group(0), '')
  return re.sub(r'<aside class="next-step"><div><h2>Choose a different starting point</h2>.*?</aside>', '', body, flags=re.S)
@@ -295,7 +309,7 @@ FULL_WIDTH = {sec[2] for sec in SECTIONS} | {'resources.html'}
 
 TILES = [
  ('presentations', 'slides', 'Templates, reusable decks and formatting help.', ['standard-template.html', 'master-deck.html', 'formatting-slides.html']),
- ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'email-signatures.html', 'poster-templates.html']),
+ ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'reports.html', 'poster-templates.html']),
  ('brand', 'brand', 'Logos, colours, fonts and partner rules.', ['logos.html', 'colours-and-type.html', 'fonts.html']),
  ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'hero-images.html', 'image-usage.html']),
  ('events', 'events', 'Stands, print and merchandise for events.', ['event-checklist.html', 'stands.html', 'merchandise.html']),
@@ -329,17 +343,24 @@ def latest_strip():
 CANTO_STRIPS = {'telescope-images.html': 'telescope telescopes ska-low ska-mid', 'hero-images.html': 'hero heroes banner', 'event-photos.html': 'event events',
  'animations.html': 'animation animations', 'video.html': 'video videos'}
 
+def canto_show(words, heading, eyebrow, wide=False):
+ """A view-only slideshow: it shows what is in Canto; the button beside it opens the library."""
+ return (f'<section class="canto-show{" wide" if wide else ""}" data-canto="{words}" hidden aria-labelledby="show-{words.split()[0] if words else "all"}">'
+  f'<div class="canto-head"><div><p class="eyebrow">{eyebrow}</p><h2 id="show-{words.split()[0] if words else "all"}">{heading}</h2></div></div>'
+  '<div class="show-stage" aria-roledescription="carousel"><ul class="show-slides" aria-live="off"></ul>'
+  '<div class="show-controls"><button type="button" class="show-prev" aria-label="Previous image"><span aria-hidden="true">‹</span></button>'
+  '<button type="button" class="show-play" aria-label="Pause slideshow" aria-pressed="false"><span aria-hidden="true"></span></button>'
+  '<button type="button" class="show-next" aria-label="Next image"><span aria-hidden="true">›</span></button></div></div>'
+  '<div class="show-dots" role="group" aria-label="Choose an image"></div>'
+  '<div class="show-foot"><p class="show-note">A few of the approved images in the library. Open Canto to search everything, see each credit and download.'
+  + (' First time? Choose <strong>Register Now</strong> and use your SKAO email address.' if wide else '') + '</p></div>'
+  '<p class="show-collections" hidden></p></section>')
+
 def canto_gallery(canto):
- return ('<section class="canto-gallery" data-canto="" hidden aria-labelledby="cantoHeading"><div class="canto-head"><div><p class="eyebrow">Staff media library</p>'
-  '<h2 id="cantoHeading">Approved photos and artwork</h2></div>'
-  f'<a class="text-link canto-open" href="{canto}" target="_blank" rel="noopener">Open in Canto ↗</a></div>'
-  '<div class="canto-tabs" role="group" aria-label="Show album"></div><ul class="canto-grid"></ul>'
-  '<p class="canto-note">Select an image to open it in Canto, where you’ll find its credit, usage notes and downloads. '
-  'First time? On the Canto sign-in page, choose Register Now and use your SKAO email address.</p></section>')
+ return canto_show('', 'A look inside the staff media library', 'Staff media library', wide=True)
 
 def canto_strip(words, canto):
- return (f'<section class="canto-strip" data-canto="{words}" hidden><div class="canto-head"><h2>In the staff media library</h2>'
-  f'<a class="text-link canto-open" href="{canto}" target="_blank" rel="noopener">Open album in Canto ↗</a></div><ul class="canto-grid small"></ul></section>')
+ return canto_show(words, 'In the staff media library', 'From Canto')
 
 def revise(pages, meta, jira, canto=''):
  pages = brandkit.apply(pages)
@@ -352,6 +373,8 @@ def revise(pages, meta, jira, canto=''):
   if name in on_request: body = asset_panel(name, body, jira)
   if name in CHECKLISTS: body = checklist(name, body)
   if name == 'request.html': body = request_routes(body, jira)
+  if name in brandkit.DOWNLOAD_GROUPS:
+   body = f'<div hidden data-dl-groups="{html.escape(json.dumps(brandkit.DOWNLOAD_GROUPS[name]), quote=True)}"></div>' + body
   pages[name] = (title, body)
  landings = {sec[2] for sec in SECTIONS}
  for name in meta:

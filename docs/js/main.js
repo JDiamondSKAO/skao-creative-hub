@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return rows
       .map((r) => {
         const title = (r.title || "").toLowerCase(), excerpt = (r.excerpt || "").toLowerCase(), body = (r.keywords || "").toLowerCase();
-        let score = title === phrase ? 40 : title.includes(phrase) ? 15 : 0;
+        let score = title === phrase ? 40 : title.startsWith(phrase) ? 20 : title.includes(phrase) ? 15 : 0;
         const hits = [];
         for (const w of words) {
           let best = 0, hit = w;
@@ -511,24 +511,49 @@ document.addEventListener("DOMContentLoaded", () => {
     // Links from "Just added" point at #downloads, which only exists once the files have loaded.
     const arrive = () => { if (location.hash === "#downloads") section.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" }); };
     if (!panel) {
-      const intro = $(".content-body > .task-intro");
-      if (intro) intro.after(section); else $(".content-body")?.prepend(section);
+      const slot = $(".content-body > [data-downloads-slot]"), intro = $(".content-body > .task-intro");
+      if (slot) slot.replaceWith(section); else if (intro) intro.after(section); else $(".content-body")?.prepend(section);
       arrive();
       return;
     }
     panel.querySelectorAll('.how-to-get, [data-fact=versions], [data-fact=sizes], [data-fact="partner versions"]').forEach((el) => el.remove());
-    const ask = panel.querySelector(".asset-actions .button");
-    if (ask) { ask.classList.add("secondary"); ask.textContent = "Ask about this file ↗"; }
+    release(panel, mine.filter((f) => safeLink(ctx + (f._links?.download || ""))));
     panel.after(section);
+    beside(section);
     arrive();
-    $$(".content-body .reading-section h2").forEach((h) => { if (h.textContent === "When you receive the file") h.textContent = "Before you use the file"; });
+  }
+  // Release details on the main card, read from the approved files: the newest upload date and,
+  // when every file agrees on it, the version (from the file names, or Confluence's own count).
+  function release(panel, files) {
+    const fact = (key, value) => { const el = panel.querySelector(`[data-fact="${key}"]`); if (!el) return; if (value) el.querySelector("dd").textContent = value; el.hidden = !el.querySelector("dd").textContent; };
+    const times = files.map((f) => Date.parse(f.version?.when || "")).filter((t) => !isNaN(t));
+    let updated = "";
+    if (times.length) try { updated = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(new Date(Math.max(...times))); } catch {}
+    const one = (list) => list.length === files.length && new Set(list).size === 1 ? list[0] : "";
+    const named = one(files.map((f) => (String(f.title || "").match(/(?:^|[\s_-])v(\d+(?:\.\d+)?)(?=[\s_.-]|$)/i) || [])[1]).filter(Boolean));
+    const counted = one(files.map((f) => String(f.version?.number || "")).filter(Boolean));
+    fact("version", named || counted ? "Version " + (named || counted) : "");
+    fact("updated", updated);
+    fact("approved", "");
+  }
+  // "Before you use the file" sits beside the downloads as a card, rather than below them.
+  function beside(section) {
+    const read = $$(".content-body > .reading-section").find((r) => r.querySelector("h2")?.textContent.trim() === "Before you use the file");
+    if (!read) return;
+    const wrap = document.createElement("div"); wrap.className = "dl-layout";
+    const card = document.createElement("aside"); card.className = "dl-aside"; card.setAttribute("aria-labelledby", "beforeUse");
+    const h = read.querySelector("h2"); h.id = "beforeUse"; h.className = "rail-title";
+    card.append(...read.childNodes);
+    section.replaceWith(wrap); wrap.append(section, card); read.remove();
   }
   // Downloads grouped by the choice people are making: classification, office, partner, then file type.
   function renderDownloads(files, ctx) {
     const CLASSES = ["Unrestricted", "Staff Resources", "SKAO Staff Only", "For Project Use", "Confidential", "Strictly Confidential"];
     const KINDS = [["Templates", /^(pptx?|potx|key|docx?|dotx)$/], ["Guides and PDFs", /^pdf$/], ["ZIP packs", /^zip$/], ["Video", /^(mp4|mov|m4v)$/], ["Motion templates", /^mogrt$/], ["Artwork", /^(ai|eps|indd|psd|svg)$/], ["Images", /^(png|jpe?g|gif|webp)$/]];
     const FORMAT_ORDER = ["pptx", "potx", "key", "docx", "dotx", "pdf", "ai", "eps", "svg", "png", "jpg", "zip", "mp4", "mov", "mogrt"];
-    const partnerPage = /co-branding/i.test($(".page-head h1")?.textContent || "");
+    const partnerPage = /co-branding|partner/i.test($(".page-head h1")?.textContent || "");
+    let rules = [];
+    try { rules = JSON.parse($("[data-dl-groups]")?.dataset.dlGroups || "[]").map((r) => ({ ...r, re: new RegExp(r.match, "i"), cut: r.strip ? new RegExp(r.strip, "gi") : null })); } catch { rules = []; }
     const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
     const pattern = (label) => new RegExp("(^|[\\s_-])" + label.replace(/ /g, "[\\s_-]+") + "($|[\\s_.-])", "i");
     const tidy = (label) => {
@@ -557,11 +582,13 @@ document.addEventListener("DOMContentLoaded", () => {
       v.cls = [...CLASSES].sort((x, y) => y.length - x.length).find((c) => pattern(c).test(v.base));
       const kinds = [...new Set(v.files.map((i) => KINDS.find(([, re]) => re.test(i.ext))?.[0] || "Other files"))];
       v.group = kinds.length > 1 ? "Files" : kinds[0];
+      v.rule = v.cls ? null : rules.find((r) => v.files.some((i) => r.re.test(i.title)));
       if (v.cls) v.group = "By information classification";
+      else if (v.rule) v.group = v.rule.group;
       else if (!partnerPage && /\b(sarao|csiro|srcnet|rcn)\b|[a-z]src\b/i.test(v.words.join(" "))) v.group = "Partner versions";
       else if (v.group === "Templates" && /office|landscape|portrait/i.test(v.base)) v.group = "By office and layout";
     });
-    const ORDER = ["By information classification", "By office and layout", "Files", ...KINDS.map(([k]) => k), "Other files", "Partner versions"];
+    const ORDER = ["By information classification", ...new Set(rules.map((r) => r.group)), "By office and layout", "Files", ...KINDS.map(([k]) => k), "Other files", "Partner versions"];
     const groups = ORDER.map((name) => [name, [...variants.values()].filter((v) => v.group === name)]).filter(([, g]) => g.length);
     const total = [...variants.values()].reduce((n, v) => n + v.files.length, 0);
     const section = document.createElement("section"); section.className = "downloads"; section.id = "downloads"; section.setAttribute("aria-labelledby", "downloadsHeading");
@@ -573,19 +600,26 @@ document.addEventListener("DOMContentLoaded", () => {
     groups.forEach(([name, list]) => {
       // Drop words every version in the group shares, when they are brand/type words or the group is large enough.
       let lead = 0, tail = 0;
-      const strippable = (word) => NOISE.has(word.toLowerCase()) || list.length >= 3;
+      // Named groups keep their descriptive words ("Logo flare statement 1"); only brand and type words go.
+      const rule = list[0].rule, strippable = (word) => NOISE.has(word.toLowerCase()) || (!rule && list.length >= 3);
       const at = (v, i) => v.words[i]?.toLowerCase();
       if (list.length > 1) {
         while (list.every((v) => v.words.length - lead - tail > 1 && at(v, lead) === at(list[0], lead)) && strippable(list[0].words[lead])) lead++;
         while (list.every((v) => v.words.length - lead - tail > 1 && at(v, v.words.length - 1 - tail) === at(list[0], list[0].words.length - 1 - tail)) && strippable(list[0].words[list[0].words.length - 1 - tail])) tail++;
       }
       list.forEach((v, n) => {
-        const label = v.cls || v.words.slice(lead, v.words.length - tail).join(" ") || tidy(v.base);
+        let label = v.cls || v.rule?.label || v.words.slice(lead, v.words.length - tail).join(" ") || tidy(v.base);
+        if (v.rule?.cut && !v.rule.label) label = label.replace(v.rule.cut, " ").replace(/\s+/g, " ").trim() || tidy(v.base);
         v.label = /^[a-z]+(\s|$)/.test(label) ? label.charAt(0).toUpperCase() + label.slice(1) : label;
         v.rank = v.cls ? CLASSES.indexOf(v.cls) : n;
       });
       const g = document.createElement("section"); g.className = "dl-group";
-      if (groups.length > 1) { const h3 = document.createElement("h3"); h3.textContent = name; g.append(h3); }
+      if (list[0].rule?.site) g.dataset.site = list[0].rule.site;
+      if (groups.length > 1) {
+        const h3 = document.createElement("h3"); h3.textContent = name; g.append(h3);
+        const note = list[0].rule?.note;
+        if (note) { const n = document.createElement("p"); n.className = "dl-note"; n.textContent = note; g.append(n); }
+      }
       const ul = document.createElement("ul");
       list.sort((x, y) => x.rank - y.rank).forEach((row) => {
         const li = document.createElement("li"); li.className = "dl-row";
@@ -643,54 +677,98 @@ document.addEventListener("DOMContentLoaded", () => {
     let shared = 0;
     while (parts.every((p) => p.length - shared > 1 && p[shared] === parts[0][shared])) shared++;
     albums.forEach((al, i) => { al.path = parts[i].slice(shared).join(" / ") || al.name; });
-    const tile = (a) => {
-      const li = document.createElement("li"), link = document.createElement("a"), img = document.createElement("img"), cap = document.createElement("span");
-      link.className = "canto-tile"; link.href = a.href; link.target = "_blank"; link.rel = "noopener";
-      link.setAttribute("aria-label", a.title + (a.video ? ", video" : "") + ", opens in Canto");
-      img.src = a.src; img.alt = a.alt || a.title; img.loading = "lazy"; img.decoding = "async";
-      if (a.w && a.h) { img.width = a.w; img.height = a.h; }
-      cap.className = "canto-caption"; cap.textContent = a.title;
-      link.append(img, cap);
-      if (a.video) { const v = document.createElement("span"); v.className = "canto-video"; v.textContent = "Video"; link.append(v); }
-      if (a.credit) { const c = document.createElement("small"); c.className = "canto-credit"; c.textContent = /^(©|\(c\)|credit)/i.test(a.credit) ? a.credit : "© " + a.credit; link.append(c); }
-      li.append(link); return li;
+    // View-only slideshow: it shows what is in the library; opening Canto is the button beside it.
+    const slideshow = (slot, list) => {
+      const stage = slot.querySelector(".show-stage"), ul = slot.querySelector(".show-slides"), dots = slot.querySelector(".show-dots");
+      const play = slot.querySelector(".show-play"), items = list.slice(0, 12);
+      let at = 0, timer = null, paused = reducedMotion.matches || items.length < 2;
+      const slides = items.map((a, i) => {
+        const li = document.createElement("li"), img = document.createElement("img"), cap = document.createElement("p");
+        li.className = "show-slide"; li.setAttribute("aria-roledescription", "slide"); li.setAttribute("aria-label", `${i + 1} of ${items.length}`);
+        img.src = a.src; img.alt = a.alt || a.title; img.decoding = "async"; if (i > 1) img.loading = "lazy";
+        if (a.w && a.h) { img.width = a.w; img.height = a.h; }
+        cap.className = "show-caption";
+        const t = document.createElement("strong"); t.textContent = a.title; cap.append(t);
+        if (a.video) { const v = document.createElement("span"); v.className = "show-kind"; v.textContent = "Video"; cap.prepend(v); }
+        if (a.credit) { const c = document.createElement("small"); c.textContent = /^(©|\(c\)|credit)/i.test(a.credit) ? a.credit : "© " + a.credit; cap.append(c); }
+        li.append(img, cap); return li;
+      });
+      ul.replaceChildren(...slides);
+      const marks = items.map((a, i) => {
+        const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label", `Show image ${i + 1}: ${a.title}`);
+        b.addEventListener("click", () => { show(i); stop(true); }); return b;
+      });
+      dots.replaceChildren(...marks); dots.hidden = items.length < 2;
+      slot.querySelectorAll(".show-prev, .show-next, .show-play").forEach((b) => { b.hidden = items.length < 2; });
+      function show(i) {
+        at = (i + items.length) % items.length;
+        slides.forEach((li, n) => { const on = n === at; li.classList.toggle("is-on", on); li.setAttribute("aria-hidden", String(!on)); });
+        marks.forEach((b, n) => b.setAttribute("aria-current", n === at ? "true" : "false"));
+      }
+      const tick = () => { clearTimeout(timer); if (!paused && !hold) timer = setTimeout(() => { show(at + 1); tick(); }, 5200); };
+      let hold = false;
+      function stop(byUser) { if (byUser) paused = true; clearTimeout(timer); sync(); }
+      function sync() {
+        play.setAttribute("aria-pressed", String(paused)); play.setAttribute("aria-label", paused ? "Play slideshow" : "Pause slideshow");
+        stage.classList.toggle("is-paused", paused);
+        ul.setAttribute("aria-live", paused ? "polite" : "off");
+      }
+      play.addEventListener("click", () => { paused = !paused; sync(); if (!paused) { show(at + 1); tick(); } else clearTimeout(timer); });
+      slot.querySelector(".show-prev").addEventListener("click", () => { show(at - 1); stop(true); });
+      slot.querySelector(".show-next").addEventListener("click", () => { show(at + 1); stop(true); });
+      // Hovering or tabbing into the slideshow holds it on the current image.
+      stage.addEventListener("pointerenter", () => { hold = true; clearTimeout(timer); });
+      stage.addEventListener("pointerleave", () => { hold = false; tick(); });
+      slot.addEventListener("focusin", () => { hold = true; clearTimeout(timer); });
+      slot.addEventListener("focusout", (e) => { if (!slot.contains(e.relatedTarget)) { hold = false; tick(); } });
+      document.addEventListener("visibilitychange", () => { hold = document.hidden; tick(); });
+      show(0); sync(); tick();
     };
-    const fill = (slot, list, max) => {
-      const grid = slot.querySelector(".canto-grid");
-      grid.replaceChildren(...list.slice(0, max).map(tile));
+    // The page's "Open the Canto library" button moves under the slideshow, so it sits with what it opens.
+    const dock = (slot, href) => {
+      const btn = $(".content-body > .task-intro > a.button[href*='canto.global']");
+      const foot = slot.querySelector(".show-foot");
+      if (btn && foot) { if (href) btn.href = href; btn.target = "_blank"; btn.rel = "noopener"; foot.append(btn); }
+      else if (foot && href) {
+        const a = document.createElement("a"); a.className = "button"; a.href = href; a.target = "_blank"; a.rel = "noopener";
+        a.innerHTML = 'Open the Canto library <span class="arr arr-out" aria-hidden="true">↗</span>'; foot.append(a);
+      }
     };
     slots.forEach((slot) => {
       const words = (slot.dataset.canto || "").toLowerCase().split(/\s+/).filter(Boolean);
       const matches = words.length ? albums.filter((al) => words.some((w) => new RegExp("(^|[^a-z0-9])" + escapeRe(w) + "([^a-z0-9]|$)", "i").test(al.path + " " + al.name))) : albums;
       if (!matches.length) return;
-      const open = slot.querySelector(".canto-open");
-      if (slot.classList.contains("canto-gallery")) {
-        // Highlights: photos from the image collections in turn (not events or video reels), no repeats.
+      let list, href;
+      if (slot.classList.contains("wide")) {
+        // The best of the library: curated highlights, else photos from the image collections in turn (not events or reels).
         const showcase = matches.filter((al) => !/\b(events?|videos?)\b/i.test(al.name));
         const source = showcase.length ? showcase : matches, all = [], seen = new Set();
         const take = (wantVideo) => { for (let i = 0; all.length < 12 && source.some((al) => al.assets[i]); i++) source.forEach((al) => { const a = al.assets[i]; if (a && a.video === wantVideo && !seen.has(a.src) && all.length < 12) { seen.add(a.src); all.push(a); } }); };
-        if (curated.length >= 4) curated.slice(0, curated.length >= 8 ? Math.min(12, curated.length - curated.length % 4) : curated.length).forEach((a) => { if (!seen.has(a.src)) { seen.add(a.src); all.push(a); } });
+        if (curated.length >= 4) curated.slice(0, 12).forEach((a) => { if (!seen.has(a.src)) { seen.add(a.src); all.push(a); } });
         else { take(false); take(true); }
-        const tabs = slot.querySelector(".canto-tabs"), openHome = open?.href;
-        const choose = (btn, list, href) => {
-          tabs.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
-          fill(slot, list, 12); if (open) open.href = href || openHome;
-        };
-        const mk = (label, n, list, href) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label + (n === "" ? "" : " "); if (n !== "") { const c = document.createElement("span"); c.textContent = n; b.append(c); } b.addEventListener("click", () => choose(b, list, href)); return b; };
-        const first = mk("Highlights", "", all, null);
-        tabs.replaceChildren(first, ...matches.map((al) => mk(al.path, al.count || al.assets.length, al.assets, al.href)));
-        tabs.hidden = matches.length < 2;
-        choose(first, all, null);
+        list = all; href = folderHref;
+        const names = slot.querySelector(".show-collections");
+        if (names) {
+          names.textContent = "In the library: " + matches.map((al) => al.path + (al.count ? " (" + al.count.toLocaleString("en-GB") + ")" : "")).join(" · ");
+          names.hidden = false;
+        }
       } else {
         const al = matches[0];
-        fill(slot, matches.flatMap((m) => m.assets), 6);
-        if (open) open.href = (matches.length === 1 && al.href) || folderHref || open.href;
+        list = matches.flatMap((m) => m.assets.filter((a) => !a.video)).concat(matches.flatMap((m) => m.assets.filter((a) => a.video)));
+        href = (matches.length === 1 && al.href) || folderHref;
         const h = slot.querySelector("h2"); if (h && matches.length === 1) h.textContent = "In the staff media library: " + al.path;
       }
+      if (!list.length) return;
       slot.hidden = false;
-      // The synced album replaces the generic "search Canto" box on the landing, and its caveat elsewhere.
-      const hand = $(".content-body .media-handoff");
-      if (slot.classList.contains("canto-gallery")) hand?.remove(); else hand?.querySelector(".quiet-note")?.remove();
+      slideshow(slot, list);
+      dock(slot, href);
+      // The synced album replaces the generic "search Canto" box; its search tip moves under the slideshow.
+      const hand = $(".content-body .media-handoff"), tip = hand?.querySelector("p:not(.quiet-note)")?.textContent;
+      const note = slot.querySelector(".show-note");
+      if (tip && note && !slot.classList.contains("wide")) note.textContent = tip;
+      const hid = hand?.querySelector("h2")?.id;
+      if (hid) $$("#toc a").find((a) => a.hash === "#" + hid)?.remove();
+      hand?.remove();
     });
   }
   // Latest approved assets on the homepage.

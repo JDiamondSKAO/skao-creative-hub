@@ -15,7 +15,7 @@
     "id": "381891652",
     "source_title": "How To Work With Us",
     "group": "Creative help",
-    "display_title": "Work with Creative Production"
+    "display_title": "Get help"
   },
   "faq.html": {
     "id": "381891657",
@@ -111,7 +111,7 @@
     "id": "381891696",
     "source_title": "Templates & Assets",
     "group": "Resources",
-    "display_title": "Templates and assets"
+    "display_title": "All resources"
   },
   "documents.html": {
     "id": "381891700",
@@ -358,5 +358,17 @@
     "source_title": "Print Supplier Contacts",
     "group": "Creative help",
     "display_title": "Work with print suppliers"
+  },
+  "partner-templates.html": {
+    "id": "990000001",
+    "source_title": "Partner templates",
+    "group": "Presentations",
+    "display_title": "Partner templates"
+  },
+  "partner-logos.html": {
+    "id": "990000002",
+    "source_title": "Partner logos",
+    "group": "Brand",
+    "display_title": "Partner logos"
   }
 }

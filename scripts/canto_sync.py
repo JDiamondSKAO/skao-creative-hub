@@ -41,7 +41,7 @@ Usage
   python3 scripts/canto_sync.py --dry-run --out build/canto   # fetch from Canto, write files locally
   python3 scripts/canto_sync.py                               # fetch and publish to Confluence
   python3 scripts/canto_sync.py --self-test
-Options: --per-album N (default 12), --width PX (default 640), --prune (remove stale canto-* thumbnails),
+Options: --per-album N (default 12), --width PX (default 1280, large enough for the slideshow), --prune (remove stale canto-* thumbnails),
          --env FILE (read KEY=VALUE settings from a local file, e.g. dev/canto.env; values already set in the environment win)
 """
 from __future__ import annotations
@@ -418,7 +418,7 @@ def run(args):
     env = os.environ.get
     domain, folder = env('CANTO_DOMAIN'), env('CANTO_FOLDER_PATH', 'Staff media library')
     if not domain: sys.exit('Set CANTO_DOMAIN and CANTO_API_KEY (or CANTO_APP_ID and CANTO_APP_SECRET).')
-    per_album = int(args.get('--per-album', 12)); width = int(args.get('--width', 640))
+    per_album = int(args.get('--per-album', 12)); width = int(args.get('--width', 1280))
     page_id = env('CONFLUENCE_PAGE_ID', 'PAGE_ID')
     if not env('CANTO_API_KEY') and not (env('CANTO_APP_ID') and env('CANTO_APP_SECRET')):
         sys.exit('Canto credentials missing: set CANTO_API_KEY (generated access token), or both CANTO_APP_ID and CANTO_APP_SECRET.')

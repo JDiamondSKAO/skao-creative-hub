@@ -1445,3 +1445,93 @@ body .content-body a.dir-row.dir-add:any-link {margin-top:6px;border:1px dashed 
 body .content-body a.dir-row.dir-add:any-link:hover {border-style:solid;border-color:color-mix(in srgb,var(--link) 55%,var(--line));}
 .dir-row.dir-add:after {content:"+";font-size:1.25rem;line-height:1;}
 .dir-row.dir-add:hover:after {transform:rotate(90deg);}
+
+/* ===== 2.16: third review round ===== */
+/* Intro actions sit with their text, not on the far edge of the page */
+.task-intro:not(.asset-panel) {flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:16px;}
+.task-intro:not(.asset-panel) > .button {max-width:none;white-space:nowrap;}
+.asset-actions {flex-wrap:wrap;gap:10px 22px;}
+
+/* Links still to be supplied */
+.pending-link {display:inline-flex;align-items:baseline;gap:8px;padding:3px 10px;border:1px dashed color-mix(in srgb,var(--muted) 45%,transparent);border-radius:7px;color:var(--muted);font-size:.86rem;font-weight:600;}
+.pending-link small {font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+
+/* "Before you use the file" beside the downloads */
+.dl-layout {display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;align-items:start;margin:-8px 0 34px;}
+.dl-layout > .downloads {margin:0;min-width:0;}
+.dl-layout .dl-groups.multi {grid-template-columns:1fr;}
+.dl-aside {position:sticky;top:84px;margin-top:38px;border:1px solid color-mix(in srgb,var(--magenta) 20%,var(--line));border-radius:14px;background:var(--bg);box-shadow:0 1px 2px #0700680a,0 14px 32px -18px #07006840;overflow:hidden;}
+.dark .dl-aside {border-color:color-mix(in srgb,#ff85bc 22%,var(--line));box-shadow:0 14px 34px -16px #000c;}
+.dl-aside:before {content:"";display:block;height:3px;background:linear-gradient(90deg,#070068,#58005f 45%,#e70068);}
+.dark .dl-aside:before {background:linear-gradient(90deg,#8e88ff,#c86bd0 50%,#ff85bc);}
+.dl-aside ul {list-style:none;margin:0;padding:2px 18px 16px;}
+.dl-aside li {position:relative;margin:0 0 8px;padding-left:19px;font-size:.86rem;line-height:1.55;color:var(--muted);}
+.dl-aside li:last-child {margin-bottom:0;}
+.dl-aside li:before {content:"";position:absolute;left:1px;top:.5em;width:8px;height:4px;border-left:2px solid #3f7d5e;border-bottom:2px solid #3f7d5e;transform:rotate(-45deg);}
+.dark .dl-aside li:before {border-color:#93c4a8;}
+@media(max-width:1100px){.dl-layout{grid-template-columns:1fr;}.dl-aside{position:static;margin-top:0;}}
+
+/* Group notes: what a download group is for */
+.content-body .dl-group h3:has(+ .dl-note) {border-bottom:0;padding-bottom:3px;}
+.content-body .dl-group .dl-note {max-width:none;margin:0;padding:0 16px 10px;background:var(--surface);border-bottom:1px solid var(--line);font-size:.78rem;line-height:1.45;color:var(--muted);}
+
+/* Co-branding: approval comes before the files */
+.approval-card {margin:0 0 30px;padding:20px 22px;border:1px solid color-mix(in srgb,var(--magenta) 22%,var(--line));border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--magenta) 6%,var(--bg)),var(--bg) 72%);}
+.dark .approval-card {border-color:color-mix(in srgb,#ff85bc 24%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#ff85bc 9%,var(--bg)),var(--bg) 72%);}
+.content-body .approval-card h2 {margin:0 0 6px;font-size:1.1rem;}
+.approval-card p {margin:0 0 16px;max-width:620px;color:var(--muted);font-size:.92rem;}
+
+/* A way to ask for a second opinion */
+.help-card {display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:30px;padding:20px 22px;border:1px solid var(--line);border-radius:14px;background:var(--surface);}
+.content-body .help-card h2 {margin:0 0 6px;font-size:1.1rem;}
+.help-card p {margin:0;max-width:600px;color:var(--muted);font-size:.9rem;}
+
+/* Get help: the brief card ends with the helpdesk */
+.brief-send {display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap;padding:16px 22px 18px;border-top:1px solid var(--line);background:linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--tint) 60%,var(--bg)));}
+.brief-send p {margin:0;flex:1 1 240px;font-size:.86rem;line-height:1.5;color:var(--muted);}
+.brief-send p strong {color:var(--ink);}
+@media(max-width:700px){.brief-send{padding-left:16px;padding-right:16px;}}
+
+/* Canto: a view-only slideshow of what is in the library */
+.canto-show {margin:6px 0 34px;}
+.canto-show[hidden] {display:none;}
+.show-stage {position:relative;width:100%;aspect-ratio:16/9;max-height:380px;border-radius:14px;overflow:hidden;background:#0b0e1a;box-shadow:var(--shadow-md);}
+.canto-show.wide .show-stage {aspect-ratio:21/9;max-height:440px;}
+.show-slides {position:absolute;inset:0;margin:0;padding:0;list-style:none;}
+.show-slide {position:absolute;inset:0;margin:0;opacity:0;visibility:hidden;transition:opacity .9s var(--ease-soft),visibility 0s linear .9s;}
+.show-slide.is-on {opacity:1;visibility:visible;transition:opacity .9s var(--ease-soft);}
+.show-slide img {display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.015);transition:transform 7s linear;}
+.show-slide.is-on img {transform:scale(1.06);}
+.is-paused .show-slide img {transition:transform .6s var(--ease-soft);}
+.show-caption {position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin:0;padding:56px 150px 18px 20px;background:linear-gradient(transparent,#000000b3);color:#fff;text-shadow:0 1px 2px #0006;}
+.show-caption strong {font-size:.95rem;line-height:1.35;}
+.show-caption small {font-size:.72rem;color:#ffffffd6;}
+.show-kind {padding:2px 8px;border-radius:999px;background:#ffffff26;font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.show-controls {position:absolute;right:14px;bottom:16px;z-index:2;display:flex;gap:6px;}
+.show-controls button {display:grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid #ffffff4d;border-radius:50%;background:#0b0e1a8c;color:#fff;font-size:1.25rem;line-height:1;cursor:pointer;backdrop-filter:blur(6px);transition:background-color var(--t-fast) var(--ease-soft),transform var(--t-fast) var(--ease-out);}
+.show-controls button:hover {background:#0b0e1acc;}
+.show-controls button:active {transform:scale(.94);}
+.show-controls button:focus-visible {outline:2px solid #fff;outline-offset:2px;}
+.show-controls button[hidden] {display:none;}
+.show-play span {display:block;width:10px;height:12px;border-left:3px solid #fff;border-right:3px solid #fff;}
+.show-play[aria-pressed="true"] span {width:0;height:0;border:0;border-left:11px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;margin-left:3px;}
+.show-dots {display:flex;gap:6px;margin:10px 0 0;}
+.show-dots[hidden] {display:none;}
+.show-dots button {position:relative;flex:1;max-width:64px;height:14px;padding:0;border:0;background:none;cursor:pointer;}
+.show-dots button:before {content:"";position:absolute;left:0;right:0;top:5px;height:4px;border-radius:2px;background:var(--line);transition:background-color var(--t) var(--ease-soft);}
+.show-dots button:hover:before {background:color-mix(in srgb,var(--link) 35%,var(--line));}
+.show-dots button[aria-current="true"]:before {background:var(--link);}
+.show-foot {display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;margin-top:14px;}
+.show-foot > .button {order:-1;flex:none;}
+.show-note {flex:1 1 280px;margin:0;max-width:620px;font-size:.86rem;line-height:1.55;color:var(--muted);}
+.show-collections {max-width:760px;margin:12px 0 0;font-size:.78rem;line-height:1.55;color:var(--muted);}
+.show-collections[hidden] {display:none;}
+@media(max-width:700px){.show-stage,.canto-show.wide .show-stage{aspect-ratio:4/3;}.show-caption{padding:48px 16px 60px;}.show-controls{right:12px;bottom:12px;}}
+@media(prefers-reduced-motion:reduce){.show-slide,.show-slide.is-on{transition:none;}.show-slide img,.show-slide.is-on img{transform:none;transition:none;}}
+
+/* Office letterheads carry their site's colour: navy for the UK headquarters, Sites ochre for Australia */
+.dl-group[data-site] {--site:#070068;border-top:3px solid var(--site);}
+.dl-group[data-site="au"] {--site:#b5814e;}
+.dark .dl-group[data-site="uk"] {--site:#8e88ff;}
+.dark .dl-group[data-site="au"] {--site:#d6b07a;}
+.content-body .dl-group[data-site] h3 {color:color-mix(in srgb,var(--site) 70%,var(--ink));}
