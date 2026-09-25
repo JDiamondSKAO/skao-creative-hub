@@ -1,5 +1,12 @@
 # Changes
 
+## 2.15.1 Get help layout
+
+- The page follows one flow: a short intro with the helpdesk button, then the brief as a single card beside what to expect.
+- The brief card lists the five things to include as labelled rows (purpose, timing, output, people, inputs), with "Copy as a template" in its header and the video, print and business card extras as compact rows inside it.
+- "What happens next" is a three-step timeline with the timing note and a small "Urgent?" note; "What we can help with" sits below it. Both are always visible, with no toggles.
+- Common questions and Share material close the page as a pair of links. On phones everything stacks in reading order.
+
 ## 2.15.0 Get help, simplified
 
 - Get help is one page instead of thirteen. It opens with a single button to the creative helpdesk, then "What to include" (with a "Copy as a template" button for the helpdesk form) and "Asking for something specific?" for video, print and business cards. A "Good to know" panel beside it covers what happens next and what the team can help with, each said once.

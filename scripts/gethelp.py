@@ -37,59 +37,59 @@ def details(key, title, items, extra=''):
   + ''.join(f'<li>{i}</li>' for i in items) + '</ul>' + (f'<p>{extra}</p>' if extra else '') + '</div></details>')
 
 def page(jira):
- intro = ('<div class="task-intro"><div><span class="eyebrow">Creative Production</span>'
-  '<p>Most everyday work can start from the Hub’s templates and guides. For new work or a review, send a brief to the creative helpdesk and we’ll reply to agree the details.</p></div>'
-  + link(jira, 'Open the creative helpdesk ↗', 'button') + '</div>')
- include = ('<section class="reading-section" id="what-to-include"><h2>What to include</h2><ul>'
-  '<li>What it is, who it’s for and what it should help them do.</li>'
-  '<li>When it will be used, and why then.</li>'
-  '<li>What you need: format, size and quantity.</li>'
-  '<li>Who supplies the content, and who approves the result.</li>'
-  '<li>Source files or links, and any budget or other constraints.</li></ul>'
-  f'<p class="copy-template-row"><button type="button" class="copy-template" data-copy="{html.escape(TEMPLATE, quote=True)}" data-copy-label="Request template">'
+ intro = ('<div class="task-intro gh-intro"><div><p>Most everyday work can start from the Hub’s templates and guides. '
+  'For new work or a review, send a brief to the creative helpdesk.</p></div>' + link(jira, 'Open the creative helpdesk ↗', 'button') + '</div>')
+ copy = (f'<button type="button" class="copy-template" data-copy="{html.escape(TEMPLATE, quote=True)}" data-copy-label="Request template">'
   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg>'
-  '<span>Copy as a template</span></button> Paste it into the helpdesk form and fill in the gaps.</p></section>')
- specific = ('<section class="reading-section" id="specific"><h2>Asking for something specific?</h2>'
-  + details('video', 'Video or animation', [
+  '<span>Copy as a template</span></button>')
+ rows = [('Purpose', 'What it is, who it’s for and what it should help them do.'),
+  ('Timing', 'When it will be used, and why then.'),
+  ('Output', 'Format, size and quantity.'),
+  ('People', 'Who supplies the content, and who approves the result.'),
+  ('Inputs', 'Source files or links, budget and any other constraints.')]
+ extra = lambda key, title, items, note='': (f'<details class="brief-extra" id="{key}"><summary>{title}</summary><div><ul>'
+  + ''.join(f'<li>{i}</li>' for i in items) + '</ul>' + (f'<p>{note}</p>' if note else '') + '</div></details>')
+ brief = ('<section class="brief-card" id="what-to-include" aria-labelledby="briefHeading"><div class="brief-head"><div>'
+  '<h2 id="briefHeading">What to include in your brief</h2><p>Copy it, paste it into the helpdesk form and fill in the gaps.</p></div>' + copy + '</div>'
+  '<dl class="brief-list">' + ''.join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in rows) + '</dl>'
+  '<div class="brief-extras" id="specific"><h3>Also include, for</h3>'
+  + extra('video', 'Video or animation', [
      'Where it will be shown, and how long it can be.',
      'Existing footage, a draft script, images and source information.',
      'Accessibility needs such as captions.',
      'Any filming, and who needs to be available for it.'],
      'Check ' + link('video.html', 'Video and animation') + ' first: existing footage may already do the job.')
-  + details('print', 'Print', [
+  + extra('print', 'Print', [
      'The item, its dimensions and how many you need.',
      'Existing artwork or draft content, and where images come from.',
      'Where it should be delivered, and the supplier’s deadline.',
      'Finishing, such as lamination or folding.'],
      'Ordering from a supplier? See ' + link('print-suppliers.html', 'Work with print suppliers') + ' and ' + link('print-preparation.html', 'Prepare files for print') + '.')
-  + details('business-cards', 'Business cards', [
+  + extra('business-cards', 'Business cards', [
      'Your name and job title, exactly as they should appear.',
      'The contact details for the card.',
      'How many, in which languages, and where to deliver them.',
      'Who will approve the proof.'])
-  + '</section>')
- nxt = ('<ol>'
-  '<li>The team reads your request and replies, often with a question or two.</li>'
-  '<li>Together you agree what will be made, who reviews it and when it’s delivered.</li>'
-  '<li>Work starts once that’s agreed.</li></ol>'
-  '<p>Timing depends on when the content is ready, how complex the work is, how quickly reviewers can respond and any supplier deadlines. '
-  'If it’s urgent, give the real deadline, the reason for it and what could be cut back. A date isn’t fixed until it’s agreed.</p>')
- scope = ('<ul>'
-  '<li>Design and layout for publications, presentations and graphics.</li>'
-  '<li>Video, animation and digital work.</li>'
-  '<li>Visual identity, templates and reusable resources.</li>'
-  '<li>Creative materials for events, print and displays.</li></ul>'
-  '<p>You bring the purpose, the content and the person who approves it. Event logistics and editorial decisions stay with the teams that own them.</p>')
- item = lambda key, title, body: (f'<details class="rail-item" data-kind="info" id="{key}" open><summary><span class="rail-label">{title}</span></summary>'
-  f'<div class="rail-body">{body}</div></details>')
- side = ('<aside class="landing-rail" aria-label="Good to know"><div class="rail-guides"><h2 class="rail-title">Good to know</h2>'
-  + item('what-happens-next', 'What happens next', nxt) + item('what-we-do', 'What we can help with', scope) + '</div></aside>')
- more = ('<section class="dir-group"><h2>More help</h2><ul class="dir-list">'
-  '<li><a class="dir-row" href="faq.html"><span class="dir-text"><strong>Common questions</strong><span>Where things are, who approves work, and what to do if something is missing.</span></span></a></li>'
-  '<li><a class="dir-row" href="contribute.html"><span class="dir-text"><strong>Share material</strong><span>Send a deck, photos, video or a correction for review.</span></span></a></li>'
-  '</ul></section>')
- return (intro + '<div class="landing-layout get-help-layout"><div class="landing-main">' + include + specific + '</div>' + side + '</div>'
-  + '<div class="directory get-help-more">' + more + '</div>')
+  + '</div></section>')
+ steps = [('We reply', 'The team reads your brief and replies, often with a question or two.'),
+  ('You agree the details', 'What will be made, who reviews it and when it’s delivered.'),
+  ('Work starts', 'Once that’s agreed.')]
+ side = ('<aside class="gh-side" aria-label="What to expect">'
+  '<section id="what-happens-next"><h2>What happens next</h2><ol class="gh-steps">'
+  + ''.join(f'<li><strong>{t}</strong><span>{d}</span></li>' for t, d in steps) + '</ol>'
+  '<p class="gh-note">Timing depends on when the content is ready, how complex the work is, how quickly reviewers respond and any supplier deadlines.</p>'
+  '<p class="gh-urgent"><strong>Urgent?</strong> Give the real deadline, the reason for it and what could be cut back. A date isn’t fixed until it’s agreed.</p></section>'
+  '<section id="what-we-do"><h2>What we can help with</h2><ul class="gh-scope">'
+  '<li>Design and layout for publications, presentations and graphics</li>'
+  '<li>Video, animation and digital work</li>'
+  '<li>Visual identity, templates and reusable resources</li>'
+  '<li>Creative materials for events, print and displays</li></ul>'
+  '<p class="gh-note">You bring the purpose, the content and the person who approves it. Event logistics and editorial decisions stay with the teams that own them.</p></section>'
+  '</aside>')
+ more = ('<nav class="gh-more" aria-label="More help">'
+  '<a class="dir-row" href="faq.html"><span class="dir-text"><strong>Common questions</strong><span>Where things are, who approves work, and what to do if something is missing.</span></span></a>'
+  '<a class="dir-row" href="contribute.html"><span class="dir-text"><strong>Share material</strong><span>Send a deck, photos, video or a correction for review.</span></span></a></nav>')
+ return intro + '<div class="gh-grid">' + brief + side + '</div>' + more
 
 def faq(jira):
  q = lambda t, b: f'<details class="guidance-detail"><summary>{t}</summary><div><p>{b}</p></div></details>'
