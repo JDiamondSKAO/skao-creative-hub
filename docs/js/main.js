@@ -507,15 +507,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!mine?.length) return;
     const section = renderDownloads(mine, ctx);
     if (!section) return;
+    // Links from "Just added" point at #downloads, which only exists once the files have loaded.
+    const arrive = () => { if (location.hash === "#downloads") section.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" }); };
     if (!panel) {
       const intro = $(".content-body > .task-intro");
       if (intro) intro.after(section); else $(".content-body")?.prepend(section);
+      arrive();
       return;
     }
     panel.querySelectorAll('.how-to-get, [data-fact=versions], [data-fact=sizes], [data-fact="partner versions"]').forEach((el) => el.remove());
     const ask = panel.querySelector(".asset-actions .button");
     if (ask) { ask.classList.add("secondary"); ask.textContent = "Ask about this file ↗"; }
     panel.after(section);
+    arrive();
     $$(".content-body .reading-section h2").forEach((h) => { if (h.textContent === "When you receive the file") h.textContent = "Before you use the file"; });
   }
   // Downloads grouped by the choice people are making: classification, office, partner, then file type.
@@ -559,7 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ORDER = ["By information classification", "By office and layout", "Files", ...KINDS.map(([k]) => k), "Other files", "Partner versions"];
     const groups = ORDER.map((name) => [name, [...variants.values()].filter((v) => v.group === name)]).filter(([, g]) => g.length);
     const total = [...variants.values()].reduce((n, v) => n + v.files.length, 0);
-    const section = document.createElement("section"); section.className = "downloads"; section.setAttribute("aria-labelledby", "downloadsHeading");
+    const section = document.createElement("section"); section.className = "downloads"; section.id = "downloads"; section.setAttribute("aria-labelledby", "downloadsHeading");
     const head = document.createElement("div"); head.className = "downloads-head";
     const h2 = document.createElement("h2"); h2.id = "downloadsHeading"; h2.textContent = "Downloads";
     const count = document.createElement("p"); count.textContent = total + (total === 1 ? " file" : " files");
@@ -698,6 +702,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const strip = box.closest(".latest-strip");
     const status = (msg) => { if (strip) { strip.hidden = true; return; } const p = document.createElement("p"); p.className = "latest-status"; p.textContent = msg; box.replaceChildren(p); };
     const show = (cards) => { box.replaceChildren(...(strip ? cards.slice(0, 3) : cards)); if (strip) strip.hidden = false; };
+    // The strip lists pages, newest first: a page that gained three files shows once, as "3 new files".
+    const when = (v) => {
+      const d = new Date(v), days = Math.floor((Date.now() - d) / 864e5);
+      if (isNaN(d)) return "";
+      if (days < 1) return "Today";
+      if (days < 2) return "Yesterday";
+      if (days < 7) return days + " days ago";
+      try { return new Intl.DateTimeFormat("en-GB", d.getFullYear() === new Date().getFullYear() ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" }).format(d); } catch { return ""; }
+    };
+    const fileName = (t) => t.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").replace(/\s*\+\s*/g, " + ").replace(/\s+/g, " ").trim();
+    const stripItems = (rows, example) => {
+      const pages = new Map();
+      rows.forEach((r) => { const k = r.pageHref || r.pageTitle || r.title; if (!pages.has(k)) pages.set(k, []); pages.get(k).push(r); });
+      return [...pages.values()].slice(0, 3).map((files, i) => {
+        const r = files[0], ext = (r.title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase();
+        const a = document.createElement("a"); a.className = "strip-item"; a.style.setProperty("--i", i);
+        const page = example ? null : safeLink(r.pageHref || r.download);
+        if (page) a.href = page + (r.pageHref ? "#downloads" : ""); else a.setAttribute("aria-disabled", "true");
+        a.title = files.map((f) => f.title).join("\n");
+        const badge = document.createElement("span"); badge.className = "file-badge"; badge.dataset.ext = ext; badge.textContent = ext.toUpperCase().slice(0, 4);
+        const text = document.createElement("span"); text.className = "strip-text";
+        const name = document.createElement("strong"); name.textContent = r.pageTitle || fileName(r.title);
+        const meta = document.createElement("span"); meta.className = "strip-meta";
+        // The file name gives way before the date does.
+        const what = document.createElement("span"), date = document.createElement("span");
+        what.className = "strip-file"; what.textContent = files.length > 1 ? files.length + " new files" : r.pageTitle ? fileName(r.title) : "";
+        date.className = "strip-when"; date.textContent = when(r.when);
+        if (what.textContent && date.textContent) date.textContent = " · " + date.textContent;
+        meta.append(...[what, date].filter((x) => x.textContent));
+        text.append(name, meta); a.append(badge, text);
+        return a;
+      });
+    };
     function card(r, example) {
       const a = document.createElement("article"); a.className = "asset-card";
       const ext = (r.title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toUpperCase();
@@ -722,11 +759,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (document.body.dataset.mode === "preview") {
       $("#latestLead").textContent = "Examples in this preview";
-      show([
+      const examples = [
         { title: "Presentation-template.potx", when: Date.now() - 2 * 864e5, size: 4.2 * 1048576, pageTitle: "Standard SKAO template" },
         { title: "Letterhead-A4.dotx", when: Date.now() - 6 * 864e5, size: 310 * 1024, pageTitle: "Letterheads" },
         { title: "Poster-A0-portrait.pdf", when: Date.now() - 11 * 864e5, size: 2.8 * 1048576, pageTitle: "Poster templates" },
-      ].map((r) => card(r, true)));
+      ];
+      show(strip ? stripItems(examples, true) : examples.map((r) => card(r, true)));
       return;
     }
     const ctx = document.body.dataset.context || "";
@@ -752,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#latestLead").textContent = "Recent uploads: check approval on the source page";
       }
       if (!rows.length) { status("No new files yet. Browse templates and assets for everything in the Hub."); return; }
-      show(rows.map((r) => card(r, false)));
+      show(strip ? stripItems(rows, false) : rows.map((r) => card(r, false)));
     } catch (e) {
       status(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the latest files." : "The latest files could not be loaded. Browse templates and assets instead.");
     }

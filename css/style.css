@@ -1279,3 +1279,37 @@ body .rail-body .rail-links a:any-link:active {transform:scale(.97);}
 .dark .rail-title-icon {background:#ff85bc;color:#1a0b14;}
 @keyframes rail-in {from{opacity:0;transform:translateY(10px);}}
 .landing-rail {animation:rail-in .55s var(--ease-out) .18s both;}
+
+/* ===== File badges: one colour per kind of file, so nothing looks greyed out ===== */
+.file-badge {--badge:var(--navy);background:var(--badge);}
+.file-badge[data-ext^="pp"],.file-badge[data-ext="potx"],.file-badge[data-ext="key"] {--badge:#c2410c;background:var(--badge);}
+.file-badge[data-ext="pdf"] {--badge:#e70068;background:var(--badge);}
+.file-badge[data-ext^="doc"],.file-badge[data-ext="dotx"] {--badge:#1d4ed8;background:var(--badge);}
+.file-badge[data-ext="zip"] {--badge:#b45309;background:var(--badge);}
+.file-badge[data-ext="ai"],.file-badge[data-ext="eps"],.file-badge[data-ext="svg"],.file-badge[data-ext="indd"],.file-badge[data-ext="psd"] {--badge:#6d28d9;background:var(--badge);}
+.file-badge[data-ext="mp4"],.file-badge[data-ext="mov"],.file-badge[data-ext="m4v"],.file-badge[data-ext="mogrt"] {--badge:#0e7490;background:var(--badge);}
+.file-badge[data-ext="png"],.file-badge[data-ext^="jp"],.file-badge[data-ext="webp"] {--badge:#15803d;background:var(--badge);}
+
+/* ===== "Just added": pages with new files, one quiet row ===== */
+.latest-strip {gap:12px 22px;padding:12px 14px 12px 20px;}
+.strip-label h2 {display:flex;align-items:center;gap:8px;}
+.strip-label h2:before {content:"";flex:none;width:7px;height:7px;border-radius:50%;background:currentColor;animation:live-dot 2.6s var(--ease-soft) infinite;}
+@keyframes live-dot {0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 45%,transparent);}70%,100%{box-shadow:0 0 0 7px transparent;}}
+.strip-label .latest-lead {padding-left:15px;}
+.strip-items {gap:4px;overflow:visible;}
+body .strip-items a.strip-item:any-link,.strip-items .strip-item {display:flex;align-items:center;gap:11px;flex:1 1 0;min-width:0;padding:8px 12px;border-radius:10px;color:var(--ink);text-decoration:none;animation:strip-in .45s var(--ease-out) both;animation-delay:calc(var(--i,0) * 70ms + 80ms);transition:background-color var(--t) var(--ease-soft);}
+@keyframes strip-in {from{opacity:0;transform:translateY(6px);}}
+body .strip-items a.strip-item:any-link:hover {background:var(--surface);}
+.strip-items .strip-item .file-badge {flex:none;width:32px;height:38px;border-radius:4px 10px 4px 4px;font-size:.52rem;letter-spacing:.04em;box-shadow:inset 0 -2px #0000001f;transition:transform var(--t) var(--ease-out);}
+.strip-items a.strip-item:hover .file-badge {transform:translateY(-2px) rotate(-3deg);}
+.strip-text {display:flex;flex-direction:column;min-width:0;line-height:1.3;}
+.strip-text strong {font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.strip-items a.strip-item:hover .strip-text strong {color:var(--link);}
+.strip-meta {margin-top:2px;font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.strip-item[aria-disabled="true"] {cursor:default;}
+body a.strip-all:any-link {display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--line);border-radius:999px;color:var(--ink);font-size:.8rem;font-weight:700;text-decoration:none;}
+body a.strip-all:any-link:hover {border-color:color-mix(in srgb,var(--link) 45%,var(--line));background:var(--surface);}
+@media(max-width:900px){body .strip-items a.strip-item:any-link,.strip-items .strip-item{padding:6px 4px;}.strip-label .latest-lead{padding-left:15px;}}
+.strip-meta {display:flex;white-space:pre;}
+.strip-file {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.strip-when {flex:none;}
