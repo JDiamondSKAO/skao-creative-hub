@@ -1,5 +1,11 @@
 # Changes
 
+## 2.15.3 Second round of board feedback
+
+- The Photos and video tile is redrawn in the family's style: two photo prints, the front one a night sky with a dish, and a small play badge for video.
+- Sharing a deck is now a quiet dashed "Share a deck" row at the end of Decks to reuse on Presentations, replacing the larger card.
+- Download buttons share one width, with the format and size in fixed columns, so a 20.1 MB file lines up with a 3.4 MB one.
+
 ## 2.15.2 Review board feedback
 
 - Templates and assets is now called All resources, which is what it is: every template, guide and service in one filterable list. Its links across the Hub use the new name, and its list heading reads "Filter by type or name".

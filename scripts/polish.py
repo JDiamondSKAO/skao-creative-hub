@@ -304,7 +304,7 @@ TILES = [
 TILE_ART = {**ART,
  'events': '<span class="art-events"><i></i><b>SKAO</b><em></em></span>',
  'guides': '<span class="art-guides"><i></i><i></i><i></i></span>',
- 'media': '<span class="art-media"><i></i><b></b></span>'}
+ 'media': '<span class="art-media"><i></i><b></b><em></em></span>'}
 
 def home_tiles(home, titles):
  """A compact index of the sections: small picture, name and what is inside."""

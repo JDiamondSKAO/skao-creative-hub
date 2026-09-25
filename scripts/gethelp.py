@@ -142,11 +142,9 @@ def rename(h):
   h = h.replace(o, n)
  return h
 
-def share_card():
- return ('<a class="presentation-feature share-feature" href="contribute.html"><div class="feature-art" aria-hidden="true"><span>SKA OBSERVATORY</span>'
-  '<strong>Your talk,<br>their head start.</strong></div><div class="feature-copy"><p class="eyebrow">Share a presentation</p><h2>Help build the library</h2>'
-  '<p>Given a talk others could reuse? Send the deck for review and it can join the library.</p>'
-  '<span class="feature-link">Share a presentation →</span></div></a>')
+# Presentations: sharing a deck sits at the end of the decks people reuse.
+SHARE_ROW = ('<li><a class="dir-row dir-add" href="contribute.html"><span class="dir-text"><strong>Share a deck</strong>'
+ '<span>Given a talk others could reuse? Send it for review and it can join this list.</span></span></a></li>')
 
 def apply(pages, jira):
  for name, target in MOVED.items():
@@ -156,10 +154,10 @@ def apply(pages, jira):
  pages['contribute.html'] = ('Share material', share(jira))
  pages = {n: (t, b if n in MOVED else rename(trim_asks(relink(b)))) for n, (t, b) in pages.items()}
  pages['resources.html'] = ('All resources', pages['resources.html'][1])
- # Presentations: an invitation to share decks, beside the advice.
  t, b = pages['presentations.html']
- at = b.find('</div></aside>', b.find('<aside class="landing-rail"'))
- if at > 0: pages['presentations.html'] = (t, b[:at + 6] + share_card() + b[at + 6:])
+ g = b.find('<h2>Decks to reuse')
+ at = b.find('</ul></section>', g) if g >= 0 else -1
+ if at > 0: pages['presentations.html'] = (t, b[:at] + SHARE_ROW + b[at:])
  t, b = pages['print-preparation.html']
  pages['print-preparation.html'] = (t, b.replace('<a href="working-with-us.html" class="text-link">Brief the print work', '<a href="working-with-us.html#print" class="text-link">Brief the print work'))
  return pages
