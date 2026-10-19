@@ -1675,3 +1675,8 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 /* Section overviews: the intro sits in the left column, so "Before you start" starts at the top beside it */
 .landing-main > .task-intro {margin-bottom:28px;}
 .landing-rail {top:90px;}
+
+/* Homepage feature card: the headline alone, centred in its panel */
+.feature-art {display:flex;flex-direction:column;justify-content:center;min-height:166px;}
+.feature-art strong {margin-top:0;}
+@media(max-width:600px){.feature-art{min-height:150px;}}
