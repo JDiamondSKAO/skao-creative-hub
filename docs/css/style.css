@@ -1688,3 +1688,7 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .welcome-copy .quick-links a:hover {border-color:color-mix(in srgb,var(--c) 50%,var(--line));background:color-mix(in srgb,var(--c) 16%,var(--bg));}
 .dark .welcome-copy .quick-links a {background:color-mix(in srgb,var(--c) 14%,var(--bg));color:var(--c);}
 
+/* Live status: the dashboard as the main button, the slides and overall status as quieter links beside it */
+.live-link-actions {align-items:center;gap:10px 20px;}
+.live-link-actions .text-link,.live-link-actions .pending-link {font-size:.86rem;}
+
