@@ -31,7 +31,7 @@ try:
  import subprocess,sys
  version=info.find('version').text
  subprocess.run([sys.executable,str(R/'scripts/staging_files.py')],check=True,capture_output=True)
- for old in (R/'release').glob('*-flat-upload.zip'):old.unlink()
+ # Other versions' uploads stay, so each branch's release can sit side by side.
  with zipfile.ZipFile(R/f'release/skao-creative-hub-v{version}-flat-upload.zip','w',zipfile.ZIP_DEFLATED) as z:
   for p in sorted((R/'release/staging-files').iterdir()):
    if p.is_file():z.write(p,p.name)
