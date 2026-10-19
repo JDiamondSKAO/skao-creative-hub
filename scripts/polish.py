@@ -213,7 +213,7 @@ def directory(name, pages, summaries):
  key, label, landing, members, groups = section_of(name)
  out = '<div class="directory">'
  for g, items in groups:
-  out += f'<section class="dir-group"><h2>{g} <span class="dir-count">{len(items)}</span></h2><ul class="dir-list">'
+  out += f'<section class="dir-group"><h2>{g}</h2><ul class="dir-list">'
   for m in items:
    out += (f'<li><a class="dir-row" href="{m}" data-page-id="{STATE["ids"].get(m, "")}"><span class="dir-text"><strong>{html.escape(pages[m][0])}</strong>'
     f'<span>{html.escape(summaries[m])}</span></span>{row_meta(m, key)}</a></li>')

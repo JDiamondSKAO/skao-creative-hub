@@ -776,7 +776,6 @@ main:focus {outline:none;}.choice-index {display:none;}/* Section menu: plain li
 .landing-main .dir-group {grid-template-columns:170px minmax(0,1fr);}
 .landing-main .dir-list {grid-template-columns:1fr;}
 .dir-legend {display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:.78rem;color:var(--muted);}
-.dir-count {margin-left:6px;font-weight:600;letter-spacing:0;opacity:.7;}
 .landing-rail {position:sticky;top:84px;display:grid;gap:14px;}
 .rail-status {padding:16px 18px;border-radius:12px;background:var(--surface);border:1px solid var(--line);}
 .rail-status p {margin:0 0 12px;font-size:.86rem;line-height:1.55;color:var(--muted);}
