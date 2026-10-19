@@ -1664,3 +1664,8 @@ body:has(.page-band) .nav-home {width:auto;max-width:270px;margin-right:22px;opa
 .navrow .search-trigger kbd {order:2;margin-left:10px;}
 .navrow .search-trigger svg {flex:none;}
 @media(min-width:1001px){.navlinks{gap:18px;}header.is-pinned .nav-home{margin-right:18px;}}
+
+/* With dark mode in the row, the header button drops its shortcut hint (shown on hover instead) and the row's gap does the spacing */
+.navrow .search-trigger kbd {display:none;}
+.navrow .tool-button {margin-left:0;}
+body:has(.page-band) .nav-home,header.is-pinned .nav-home {margin-right:6px;}
