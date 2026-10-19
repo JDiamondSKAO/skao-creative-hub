@@ -5,7 +5,7 @@
 Built on 2.17 after a look at how current documentation and resource sites handle navigation. The Hub only goes Home › Section › Page, so it now says where you are once, not four times.
 
 - **One header everywhere:** every page, light or dark, has the same compact navy-to-magenta bar with the white SKAO lettermark and "Creative Hub", the sections, search and dark mode. The masthead's slow lenses drift behind it. Content starts about 100 px higher on inner pages.
-- **Calmer top of page:** search and dark mode lose their outlines, links are soft white with the current one full white, and the notification is slimmer and softer, in exact SKAO accent swatches: Sites #F9B34C into Science #F49E6B (dark mode: Sites #6A3F23 into Technology #5D2A2B), so the header stays the strongest band of colour.
+- **Calmer top of page:** search and dark mode lose their outlines, links are soft white with the current one full white, and the notification is slimmer and softer, in exact SKAO accent swatches: Sites #F9B34C into Science #F49E6B (dark mode: Sites #6A3F23 into Technology #5D2A2B), with its text in Science #0D1D2C for strong contrast, so the header stays the strongest band of colour.
 - **No breadcrumb.** The section label above the title links back to the section.
 - **On this page** appears only on long pages (four sections or more).
 - **Previous and next** at the foot of each page on wide screens; phones, which have no sidebar, keep the "More in" list.
