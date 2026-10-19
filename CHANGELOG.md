@@ -19,6 +19,7 @@ The Hub goes from 51 pages to 38, and adds the three things asked for in the rep
 - **Get help** is now a short note that points to the Comms helpdesk for questions and larger projects, then Common questions and Share material. The brief checklist and "what happens next" steps are gone, and the helpdesk is called the Comms helpdesk throughout, including the footer band.
 - **Photos and video:** the slideshow uses Canto's large preview (2000 px instead of 640–800 px), loads each image just before it shows, and its caption band runs the full width. Weekly all-hands photos are one card with a single link to one Canto folder, sorted into subfolders.
 - **More in…** cards at the foot of each page no longer carry a "Next" label.
+- **How-to guides** read as numbered steps, each with a short description of what to do and why, instead of tick lists. The Event materials checklist keeps its ticks.
 - Old addresses show a short "this page has moved" note, and search still finds them by their old names.
 - The folded pages are kept as they were in `archive/removed-v2.16.html` and at the git tag `v2.16.0`.
 

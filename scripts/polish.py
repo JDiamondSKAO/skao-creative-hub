@@ -84,7 +84,7 @@ TYPES = [
  ('services', 'Creative services', {'Creative help'}),
 ]
 SKIP = {'resources.html'} | set(MOVED)
-CHECKLISTS = {'event-checklist.html', 'print-preparation.html', 'making-a-poster.html', 'accessibility.html'}
+CHECKLISTS = {'event-checklist.html'}  # How-to guides read as described steps, not tick lists
 
 def sidebar(current, titles):
  sec = section_of(current)
