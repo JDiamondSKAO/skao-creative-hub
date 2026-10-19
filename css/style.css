@@ -1640,3 +1640,7 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 body .site-photo-rows a.text-link {font-size:.84rem;}
 @media(max-width:700px){.site-photo-rows{grid-column:1/-1;}}
 .all-hands-note a + a,.all-hands-note .pending-link + .pending-link {margin-left:14px;}
+
+/* Section overviews: the intro sits in the left column, so "Before you start" starts at the top beside it */
+.landing-main > .task-intro {margin-bottom:28px;}
+.landing-rail {top:90px;}

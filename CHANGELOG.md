@@ -10,6 +10,7 @@ Built on 2.17 after a look at how current documentation and resource sites handl
 - **Previous and next** at the foot of each page on wide screens; phones, which have no sidebar, keep the "More in" list.
 - **Search:** plain questions work ("where do I find the letterhead"), quick answers to the most common questions appear above the results, approved files are found by name, and / opens search.
 - **Small touches:** a copy-link button on section headings, and an "Updated" date under each page title.
+- **Before you start** on section overviews sits level with the intro at the top of the page, not halfway down. With several items they start closed. Overview pages drop the small label above the title, since the title is the section.
 
 ## 2.17.0 Fewer, fuller pages
 

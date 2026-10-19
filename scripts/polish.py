@@ -293,7 +293,8 @@ def rail(rest):
  out = '<aside class="landing-rail" aria-label="Help with this section">'
  if items:
   out += ('<div class="rail-guides"><h2 class="rail-title">Before you start</h2>') + ''.join(
-   f'<details class="rail-item" data-kind="{rail_kind(t, b)}"{" open" if i == 0 else ""}><summary>'
+   # One item reads open; several start closed, so the panel stays compact beside a short list.
+   f'<details class="rail-item" data-kind="{rail_kind(t, b)}"{" open" if len(items) == 1 else ""}><summary>'
    f'<span class="rail-label">{html.escape(t)}</span></summary><div class="rail-body">{rail_links(b)}</div></details>'
    for i, (t, b) in enumerate(items)) + '</div>'
  return out + '</aside>'
@@ -305,8 +306,11 @@ def landing(name, body, pages, summaries):
  body = unfold(body)
  d = directory(name, pages, summaries)
  # Quick answers (brand swatches, the Canto hand-off) stay first; the directory follows.
- def after(head, rest):
+ def after(head, rest, beside=False):
   side = rail(rest.strip())
+  if side and beside:
+   # "Before you start" sits level with the intro, at the top of the page, rather than halfway down.
+   return f'<div class="landing-layout"><div class="landing-main">{head}{d}</div>{side}</div>'
   return head + (f'<div class="landing-layout"><div class="landing-main">{d}</div>{side}</div>' if side else d)
  for marker in ['<div class="type-spec">', '<div class="media-handoff">']:
   at = body.find(marker)
@@ -314,7 +318,7 @@ def landing(name, body, pages, summaries):
    close = body.find('</div></div>', at) + 12
    return after(body[:close], body[close:])
  m = re.search(r'<div class="task-intro">.*?</div>(?:<a [^>]*class="button"[^>]*>.*?</a>)?</div>', body, re.S)
- return after(body[:m.end()], body[m.end():]) if m else d + body
+ return after(body[:m.end()], body[m.end():], beside=True) if m else d + body
 
 def nav(current=''):
  """Top menu: one link per section. The landing page lists everything in it."""

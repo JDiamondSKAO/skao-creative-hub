@@ -64,7 +64,8 @@ def shell(title,body,current,home=False):
  sidebar=section_sidebar(current,SOURCE_TITLES)
  sec=section_of(current)
  # No breadcrumb: the site is only two levels deep, so the section label above the title links back instead.
- eyebrow=('<a class="eyebrow eyebrow-link" href="'+sec[2]+'">'+html.escape(sec[1])+'</a>') if sec and sec[2]!=current else '<p class="eyebrow">'+html.escape(INTERIOR_META.get(current,{}).get('group','Creative Hub'))+'</p>'
+ # Section overviews need no label: their title is the section.
+ eyebrow=('<a class="eyebrow eyebrow-link" href="'+sec[2]+'">'+html.escape(sec[1])+'</a>') if sec and sec[2]!=current else '' if sec else '<p class="eyebrow">'+html.escape(INTERIOR_META.get(current,{}).get('group','Creative Hub'))+'</p>'
  main=body if home else '<div class="page-band"><div class="page-head">'+eyebrow+'<h1>'+html.escape(title)+'</h1></div></div>'+('<div class="page-grid full-width">' if current in FULL_WIDTH else '<div class="page-grid">'+sidebar)+'<article class="content-body">'+body+'</article>'+('' if current in FULL_WIDTH else TOC_RAIL)+'</div>'
  return arrows(gethelp.rename(gethelp.relink('<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>'+html.escape(title)+' | SKAO Creative Hub</title><link rel="stylesheet" href="css/style.css?v='+ASSET_V+'"><script src="js/boot.js"></script></head><body data-mode="preview">'+header(current)+'<div id="announcement" class="announce" hidden><div class="wrap announce-inner"><span class="announce-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.5 4.6 2.4 6.9 7 7.5-4.6.6-6.5 2.9-7 7.5-.5-4.6-2.4-6.9-7-7.5 4.6-.6 6.5-2.9 7-7.5Z"/><path d="M19 15.5c.2 1.8 1 2.7 2.8 3-1.8.3-2.6 1.2-2.8 3-.2-1.8-1-2.7-2.8-3 1.8-.3 2.6-1.2 2.8-3Z"/></svg>New on the Hub</span><p class="announce-text"><a id="announcementLink" href="updates.html">Hub updates</a></p><button type="button" class="announce-close" aria-label="Dismiss announcement"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div><div class="wrap preview-note">Design preview · Guidance is proposed; library links open the current staff services.</div><main id="main-content" class="wrap" tabindex="-1">'+main+'</main>'+footer()+'</body></html>')))
 for name,(title,body) in PAGES.items():
@@ -119,6 +120,7 @@ for n,sec in enumerate(SECTIONS):
  members=[m for m in members_of(sec) if section_of(m)[0]==key and m!=landing]+[x for x,k in EXTRA.items() if k==key]
  cond=' || '.join(f'$page.id.toString() == "{ROUTE_IDS[m]}"' for m in members)
  crumbs+=('#if' if n==0 else '#elseif')+f'({cond})<a class="eyebrow eyebrow-link" href="{landing}">{label}</a>\n'
+crumbs+=f'#elseif($page.id.toString() == "{ROUTE_IDS[SECTIONS[0][2]]}"'+''.join(f' || $page.id.toString() == "{ROUTE_IDS[sec[2]]}"' for sec in SECTIONS[1:])+')\n'
 crumbs+='#else<p class="eyebrow">$displayGroup</p>\n#end\n'
 assert 'SECTION_EYEBROW' in prod
 prod=prod.replace('SECTION_EYEBROW',crumbs,1)
