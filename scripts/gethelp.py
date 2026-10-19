@@ -1,11 +1,10 @@
 """Get help, simplified: one page to ask, one to share, one for questions.
 
-Everything in this section ends at the creative helpdesk, so it says each thing
-once: what to include, what happens next, and the few extra details a video,
-print or business card request needs. The pages it replaces stay reachable at
-their old addresses and point to the part of Get help that now holds their
-content. The full previous text is kept in archive/get-help-v2.14.html and at
-the git tag pre-get-help-simplify.
+Get help is a short note that points to the Comms helpdesk for questions and
+larger projects, then Common questions and Share material. The pages it replaces
+stay reachable at their old addresses and point to Get help. The brief checklist,
+"what happens next" steps and request extras it held until 2.17 are at the git
+tag v2.16.0; the text before that is in archive/get-help-v2.14.html.
 """
 import html, re
 import links
@@ -16,10 +15,10 @@ HOME = 'working-with-us.html'
 MOVED = {
  'request.html': (HOME, 'Get help'),
  'creative-services.html': (HOME, 'Get help'),
- 'timing.html': (HOME + '#what-happens-next', 'What happens next'),
- 'video-request.html': (HOME + '#video', 'Video or animation'),
- 'print.html': (HOME + '#print', 'Print'),
- 'business-cards.html': (HOME + '#business-cards', 'Business cards'),
+ 'timing.html': (HOME, 'Get help'),
+ 'video-request.html': (HOME, 'Get help'),
+ 'print.html': (HOME, 'Get help'),
+ 'business-cards.html': (HOME, 'Get help'),
  'help.html': ('faq.html', 'Common questions'),
  'updates.html': ('index.html', 'Just added, on the homepage'),
  'archive.html': ('index.html', 'Just added, on the homepage'),
@@ -48,68 +47,19 @@ RETIRED = {
  'widescreen-template.html': ('This page has moved', 'All SKAO presentation templates are 16:9, so the Standard SKAO template is the widescreen one.', False),
 }
 
-TEMPLATE = '\n'.join([
- 'What it is and who it is for:', '', 'When it will be used, and why then:', '',
- 'What you need (format, size, quantity):', '', 'Who supplies the content, and who approves it:', '',
- 'Source files or links:', '', 'Budget or other constraints:', ''])
-
 def link(url, label, cls=''):
  return f'<a href="{html.escape(url, quote=True)}"' + (f' class="{cls}"' if cls else '') + f'>{label}</a>'
 
-def details(key, title, items, extra=''):
- return (f'<details class="guidance-detail" id="{key}"><summary>{title}</summary><div><ul>'
-  + ''.join(f'<li>{i}</li>' for i in items) + '</ul>' + (f'<p>{extra}</p>' if extra else '') + '</div></details>')
-
 def page(jira):
- intro = ('<div class="task-intro gh-intro"><div><p>Most everyday work can start from the Hub’s templates and guides. '
-  'For new work or a review, send a brief to the creative helpdesk.</p></div></div>')
- copy = (f'<button type="button" class="copy-template" data-copy="{html.escape(TEMPLATE, quote=True)}" data-copy-label="Request template">'
-  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg>'
-  '<span>Copy as a template</span></button>')
- rows = [('Purpose', 'What it is, who it’s for and what it should help them do.'),
-  ('Timing', 'When it will be used, and why then.'),
-  ('Output', 'Format, size and quantity.'),
-  ('People', 'Who supplies the content, and who approves the result.'),
-  ('Inputs', 'Source files or links, budget and any other constraints.')]
- extra = lambda key, title, items, note='': (f'<details class="brief-extra" id="{key}"><summary>{title}</summary><div><ul>'
-  + ''.join(f'<li>{i}</li>' for i in items) + '</ul>' + (f'<p>{note}</p>' if note else '') + '</div></details>')
- brief = ('<section class="brief-card" id="what-to-include" aria-labelledby="briefHeading"><div class="brief-head"><div>'
-  '<h2 id="briefHeading">What to include in your brief</h2><p>Copy the template, paste it into the helpdesk form and fill in the gaps.</p></div>' + copy + '</div>'
-  '<dl class="brief-list">' + ''.join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in rows) + '</dl>'
-  '<div class="brief-extras" id="specific"><h3>Also include, for</h3>'
-  + extra('video', 'Video or animation', [
-     'Where it will be shown, and how long it can be.',
-     'Existing footage, a draft script, images and source information.',
-     'Accessibility needs such as captions.',
-     'Any filming, and who needs to be available for it.'],
-     'Check ' + link('video.html', 'Video and animation') + ' first: existing footage may already do the job.')
-  + extra('print', 'Print', [
-     'The item, its dimensions and how many you need.',
-     'Existing artwork or draft content, and where images come from.',
-     'Where it should be delivered, and the supplier’s deadline.',
-     'Finishing, such as lamination or folding.'],
-     'Ordering from a supplier? See ' + link('print-suppliers.html', 'Work with print suppliers') + ' and ' + link('print-preparation.html', 'Prepare files for print') + '.')
-  + extra('business-cards', 'Business cards', [
-     'Your name and job title, exactly as they should appear.',
-     'The contact details for the card.',
-     'How many, in which languages, and where to deliver them.',
-     'Who will approve the proof.'])
-  + '</div><div class="brief-send"><p><strong>Ready to send it?</strong> Submit your brief through the creative helpdesk, with any files attached.</p>'
-  + link(jira, 'Open the creative helpdesk ↗', 'button') + '</div></section>')
- steps = [('Brief received', 'Creative Production reviews your brief and replies to confirm it, with any questions.'),
-  ('Scope agreed', 'Together we confirm the deliverables, the reviewers and the delivery date.'),
-  ('Production', 'Work begins once the scope is agreed.'),
-  ('Review and delivery', 'You review drafts at the agreed points. Final files follow your approval.')]
- side = ('<aside class="gh-side" aria-label="What to expect">'
-  '<section id="what-happens-next"><h2>What happens next</h2><ol class="gh-steps">'
-  + ''.join(f'<li><strong>{t}</strong><span>{d}</span></li>' for t, d in steps) + '</ol>'
-  '<p class="gh-note">Timelines depend on when the content is ready, the complexity of the work, review turnaround and any supplier lead times.</p>'
-  '<p class="gh-urgent"><strong>Working to a fixed deadline?</strong> State the date, the reason for it and which elements could be simplified. A delivery date is confirmed once the scope is agreed.</p></section>'
-  '</aside>')
+ """A short note, the helpdesk, then the two other Get help pages."""
+ ask = ('<div class="task-intro gh-intro"><div><p>Most everyday work can start from the Hub’s templates and guides.</p>'
+  '<p>For anything else, from a quick question to a larger project such as new design, video or animation, print, events or business cards, '
+  'contact the Comms helpdesk. Say what you need, who it’s for and when you need it, and attach anything you already have.</p></div>'
+  + link(jira, 'Open the Comms helpdesk ↗', 'button') + '</div>')
  more = ('<nav class="gh-more" aria-label="More help">'
   '<a class="dir-row" href="faq.html"><span class="dir-text"><strong>Common questions</strong><span>Where things are, who approves work, and what to do if something is missing.</span></span></a>'
   '<a class="dir-row" href="contribute.html"><span class="dir-text"><strong>Share material</strong><span>Send a deck, photos, video or a correction for review.</span></span></a></nav>')
- return intro + '<div class="gh-grid">' + brief + side + '</div>' + more
+ return ask + more
 
 def faq(jira):
  q = lambda t, b: f'<details class="guidance-detail"><summary>{t}</summary><div><p>{b}</p></div></details>'
@@ -120,11 +70,11 @@ def faq(jira):
   + q('Why can I browse but not upload?', 'Browsing and contributing have separate permissions. To add material, see ' + link('contribute.html', 'Share material') + '.')
   + q('Is my request booked once I send it?', 'Not yet. The team replies to agree what will be made and when; a date isn’t fixed until then. If it’s urgent, say why and what could be cut back.')
   + q('Who approves the work?', 'Name the content owner and the final reviewer in your request. The approval route depends on the work, so confirm it rather than assume it.')
-  + q('A file is missing or a link is broken', 'Send the page link and what happened to the ' + link(jira, 'creative helpdesk ↗') + '.'))
+  + q('A file is missing or a link is broken', 'Send the page link and what happened to the ' + link(jira, 'Comms helpdesk ↗') + '.'))
 
 def share(jira):
  return ('<div class="task-intro"><div><span class="eyebrow">Make good work reusable</span>'
-  '<p>Send it through ' + link(jira, 'the creative helpdesk') + '. Sharing starts a review: nothing is published until its owner has checked it.</p></div></div>'
+  '<p>Send it through ' + link(jira, 'the Comms helpdesk') + '. Sharing starts a review: nothing is published until its owner has checked it.</p></div></div>'
   '<section class="reading-section"><h2>What to send</h2><ul>'
   '<li><strong>A presentation:</strong> the editable deck or a link to it, with its audience, event date, content owner and any limits on reuse.</li>'
   '<li><strong>Photos or video:</strong> use the upload link you were given, with a title, creator, location and rights information. '
@@ -174,6 +124,4 @@ def apply(pages, jira):
  pages['contribute.html'] = ('Share material', share(jira))
  pages = {n: (t, b if n in MOVED else rename(trim_asks(relink(b)))) for n, (t, b) in pages.items()}
  pages['resources.html'] = ('All resources', pages['resources.html'][1])
- t, b = pages['print-preparation.html']
- pages['print-preparation.html'] = (t, b.replace('<a href="working-with-us.html" class="text-link">Brief the print work', '<a href="working-with-us.html#print" class="text-link">Brief the print work'))
  return pages

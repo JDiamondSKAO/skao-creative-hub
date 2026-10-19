@@ -115,7 +115,7 @@ def related(name, pages, summaries):
   picks = [rest[(at + i) % len(rest)] for i in range(1, min(4, len(rest)))] if rest else []
   heading = 'More in ' + label
  cards = ''.join(
-  f'<a class="related-card" href="{m}">' + ('<span class="related-next">Next</span>' if i == 0 and name != landing else '') +
+  f'<a class="related-card" href="{m}">' +
   f'<strong>{html.escape(pages[m][0])}</strong><span>{html.escape(summaries[m])}</span></a>' for i, m in enumerate(picks))
  more = f'<a class="related-all" href="{landing}">{html.escape(pages[landing][0])} →</a>'
  return f'<nav class="section-next" aria-label="{heading}"><div class="section-next-head"><h2>{heading}</h2>{more}</div><div class="related-grid">{cards}</div></nav>'
@@ -195,9 +195,9 @@ def catalogue(pages, meta, summaries, on_request):
 
 def request_routes(body, jira):
  """Two clear routes first: submit a brief, or write one with the helper."""
- body = re.sub(r'(<div class="task-intro">.*?</div>)<a href="[^"]*" class="button">Open creative helpdesk ↗</a>(</div>)', r'\1\2', body, count=1, flags=re.S)
- body = body.replace('Already have a brief? Send it through the creative helpdesk with your files or source links.', 'Choose how you want to start. Either way, the team replies to agree the scope and timing with you.', 1)
- routes = (f'<div class="route-choice"><a class="route-card primary" href="{jira}"><span class="eyebrow">I have a brief</span><strong>Submit it in the helpdesk</strong><span>Attach your files or source links. The team replies to agree scope and timing.</span><em>Open creative helpdesk ↗</em></a>'
+ body = re.sub(r'(<div class="task-intro">.*?</div>)<a href="[^"]*" class="button">Open the Comms helpdesk ↗</a>(</div>)', r'\1\2', body, count=1, flags=re.S)
+ body = body.replace('Already have a brief? Send it through the Comms helpdesk with your files or source links.', 'Choose how you want to start. Either way, the team replies to agree the scope and timing with you.', 1)
+ routes = (f'<div class="route-choice"><a class="route-card primary" href="{jira}"><span class="eyebrow">I have a brief</span><strong>Submit it in the helpdesk</strong><span>Attach your files or source links. The team replies to agree scope and timing.</span><em>Open the Comms helpdesk ↗</em></a>'
   '<a class="route-card" href="#brief-builder" data-open-details><span class="eyebrow">I need help</span><strong>Write my brief here</strong><span>Answer six short questions, then copy the result into the helpdesk.</span><em>Start the brief helper ↓</em></a></div>')
  body = body.replace('<div class="process-strip">', routes + '<div class="process-strip">', 1)
  return body.replace('<details class="brief-builder">', '<details class="brief-builder" id="brief-builder">', 1)
@@ -343,10 +343,10 @@ def latest_strip():
 # matched to album names. They stay hidden until the synced manifest has matching albums.
 CANTO_STRIPS = {'video.html': 'video videos'}
 
-def canto_show(words, heading, eyebrow, wide=False):
+def canto_show(words, heading, eyebrow='', wide=False):
  """A view-only slideshow: it shows what is in Canto; the button beside it opens the library."""
  return (f'<section class="canto-show{" wide" if wide else ""}" data-canto="{words}" hidden aria-labelledby="show-{words.split()[0] if words else "all"}">'
-  f'<div class="canto-head"><div><p class="eyebrow">{eyebrow}</p><h2 id="show-{words.split()[0] if words else "all"}">{heading}</h2></div></div>'
+  f'<div class="canto-head"><div>' + (f'<p class="eyebrow">{eyebrow}</p>' if eyebrow else '') + f'<h2 id="show-{words.split()[0] if words else "all"}">{heading}</h2></div></div>'
   '<div class="show-stage" aria-roledescription="carousel"><ul class="show-slides" aria-live="off"></ul>'
   '<div class="show-controls"><button type="button" class="show-prev" aria-label="Previous image"><span aria-hidden="true">‹</span></button>'
   '<button type="button" class="show-play" aria-label="Pause slideshow" aria-pressed="false"><span aria-hidden="true"></span></button>'
@@ -356,15 +356,18 @@ def canto_show(words, heading, eyebrow, wide=False):
   + (' First time? Choose <strong>Register Now</strong> and use your SKAO email address.' if wide else '') + '</p></div>'
   '<p class="show-collections" hidden></p></section>')
 
+PHOTOS_ICON = ('<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+ '<rect x="3" y="7" width="14" height="12" rx="2"/><path d="M7 4h11a3 3 0 0 1 3 3v9"/><circle cx="8" cy="11" r="1.4"/><path d="m3.5 17 4-4 3.5 3.5 2-2 3.5 3.5"/></svg>')
+
 def site_photos():
- """Weekly all-hands photos from each site, in their own Canto albums."""
- return links.needs('<section class="site-photos"><div><p class="eyebrow">From the sites</p><h2>Weekly all-hands photos</h2>'
-  '<p>Photos shared at the weekly all-hands, newest first, with captions and credits.</p></div><div class="site-photo-links">'
-  + links.pending('ALLHANDS_LOW', 'SKA-Low', 'button secondary') + links.pending('ALLHANDS_MID', 'SKA-Mid', 'button secondary') + '</div></section>',
-  links.url('ALLHANDS_LOW') or links.url('ALLHANDS_MID'))
+ """Weekly all-hands photos: one Canto folder, sorted into subfolders."""
+ return links.needs('<section class="site-photos"><span class="site-photos-icon">' + PHOTOS_ICON + '</span>'
+  '<div><p class="eyebrow">From the sites · New each week</p><h2>Weekly all-hands photos</h2>'
+  '<p>Photos shared at the weekly all-hands, in one Canto folder sorted into subfolders. Each photo carries its caption and credit.</p></div>'
+  + links.pending('ALLHANDS', 'Open the all-hands photos', 'button secondary') + '</section>', links.url('ALLHANDS'))
 
 def canto_gallery(canto):
- return canto_show('', 'A look inside the staff media library', 'Staff media library', wide=True)
+ return canto_show('', 'A look inside the staff media library', wide=True)
 
 def canto_strip(words, canto):
  return canto_show(words, 'In the staff media library', 'From Canto')

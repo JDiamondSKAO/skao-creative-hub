@@ -13,7 +13,9 @@ against SKAO's Canto showed (September 2026):
 - /api/v1/album returns the web app, so albums are listed with /search?scheme=album
   (namePath, size); /album/{id} returns an album's contents.
 - url.directUrlPreview gives an 800 px JPEG for images and a poster frame for videos,
-  served from a CDN after a redirect.
+  served from a CDN after a redirect. Too soft for the slideshow (tested October 2026):
+  url.preview + '/{size}' returns Canto's large preview instead, about 2050 px on the
+  long side for any size above 800, so that is fetched first.
 Albums are grouped into collections by path (e.g. "Image bank - Staff/SKA-Low").
 
 Environment
@@ -41,7 +43,7 @@ Usage
   python3 scripts/canto_sync.py --dry-run --out build/canto   # fetch from Canto, write files locally
   python3 scripts/canto_sync.py                               # fetch and publish to Confluence
   python3 scripts/canto_sync.py --self-test
-Options: --per-album N (default 12), --width PX (default 1280, large enough for the slideshow), --prune (remove stale canto-* thumbnails),
+Options: --per-album N (default 12), --width PX (default 2000, sharp in the full-width slideshow), --prune (remove stale canto-* thumbnails),
          --env FILE (read KEY=VALUE settings from a local file, e.g. dev/canto.env; values already set in the environment win)
 """
 from __future__ import annotations
@@ -132,12 +134,18 @@ class Canto:
     def album_assets(self, album_id, limit):
         return self.get(f'/album/{album_id}', limit=limit, start=0, sortBy='time', sortDirection='descending').get('results', [])
 
-    def preview_bytes(self, asset):
-        url = (asset.get('url') or {}).get('directUrlPreview') or (asset.get('url') or {}).get('preview')
-        if not url: return None
+    def preview_bytes(self, asset, size=2000):
+        """Canto's large preview (about 2050 px), else its standard 800 px one."""
+        urls = asset.get('url') or {}
+        tries = ([urls['preview'].rstrip('/') + f'/{size}'] if urls.get('preview') else []) + ([urls['directUrlPreview']] if urls.get('directUrlPreview') else [])
         self._auth()
-        _, raw, _ = http('GET', url, {'Authorization': f'Bearer {self.token}'})
-        return raw
+        for url in tries:
+            try:
+                _, raw, _ = http('GET', url, {'Authorization': f'Bearer {self.token}'})
+                if raw: return raw
+            except (HTTPError, URLError):
+                continue
+        return None
 
 # ---------- Selection and manifest (pure, covered by --self-test) ----------
 
@@ -418,7 +426,7 @@ def run(args):
     env = os.environ.get
     domain, folder = env('CANTO_DOMAIN'), env('CANTO_FOLDER_PATH', 'Staff media library')
     if not domain: sys.exit('Set CANTO_DOMAIN and CANTO_API_KEY (or CANTO_APP_ID and CANTO_APP_SECRET).')
-    per_album = int(args.get('--per-album', 12)); width = int(args.get('--width', 1280))
+    per_album = int(args.get('--per-album', 12)); width = int(args.get('--width', 2000))
     page_id = env('CONFLUENCE_PAGE_ID', 'PAGE_ID')
     if not env('CANTO_API_KEY') and not (env('CANTO_APP_ID') and env('CANTO_APP_SECRET')):
         sys.exit('Canto credentials missing: set CANTO_API_KEY (generated access token), or both CANTO_APP_ID and CANTO_APP_SECRET.')

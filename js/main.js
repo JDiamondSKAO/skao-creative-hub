@@ -738,7 +738,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const slides = items.map((a, i) => {
         const li = document.createElement("li"), img = document.createElement("img"), cap = document.createElement("p");
         li.className = "show-slide"; li.setAttribute("aria-roledescription", "slide"); li.setAttribute("aria-label", `${i + 1} of ${items.length}`);
-        img.src = a.src; img.alt = a.alt || a.title; img.decoding = "async"; if (i > 1) img.loading = "lazy";
+        // Large images: only the first two load straight away, the rest just before they show.
+        if (i < 2) img.src = a.src; else img.dataset.src = a.src;
+        img.alt = a.alt || a.title; img.decoding = "async";
         if (a.w && a.h) { img.width = a.w; img.height = a.h; }
         cap.className = "show-caption";
         const t = document.createElement("strong"); t.textContent = a.title; cap.append(t);
@@ -757,6 +759,7 @@ document.addEventListener("DOMContentLoaded", () => {
         at = (i + items.length) % items.length;
         slides.forEach((li, n) => { const on = n === at; li.classList.toggle("is-on", on); li.setAttribute("aria-hidden", String(!on)); });
         marks.forEach((b, n) => b.setAttribute("aria-current", n === at ? "true" : "false"));
+        [at, (at + 1) % items.length].forEach((n) => { const img = slides[n].querySelector("img"); if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; } });
       }
       const tick = () => { clearTimeout(timer); if (!paused && !hold) timer = setTimeout(() => { show(at + 1); tick(); }, 5200); };
       let hold = false;
@@ -968,7 +971,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const notice=document.createElement("aside"); notice.className="source-check";
     const title=document.createElement("h2"), text=document.createElement("p"), route=document.createElement("a");
     title.textContent="Resource not yet ready on this page";
-    text.textContent="This page contains asset placeholders. The listed files and version details should not be treated as a released resource. Ask the creative helpdesk for an available source.";
+    text.textContent="This page contains asset placeholders. The listed files and version details should not be treated as a released resource. Ask the Comms helpdesk for an available source.";
     route.href="https://jira.skatelescope.org/servicedesk/customer/portal/364";
     route.textContent="Ask for the available resource ↗";
     notice.append(title,text,route); article.prepend(notice);

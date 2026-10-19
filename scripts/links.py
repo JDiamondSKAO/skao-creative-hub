@@ -22,8 +22,7 @@ NAMES = {
  'CONSTRUCTION_STATUS': 'Overall construction status for both telescopes (Google Doc)',
  'LOW_STATUS': 'SKA-Low status slides, kept by the SKA-Low team (Google Slides)',
  'MID_STATUS': 'SKA-Mid status slides, kept by the SKA-Mid team (Google Slides)',
- 'ALLHANDS_LOW': 'Canto album of SKA-Low photos shared at the weekly all-hands',
- 'ALLHANDS_MID': 'Canto album of SKA-Mid photos shared at the weekly all-hands',
+ 'ALLHANDS': 'Canto folder of photos shared at the weekly all-hands, sorted into subfolders',
 }
 
 def load():

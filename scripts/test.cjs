@@ -24,11 +24,10 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  complete[1]({ok:true,json:async()=>({results:[{id:'2',title:'New result',_links:{webui:'/new'}}]})});await wait();complete[0]({ok:true,json:async()=>({results:[{id:'1',title:'Old result',_links:{webui:'/old'}}]})});await wait();assert(el('#searchResults').textContent.includes('New result'));assert(!el('#searchResults').textContent.includes('Old result'));pass('Late search responses cannot overwrite newer results');live.window.close();
  const gh=dom('working-with-us.html'),ghd=gh.window.document,ghq=s=>ghd.querySelector(s);
  assert.equal(ghd.querySelectorAll('.content-body a[href*="servicedesk"]').length,1,'one helpdesk button on Get help');
- const tmpl=ghq('.copy-template');assert(tmpl.dataset.copy.includes('When it will be used'));assert.equal(tmpl.dataset.copyLabel,'Request template');
- assert.deepEqual(['video','print','business-cards','what-happens-next','what-we-do'].map(id=>!!ghd.getElementById(id)),[true,true,true,true,false]);
- assert(ghq('.brief-card .brief-send a.button[href*="servicedesk"]'),'the helpdesk button closes the brief card');assert(!ghq('.gh-intro a'),'no button beside the intro');assert.equal(ghd.querySelectorAll('.gh-steps li').length,4);
- assert(!ghq('#briefForm'),'no brief form: the checklist and template replace it');gh.window.close();
- for(const [old,to] of [['request.html','working-with-us.html'],['video-request.html','working-with-us.html#video'],['timing.html','working-with-us.html#what-happens-next'],['help.html','faq.html'],['creative-services.html','working-with-us.html'],['canto-guide.html','canto-access.html'],['email-signatures.html','documents.html'],['widescreen-template.html','standard-template.html'],['science-slides.html','master-deck.html'],['reports.html','memos.html'],['hero-images.html','media.html'],['event-safety.html','events.html'],['merchandise.html','stands.html']]){
+ assert(ghq('.gh-intro a.button[href*="servicedesk"]').textContent.includes('Comms helpdesk'),'Get help is a short note that points to the Comms helpdesk');
+ assert(!ghq('.brief-card')&&!ghq('.gh-steps')&&!ghq('.copy-template'),'no brief checklist or steps');
+ assert.deepEqual([...ghd.querySelectorAll('.gh-more a')].map(a=>a.getAttribute('href')),['faq.html','contribute.html'],'then Common questions and Share material');gh.window.close();
+ for(const [old,to] of [['request.html','working-with-us.html'],['video-request.html','working-with-us.html'],['timing.html','working-with-us.html'],['help.html','faq.html'],['creative-services.html','working-with-us.html'],['canto-guide.html','canto-access.html'],['email-signatures.html','documents.html'],['widescreen-template.html','standard-template.html'],['science-slides.html','master-deck.html'],['reports.html','memos.html'],['hero-images.html','media.html'],['event-safety.html','events.html'],['merchandise.html','stands.html']]){
   const mv=dom(old).window.document;assert.equal(mv.querySelector('.moved-note a.button').getAttribute('href'),to,old+' points to its new home');}
  assert(dom('email-signatures.html').window.document.querySelector('.moved-note').textContent.includes('managed by IT'),'retired signatures page says why');
  const share=dom('contribute.html').window.document;assert(!share.querySelector('.task-intro a.button'),'Share material has no helpdesk button');assert(share.querySelector('.task-intro p a[href*="servicedesk"]'));
@@ -110,7 +109,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  pass('Production catalogue, title band and footer render with resolved Confluence links');
  const md=new JSDOM(fs.readFileSync(path.join(root,'docs/master-deck.html'),'utf8')).window.document;
  assert(!md.querySelector('.asset-panel .status-pill'),'no status marker');assert(md.querySelector('.asset-panel .how-to-get'));assert(!md.querySelector('.asset-panel .asset-actions .button'),'no request button on the card');assert(md.querySelectorAll('.asset-panel .release-fact[hidden]').length,3);assert(!md.querySelector('.availability-note'));assert(md.querySelector('.section-nav a[href="presentations.html"]'));
- assert.equal(md.querySelectorAll('.section-next .related-card').length,3);assert(md.querySelector('.related-next'));assert(md.querySelector('.breadcrumbs a[href="presentations.html"]'));
+ assert.equal(md.querySelectorAll('.section-next .related-card').length,3);assert(!md.querySelector('.related-next'),'More-in cards carry no Next label');assert(md.querySelector('.breadcrumbs a[href="presentations.html"]'));
  pass('Resource pages show a status panel, section navigation, section breadcrumb and next pages');
  const ck=dom('event-checklist.html'),kw=ck.window,kq=s=>kw.document.querySelector(s),boxes=[...kw.document.querySelectorAll('.check-list input')];
  assert(boxes.length>=6);boxes[0].checked=true;boxes[0].dispatchEvent(new kw.Event('change'));assert(kq('.checklist-progress').textContent.startsWith('1 of'));
@@ -242,7 +241,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   w.document.body.dataset.mode='confluence';w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();return d;};
  const cMedia=await runCanto('media.html',cantoManifest),kq2=s=>cMedia.window.document.querySelector(s),kqa=s=>[...cMedia.window.document.querySelectorAll(s)];
  assert(!kq2('.canto-show.wide').hidden);assert.equal(kqa('.show-slide').length,3,'off-site images and links are dropped');assert(!kq2('.canto-show a:not(.button)'),'the slideshow is view only');
- assert(kqa('.show-slide img').every(i=>i.src.startsWith('http://localhost/download/attachments/')));assert(!kq2('.show-slide img[onerror]')&&!kq2('.show-caption img'));
+ assert(kqa('.show-slide img').every(i=>(i.getAttribute('src')||i.dataset.src||'').startsWith('http://localhost/download/attachments/')));assert(kqa('.show-slide img').filter(i=>i.getAttribute('src')).length===2,'large slideshow images load as they come up, not all at once');assert(!kq2('.show-slide img[onerror]')&&!kq2('.show-caption img'));
  assert.equal(kq2('.show-caption small').textContent,'© SKAO');assert.equal(kq2('.show-collections').textContent,'In the library: Telescopes (40) · Future visions (5)','shared folder levels dropped from collection names');
  assert.equal(kqa('.show-slide.is-on').length,1);assert.equal(kqa('.show-slide[aria-hidden="false"]').length,1);
  kq2('.show-next').click();assert.equal(kqa('.show-dots button')[1].getAttribute('aria-current'),'true');assert.equal(kq2('.show-play').getAttribute('aria-pressed'),'true','moving by hand pauses the slideshow');
