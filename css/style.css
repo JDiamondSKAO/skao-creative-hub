@@ -1603,10 +1603,39 @@ header.is-pinned .nav-home {width:auto;max-width:120px;margin-right:22px;}
 @media(max-width:1240px){header.is-pinned .nav-home{max-width:110px;margin-right:16px;}}
 @media(max-width:1000px){.nav-home .skao-mark{height:24px;}header.is-pinned .nav-home{margin-right:4px;}}
 
-/* Header search: a compact "Search ⌘K" at every width, so the row fits beside the logo and the Hub's name */
-.navrow .search-trigger {min-width:0;}
-.navrow .search-trigger > span {display:none;}
-.navrow .search-trigger:after {content:"Search";order:1;}
-.navrow .search-trigger kbd {order:2;margin-left:10px;}
-.navrow .search-trigger svg {flex:none;}
-@media(min-width:1001px){.navlinks{gap:18px;}header.is-pinned .nav-home{margin-right:18px;}}
+/* Header search: the full "Search the Hub ⌘K" on wide screens; a compact "Search" on mid-size and small screens so the row fits */
+@media(max-width:1240px){
+ .navrow .search-trigger {min-width:0;}
+ .navrow .search-trigger > span {display:none;}
+ .navrow .search-trigger:after {content:"Search";order:1;}
+ .navrow .search-trigger kbd {order:2;margin-left:10px;}
+ .navrow .search-trigger svg {flex:none;}
+}
+@media(min-width:1001px) and (max-width:1240px){.navlinks{gap:18px;}}
+@media(max-width:1100px){.navrow .search-trigger kbd{display:none;}}
+
+/* ===== Notification bar: slim, in SKAO accent swatches ===== */
+/* The notification: a light warm wash from the same accents, slimmer and quieter */
+.announce,.dark .announce {background:linear-gradient(90deg,#fff2cf,#ffe9d4 55%,#ffe0cf);border-bottom:1px solid #f0c9a4;}
+.dark .announce {background:linear-gradient(90deg,#2d2410,#2e1d14 55%,#2f1a15);border-bottom-color:#5a3a22;}
+.announce-inner {min-height:36px;padding-block:4px;}
+.announce-tag {color:#7a4a12;border-right-color:#7a4a1233;font-size:.76rem;}
+.announce-tag svg {color:#e07a1f;opacity:1;}
+body .announce-text a,body .announce-text a:visited {color:#1b1530;font-size:.82rem;}
+.dark .announce-tag {color:#f3c48a;border-right-color:#f3c48a33;}
+.dark .announce-tag svg {color:#f9b34c;}
+.dark body .announce-text a,.dark body .announce-text a:visited {color:#fff1dc;}
+.announce-close {width:28px;height:28px;color:#7a4a12b3;}
+.dark .announce-close {color:#f3c48ab3;}
+/* Notification: exact SKAO accent swatches. Light: Sites #F9B34C into Science #F49E6B, with Sites brown #6A3F23
+   for the label and close. Dark: Sites #6A3F23 into Technology #5D2A2B, with Sites gold #F9B34C for the label. */
+.announce {background:linear-gradient(90deg,#F9B34C,#F49E6B);border-bottom:0;}
+.dark .announce {background:linear-gradient(90deg,#6A3F23,#5D2A2B);border-bottom:0;}
+/* Text on the light bar: Science #0D1D2C, about 9:1 on the gold and 8:1 on the orange */
+.announce-tag {color:#0D1D2C;border-right-color:#0D1D2C33;font-size:.8rem;font-weight:600;}
+.announce-tag svg {color:#0D1D2C;}
+body .announce-text a,body .announce-text a:visited {color:#0D1D2C;}
+.announce-close {color:#0D1D2C;}
+.dark body .announce-text a,.dark body .announce-text a:visited {color:#fff;}
+.dark .announce-tag,.dark .announce-tag svg,.dark .announce-close {color:#F9B34C;}
+.dark .announce-tag {border-right-color:#F9B34C40;}
