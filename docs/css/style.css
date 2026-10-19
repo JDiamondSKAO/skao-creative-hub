@@ -1644,3 +1644,8 @@ body .announce-text a,body .announce-text a:visited {color:#0D1D2C;}
 .welcome-copy .quick-links a {min-height:32px;padding:0 11px;border-color:color-mix(in srgb,var(--c) 26%,var(--line));background:color-mix(in srgb,var(--c) 9%,var(--bg));color:color-mix(in srgb,var(--c) 80%,var(--ink));font-size:.8rem;font-weight:600;white-space:nowrap;}
 .welcome-copy .quick-links a:hover {border-color:color-mix(in srgb,var(--c) 50%,var(--line));background:color-mix(in srgb,var(--c) 16%,var(--bg));}
 .dark .welcome-copy .quick-links a {background:color-mix(in srgb,var(--c) 14%,var(--bg));color:var(--c);}
+
+/* Live status: the dashboard as the main button, the slides and overall status as quieter links beside it */
+.live-link-actions {align-items:center;gap:10px 20px;}
+.live-link-actions .text-link,.live-link-actions .pending-link {font-size:.86rem;}
+

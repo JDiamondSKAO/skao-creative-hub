@@ -19,6 +19,7 @@ NAMES = {
  'LOGO_REQUEST_FORM': 'Logo use request form, for people outside the SKAO',
  'AI_POLICY': 'SKAO AI policy pages',
  'IT_SERVICE_DESK': 'IT service desk, for email signatures',
+ 'CONSTRUCTION_DASHBOARD': 'Construction dashboard for SKA-Low and SKA-Mid (Google Apps Script, SKAO sign-in; still being built)',
  'CONSTRUCTION_STATUS': 'Overall construction status for both telescopes (Google Doc)',
  'LOW_STATUS': 'SKA-Low status slides, kept by the SKA-Low team (Google Slides)',
  'MID_STATUS': 'SKA-Mid status slides, kept by the SKA-Mid team (Google Slides)',
