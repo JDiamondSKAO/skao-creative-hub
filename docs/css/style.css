@@ -1585,3 +1585,12 @@ body .announce-text a,body .announce-text a:visited {font-weight:650;}
 .announce-text a:after {opacity:.75;}
 .announce-text a:hover:after {opacity:1;}
 @media(max-width:700px){.announce-tag{font-size:.74rem;padding-right:10px;margin-right:10px;}}
+
+/* Weekly all-hands photos: a row per site, to see the album or add to it */
+.site-photo-rows {list-style:none;display:grid;gap:8px;margin:0;padding:0;}
+.site-photo-rows li {display:flex;align-items:center;gap:12px;}
+.site-photo-rows strong {width:64px;font-size:.84rem;}
+.site-photo-rows .button {min-height:36px;padding-block:6px;font-size:.84rem;}
+body .site-photo-rows a.text-link {font-size:.84rem;}
+@media(max-width:700px){.site-photo-rows{grid-column:1/-1;}}
+.all-hands-note a + a,.all-hands-note .pending-link + .pending-link {margin-left:14px;}
