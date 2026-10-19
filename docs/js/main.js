@@ -1033,10 +1033,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const headings = [...article.querySelectorAll("h2")].filter(
       (h) => !h.closest("[hidden], details, .choice-card, .section-next, .catalogue"),
     );
-    if (headings.length > 2) {
-      const h = document.createElement("strong");
-      h.textContent = "On this page";
-      toc.append(h);
+    const rail = toc.closest(".toc-rail"), grid = toc.closest(".page-grid");
+    if (headings.length > 2 && rail && !grid?.classList.contains("full-width")) {
+      rail.hidden = false; grid.classList.add("has-toc");
       headings.forEach((heading, i) => {
         if (!heading.id) heading.id = "section-" + i;
         const a = document.createElement("a");
@@ -1044,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", () => {
         a.textContent = heading.textContent;
         toc.append(a);
       });
-    } else toc.hidden = true;
+    }
     // Mark the section currently in view.
     const tocLinks = [...toc.querySelectorAll("a")];
     const targets = tocLinks.map((a) => document.getElementById(a.hash.slice(1))).filter(Boolean);
@@ -1060,6 +1059,28 @@ document.addEventListener("DOMContentLoaded", () => {
       addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
       spy();
     }
+  }
+  // Side menus fold away for more room; each viewer's choice is remembered on this device.
+  const pageGrid = $(".page-grid:not(.full-width)");
+  if (pageGrid) {
+    const remember = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+    const recall = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+    const labels = { nav: "the section menu", toc: "On this page" };
+    const fold = (button, closed) => {
+      const rail = button.dataset.rail;
+      pageGrid.classList.toggle(rail + "-closed", closed);
+      button.setAttribute("aria-expanded", String(!closed));
+      const label = (closed ? "Show " : "Hide ") + labels[rail];
+      button.setAttribute("aria-label", label); button.title = label;
+    };
+    $$(".page-grid .rail-toggle").forEach((button) => {
+      const key = "crh-" + button.dataset.rail + "-closed";
+      fold(button, recall(key) === "1");
+      button.addEventListener("click", () => {
+        const closed = !pageGrid.classList.contains(button.dataset.rail + "-closed");
+        fold(button, closed); remember(key, closed ? "1" : "0");
+      });
+    });
   }
   const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || "");
   // Copy values such as colour codes.

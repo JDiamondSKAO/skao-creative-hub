@@ -41,7 +41,7 @@ from journeys import revise
 PAGES=revise(PAGES,JIRA,CANTO,LIVE)
 from interiors import revise as revise_interiors, ROUTES, PLANNED
 PAGES, INTERIOR_META=revise_interiors(PAGES,JIRA,CANTO)
-from polish import revise as revise_polish, text, summary, sidebar as section_sidebar, section_of, SECTIONS, EXTRA, members_of, nav as mega_nav, FULL_WIDTH
+from polish import revise as revise_polish, text, summary, sidebar as section_sidebar, section_of, SECTIONS, EXTRA, members_of, nav as mega_nav, FULL_WIDTH, TOC_RAIL
 PAGES,SOURCE_TITLES=revise_polish(PAGES,INTERIOR_META,JIRA,CANTO)
 import gethelp
 PAGES=gethelp.apply(PAGES,JIRA)
@@ -64,7 +64,7 @@ def shell(title,body,current,home=False):
  sidebar=section_sidebar(current,SOURCE_TITLES)
  sec=section_of(current)
  crumb=(a(sec[2],sec[1])+' / ') if sec and sec[2]!=current else ''
- main=body if home else '<div class="page-band"><div class="breadcrumbs">'+a('index.html','Creative Hub')+' / '+crumb+html.escape(title)+'</div><div class="page-head"><p class="eyebrow">'+html.escape(INTERIOR_META.get(current,{}).get('group','Creative Hub'))+'</p><h1>'+html.escape(title)+'</h1></div></div>'+('<div class="page-grid full-width">' if current in FULL_WIDTH else '<div class="page-grid">'+sidebar)+'<article class="content-body">'+body+'</article></div>'
+ main=body if home else '<div class="page-band"><div class="breadcrumbs">'+a('index.html','Creative Hub')+' / '+crumb+html.escape(title)+'</div><div class="page-head"><p class="eyebrow">'+html.escape(INTERIOR_META.get(current,{}).get('group','Creative Hub'))+'</p><h1>'+html.escape(title)+'</h1></div></div>'+('<div class="page-grid full-width">' if current in FULL_WIDTH else '<div class="page-grid">'+sidebar)+'<article class="content-body">'+body+'</article>'+('' if current in FULL_WIDTH else TOC_RAIL)+'</div>'
  return arrows(gethelp.rename(gethelp.relink('<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>'+html.escape(title)+' | SKAO Creative Hub</title><link rel="stylesheet" href="css/style.css?v='+ASSET_V+'"><script src="js/boot.js"></script></head><body data-mode="preview">'+header(current)+'<div id="announcement" class="announce" hidden><div class="wrap announce-inner"><span class="announce-tag">New</span><p class="announce-text"><a id="announcementLink" href="updates.html">Hub updates</a></p><button type="button" class="announce-close" aria-label="Dismiss announcement"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div><div class="wrap preview-note">Design preview · Guidance is proposed; library links open the current staff services.</div><main id="main-content" class="wrap" tabindex="-1">'+main+'</main>'+footer()+'</body></html>')))
 for name,(title,body) in PAGES.items():
  (D/name).write_text(shell(title,body,name,name=='index.html'))
@@ -111,7 +111,7 @@ main+='''#else
 $page.content
 #if($page.children.size() > 0)<section class="section" id="library-sections"><h2>Explore this section</h2><ul class="list">#foreach($child in $page.children)<li><a href="$child.absoluteLink">$stringEscapeUtils.escapeHtml($child.title)</a></li>#end</ul></section>#end
 #end
-</article></div>
+</article>'''+TOC_RAIL+'''</div>
 #end
 </main>'''
 prod=prod[:start]+main+prod[end:]

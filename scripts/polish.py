@@ -86,23 +86,31 @@ TYPES = [
 SKIP = {'resources.html'} | set(MOVED)
 CHECKLISTS = {'event-checklist.html'}  # How-to guides read as described steps, not tick lists
 
+# Side menus fold away to give the page more room: section pages on the left, "On this page" on the right.
+PANEL_LEFT = ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>')
+PANEL_RIGHT = ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg>')
+TOC_RAIL = ('<aside class="toc-rail" hidden><div class="toc-head"><strong id="tocHeading">On this page</strong>'
+ '<button type="button" class="rail-toggle" data-rail="toc" aria-controls="toc" aria-expanded="true" aria-label="Hide On this page" title="Hide On this page">' + PANEL_RIGHT + '</button></div>'
+ '<nav id="toc" class="toc" aria-labelledby="tocHeading"></nav></aside>')
+
 def sidebar(current, titles):
  sec = section_of(current)
- out = '<aside class="sidebar">'
+ out = ('<aside class="sidebar"><button type="button" class="rail-toggle" data-rail="nav" aria-controls="sectionNav" aria-expanded="true" aria-label="Hide the section menu" title="Hide the section menu">'
+  + PANEL_LEFT + '</button>')
  if sec:
   key, label, landing, members, groups = sec
   # Every page is listed: sections are short, so nothing hides behind a toggle. The heading is a
   # heading, "Overview" is the landing page, and small capitals only ever mean a group label.
-  out += (f'<nav class="section-nav" aria-label="{label} pages"><h2>{label}</h2>'
+  out += (f'<nav class="section-nav" id="sectionNav" aria-label="{label} pages"><h2>{label}</h2>'
    f'<ul class="nav-overview"><li><a class="section-home" href="{landing}" title="{html.escape(titles[landing])}">Overview</a></li></ul>')
   for g, pages in groups:
    out += (f'<div class="nav-group"><h3>{g}</h3><ul>'
     + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul></div>')
   out += '</nav>'
  else:
-  out += '<nav class="section-nav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
+  out += '<nav class="section-nav" id="sectionNav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
    f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">Templates and assets</a></li></ul></nav>'
- return out + '<nav id="toc" class="toc" aria-label="On this page"></nav></aside>'
+ return out + '</aside>'
 
 def related(name, pages, summaries):
  sec = section_of(name)

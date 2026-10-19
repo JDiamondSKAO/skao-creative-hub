@@ -250,6 +250,14 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   const sel=doc.querySelector('#resourceSort');assert(!doc.querySelector('.resource-sort').hidden);sel.value='az';sel.dispatchEvent(new w.Event('change'));
   const az=[...doc.querySelectorAll('.resource-row strong')].map(s=>s.textContent.toLowerCase());assert.deepEqual(az,[...az].sort((a,b)=>a.localeCompare(b)),'A to Z sorts by title');
   w.close();pass('All resources is dated and sorted newest first, with an A to Z option');}
+ {const d=dom('low-slides.html'),w=d.window,doc=w.document,g=doc.querySelector('.page-grid');
+  assert(!doc.querySelector('.toc-rail').hidden&&g.classList.contains('has-toc')&&doc.querySelectorAll('.toc-rail #toc a').length===3,'On this page sits in its own column on the right');
+  assert(!doc.querySelector('.sidebar #toc'),'and no longer under the section menu');
+  doc.querySelector('[data-rail="nav"]').click();doc.querySelector('[data-rail="toc"]').click();
+  assert(g.classList.contains('nav-closed')&&g.classList.contains('toc-closed'),'both side menus fold away');assert.equal(doc.querySelector('[data-rail="nav"]').getAttribute('aria-expanded'),'false');
+  assert.equal(w.localStorage.getItem('crh-toc-closed'),'1','the choice is remembered');w.close();
+  const few=dom('making-a-poster.html');assert(few.window.document.querySelector('.toc-rail').hidden&&!few.window.document.querySelector('.page-grid').classList.contains('has-toc'),'short pages keep two columns');few.window.close();
+  pass('Side menus: On this page on the right, and both fold away for more room');}
  const cMedia=await runCanto('media.html',cantoManifest),kq2=s=>cMedia.window.document.querySelector(s),kqa=s=>[...cMedia.window.document.querySelectorAll(s)];
  assert(!kq2('.canto-show.wide').hidden);assert.equal(kqa('.show-slide').length,3,'off-site images and links are dropped');assert(!kq2('.canto-show a:not(.button)'),'the slideshow is view only');
  assert(kqa('.show-slide img').every(i=>(i.getAttribute('src')||i.dataset.src||'').startsWith('http://localhost/download/attachments/')));assert(kqa('.show-slide img').filter(i=>i.getAttribute('src')).length===2,'large slideshow images load as they come up, not all at once');assert(!kq2('.show-slide img[onerror]')&&!kq2('.show-caption img'));
