@@ -4,7 +4,7 @@
 
 Built on 2.17 after a look at how current documentation and resource sites handle navigation. The Hub only goes Home › Section › Page, so it now says where you are once, not four times.
 
-- **One-row header on inner pages:** logo, sections, search and dark mode in a single bar under a thin brand line. The homepage keeps the full masthead. Content starts about 100 px higher.
+- **One header everywhere:** every page, light or dark, has the same compact navy-to-magenta bar with the white SKAO lettermark and "Creative Hub", the sections, search and dark mode. The masthead's slow lenses drift behind it. Content starts about 100 px higher on inner pages.
 - **No breadcrumb.** The section label above the title links back to the section.
 - **On this page** appears only on long pages (four sections or more).
 - **Previous and next** at the foot of each page on wide screens; phones, which have no sidebar, keep the "More in" list.

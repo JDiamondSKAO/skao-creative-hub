@@ -1677,3 +1677,31 @@ body:has(.page-band) .nav-home,header.is-pinned .nav-home {margin-right:14px;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .tool-button {background:transparent;border-color:#ffffff40;color:#fff;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .tool-button:hover {background:#ffffff1f;border-color:#ffffff70;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .mobile-menu {background:#ffffff14;border-color:#ffffff33;color:#fff;}
+
+/* ===== One header everywhere =====
+   Every page, light or dark, has the same compact bar: navy to magenta, the white SKAO lettermark and the Hub's
+   name, the sections, search and dark mode. The masthead's slow lenses still drift behind it. */
+body {--brand-h:0px;}
+.brandbar {display:none;}
+header,.dark header,body:has(.page-band) header,.dark body:has(.page-band) header,header.is-pinned,.dark header.is-pinned {position:sticky;top:0;isolation:isolate;overflow:hidden;background:linear-gradient(110deg,#070068 0%,#070068 48%,#58005f 78%,#aa005c 100%);border-top:0;border-image:none;}
+header:before,header:after {content:"";position:absolute;z-index:-1;left:-540px;top:-320px;width:440px;height:440px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 44px #ffffff05,0 0 0 88px #ffffff04;background:radial-gradient(circle at 65% 55%,#ffffff06,transparent 68%);pointer-events:none;opacity:.65;animation:header-lens-pass 48s linear infinite;}
+header:after {top:-235px;opacity:.4;animation-delay:-24s;}
+@media(prefers-reduced-motion:reduce){header:before,header:after{animation:none;left:auto;right:-120px;}}
+header .navrow {border-bottom:0;}
+header .nav-home,header.is-pinned .nav-home,body:has(.page-band) .nav-home {width:auto;max-width:none;margin-right:14px;opacity:1;visibility:visible;color:#fff;}
+header .nav-home .skao-mark,.dark header .nav-home .skao-mark {--logo-ink:#fff;--logo-accent:#fff;}
+.nav-home-title {flex:none;padding-left:14px;border-left:1px solid #ffffff48;font-size:1.05rem;font-weight:400;letter-spacing:-.02em;line-height:1.1;white-space:nowrap;color:#fff;}
+.nav-home-title strong {font-weight:700;}
+header .navlinks a,.dark header .navlinks a {color:#d9d6f0;}
+header .navlinks a:hover,header .navlinks a:focus-visible,header .navlinks a[aria-current] {color:#fff;}
+header .navlinks a:not([aria-current]):hover {box-shadow:inset 0 -3px #ffffff40;}
+header .search-trigger,.dark header .search-trigger {background:#ffffff14;border-color:#ffffff33;color:#fff;}
+header .search-trigger:hover {background:#ffffff24;border-color:#ffffff66;color:#fff;box-shadow:none;}
+header .tool-button,header .navrow .tool-button {background:transparent;border-color:#ffffff40;color:#fff;}
+header .tool-button:hover,header .navrow .tool-button:hover {background:#ffffff1f;border-color:#ffffff70;color:#fff;}
+header .mobile-menu {background:#ffffff14;border-color:#ffffff33;color:#fff;}
+body:has(.hero-search) .navrow .search-trigger {display:flex;}
+@media(max-width:1240px){.nav-home-title{display:none;}}
+@media(max-width:1000px){header .navlinks a{border-bottom-color:#ffffff1f;}header .nav-home{margin-right:4px;}}
+body:not(:has(.page-band)) .navrow .tool-button {margin-left:0;}
+@media(max-width:480px){.navrow .search-trigger{flex:none;width:40px;padding:0;justify-content:center;}.navrow .search-trigger:after{content:none;}}
