@@ -126,12 +126,12 @@ def revise(pages,jira,canto):
  # 2.17: fewer, fuller pages. Pages folded into others keep a stub here; gethelp turns them into notes.
  after_use=['Check its version and date: figures change as construction moves on.','Save your working copy separately and keep credits and sources.','Specialised decks are shared by staff and approved by Communications. Ask the owner before changing what they say.']
  put('master-deck.html','Decks to reuse',intro('Approved decks to reuse and adapt: an introduction to the SKAO, the science case, construction progress across both sites, and decks on specialised topics.',tag='Resource source')+missing('',jira)+block('Before you use the file',after_use))
- for name,site,status in [('low-slides.html','SKA-Low','LOW_STATUS'),('mid-slides.html','SKA-Mid','MID_STATUS')]:
+ for name,site,key in [('low-slides.html','SKA-Low','LOW'),('mid-slides.html','SKA-Mid','MID')]:
   put(name,site+' progress',intro(f'Where {site} construction stands: the live status slides and the progress decks the {site} team shares here.',tag='Site progress')+
    needs(f'<section class="live-link"><div><h2>Live status</h2><p>The {site} team updates these Google Slides as construction moves on. Their figures feed the overall construction status for both telescopes.</p></div>'
-    '<div class="live-link-actions">'+pending(status,'Open the '+site+' status slides','button')+pending('CONSTRUCTION_STATUS','Open the overall status','button secondary')+'</div></section>',url(status),url('CONSTRUCTION_STATUS'))+
+    '<div class="live-link-actions">'+pending(key+'_STATUS','Open the '+site+' status slides','button')+pending('CONSTRUCTION_STATUS','Open the overall status','button secondary')+'</div></section>',url(key+'_STATUS'),url('CONSTRUCTION_STATUS'))+
    '<section class="attachments" data-attachments="all" data-add-label="Add or update slides" data-empty="No slides yet. The '+site+' team adds them here."><div class="attachments-head"><h2>Latest slides</h2></div><div data-attachment-list></div></section>'+
-   needs('<p class="quiet-note">Photos from the weekly all-hands: '+pending('ALLHANDS','All-hands photos in Canto')+'</p>',url('ALLHANDS'))+
+   needs('<p class="quiet-note all-hands-note">Weekly all-hands photos: '+pending('ALLHANDS_'+key,'See them in Canto')+pending('ALLHANDS_UPLOAD_'+key,'Add this week’s')+'</p>',url('ALLHANDS_'+key))+
    block('Keeping this page current',[f'The {site} team adds new slides here whenever they update them. The newest is shown first.','Start file names with the year and month, for example 2026-10 '+site+' progress.','Only add slides cleared for all staff: Unrestricted or Staff Resources.']))
  put('recent-talks.html','Recent talks',intro('Slides from talks given by SKAO staff, newest first. They are shared as presented and not reviewed by Communications, so check facts and figures with the speaker before reusing them.',tag='Shared by staff')+
   '<section class="attachments" data-attachments="all" data-add-label="Add your talk" data-empty="No talks yet. Add the first one."><div class="attachments-head"><h2>Talks</h2></div><div data-attachment-list></div></section>'+

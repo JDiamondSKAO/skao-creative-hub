@@ -380,11 +380,13 @@ PHOTOS_ICON = ('<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stro
  '<rect x="3" y="7" width="14" height="12" rx="2"/><path d="M7 4h11a3 3 0 0 1 3 3v9"/><circle cx="8" cy="11" r="1.4"/><path d="m3.5 17 4-4 3.5 3.5 2-2 3.5 3.5"/></svg>')
 
 def site_photos():
- """Weekly all-hands photos: one Canto folder, sorted into subfolders."""
+ """Weekly all-hands photos: an album per site in the staff portal, each with an upload link."""
+ rows = ''.join(f'<li><strong>{site}</strong>' + links.pending(f'ALLHANDS_{key}', 'See photos', 'button secondary')
+  + links.pending(f'ALLHANDS_UPLOAD_{key}', 'Add photos', 'text-link') + '</li>' for site, key in [('SKA-Low', 'LOW'), ('SKA-Mid', 'MID')])
  return links.needs('<section class="site-photos"><span class="site-photos-icon">' + PHOTOS_ICON + '</span>'
   '<div><p class="eyebrow">From the sites · New each week</p><h2>Weekly all-hands photos</h2>'
-  '<p>Photos shared at the weekly all-hands, in one Canto folder sorted into subfolders. Each photo carries its caption and credit.</p></div>'
-  + links.pending('ALLHANDS', 'Open the all-hands photos', 'button secondary') + '</section>', links.url('ALLHANDS'))
+  '<p>Photos from each site’s weekly all-hands update, in the staff media library. Presenting this week? Add yours with your site’s upload link.</p></div>'
+  f'<ul class="site-photo-rows">{rows}</ul></section>', links.url('ALLHANDS_LOW') or links.url('ALLHANDS_MID'))
 
 def canto_gallery(canto):
  return canto_show('', 'A look inside the staff media library', wide=True)

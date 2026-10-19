@@ -1632,3 +1632,11 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 @media(hover:none){.heading-link{opacity:.6;}}
 /* When the page last changed, under its title */
 .page-updated {margin:10px 0 0;font-size:.8rem;color:var(--muted);}
+/* Weekly all-hands photos: a row per site, to see the album or add to it */
+.site-photo-rows {list-style:none;display:grid;gap:8px;margin:0;padding:0;}
+.site-photo-rows li {display:flex;align-items:center;gap:12px;}
+.site-photo-rows strong {width:64px;font-size:.84rem;}
+.site-photo-rows .button {min-height:36px;padding-block:6px;font-size:.84rem;}
+body .site-photo-rows a.text-link {font-size:.84rem;}
+@media(max-width:700px){.site-photo-rows{grid-column:1/-1;}}
+.all-hands-note a + a,.all-hands-note .pending-link + .pending-link {margin-left:14px;}
