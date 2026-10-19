@@ -1585,3 +1585,50 @@ body .announce-text a,body .announce-text a:visited {font-weight:650;}
 .announce-text a:after {opacity:.75;}
 .announce-text a:hover:after {opacity:1;}
 @media(max-width:700px){.announce-tag{font-size:.74rem;padding-right:10px;margin-right:10px;}}
+
+/* ===== Navigation trim =====
+   Inner pages start in the compact one-row header (logo, sections, search, theme) under a thin brand line;
+   the full masthead stays on the homepage. No breadcrumb: the section label above the title links back. */
+body:has(.page-band) {--brand-h:0px;}
+body:has(.page-band) .brandbar {display:none;}
+body:has(.page-band) header {border-top:3px solid transparent;border-image:linear-gradient(90deg,#070068,#58005f 60%,#aa005c) 1;}
+body:has(.page-band) .nav-home {width:58px;margin-right:6px;opacity:1;visibility:visible;}
+@media(max-width:1000px){body:has(.page-band) .nav-home{width:50px;margin-right:0;}}
+.navrow .tool-button {flex:none;width:40px;height:40px;margin-left:10px;border:1px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);}
+.navrow .tool-button:hover,.navrow .tool-button:focus-visible {border-color:color-mix(in srgb,var(--link) 40%,var(--line));background:var(--surface);color:var(--link);}
+.page-band .page-head {padding-top:26px;}
+body .page-band .page-head a.eyebrow-link {display:inline-block;color:var(--magenta);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;padding-bottom:1px;transition:background-size var(--t) var(--ease-out);}
+.dark body .page-band .page-head a.eyebrow-link,body.dark .page-band .page-head a.eyebrow-link {color:#ff85bc;}
+body .page-band .page-head a.eyebrow-link:hover,body .page-band .page-head a.eyebrow-link:focus-visible {background-size:100% 1px;}
+/* Foot of the page: previous and next on wide screens, the "More in" list on phones */
+.page-pager {display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:22px;border-top:1px solid var(--line);}
+body .content-body .page-pager a {display:inline-flex;align-items:center;gap:10px;max-width:48%;color:var(--link);font-weight:600;text-decoration:none;}
+body .content-body .page-pager a:hover {color:var(--ink);}
+.page-pager a span {transition:transform var(--t) var(--ease-out);}
+.page-pager .pager-prev:hover span {transform:translateX(-3px);}
+.page-pager .pager-next {margin-left:auto;text-align:right;}
+.page-pager .pager-next:hover span {transform:translateX(3px);}
+@media(min-width:761px){.page-pager ~ .section-next{display:none;}}
+@media(max-width:760px){.page-pager{display:none;}}
+body:not(:has(.page-band)) .navrow .tool-button {margin-left:auto;}
+@media(max-width:1000px){
+ .navrow .search-trigger {flex:1 1 0;min-width:0;}
+ .navrow .search-trigger > span {display:none;}
+ .navrow .search-trigger:after {content:"Search";}
+ .navrow .tool-button {width:38px;height:38px;margin-left:0;}
+}
+
+/* Search: a quick answer above the results */
+body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--link) 18%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--link) 5%,var(--bg));box-shadow:none;text-decoration:none;}
+.search-answer strong {font-size:.98rem;color:var(--ink);}
+.search-answer small {font-size:.86rem;line-height:1.5;color:var(--muted);}
+.search-answer em {margin-top:2px;font-size:.84rem;font-style:normal;font-weight:600;color:var(--link);}
+/* Section headings: a quiet link button that appears on hover */
+.content-body h2 {scroll-margin-top:90px;}
+.heading-link {display:inline-grid;place-items:center;width:28px;height:28px;margin-left:6px;padding:0;border:0;border-radius:7px;background:none;color:var(--muted);vertical-align:middle;cursor:pointer;opacity:0;transition:opacity var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
+.content-body h2:hover .heading-link,.heading-link:focus-visible,.heading-link.is-copied {opacity:1;}
+.heading-link:hover {background:var(--surface);color:var(--link);}
+.heading-link.is-copied {color:#1f7a4d;}
+@media(hover:none){.heading-link{opacity:.6;}}
+/* When the page last changed, under its title */
+.page-updated {margin:10px 0 0;font-size:.8rem;color:var(--muted);}

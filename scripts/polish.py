@@ -126,7 +126,17 @@ def related(name, pages, summaries):
   f'<a class="related-card" href="{m}">' +
   f'<strong>{html.escape(pages[m][0])}</strong><span>{html.escape(summaries[m])}</span></a>' for i, m in enumerate(picks))
  more = f'<a class="related-all" href="{landing}">{html.escape(pages[landing][0])} →</a>'
- return f'<nav class="section-next" aria-label="{heading}"><div class="section-next-head"><h2>{heading}</h2>{more}</div><div class="related-grid">{cards}</div></nav>'
+ # Wide screens: a quiet previous and next pair, since the sidebar already lists the section.
+ # Phones have no sidebar, so they keep the "More in" list.
+ prev = rest[at - 1] if at > 0 else None
+ nxt = rest[at + 1] if 0 <= at < len(rest) - 1 else None
+ pager = ''
+ if prev or nxt:
+  pager = (f'<nav class="page-pager" aria-label="Previous and next in {label}">'
+   + (f'<a class="pager-prev" href="{prev}" rel="prev"><span aria-hidden="true">←</span>{html.escape(pages[prev][0])}</a>' if prev else '<span></span>')
+   + (f'<a class="pager-next" href="{nxt}" rel="next">{html.escape(pages[nxt][0])}<span aria-hidden="true">→</span></a>' if nxt else '')
+   + '</nav>')
+ return pager + f'<nav class="section-next" aria-label="{heading}"><div class="section-next-head"><h2>{heading}</h2>{more}</div><div class="related-grid">{cards}</div></nav>'
 
 # Resource pages: one panel with purpose, status and how to get the file.
 ASSET_KIND = {'presentations': ('slides', 'Presentation', 'formatting-slides.html', 'How to format a presentation'),

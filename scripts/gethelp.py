@@ -125,3 +125,29 @@ def apply(pages, jira):
  pages = {n: (t, b if n in MOVED else rename(trim_asks(relink(b)))) for n, (t, b) in pages.items()}
  pages['resources.html'] = ('All resources', pages['resources.html'][1])
  return pages
+
+# Search: short, ready-written answers to the questions staff ask most. When a search matches
+# one, it shows above the results with a link to the page that has the detail. Kept as hidden
+# links in the search dialog, so production rewrites their addresses like any other link.
+ANSWERS = [
+ ('logo logos lockup artwork emblem', 'Where do I get the SKAO logo?', 'Logo files are on Logos and icons, in versions for light and dark backgrounds. Anyone outside the SKAO needs permission to use it.', 'logos.html', 'Logos and icons'),
+ ('template powerpoint pptx slides slide deck presentation', 'Where’s the slide template?', 'The Standard SKAO template is the 16:9 PowerPoint for any talk. For joint work, use a partner template.', 'standard-template.html', 'Standard SKAO template'),
+ ('colour colours color colors hex rgb cmyk pantone palette', 'What are the SKAO colours?', 'Navy and magenta lead, with accent palettes for science, technology and the sites. Copy hex, RGB, CMYK or Pantone values from Colours and typography.', 'colours-and-type.html', 'Colours and typography'),
+ ('font fonts typeface noto verdana typography', 'Which font do we use?', 'Noto Sans, with Verdana as the fallback where Noto isn’t installed.', 'fonts.html', 'Fonts'),
+ ('photo photos image images picture pictures canto photography', 'Where are the photos?', 'In the staff media library in Canto. First time? Choose Register Now and use your SKAO email address.', 'media.html', 'Photos and video'),
+ ('letterhead letterheads letter', 'Where are the letterheads?', 'Letterheads for each office are on Letterheads, grouped by information classification.', 'letterheads.html', 'Letterheads'),
+ ('poster posters a0 a1 a2', 'How do I make a poster?', 'Start from a poster template in A0, A1 or A2, then follow Prepare a poster for the content and export.', 'making-a-poster.html', 'Prepare a poster'),
+ ('business card cards', 'How do I get business cards?', 'Ask the Comms helpdesk, with your name, job title and contact details exactly as they should appear.', HOME, 'Get help'),
+ ('signature signatures', 'How do I set up my email signature?', 'Email signatures are looked after by IT. Contact the IT service desk for a new or updated one.', 'email-signatures.html', 'Email signatures'),
+ ('progress construction status figures stats statistics milestones', 'Where are the latest construction figures?', 'SKA-Low progress and SKA-Mid progress have each team’s live status slides, the overall construction status and their latest decks.', 'low-slides.html', 'SKA-Low progress'),
+ ('help request brief commission design designer helpdesk project', 'Can someone design something for me?', 'Contact the Comms helpdesk. Say what you need, who it’s for and when, and attach anything you already have.', HOME, 'Get help'),
+ ('ai firefly generative midjourney chatgpt', 'Can I use AI to make images?', 'Check the SKAO AI policy and use only approved tools. Never upload confidential or personal material.', 'firefly.html', 'Using AI image tools'),
+ ('supplier suppliers printer printers printing', 'Who should print it?', 'Communications can recommend trusted print suppliers for your location and the kind of job you have.', 'print-suppliers.html', 'Work with print suppliers'),
+ ('stand stands booth exhibition merchandise merch swag giveaway giveaways', 'Do we have a stand or merchandise?', 'Check the existing stand kit, designs and stock on Stands and merchandise before briefing anything new.', 'stands.html', 'Stands and merchandise'),
+ ('talk talks speaker speakers', 'Where are the slides from staff talks?', 'Recent talks has slides shared by staff, newest first. You can add your own.', 'recent-talks.html', 'Recent talks'),
+]
+
+def answers_html():
+ return ('<div id="hubAnswers" hidden>' + ''.join(
+  f'<a href="{href}" data-keys="{keys}" data-question="{html.escape(q, quote=True)}" data-answer="{html.escape(a, quote=True)}">{html.escape(label)}</a>'
+  for keys, q, a, href, label in ANSWERS) + '</div>')

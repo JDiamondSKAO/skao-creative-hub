@@ -44,21 +44,26 @@ def attachments(approved_only):
                      '_links': {'download': f'/download/attachments/{pid}/{quote(a["title"])}', 'webui': '/' + a['page']}, '_when': a['when']})
     return rows
 
+def edited(name):
+    """Stand-in edit date: the page's newest file, else a fixed date over the past few months."""
+    newest = max((a['when'] for a in FIXTURES['attachments'] if a['page'] == name), default='')
+    return newest or (datetime(2026, 9, 30) - timedelta(days=zlib.crc32(name.encode()) % 150)).strftime('%Y-%m-%dT10:00:00+00:00')
+
 def search(cql, limit):
     if 'type=attachment' in cql:
         rows = attachments('label="approved"' in cql)
         wanted = re.search(r'title="((?:[^"\\]|\\.)*)"', cql)
         if wanted: rows = [r for r in rows if r['title'] == wanted.group(1)]
+        like = [t.lower() for t in re.findall(r'title~"((?:[^"\\]|\\.)*)"', cql)]
+        if like: rows = [r for r in rows if any(t in r['title'].lower() for t in like)]
         rows.sort(key=lambda r: r['title'].lower()) if 'ORDER BY title' in cql else rows.sort(key=lambda r: r['_when'], reverse=True)
         return rows[:limit]
     if 'type=page' in cql and 'lastmodified' in cql:
         # Stand-in edit dates: a page's newest file, else a fixed date over the past few months.
-        newest = {}
-        for a in FIXTURES['attachments']: newest[a['page']] = max(newest.get(a['page'], ''), a['when'])
         rows = []
         for name in ROUTES:
             ref = page_ref(name)
-            ref['version'] = {'number': 1, 'when': newest.get(name) or (datetime(2026, 9, 30) - timedelta(days=zlib.crc32(name.encode()) % 150)).strftime('%Y-%m-%dT10:00:00+00:00')}
+            ref['version'] = {'number': 1, 'when': edited(name)}
             rows.append(ref)
         return sorted(rows, key=lambda r: r['version']['when'], reverse=True)[:limit]
     if 'label="announcement"' in cql:
@@ -89,6 +94,10 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         url = urlparse(self.path)
         # Every file on one page, whatever its labels (Recent talks and the site progress pages).
+        m = re.fullmatch(r'/rest/api/content/(\d+)', url.path)
+        if m and m.group(1) in FILE_OF:
+            ref = page_ref(FILE_OF[m.group(1)]); ref['version'] = {'number': 1, 'when': edited(FILE_OF[m.group(1)])}
+            return self.send_json(ref)
         m = re.fullmatch(r'/rest/api/content/(\d+)/child/attachment', url.path)
         if m:
             rows = [r for r in attachments(False) if r['container']['id'] == m.group(1)]

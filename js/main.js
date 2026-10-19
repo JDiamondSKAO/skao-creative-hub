@@ -99,6 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
     opener?.focus();
   });
   document.addEventListener("keydown", (e) => {
+    // "/" opens search too, unless you are typing somewhere.
+    if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey && !dialog.open && !e.target.closest?.("input, textarea, select, [contenteditable]")) {
+      e.preventDefault(); openSearch(); return;
+    }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
       dialog.open ? dialog.close() : openSearch();
@@ -149,8 +153,15 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     return [...alts];
   };
-  const terms = (q) => q.toLowerCase().split(/[^\p{L}\p{N}-]+/u).filter((t) => t.length > 1);
+  // Plain questions work too: filler words are dropped unless nothing else is left.
+  const FILLER = new Set("a an the and or of to in on at for from with about is are be can could do does did get find need want where what which who how when why i we you my our me it its this that there any some please should would have has".split(" "));
+  const terms = (q) => {
+    const all = q.toLowerCase().split(/[^\p{L}\p{N}-]+/u).filter((t) => t.length > 1);
+    const kept = all.filter((t) => !FILLER.has(t));
+    return kept.length ? kept : all;
+  };
   const escapeRe = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const slugify = (t) => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "section";
   function rank(rows, q) {
     const words = terms(q), phrase = q.toLowerCase().trim();
     if (!words.length) return [];
@@ -197,8 +208,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const from = Math.max(0, body.lastIndexOf(" ", Math.max(0, at - 50)));
     return (from ? "…" : "") + body.slice(from, at + 90).trim() + "…";
   }
+  // Ready-written answers to common questions sit above the results.
+  let answerCard = null;
+  function findAnswer(q) {
+    const words = terms(q);
+    if (!words.length || words.length > 6) return null;
+    let best = null, bestHits = 0;
+    $$("#hubAnswers a").forEach((a) => {
+      const keys = (a.dataset.keys || "").split(" ");
+      const hits = words.filter((w) => expand(w).some((alt) => keys.some((k) => k === alt || (alt.length >= 4 && k.startsWith(alt)) || (k.length >= 4 && alt.startsWith(k))))).length;
+      if (hits > bestHits) { best = a; bestHits = hits; }
+    });
+    return best;
+  }
+  function showAnswer(q) {
+    const a = findAnswer(q), href = a && safeLink(a.href);
+    answerCard = null;
+    if (!a || !href) return;
+    const card = document.createElement("a"), label = document.createElement("span"), question = document.createElement("strong"), text = document.createElement("small"), go = document.createElement("em");
+    card.className = "search-answer"; card.href = href;
+    label.className = "result-group"; label.textContent = "Quick answer";
+    question.textContent = a.dataset.question || "";
+    text.textContent = a.dataset.answer || "";
+    go.textContent = "Open " + a.textContent.trim() + " →";
+    card.append(label, question, text, go);
+    answerCard = card;
+  }
   function renderRows(rows) {
-    results.replaceChildren();
+    results.replaceChildren(...(answerCard ? [answerCard] : []));
     let count = 0;
     rows.forEach((r) => {
       const href = safeLink(r.href);
@@ -232,11 +269,14 @@ document.addEventListener("DOMContentLoaded", () => {
     rendered = "";
     suggest.hidden = q.length >= 2;
     if (q.length < 2) {
+      answerCard = null;
       results.replaceChildren();
       message.textContent = "";
       return;
     }
     message.textContent = "Searching…";
+    showAnswer(q);
+    if (answerCard) results.replaceChildren(answerCard);
     controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     try {
@@ -262,6 +302,10 @@ document.addEventListener("DOMContentLoaded", () => {
           'type=page AND space="CRH" AND (' +
           alts.map((t) => 'title~"' + cqlLiteral(t) + '" OR text~"' + cqlLiteral(t) + '"').join(" OR ") +
           ")";
+        // Approved files whose names match, shown after the pages that hold them.
+        const fileWords = terms(q).flatMap(expand).filter((v, i, all) => all.indexOf(v) === i).slice(0, 6);
+        const filesFound = fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql: 'type=attachment AND space="CRH" AND label="approved" AND (' + fileWords.map((t) => 'title~"' + cqlLiteral(t) + '"').join(" OR ") + ")", limit: "8", expand: "container" }), { credentials: "same-origin", headers: { Accept: "application/json" }, signal: controller.signal })
+          .then((r) => (r.ok ? r.json() : { results: [] })).catch(() => ({ results: [] }));
         const res = await fetch(
           ctx +
             "/rest/api/content/search?" +
@@ -294,14 +338,24 @@ document.addEventListener("DOMContentLoaded", () => {
         remote.forEach((r, i) => { r.order = i; });
         remote.sort((a, b) => titleScore(b) - titleScore(a) || a.order - b.order);
         const seen = new Set(local.map((r) => r.href));
-        rows = [...local, ...remote.filter((r) => !seen.has(r.href))];
+        const files = ((await filesFound).results || []).filter((f) => !/^canto-|\.json$/i.test(f.title || "")).slice(0, 4).map((f) => {
+          const page = String(f.container?.id || ""), ext = ((f.title || "").match(/\.([a-z0-9]+)$/i) || [])[1];
+          return {
+            title: String(f.title || "").replace(/\.[a-z0-9]+$/i, "").replace(/[_]+/g, " ").trim(),
+            excerpt: "On " + (labels[page] || f.container?.title || "a Hub page"),
+            href: (routes.get(page)?.href || ctx + (f.container?._links?.webui || "")) + "#downloads",
+            group: ext ? ext.toUpperCase() + " file" : "File",
+            hits: terms(q),
+          };
+        });
+        rows = [...local, ...remote.filter((r) => !seen.has(r.href))].slice(0, 12 - files.length).concat(files);
       }
       if (id !== serial || !dialog.open) return;
       const count = renderRows(rows);
       rendered = count ? q : "";
       message.textContent = count
         ? `${count} result${count === 1 ? "" : "s"}.` + (matchMedia("(pointer: fine)").matches ? " Use ↑ ↓ to move, Enter to open." : "")
-        : "No matching pages. Try another word or browse all resources.";
+        : answerCard ? "" : "No matching pages. Try another word or browse all resources.";
     } catch (e) {
       if (id === serial && dialog.open)
         message.textContent =
@@ -1034,10 +1088,11 @@ document.addEventListener("DOMContentLoaded", () => {
       (h) => !h.closest("[hidden], details, .choice-card, .section-next, .catalogue"),
     );
     const rail = toc.closest(".toc-rail"), grid = toc.closest(".page-grid");
-    if (headings.length > 2 && rail && !grid?.classList.contains("full-width")) {
+    // Only long pages get a contents list: four sections or more.
+    if (headings.length > 3 && rail && !grid?.classList.contains("full-width")) {
       rail.hidden = false; grid.classList.add("has-toc");
       headings.forEach((heading, i) => {
-        if (!heading.id) heading.id = "section-" + i;
+        if (!heading.id) { let id = slugify(heading.textContent); while (document.getElementById(id)) id += "-" + i; heading.id = id; }
         const a = document.createElement("a");
         a.href = "#" + heading.id;
         a.textContent = heading.textContent;
@@ -1082,6 +1137,38 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+  // Section headings can be linked to directly: a small link button copies the address.
+  const bodyText = $(".content-body");
+  if (bodyText && !bodyText.querySelector(".directory")) {
+    bodyText.querySelectorAll("h2").forEach((h) => {
+      if (h.closest("[hidden], details, .section-next, .catalogue, .canto-show, .asset-panel, .live-link, .site-photos, .attachments-head, .next-step, .downloads-head")) return;
+      if (!h.id) { let id = slugify(h.textContent); while (document.getElementById(id)) id += "-2"; h.id = id; }
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "heading-link"; b.setAttribute("aria-label", "Copy a link to " + h.textContent.trim());
+      b.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
+      b.addEventListener("click", async () => {
+        const url = location.href.split("#")[0] + "#" + h.id, status = $("#copyAnnounce");
+        try { await navigator.clipboard.writeText(url); b.classList.add("is-copied"); if (status) status.textContent = "Link copied."; }
+        catch { history.replaceState(null, "", "#" + h.id); if (status) status.textContent = "Copy the address from the address bar."; }
+        clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove("is-copied"), 1800);
+      });
+      h.append(b);
+    });
+  }
+  // When the page was last changed, under its title.
+  const head = $(".page-band .page-head"), thisPage = document.body.dataset.pageId;
+  if (head && thisPage && document.body.dataset.mode !== "preview") (async () => {
+    try {
+      const ctx = document.body.dataset.context || "";
+      const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(thisPage) + "?expand=version", { credentials: "same-origin", headers: { Accept: "application/json" } });
+      const when = res.ok ? Date.parse((await res.json()).version?.when) : NaN;
+      if (!when) return;
+      const p = document.createElement("p");
+      p.className = "page-updated";
+      p.textContent = "Updated " + new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(when);
+      head.append(p);
+    } catch {}
+  })();
   const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || "");
   // Copy values such as colour codes.
   $$("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
