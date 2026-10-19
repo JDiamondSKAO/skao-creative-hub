@@ -231,7 +231,8 @@ def directory(name, pages, summaries):
  key, label, landing, members, groups = section_of(name)
  out = '<div class="directory">'
  for g, items in groups:
-  out += f'<section class="dir-group"><h2>{g}</h2><ul class="dir-list">'
+  # Each group can be linked to, e.g. presentations.html#site-progress.
+  out += f'<section class="dir-group" id="{re.sub(r"[^a-z0-9]+", "-", g.lower()).strip("-")}"><h2>{g}</h2><ul class="dir-list">'
   for m in items:
    out += (f'<li><a class="dir-row" href="{m}" data-page-id="{STATE["ids"].get(m, "")}"><span class="dir-text"><strong>{html.escape(pages[m][0])}</strong>'
     f'<span>{html.escape(summaries[m])}</span></span>{row_meta(m, key)}</a></li>')
@@ -432,7 +433,7 @@ def revise(pages, meta, jira, canto=''):
  old = '<div class="actions"><a class="button" href="#library">Find a resource →</a></div>'
  assert old in home
  home = home.replace(old, '<form class="hero-search" data-hub-search role="search"><label for="heroSearch" class="visually-hidden">Search the Creative Hub</label>' + SEARCH_ICON +
-  '<input id="heroSearch" type="search" autocomplete="off" placeholder="Search templates, logos, guidance…"><button class="button" type="submit">Search</button></form>')
+  '<input id="heroSearch" type="search" autocomplete="off" placeholder="Search or ask, e.g. where’s the logo?"><button class="button" type="submit">Search</button></form>')
  home = re.sub(r'<div class="quick-library">.*?</div></section>', lambda m: home_tiles(home, titles) + '</section>', home, count=1, flags=re.S)
  home = home.replace('<h2>What do you need?</h2>', '<h2>Browse the Hub</h2>', 1).replace('<p class="eyebrow">01 / Find and reuse</p>', '', 1)
  home = home.replace('<span>Jump to</span>', '<span>Quick links</span>', 1)
