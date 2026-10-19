@@ -45,8 +45,6 @@ SECTIONS = [
  ('guides', 'How-to guides', 'self-service.html', [
   ('Print and posters', ['making-a-poster.html', 'print-preparation.html', 'print-suppliers.html']),
   ('Good practice', ['accessibility.html', 'firefly.html'])]),
- ('help', 'Get help', 'working-with-us.html', [
-  ('More help', ['faq.html', 'contribute.html'])]),
 ]
 # Pages that belong to a section without being listed (duplicate source titles).
 EXTRA = {}
@@ -330,7 +328,7 @@ def nav(current=''):
  return out
 
 # Pages shown full width: they list a whole section, so a sidebar would repeat them.
-FULL_WIDTH = {sec[2] for sec in SECTIONS} | {'resources.html'}
+FULL_WIDTH = {sec[2] for sec in SECTIONS} | {'resources.html', 'faq.html'}
 
 TILES = [
  ('presentations', 'slides', 'Templates, decks, site progress and recent talks.', ['standard-template.html', 'master-deck.html', 'recent-talks.html']),

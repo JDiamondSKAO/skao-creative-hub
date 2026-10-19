@@ -6,6 +6,7 @@ Built on 2.17 after a look at how current documentation and resource sites handl
 
 - **Header:** the same as 2.17 (full masthead, then the section row with the full "Search the Hub"), after trying a one-row header that read as busier.
 - **Notification bar** is slimmer and in exact SKAO accent swatches: Sites #F9B34C into Science #F49E6B with text in Science #0D1D2C (dark mode: Sites #6A3F23 into Technology #5D2A2B with a gold label).
+- **Get help is one page, Common questions, in the footer.** It opens with the Comms helpdesk, then short answers, then "Sharing your work" (how to share a deck, and how to share photos or video). The header has six sections. Get help and Share material show "this page has moved" notes, and Recent talks and Photos and video link straight to the right answer.
 - **No breadcrumb.** The section label above the title links back to the section.
 - **On this page** appears only on long pages (four sections or more).
 - **Previous and next** at the foot of each page on wide screens; phones, which have no sidebar, keep the "More in" list.

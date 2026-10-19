@@ -1672,3 +1672,11 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .feature-art {display:flex;flex-direction:column;justify-content:center;min-height:166px;}
 .feature-art strong {margin-top:0;}
 @media(max-width:600px){.feature-art{min-height:150px;}}
+
+/* Common questions: the help page reads at a comfortable width */
+.help-answers,.help-share {max-width:860px;}
+.help-answers {margin-top:8px;}
+.help-share {margin-top:48px;scroll-margin-top:90px;}
+.content-body .help-share h2 {margin:0 0 6px;font-size:1.3rem;}
+.help-lead {margin:0 0 14px;color:var(--muted);}
+.help-share details {scroll-margin-top:90px;}

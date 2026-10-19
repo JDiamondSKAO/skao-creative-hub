@@ -1,24 +1,26 @@
-"""Get help, simplified: one page to ask, one to share, one for questions.
+"""Get help is one page, Common questions: how to reach the Comms helpdesk, short answers
+to the questions staff ask most, and how to share work.
 
-Get help is a short note that points to the Comms helpdesk for questions and
-larger projects, then Common questions and Share material. The pages it replaces
-stay reachable at their old addresses and point to Get help. The brief checklist,
-"what happens next" steps and request extras it held until 2.17 are at the git
-tag v2.16.0; the text before that is in archive/get-help-v2.14.html.
+It lives in the footer rather than the header. The pages it replaces (Get help, Share material
+and the older request pages) stay reachable at their old addresses and point here. The brief
+checklist and "what happens next" steps it held until 2.17 are at the git tag v2.16.0; the text
+before that is in archive/get-help-v2.14.html.
 """
 import html, re
 import links
 
-HOME = 'working-with-us.html'
+HOME = 'faq.html'
 
 # Old page -> where its content lives now, and what that part is called.
 MOVED = {
- 'request.html': (HOME, 'Get help'),
- 'creative-services.html': (HOME, 'Get help'),
- 'timing.html': (HOME, 'Get help'),
- 'video-request.html': (HOME, 'Get help'),
- 'print.html': (HOME, 'Get help'),
- 'business-cards.html': (HOME, 'Get help'),
+ 'working-with-us.html': (HOME, 'Common questions'),
+ 'contribute.html': (HOME + '#share', 'Sharing your work'),
+ 'request.html': (HOME, 'Common questions'),
+ 'creative-services.html': (HOME, 'Common questions'),
+ 'timing.html': (HOME, 'Common questions'),
+ 'video-request.html': (HOME, 'Common questions'),
+ 'print.html': (HOME, 'Common questions'),
+ 'business-cards.html': (HOME, 'Common questions'),
  'help.html': ('faq.html', 'Common questions'),
  'updates.html': ('index.html', 'Just added, on the homepage'),
  'archive.html': ('index.html', 'Just added, on the homepage'),
@@ -50,41 +52,34 @@ RETIRED = {
 def link(url, label, cls=''):
  return f'<a href="{html.escape(url, quote=True)}"' + (f' class="{cls}"' if cls else '') + f'>{label}</a>'
 
-def page(jira):
- """A short note, the helpdesk, then the two other Get help pages."""
+def faq(jira):
+ """The help page: the helpdesk first, then short answers, then how to share work."""
+ q = lambda t, b, key='': (f'<details class="guidance-detail"' + (f' id="{key}"' if key else '') + f'><summary>{t}</summary><div><p>{b}</p></div></details>')
  ask = ('<div class="task-intro gh-intro"><div><p>Most everyday work can start from the Hub’s templates and guides.</p>'
   '<p>For anything else, from a quick question to a larger project such as new design, video or animation, print, events or business cards, '
   'contact the Comms helpdesk. Say what you need, who it’s for and when you need it, and attach anything you already have.</p></div>'
   + link(jira, 'Open the Comms helpdesk ↗', 'button') + '</div>')
- more = ('<nav class="gh-more" aria-label="More help">'
-  '<a class="dir-row" href="faq.html"><span class="dir-text"><strong>Common questions</strong><span>Where things are, who approves work, and what to do if something is missing.</span></span></a>'
-  '<a class="dir-row" href="contribute.html"><span class="dir-text"><strong>Share material</strong><span>Send a deck, photos, video or a correction for review.</span></span></a></nav>')
- return ask + more
-
-def faq(jira):
- q = lambda t, b: f'<details class="guidance-detail"><summary>{t}</summary><div><p>{b}</p></div></details>'
- return ('<div class="task-intro"><div><span class="eyebrow">Help</span><p>Short answers to the questions staff ask most.</p></div></div>'
-  + q('Where are templates and slides?', 'Start with ' + link('resources.html', 'Templates and assets') + '. Presentation decks are under ' + link('presentations.html', 'Presentations') + '.')
+ answers = ('<section class="help-answers" aria-label="Common questions">'
+  + q('Where are templates and slides?', 'Start with ' + link('resources.html', 'All resources') + '. Presentation decks are under ' + link('presentations.html', 'Presentations') + '.')
   + q('Where are photos and video?', 'In the staff media library in Canto. ' + link('media.html', 'Photos and video') + ' shows a selection and links to it. Check each asset’s credit and permitted use.')
   + q('Can I adapt material myself?', 'Yes, within its usage notes, and keep the credits. Ask the content owner before changing facts or meaning, and the creative team before substantial design changes.')
-  + q('Why can I browse but not upload?', 'Browsing and contributing have separate permissions. To add material, see ' + link('contribute.html', 'Share material') + '.')
+  + q('Why can I browse but not upload?', 'Browsing and contributing have separate permissions. To add material, see ' + link('#share', 'Sharing your work') + ' below.')
   + q('Is my request booked once I send it?', 'Not yet. The team replies to agree what will be made and when; a date isn’t fixed until then. If it’s urgent, say why and what could be cut back.')
   + q('Who approves the work?', 'Name the content owner and the final reviewer in your request. The approval route depends on the work, so confirm it rather than assume it.')
-  + q('A file is missing or a link is broken', 'Send the page link and what happened to the ' + link(jira, 'Comms helpdesk ↗') + '.'))
-
-def share(jira):
- return ('<div class="task-intro"><div><span class="eyebrow">Make good work reusable</span>'
-  '<p>Send it through ' + link(jira, 'the Comms helpdesk') + '. Sharing starts a review: nothing is published until its owner has checked it.</p></div></div>'
-  '<section class="reading-section"><h2>What to send</h2><ul>'
-  '<li><strong>A presentation:</strong> the editable deck or a link to it, with its audience, event date, content owner and any limits on reuse.</li>'
-  '<li><strong>Photos or video:</strong> use the upload link you were given, with a title, creator, location and rights information. '
-  'No link yet? Ask the helpdesk for one; the Canto library is for browsing, not uploading.</li>'
-  '<li><strong>A correction:</strong> the page link, what should change and where the correct information comes from.</li></ul>'
-  '<p>Keep working files where they are, so a new copy doesn’t become a competing version.</p></section>')
+  + q('Something is missing, wrong or broken', 'Send the page link, what happened or what should change, and where the correct information comes from, to the ' + link(jira, 'Comms helpdesk ↗') + '.')
+  + '</section>')
+ sharing = ('<section class="help-share" id="share"><h2>Sharing your work</h2>'
+  '<p class="help-lead">Sharing starts a review: nothing is published until its owner has checked it.</p>'
+  + q('How do I share a deck for others to reuse?', 'Send the editable deck, or a link to it, through the ' + link(jira, 'Comms helpdesk ↗') + ', with its audience, event date, content owner and any limits on reuse. '
+     'Once it’s reviewed it can join ' + link('master-deck.html', 'Decks to reuse') + '. Gave a talk recently? Add your slides to ' + link('recent-talks.html', 'Recent talks') + ' yourself.', 'share-a-deck')
+  + q('How do I share photos or video?', 'Ask the ' + link(jira, 'Comms helpdesk ↗') + ' for an upload link; the Canto library is for browsing, not uploading. '
+     'Include a title, who took it, where, and any rights or consent information.', 'share-photos')
+  + '<p class="quiet-note">Keep working files where they are, so a new copy doesn’t become a competing version.</p></section>')
+ return ask + answers + sharing
 
 def moved(title, target, name=''):
  url, part = target
- where = 'Get help' if url.startswith(HOME) else part
+ where = 'Common questions' if url.startswith(HOME) else part
  if name in RETIRED:
   eyebrow, message, _ = RETIRED[name]
   action = (link(links.url('IT_SERVICE_DESK'), 'Open the IT service desk ↗', 'button') if name == 'email-signatures.html' and links.url('IT_SERVICE_DESK')
@@ -117,11 +112,11 @@ def rename(h):
  return h
 
 def apply(pages, jira):
+ # Staff knew the old page by its menu label.
+ if 'working-with-us.html' in pages: pages['working-with-us.html'] = ('Get help', pages['working-with-us.html'][1])
  for name, target in MOVED.items():
   if name in pages: pages[name] = (pages[name][0], moved(pages[name][0], target, name))
- pages[HOME] = ('Get help', page(jira))
- pages['faq.html'] = ('Common questions', faq(jira))
- pages['contribute.html'] = ('Share material', share(jira))
+ pages[HOME] = ('Common questions', faq(jira))
  pages = {n: (t, b if n in MOVED else rename(trim_asks(relink(b)))) for n, (t, b) in pages.items()}
  pages['resources.html'] = ('All resources', pages['resources.html'][1])
  return pages
@@ -137,10 +132,10 @@ ANSWERS = [
  ('photo photos image images picture pictures canto photography', 'Where are the photos?', 'In the staff media library in Canto. First time? Choose Register Now and use your SKAO email address.', 'media.html', 'Photos and video'),
  ('letterhead letterheads letter', 'Where are the letterheads?', 'Letterheads for each office are on Letterheads, grouped by information classification.', 'letterheads.html', 'Letterheads'),
  ('poster posters a0 a1 a2', 'How do I make a poster?', 'Start from a poster template in A0, A1 or A2, then follow Prepare a poster for the content and export.', 'making-a-poster.html', 'Prepare a poster'),
- ('business card cards', 'How do I get business cards?', 'Ask the Comms helpdesk, with your name, job title and contact details exactly as they should appear.', HOME, 'Get help'),
+ ('business card cards', 'How do I get business cards?', 'Ask the Comms helpdesk, with your name, job title and contact details exactly as they should appear.', HOME, 'Common questions'),
  ('signature signatures', 'How do I set up my email signature?', 'Email signatures are looked after by IT. Contact the IT service desk for a new or updated one.', 'email-signatures.html', 'Email signatures'),
  ('progress construction status figures stats statistics milestones', 'Where are the latest construction figures?', 'SKA-Low progress and SKA-Mid progress have each team’s live status slides, the overall construction status and their latest decks.', 'low-slides.html', 'SKA-Low progress'),
- ('help request brief commission design designer helpdesk project', 'Can someone design something for me?', 'Contact the Comms helpdesk. Say what you need, who it’s for and when, and attach anything you already have.', HOME, 'Get help'),
+ ('help request brief commission design designer helpdesk project', 'Can someone design something for me?', 'Contact the Comms helpdesk. Say what you need, who it’s for and when, and attach anything you already have.', HOME, 'Common questions'),
  ('ai firefly generative midjourney chatgpt', 'Can I use AI to make images?', 'Check the SKAO AI policy and use only approved tools. Never upload confidential or personal material.', 'firefly.html', 'Using AI image tools'),
  ('supplier suppliers printer printers printing', 'Who should print it?', 'Communications can recommend trusted print suppliers for your location and the kind of job you have.', 'print-suppliers.html', 'Work with print suppliers'),
  ('stand stands booth exhibition merchandise merch swag giveaway giveaways', 'Do we have a stand or merchandise?', 'Check the existing stand kit, designs and stock on Stands and merchandise before briefing anything new.', 'stands.html', 'Stands and merchandise'),

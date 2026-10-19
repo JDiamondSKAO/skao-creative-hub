@@ -499,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (groups.some((g) => g.querySelector("a[aria-current]"))) groups.forEach((g) => { g.open = !!g.querySelector("a[aria-current]"); });
   // Pages with several questions get one control to open or close them all.
   const body = $(".content-body");
-  const questions = body ? [...body.querySelectorAll(":scope > details.guidance-detail")] : [];
+  const questions = body ? [...body.querySelectorAll(":scope > details.guidance-detail, :scope > .help-answers > details.guidance-detail")] : [];
   if (questions.length >= 3) {
     const toggle = document.createElement("button");
     toggle.type = "button"; toggle.className = "expand-all";
