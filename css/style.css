@@ -1575,3 +1575,13 @@ body .announce-text a,body .announce-text a:visited,.dark body .announce-text a 
 .announce-close {color:#1b1530cc;}
 .announce-close:hover,.dark .announce-close:hover {background:#1b153014;color:#1b1530;}
 .announce-close:focus-visible,.announce-text a:focus-visible {outline-color:#1b1530;}
+
+/* Notification bar type: a quiet lead-in, a hairline, then the page title */
+.announce-inner {gap:0;}
+.announce-tag {display:inline-flex;align-items:center;gap:7px;padding:0 14px 0 0;margin-right:14px;border-radius:0;border-right:1px solid #1b153033;background:none;color:#1b1530c7;font-size:.8rem;font-weight:600;letter-spacing:.005em;text-transform:none;line-height:1.2;}
+.announce-tag svg {flex:none;color:#1b1530;opacity:.8;}
+.announce-text {font-size:.86rem;letter-spacing:-.003em;}
+body .announce-text a,body .announce-text a:visited {font-weight:650;}
+.announce-text a:after {opacity:.75;}
+.announce-text a:hover:after {opacity:1;}
+@media(max-width:700px){.announce-tag{font-size:.74rem;padding-right:10px;margin-right:10px;}}
