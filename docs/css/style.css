@@ -1656,3 +1656,11 @@ header.is-pinned .nav-home {width:auto;max-width:270px;margin-right:22px;}
 body:has(.page-band) .nav-home {width:auto;max-width:270px;margin-right:22px;opacity:1;visibility:visible;}
 @media(max-width:1240px){body:has(.page-band) .nav-home{max-width:110px;margin-right:16px;}}
 @media(max-width:1000px){body:has(.page-band) .nav-home{margin-right:4px;}}
+
+/* Header search: a compact "Search ⌘K" at every width, so the row fits beside the logo and the Hub's name */
+.navrow .search-trigger {min-width:0;}
+.navrow .search-trigger > span {display:none;}
+.navrow .search-trigger:after {content:"Search";order:1;}
+.navrow .search-trigger kbd {order:2;margin-left:10px;}
+.navrow .search-trigger svg {flex:none;}
+@media(min-width:1001px){.navlinks{gap:18px;}header.is-pinned .nav-home{margin-right:18px;}}
