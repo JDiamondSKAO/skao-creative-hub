@@ -1637,3 +1637,10 @@ body .announce-text a,body .announce-text a:visited {color:#0D1D2C;}
 .feature-art {display:flex;flex-direction:column;justify-content:center;min-height:166px;}
 .feature-art strong {margin-top:0;}
 @media(max-width:600px){.feature-art{min-height:150px;}}
+
+/* Homepage quick links: one row, each tinted with its section's colour (as on All resources) */
+.welcome-copy .quick-links {gap:6px;}
+:where(.welcome-copy .quick-links a) {--c:var(--link);}
+.welcome-copy .quick-links a {min-height:32px;padding:0 11px;border-color:color-mix(in srgb,var(--c) 26%,var(--line));background:color-mix(in srgb,var(--c) 9%,var(--bg));color:color-mix(in srgb,var(--c) 80%,var(--ink));font-size:.8rem;font-weight:600;white-space:nowrap;}
+.welcome-copy .quick-links a:hover {border-color:color-mix(in srgb,var(--c) 50%,var(--line));background:color-mix(in srgb,var(--c) 16%,var(--bg));}
+.dark .welcome-copy .quick-links a {background:color-mix(in srgb,var(--c) 14%,var(--bg));color:var(--c);}
