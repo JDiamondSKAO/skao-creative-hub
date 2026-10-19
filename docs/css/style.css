@@ -1672,7 +1672,6 @@ body:has(.page-band) .nav-home,header.is-pinned .nav-home {margin-right:14px;}
 .dark body:has(.page-band) header,.dark header.is-pinned {background:linear-gradient(110deg,#070068 0%,#070068 48%,#58005f 78%,#aa005c 100%);border-top:0;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a {color:#d9d6f0;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a:hover,:is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a[aria-current] {color:#fff;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .nav-home-title {color:#fff;border-left-color:#ffffff48;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .search-trigger {background:#ffffff14;border-color:#ffffff33;color:#fff;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .search-trigger:hover {background:#ffffff24;border-color:#ffffff66;}
 :is(.dark body:has(.page-band) header,.dark header.is-pinned) .tool-button {background:transparent;border-color:#ffffff40;color:#fff;}
