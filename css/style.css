@@ -1736,3 +1736,12 @@ body .announce-text a,body .announce-text a:visited {color:#1b1530;font-size:.82
 .dark body .announce-text a,.dark body .announce-text a:visited {color:#fff1dc;}
 .announce-close {width:28px;height:28px;color:#7a4a12b3;}
 .dark .announce-close {color:#f3c48ab3;}
+/* Notification: exact SKAO accent swatches. Light: Sites #F9B34C into Science #F49E6B, with Sites brown #6A3F23
+   for the label and close. Dark: Sites #6A3F23 into Technology #5D2A2B, with Sites gold #F9B34C for the label. */
+.announce {background:linear-gradient(90deg,#F9B34C,#F49E6B);border-bottom:0;}
+.dark .announce {background:linear-gradient(90deg,#6A3F23,#5D2A2B);border-bottom:0;}
+.announce-tag {color:#6A3F23;border-right-color:#6A3F2340;}
+.announce-tag svg {color:#6A3F23;}
+.announce-close {color:#6A3F23;}
+.dark .announce-tag,.dark .announce-tag svg,.dark .announce-close {color:#F9B34C;}
+.dark .announce-tag {border-right-color:#F9B34C40;}
