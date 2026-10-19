@@ -1644,16 +1644,14 @@ body .site-photo-rows a.text-link {font-size:.84rem;}
 .landing-rail {top:90px;}
 /* Compact header logo: the official SKAO lettermark as vector art, with the Hub's name */
 .nav-home {width:auto;max-width:0;gap:14px;margin-right:0;text-decoration:none;color:var(--ink);transition:max-width var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),margin var(--t-slow) var(--ease-out);}
-header.is-pinned .nav-home {width:auto;max-width:270px;margin-right:22px;}
+header.is-pinned .nav-home {width:auto;max-width:120px;margin-right:22px;}
 .nav-home .skao-mark {flex:none;display:block;width:auto;height:28px;--logo-ink:#15265c;--logo-accent:#fe3377;}
 .dark .nav-home .skao-mark {--logo-ink:#fff;--logo-accent:#fff;} /* dark mode: the all-white lettermark */
-.nav-home-title {flex:none;padding-left:14px;border-left:1px solid var(--line);font-size:1.05rem;font-weight:400;letter-spacing:-.02em;line-height:1.1;white-space:nowrap;color:var(--ink);}
-.nav-home-title strong {font-weight:700;}
-@media(max-width:1240px){.nav-home-title{display:none;}header.is-pinned .nav-home{max-width:110px;margin-right:16px;}}
+@media(max-width:1240px){header.is-pinned .nav-home{max-width:110px;margin-right:16px;}}
 @media(max-width:1000px){.nav-home .skao-mark{height:24px;}header.is-pinned .nav-home{margin-right:4px;}}
 
 /* Inner pages: the compact header always carries the logo and the Hub's name */
-body:has(.page-band) .nav-home {width:auto;max-width:270px;margin-right:22px;opacity:1;visibility:visible;}
+body:has(.page-band) .nav-home {width:auto;max-width:120px;margin-right:22px;opacity:1;visibility:visible;}
 @media(max-width:1240px){body:has(.page-band) .nav-home{max-width:110px;margin-right:16px;}}
 @media(max-width:1000px){body:has(.page-band) .nav-home{margin-right:4px;}}
 
@@ -1668,7 +1666,7 @@ body:has(.page-band) .nav-home {width:auto;max-width:270px;margin-right:22px;opa
 /* With dark mode in the row, the header button drops its shortcut hint (shown on hover instead) and the row's gap does the spacing */
 .navrow .search-trigger kbd {display:none;}
 .navrow .tool-button {margin-left:0;}
-body:has(.page-band) .nav-home,header.is-pinned .nav-home {margin-right:6px;}
+body:has(.page-band) .nav-home,header.is-pinned .nav-home {margin-right:14px;}
 
 /* Dark mode: the compact header carries the masthead's navy-to-magenta, so the top of the page keeps its colour */
 .dark body:has(.page-band) header,.dark header.is-pinned {background:linear-gradient(110deg,#070068 0%,#070068 48%,#58005f 78%,#aa005c 100%);border-top:0;}
