@@ -1592,8 +1592,6 @@ body .announce-text a,body .announce-text a:visited {font-weight:650;}
 body:has(.page-band) {--brand-h:0px;}
 body:has(.page-band) .brandbar {display:none;}
 body:has(.page-band) header {border-top:3px solid transparent;border-image:linear-gradient(90deg,#070068,#58005f 60%,#aa005c) 1;}
-body:has(.page-band) .nav-home {width:58px;margin-right:6px;opacity:1;visibility:visible;}
-@media(max-width:1000px){body:has(.page-band) .nav-home{width:50px;margin-right:0;}}
 .navrow .tool-button {flex:none;width:40px;height:40px;margin-left:10px;border:1px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);}
 .navrow .tool-button:hover,.navrow .tool-button:focus-visible {border-color:color-mix(in srgb,var(--link) 40%,var(--line));background:var(--surface);color:var(--link);}
 .page-band .page-head {padding-top:26px;}
@@ -1644,3 +1642,17 @@ body .site-photo-rows a.text-link {font-size:.84rem;}
 /* Section overviews: the intro sits in the left column, so "Before you start" starts at the top beside it */
 .landing-main > .task-intro {margin-bottom:28px;}
 .landing-rail {top:90px;}
+/* Compact header logo: the official SKAO lettermark as vector art, with the Hub's name */
+.nav-home {width:auto;max-width:0;gap:14px;margin-right:0;text-decoration:none;color:var(--ink);transition:max-width var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),margin var(--t-slow) var(--ease-out);}
+header.is-pinned .nav-home {width:auto;max-width:270px;margin-right:22px;}
+.nav-home .skao-mark {flex:none;display:block;width:auto;height:28px;--logo-ink:#15265c;--logo-accent:#fe3377;}
+.dark .nav-home .skao-mark {--logo-ink:#fff;}
+.nav-home-title {flex:none;padding-left:14px;border-left:1px solid var(--line);font-size:1.05rem;font-weight:400;letter-spacing:-.02em;line-height:1.1;white-space:nowrap;color:var(--ink);}
+.nav-home-title strong {font-weight:700;}
+@media(max-width:1240px){.nav-home-title{display:none;}header.is-pinned .nav-home{max-width:110px;margin-right:16px;}}
+@media(max-width:1000px){.nav-home .skao-mark{height:24px;}header.is-pinned .nav-home{margin-right:4px;}}
+
+/* Inner pages: the compact header always carries the logo and the Hub's name */
+body:has(.page-band) .nav-home {width:auto;max-width:270px;margin-right:22px;opacity:1;visibility:visible;}
+@media(max-width:1240px){body:has(.page-band) .nav-home{max-width:110px;margin-right:16px;}}
+@media(max-width:1000px){body:has(.page-band) .nav-home{margin-right:4px;}}
