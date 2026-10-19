@@ -16,6 +16,7 @@ The Hub goes from 51 pages to 38, and adds the three things asked for in the rep
 - **How-to guides:** Format a presentation is listed once, under Presentations.
 - **Links to internal documents** stay out of this public repo: their addresses live in a local file that only the release build and local test mode read. Links still to come (Google Slides, logo request form, AI policy, all-hands albums) show as "link to follow" in the preview and are left out of the live theme until they arrive.
 - **Section pages** list their groups without a page count beside each title.
+- **Header:** the masthead's pause button is gone; the motion stays (and still stops for anyone who has reduced motion turned on). Once you scroll, the compact header shows the official SKAO lettermark in colour, with "Creative Hub" beside it, instead of a small grey logo.
 - **Get help** is now a short note that points to the Comms helpdesk for questions and larger projects, then Common questions and Share material. The brief checklist and "what happens next" steps are gone, and the helpdesk is called the Comms helpdesk throughout, including the footer band.
 - **Photos and video:** the slideshow uses Canto's large preview (2000 px instead of 640–800 px), loads each image just before it shows, and its caption band runs the full width. Weekly all-hands photos are one card with a row per site: see the album in the staff portal, or add photos with the upload link.
 - **More in…** cards at the foot of each page no longer carry a "Next" label.
