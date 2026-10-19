@@ -10,7 +10,8 @@ import brandkit, links
 
 def text(fragment):
  fragment = re.sub(r'<span[^>]*aria-hidden="?true"?[^>]*>.*?</span>', '', fragment, flags=re.S)
- return re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', fragment))).strip()
+ # Tags become spaces, so a link right before a comma would leave "times , and".
+ return re.sub(r'\s+([,.;:!?])', r'\1', re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', fragment)))).strip()
 
 def summary(body):
  m = re.search(r'<div class="task-intro[^"]*">.*?<p[^>]*>(.*?)</p>', body, re.S) or re.search(r'<p[^>]*>(.*?)</p>', body, re.S)
@@ -306,11 +307,15 @@ def landing(name, body, pages, summaries):
  d = directory(name, pages, summaries)
  # Quick answers (brand swatches, the Canto hand-off) stay first; the directory follows.
  def after(head, rest, beside=False):
+  # Sections marked data-landing-main (the Events lead times, say) stay under the list, not in the rail.
+  keep = [el for el in top_level(rest) if 'data-landing-main' in el[:200]]
+  for el in keep: rest = rest.replace(el, '', 1)
+  main = d + ''.join(keep)
   side = rail(rest.strip())
   if side and beside:
    # "Before you start" sits level with the intro, at the top of the page, rather than halfway down.
-   return f'<div class="landing-layout"><div class="landing-main">{head}{d}</div>{side}</div>'
-  return head + (f'<div class="landing-layout"><div class="landing-main">{d}</div>{side}</div>' if side else d)
+   return f'<div class="landing-layout"><div class="landing-main">{head}{main}</div>{side}</div>'
+  return head + (f'<div class="landing-layout"><div class="landing-main">{main}</div>{side}</div>' if side else main)
  for marker in ['<div class="type-spec">', '<div class="media-handoff">']:
   at = body.find(marker)
   if at >= 0:

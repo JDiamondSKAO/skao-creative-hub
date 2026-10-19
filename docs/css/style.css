@@ -1692,3 +1692,30 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .live-link-actions {align-items:center;gap:10px 20px;}
 .live-link-actions .text-link,.live-link-actions .pending-link {font-size:.86rem;}
 
+/* Event kit on Stands and merchandise: a picture per item, attached to the page, or its outline until then */
+.kit > p {max-width:62ch;}
+.kit-grid {list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 20px;}
+.kit-item {margin:0;}
+.kit-pic {position:relative;display:grid;place-items:center;aspect-ratio:3/2;border-radius:12px;background:var(--surface);overflow:hidden;}
+.kit-pic img {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .4s;}
+.kit-pic.has-image img {opacity:1;}
+.kit-pic:before {content:"";border:1.5px solid color-mix(in srgb,var(--c,var(--link)) 40%,transparent);border-radius:3px;transition:opacity .3s;}
+.kit-pic[data-shape=wide]:before {width:56%;aspect-ratio:3/2;}
+.kit-pic[data-shape=square]:before {height:60%;aspect-ratio:1;}
+.kit-pic[data-shape=tall]:before {height:74%;aspect-ratio:85/200;}
+.kit-pic[data-shape=cloth]:before {width:62%;aspect-ratio:1.84;}
+.kit-pic.has-image:before {opacity:0;}
+.content-body .kit-item h3 {margin:14px 0 2px;font-size:1rem;}
+.kit-size {margin:0 0 6px;font-size:.78rem;font-weight:700;color:var(--c,var(--link));}
+.kit-item p:last-child {margin:0;font-size:.85rem;line-height:1.5;color:var(--muted);}
+.kit-care {margin-top:22px;font-size:.85rem;color:var(--muted);max-width:68ch;}
+@media(max-width:900px){.kit-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:520px){.kit-grid{grid-template-columns:1fr;}}
+/* Events landing: lead times and how a request runs, under the section list */
+.landing-main > [data-landing-main] {margin-top:44px;}
+.content-body .lead-table {display:table;width:100%;max-width:640px;margin:16px 0 0;font-size:.9rem;}
+.content-body .lead-table th,.content-body .lead-table td {border:0;border-bottom:1px solid var(--line);padding:11px 18px 11px 0;vertical-align:top;}
+.content-body .lead-table thead th {padding-top:0;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.content-body .lead-table td:last-child {font-weight:700;color:var(--ink);}
+.request-flow .guide-steps {margin-top:18px;}
+.kit + #downloads {margin-top:36px;}

@@ -36,6 +36,15 @@ for page, patterns in spec['pages'].items():
             st = p.stat()
             out.append({'page': page, 'title': p.name, 'path': str(p), 'size': st.st_size, 'labels': ['approved'],
                         'when': datetime.fromtimestamp(st.st_mtime, timezone.utc).isoformat()})
+# Event kit pictures from scripts/kit_images.py (no label: the theme shows them, not the downloads),
+# and the Events Production Manual as an approved download, both on Stands and merchandise.
+for f in sorted((ROOT / 'build' / 'kit').glob('kit-*.webp')):
+    out.append({'page': 'stands.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': [],
+                'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
+if spec.get('events_guide'):
+    for f in sorted(Path(spec['events_guide']).glob('FINALS/BROCHURE/*.pdf')):
+        out.append({'page': 'stands.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': ['approved'],
+                    'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
 # Canto showcase: real dry-run output from scripts/canto_sync.py if present, otherwise stand-ins.
 real = ROOT / 'build' / 'canto' / 'canto-showcase.json'
 stand = spec.get('canto_standin')

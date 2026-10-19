@@ -228,6 +228,25 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(talkQ('.attachments-add').href.includes('/pages/viewpageattachments.action?pageId='+talksId));assert.equal(talkQ('.attachments-add').textContent,'Add your talk');tk.window.close();
  const tp=dom('recent-talks.html');assert(tp.window.document.querySelector('.attachments-note').textContent.startsWith('Preview'));tp.window.close();
  pass('Recent talks and site progress list every file on their page, newest first, with an add link for the people who keep them current');
+ // Events: lead times and request steps on the landing; the kit on Stands and merchandise.
+ const ev=read('events.html');
+ assert.equal(ev.querySelectorAll('.landing-main .lead-table tbody tr').length,6,'lead times sit in the main column');
+ assert.equal(ev.querySelectorAll('.landing-main .request-flow .guide-steps li').length,5,'then how a request runs');
+ assert(!ev.querySelector('.landing-rail .lead-table, .landing-rail .guide-steps'),'neither moves into the rail');assert.equal(ev.querySelectorAll('.landing-rail details.rail-item').length,3,'the rail keeps its three items');
+ assert(read('event-checklist.html').querySelector('.task-intro a[href="events.html#lead-times"]'),'the checklist points at the lead times');
+ const standsId=routes['stands.html'].id,sk=dom('stands.html','confluence'),skw=sk.window;skw.document.body.dataset.pageId=standsId;
+ skw.fetch=async u=>{if(String(u).includes('/child/attachment'))return {ok:true,json:async()=>({results:[
+  {title:'kit-fabrilux-3m.webp',_links:{download:`/download/attachments/${standsId}/kit-fabrilux-3m.webp`}},
+  {title:'KIT-KIOSK.PNG',_links:{download:`/download/attachments/${standsId}/KIT-KIOSK.PNG`}},
+  {title:'kit-pull-up-banners.webp',_links:{download:'//evil.example/x.webp'}},
+  {title:'kit-table-cloths.pdf',_links:{download:`/download/attachments/${standsId}/kit-table-cloths.pdf`}}]})};return {ok:true,json:async()=>({results:[]})};};
+ skw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
+ const pics=Object.fromEntries([...skw.document.querySelectorAll('[data-kit-image]')].map(p=>[p.dataset.kitImage,p.querySelector('img')?.getAttribute('src')||'']));
+ assert.deepEqual(Object.keys(pics),['kit-fabrilux-3m','kit-fabrilux-2m','kit-pull-up-banners','kit-kiosk','kit-table-cloths']);
+ assert(pics['kit-fabrilux-3m'].endsWith('/kit-fabrilux-3m.webp')&&pics['kit-kiosk'].endsWith('/KIT-KIOSK.PNG'),'pictures are matched by file name');
+ assert.equal(pics['kit-pull-up-banners'],'','off-site links are dropped');assert.equal(pics['kit-table-cloths'],'','only image files count');assert.equal(pics['kit-fabrilux-2m'],'','a missing picture keeps the outline');sk.window.close();
+ const skp=dom('stands.html');assert(!skp.window.document.querySelector('.kit-pic img'),'the preview shows outlines');skp.window.close();
+ pass('Events: lead times and request steps under the section list; the kit shows pictures attached to Stands and merchandise, or outlines until then');
  const mediaId=routes['media.html'].id;
  const cantoManifest={version:1,albums:[
   {id:'a1',name:'Telescopes',path:'Asset library - Staff / Telescopes',count:40,href:'https://skao.canto.global/album/a1',assets:[

@@ -697,6 +697,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     group.append(ul); list.replaceChildren(group);
   }
+  // The event kit: each item's picture is a file attached to the page under a fixed name
+  // (kit-fabrilux-3m.webp and so on). Until it's there, an outline of the item shows instead.
+  const kitBox = $("[data-kit]");
+  if (kitBox && document.body.dataset.mode !== "preview") loadKit(kitBox);
+  async function loadKit(box) {
+    const pageId = document.body.dataset.pageId, ctx = document.body.dataset.context || "";
+    if (!pageId) return;
+    let files = [];
+    try {
+      const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+      if (!res.ok) return;
+      files = (await res.json()).results || [];
+    } catch { return; }
+    box.querySelectorAll("[data-kit-image]").forEach((slot) => {
+      const name = slot.dataset.kitImage.toLowerCase();
+      const file = files.find((f) => String(f.title || "").toLowerCase().replace(/\.(webp|png|jpe?g)$/, "") === name && /\.(webp|png|jpe?g)$/i.test(f.title));
+      const href = file && safeLink(ctx + (file._links?.download || ""));
+      if (!href) return;
+      const img = new Image(); img.alt = ""; img.decoding = "async";
+      img.onload = () => slot.classList.add("has-image");
+      img.src = href; slot.append(img);
+    });
+  }
   // Downloads grouped by the choice people are making: classification, office, partner, then file type.
   function renderDownloads(files, ctx) {
     const CLASSES = ["Unrestricted", "Staff Resources", "SKAO Staff Only", "For Project Use", "Confidential", "Strictly Confidential"];
