@@ -6,7 +6,7 @@ Confluence attachments labelled "approved", which the theme lists as
 downloads.
 """
 import re
-from links import pending, GOOGLE_SLIDES
+from links import pending
 
 CLASSIFICATIONS = ['Unrestricted', 'Staff Resources', 'SKAO Staff Only', 'For Project Use', 'Confidential', 'Strictly Confidential']
 
@@ -16,7 +16,7 @@ PACK = {
   ('Format', 'PowerPoint (.pptx), 16:9 widescreen'),
   ('Versions', CLASSIFICATIONS),
   ('Choose', 'Use the version whose label matches your content’s information classification.'),
-  ('Google Slides', 'Also available as a Google Slides template. ' + pending(GOOGLE_SLIDES, 'Open in Google Slides')),
+  ('Google Slides', 'Also available as a Google Slides template. ' + pending('GOOGLE_SLIDES', 'Open in Google Slides')),
  ],
  'master-deck.html': [
   ('Planned', ['About the SKAO', 'Science case', 'Construction progress, both sites', 'SRCNet', 'Working with local communities', 'Specialised topics']),

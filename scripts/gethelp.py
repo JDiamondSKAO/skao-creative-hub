@@ -137,7 +137,7 @@ def moved(title, target, name=''):
  where = 'Get help' if url.startswith(HOME) else part
  if name in RETIRED:
   eyebrow, message, _ = RETIRED[name]
-  action = (link(links.IT_SERVICE_DESK, 'Open the IT service desk ↗', 'button') if name == 'email-signatures.html' and links.IT_SERVICE_DESK
+  action = (link(links.url('IT_SERVICE_DESK'), 'Open the IT service desk ↗', 'button') if name == 'email-signatures.html' and links.url('IT_SERVICE_DESK')
    else link(url, 'Go to ' + html.escape(where) + ' →', 'button'))
   return f'<div class="task-intro moved-note"><div><span class="eyebrow">{eyebrow}</span><p>{html.escape(message)}</p></div>{action}</div>'
  return ('<div class="task-intro moved-note"><div><span class="eyebrow">This page has moved</span>'

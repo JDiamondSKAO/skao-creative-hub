@@ -360,8 +360,8 @@ def site_photos():
  """Weekly all-hands photos from each site, in their own Canto albums."""
  return links.needs('<section class="site-photos"><div><p class="eyebrow">From the sites</p><h2>Weekly all-hands photos</h2>'
   '<p>Photos shared at the weekly all-hands, newest first, with captions and credits.</p></div><div class="site-photo-links">'
-  + links.pending(links.ALLHANDS_LOW, 'SKA-Low', 'button secondary') + links.pending(links.ALLHANDS_MID, 'SKA-Mid', 'button secondary') + '</div></section>',
-  links.ALLHANDS_LOW or links.ALLHANDS_MID)
+  + links.pending('ALLHANDS_LOW', 'SKA-Low', 'button secondary') + links.pending('ALLHANDS_MID', 'SKA-Mid', 'button secondary') + '</div></section>',
+  links.url('ALLHANDS_LOW') or links.url('ALLHANDS_MID'))
 
 def canto_gallery(canto):
  return canto_show('', 'A look inside the staff media library', 'Staff media library', wide=True)

@@ -1547,6 +1547,8 @@ body .content-body a.dl-file:any-link {justify-content:flex-start;min-width:122p
 .live-link {display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;margin:0 0 26px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--surface);}
 .content-body .live-link h2 {margin:0 0 4px;font-size:1.05rem;}
 .live-link p {margin:0;font-size:.88rem;color:var(--muted);}
+.live-link > div:first-child {flex:1 1 320px;}
+.live-link-actions {display:flex;gap:10px;flex-wrap:wrap;}
 
 /* Photos and video: weekly all-hands photos from each site */
 .site-photos {display:flex;align-items:center;justify-content:space-between;gap:14px 24px;flex-wrap:wrap;margin:0 0 34px;padding:18px 22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,#b5814e 7%,var(--bg)),var(--bg) 70%);}

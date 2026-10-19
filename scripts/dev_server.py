@@ -3,6 +3,7 @@
 Serves docs/ on http://127.0.0.1:8767 and answers the few Confluence REST calls
 the theme makes (page search, attachments, the announcement label), using a
 local fixtures file. Attachment downloads stream from the paths in that file.
+Links to internal documents are filled in from dev/links.json as each page is served.
 
   python3 scripts/dev_fixtures.py   # build dev/fixtures.json from your local map
   python3 scripts/dev_server.py [--no-approved] [--no-announcement]
@@ -14,6 +15,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, unquote, quote
 import html as htmllib, json, mimetypes, re, sys
+import links
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS, DEV = ROOT / 'docs', ROOT / 'dev'
@@ -110,6 +112,7 @@ class Handler(SimpleHTTPRequestHandler):
             routes = ''.join(f'<a data-page-id="{m["id"]}" href="/{n}">{htmllib.escape(m["source_title"])}</a>' for n, m in ROUTES.items())
             html = html.replace('</body>', f'<div id="hubRoutes" hidden>{routes}</div></body>', 1)
             html = re.sub(r'<div class="wrap preview-note">.*?</div>', '<div class="wrap preview-note">Local test mode · Confluence is simulated; downloads come from your local brand bank.</div>', html, count=1)
+            html = links.fill(html, links.load())  # internal addresses from the gitignored dev/links.json
             body = html.encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.send_header('Cache-Control', 'no-store'); self.end_headers(); self.wfile.write(body)
             return

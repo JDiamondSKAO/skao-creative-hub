@@ -42,7 +42,7 @@ python3 scripts/dev_server.py --no-announcement  # no announcement banner
 
 - **Resource pages** (templates, logos, the Brand Book and similar) list the files attached to their Confluence page and labelled `approved`, grouped by the rules in `brandkit.DOWNLOAD_GROUPS`.
 - **Pages people keep current themselves** (Recent talks, SKA-Low progress, SKA-Mid progress) list every file attached to the page, newest first, with no label needed. A file name starting with the year and month (`2026-10 Name Event.pptx`) shows that month. Staff need permission to add attachments to those pages.
-- **Links still to come** live in `scripts/links.py`. Until a link is filled in, the preview and local test mode show it as "link to follow", and the production theme leaves the content that depends on it out.
+- **Links to internal documents** (status slides, forms, policies) are named in `scripts/links.py`, but their addresses live in `dev/links.json`, which is not in Git: this repo is public and some of those documents open for anyone with the link. `scripts/package.py` builds the release with them and then rebuilds the committed files without them; local test mode fills them in as it serves each page. A name with no address shows as "link to follow" in the preview, and the production theme leaves the content that depends on it out.
 
 ## Canto showcase
 
