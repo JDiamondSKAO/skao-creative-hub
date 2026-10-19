@@ -1640,3 +1640,8 @@ body .announce-text a,body .announce-text a:visited {color:#0D1D2C;}
 .dark body .announce-text a,.dark body .announce-text a:visited {color:#fff;}
 .dark .announce-tag,.dark .announce-tag svg,.dark .announce-close {color:#F9B34C;}
 .dark .announce-tag {border-right-color:#F9B34C40;}
+
+/* Homepage feature card: the headline alone, centred in its panel */
+.feature-art {display:flex;flex-direction:column;justify-content:center;min-height:166px;}
+.feature-art strong {margin-top:0;}
+@media(max-width:600px){.feature-art{min-height:150px;}}
