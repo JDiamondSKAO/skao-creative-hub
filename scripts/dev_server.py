@@ -6,10 +6,11 @@ local fixtures file. Attachment downloads stream from the paths in that file.
 Links to internal documents are filled in from dev/links.json as each page is served.
 
   python3 scripts/dev_fixtures.py   # build dev/fixtures.json from your local map
-  python3 scripts/dev_server.py [--no-approved] [--no-announcement]
+  python3 scripts/dev_server.py [--no-approved] [--no-announcement] [--show-note]
 
 --no-approved     no attachment carries the "approved" label (tests fallbacks)
 --no-announcement no page carries the "announcement" label
+--show-note       show a "Local test mode" line under the header
 """
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -122,7 +123,9 @@ class Handler(SimpleHTTPRequestHandler):
             html = html.replace('data-mode="preview"', f'data-mode="confluence" data-context="" data-page-id="{PAGE_ID.get(name, "")}"', 1)
             routes = ''.join(f'<a data-page-id="{m["id"]}" href="/{n}">{htmllib.escape(m["source_title"])}</a>' for n, m in ROUTES.items())
             html = html.replace('</body>', f'<div id="hubRoutes" hidden>{routes}</div></body>', 1)
-            html = re.sub(r'<div class="wrap preview-note">.*?</div>', '<div class="wrap preview-note">Local test mode · Confluence is simulated; downloads come from your local brand bank.</div>', html, count=1)
+            # Pages look as staff see them; --show-note adds a reminder that this is local test mode.
+            note = '<div class="wrap preview-note">Local test mode · Confluence is simulated; downloads come from your local brand bank.</div>' if '--show-note' in ARGS else ''
+            html = re.sub(r'<div class="wrap preview-note">.*?</div>', note, html, count=1)
             html = links.fill(html, links.load())  # internal addresses from the gitignored dev/links.json
             body = html.encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.send_header('Cache-Control', 'no-store'); self.end_headers(); self.wfile.write(body)
