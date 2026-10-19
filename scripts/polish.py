@@ -6,7 +6,7 @@ reorganises reviewed content; it never invents files or availability.
 """
 import html, json, re
 from gethelp import MOVED
-import brandkit
+import brandkit, links
 
 def text(fragment):
  fragment = re.sub(r'<span[^>]*aria-hidden="?true"?[^>]*>.*?</span>', '', fragment, flags=re.S)
@@ -24,26 +24,27 @@ SEARCH_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" strok
 # than one section belongs to the first; later listings are cross-links.
 SECTIONS = [
  ('presentations', 'Presentations', 'presentations.html', [
-  ('Templates', ['standard-template.html', 'widescreen-template.html', 'partner-templates.html']),
-  ('Decks to reuse', ['master-deck.html', 'science-slides.html', 'low-slides.html', 'mid-slides.html', 'construction-slides.html', 'specialised-slides.html']),
+  ('Templates', ['standard-template.html', 'partner-templates.html']),
+  ('Decks to reuse', ['master-deck.html']),
+  ('Site progress', ['low-slides.html', 'mid-slides.html']),
+  ('Shared by staff', ['recent-talks.html']),
   ('How to', ['formatting-slides.html'])]),
  ('documents', 'Documents', 'documents.html', [
-  ('Templates', ['letterheads.html', 'memos.html', 'reports.html']),
+  ('Templates', ['letterheads.html', 'memos.html']),
   ('Posters', ['poster-templates.html'])]),
  ('brand', 'Brand', 'brand.html', [
   ('Artwork and files', ['logos.html', 'partner-logos.html', 'fonts.html', 'brand-book.html']),
   ('Using the brand', ['logo-guidance.html', 'colours-and-type.html', 'brand-in-practice.html']),
   ('Partner brands', ['co-branding-csiro.html', 'co-branding-sarao.html'])]),
  ('media', 'Photos and video', 'media.html', [
-  ('Photos', ['canto-access.html', 'hero-images.html', 'telescope-images.html', 'event-photos.html']),
-  ('Video', ['video.html', 'b-roll.html', 'recordings.html', 'animations.html']),
-  ('Using media', ['image-usage.html'])]),
+  ('Find and use media', ['canto-access.html', 'image-usage.html']),
+  ('Downloads', ['video.html'])]),
  ('events', 'Events', 'events.html', [
-  ('Plan', ['event-checklist.html', 'event-safety.html']),
-  ('Materials', ['stands.html', 'merchandise.html'])]),
+  ('Plan', ['event-checklist.html']),
+  ('Materials', ['stands.html'])]),
  ('guides', 'How-to guides', 'self-service.html', [
   ('Print and posters', ['making-a-poster.html', 'print-preparation.html', 'print-suppliers.html']),
-  ('Good practice', ['accessibility.html', 'firefly.html', 'formatting-slides.html'])]),
+  ('Good practice', ['accessibility.html', 'firefly.html'])]),
  ('help', 'Get help', 'working-with-us.html', [
   ('More help', ['faq.html', 'contribute.html'])]),
 ]
@@ -133,7 +134,7 @@ APPROVER = 'Communications'
 CARD_LINKS = {'standard-template.html': [('partner-templates.html', 'Partner templates')],
  'logos.html': [('partner-logos.html', 'Partner logos')],
  'partner-logos.html': [('logos.html', 'SKAO logos')],
- 'construction-slides.html': [('low-slides.html', 'SKA-Low overview'), ('mid-slides.html', 'SKA-Mid overview')]}
+ 'master-deck.html': [('low-slides.html', 'SKA-Low progress'), ('mid-slides.html', 'SKA-Mid progress'), ('recent-talks.html', 'Recent talks')]}
 
 def asset_panel(name, body, jira):
  m = re.search(r'<div class="task-intro"><div>(?:<span class="eyebrow">.*?</span>)?<p>(.*?)</p></div></div>', body, re.S)
@@ -146,14 +147,14 @@ def asset_panel(name, body, jira):
  # Version, date and approver come from the approved files themselves, so they are hidden until those load.
  release = [('version', 'Version', ''), ('updated', 'Last updated', ''), ('approved', 'Approved by', APPROVER)]
  if any(l.lower() == 'edition' for l, _ in facts): release = release[1:]
- links = ''.join(f'<a class="text-link" href="{h}">{t}</a>' for h, t in [(guide, guide_label)] + CARD_LINKS.get(name, []))
+ card_links = ''.join(f'<a class="text-link" href="{h}">{t}</a>' for h, t in [(guide, guide_label)] + CARD_LINKS.get(name, []))
  panel = (f'<div class="task-intro asset-panel" data-page-id="{STATE["ids"].get(name, "")}"><div class="asset-art {kind}" aria-hidden="true">{ART[kind]}</div><div class="asset-info">'
   f'<span class="eyebrow">{label}</span><p class="asset-purpose">{m.group(1)}</p>'
   '<dl class="asset-facts"><div class="how-to-get"><dt>Availability</dt><dd>Not yet available to download. The files appear here once they are approved.</dd></div>'
-  + ''.join(f'<div data-fact="{label.lower()}"><dt>{label}</dt><dd>' + ('<ul class="variant-list">' + ''.join(f'<li>{v}</li>' for v in value) + '</ul>' if isinstance(value, list) else value) + '</dd></div>'
-    for label, value in facts)
+  + ''.join(links.needs(f'<div data-fact="{label.lower()}"><dt>{label}</dt><dd>' + ('<ul class="variant-list">' + ''.join(f'<li>{v}</li>' for v in value) + '</ul>' if isinstance(value, list) else value) + '</dd></div>',
+    'pending-link' not in str(value)) for label, value in facts)
   + ''.join(f'<div data-fact="{key}" class="release-fact" hidden><dt>{label}</dt><dd>{value}</dd></div>' for key, label, value in release) + '</dl>'
-  f'<div class="asset-actions">{links}</div>'
+  f'<div class="asset-actions">{card_links}</div>'
   '<div class="asset-downloads" data-downloads hidden></div></div></div>')
  body = body.replace(m.group(0), panel).replace(n.group(0), '')
  return re.sub(r'<aside class="next-step"><div><h2>Choose a different starting point</h2>.*?</aside>', '', body, flags=re.S)
@@ -308,11 +309,11 @@ def nav(current=''):
 FULL_WIDTH = {sec[2] for sec in SECTIONS} | {'resources.html'}
 
 TILES = [
- ('presentations', 'slides', 'Templates, reusable decks and formatting help.', ['standard-template.html', 'master-deck.html', 'formatting-slides.html']),
- ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'reports.html', 'poster-templates.html']),
+ ('presentations', 'slides', 'Templates, decks, site progress and recent talks.', ['standard-template.html', 'master-deck.html', 'recent-talks.html']),
+ ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'memos.html', 'poster-templates.html']),
  ('brand', 'brand', 'Logos, colours, fonts and partner rules.', ['logos.html', 'colours-and-type.html', 'fonts.html']),
- ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'hero-images.html', 'image-usage.html']),
- ('events', 'events', 'Stands, print and merchandise for events.', ['event-checklist.html', 'stands.html', 'merchandise.html']),
+ ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'video.html', 'image-usage.html']),
+ ('events', 'events', 'Stands, print and merchandise for events.', ['event-checklist.html', 'stands.html']),
  ('guides', 'guides', 'Do-it-yourself checks for common jobs.', ['making-a-poster.html', 'print-preparation.html', 'accessibility.html']),
 ]
 TILE_ART = {**ART,
@@ -340,8 +341,7 @@ def latest_strip():
 
 # Canto showcase slots: the gallery on Photos and video, and strips on topic pages
 # matched to album names. They stay hidden until the synced manifest has matching albums.
-CANTO_STRIPS = {'telescope-images.html': 'telescope telescopes ska-low ska-mid', 'hero-images.html': 'hero heroes banner', 'event-photos.html': 'event events',
- 'animations.html': 'animation animations', 'video.html': 'video videos'}
+CANTO_STRIPS = {'video.html': 'video videos'}
 
 def canto_show(words, heading, eyebrow, wide=False):
  """A view-only slideshow: it shows what is in Canto; the button beside it opens the library."""
@@ -355,6 +355,13 @@ def canto_show(words, heading, eyebrow, wide=False):
   '<div class="show-foot"><p class="show-note">A few of the approved images in the library. Open Canto to search everything, see each credit and download.'
   + (' First time? Choose <strong>Register Now</strong> and use your SKAO email address.' if wide else '') + '</p></div>'
   '<p class="show-collections" hidden></p></section>')
+
+def site_photos():
+ """Weekly all-hands photos from each site, in their own Canto albums."""
+ return links.needs('<section class="site-photos"><div><p class="eyebrow">From the sites</p><h2>Weekly all-hands photos</h2>'
+  '<p>Photos shared at the weekly all-hands, newest first, with captions and credits.</p></div><div class="site-photo-links">'
+  + links.pending(links.ALLHANDS_LOW, 'SKA-Low', 'button secondary') + links.pending(links.ALLHANDS_MID, 'SKA-Mid', 'button secondary') + '</div></section>',
+  links.ALLHANDS_LOW or links.ALLHANDS_MID)
 
 def canto_gallery(canto):
  return canto_show('', 'A look inside the staff media library', 'Staff media library', wide=True)
@@ -384,7 +391,7 @@ def revise(pages, meta, jira, canto=''):
  # Canto slots go in after the landing layout exists, so they never land in the side panel.
  title, body = pages['media.html']
  at = body.find('<div class="landing-layout">')
- pages['media.html'] = (title, body[:at] + canto_gallery(canto) + body[at:] if at >= 0 else body + canto_gallery(canto))
+ pages['media.html'] = (title, body[:at] + canto_gallery(canto) + site_photos() + body[at:] if at >= 0 else body + canto_gallery(canto) + site_photos())
  for name, words in CANTO_STRIPS.items():
   title, body = pages[name]
   m = re.search(r'<div class="media-handoff">.*?</div></div>', body, re.S)

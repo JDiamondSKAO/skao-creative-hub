@@ -18,6 +18,16 @@ SKIP = ('/ADMIN/', '/DEVELOPMENT/', '/LINKS/', '/_LEGACY', '/_REVIEW', '/.')
 spec = json.loads((DEV / 'brandbank-map.json').read_text())
 base = Path(spec['root'])
 out, missing = [], []
+# Example files with their own names, for pages people fill themselves (talks, site progress):
+# {"page": "recent-talks.html", "title": "2026-10 Example talk.pptx", "from": "glob of any stand-in file"}.
+# The date at the start of the title becomes the upload date, so the newest example sorts first.
+for ex in spec.get('examples', []):
+    found = sorted(p for p in base.glob(ex['from']) if p.is_file())
+    if not found: missing.append(f"{ex['page']}: {ex['from']}"); continue
+    import re as _re
+    d = _re.match(r'(\d{4})-(\d{2})', ex['title'])
+    when = datetime(int(d[1]), int(d[2]), 15, tzinfo=timezone.utc).isoformat() if d else datetime.now(timezone.utc).isoformat()
+    out.append({'page': ex['page'], 'title': ex['title'], 'path': str(found[0]), 'size': found[0].stat().st_size, 'labels': [], 'when': when})
 for page, patterns in spec['pages'].items():
     for pattern in patterns:
         found = sorted(p for p in base.glob(pattern) if p.is_file() and not any(s in '/' + str(p.relative_to(base)) + '/' for s in SKIP))

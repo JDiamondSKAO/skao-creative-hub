@@ -18,10 +18,12 @@ PACK = {
   ('Choose', 'Use the version whose label matches your content’s information classification.'),
   ('Google Slides', 'Also available as a Google Slides template. ' + pending(GOOGLE_SLIDES, 'Open in Google Slides')),
  ],
- 'widescreen-template.html': [
-  ('Format', 'PowerPoint (.pptx), 16:9'),
-  ('Note', 'The current SKAO presentation templates are all 16:9, so this is the same layout as the <a href="standard-template.html">Standard SKAO template</a>.'),
-  ('Google Slides', 'Also available as a Google Slides template. ' + pending(GOOGLE_SLIDES, 'Open in Google Slides')),
+ 'master-deck.html': [
+  ('Planned', ['About the SKAO', 'Science case', 'Construction progress, both sites', 'SRCNet', 'Working with local communities', 'Specialised topics']),
+ ],
+ 'memos.html': [
+  ('Format', 'Word (.docx)'),
+  ('Includes', ['Memo template', 'Report template']),
  ],
  'partner-templates.html': [
   ('Format', 'PowerPoint (.pptx), 16:9; the SRCNet template also comes as Keynote (.key)'),
@@ -73,6 +75,16 @@ DOWNLOAD_GROUPS = {
  'partner-logos.html': [
   {'group': 'SRCNet', 'note': 'The network logo and avatar', 'match': 'srcnet_(logo|avatar)', 'strip': r'\bsrcnet\b|\brgb\b|\bmono'},
   {'group': 'SRCNet regional centres', 'note': 'One logo pack per centre', 'match': 'src'}],
+ 'master-deck.html': [
+  {'group': 'About the SKAO', 'match': 'about|master|overview|introduc'},
+  {'group': 'Science case', 'match': 'science'},
+  {'group': 'Construction progress', 'match': 'construction|progress'},
+  {'group': 'SRCNet', 'match': 'srcnet|rcn'},
+  {'group': 'Working with local communities', 'match': 'communit'},
+  {'group': 'Specialised topics', 'match': '.'}],
+ 'memos.html': [
+  {'group': 'Memos', 'match': 'memo'},
+  {'group': 'Reports', 'match': 'report'}],
  'video.html': [
   {'group': 'Logo intros and outros: landscape', 'note': '16:9, for most video', 'match': '^logo_flare(?!_portrai)'},
   {'group': 'Logo intros and outros: portrait', 'note': '9:16, for social stories and reels', 'match': '^logo_flare_portrai', 'strip': r'\bportrai[tr]\b'},
@@ -177,5 +189,5 @@ def apply(pages):
    '<p>Ask for the artwork before briefing something new.</p></section>')
   at = body.find('<section class="reading-section">')
   return body[:at] + reuse + body[at:]
- edit('merchandise.html', merch)
+ edit('stands.html', merch)
  return pages

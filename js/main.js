@@ -485,6 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function refreshAvailability() {
     const panel = $(".asset-panel[data-page-id]"), pageId = panel?.dataset.pageId || document.body.dataset.pageId;
     if (!panel && !pageId) return;
+    if ($("[data-attachments]")) return; // these pages list every file themselves
     const slot = panel?.querySelector("[data-downloads]");
     if (document.body.dataset.mode === "preview") {
       if (slot) {
@@ -516,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
       arrive();
       return;
     }
-    panel.querySelectorAll('.how-to-get, [data-fact=versions], [data-fact=sizes], [data-fact="partner versions"]').forEach((el) => el.remove());
+    panel.querySelectorAll('.how-to-get, [data-fact=versions], [data-fact=sizes], [data-fact="partner versions"], [data-fact=planned]').forEach((el) => el.remove());
     release(panel, mine.filter((f) => safeLink(ctx + (f._links?.download || ""))));
     panel.after(section);
     beside(section);
@@ -545,6 +546,58 @@ document.addEventListener("DOMContentLoaded", () => {
     const h = read.querySelector("h2"); h.id = "beforeUse"; h.className = "rail-title";
     card.append(...read.childNodes);
     section.replaceWith(wrap); wrap.append(section, card); read.remove();
+  }
+  // Pages people keep current themselves (talks, site progress): every file on the page, newest first.
+  // No "approved" label is needed, so adding a file is the whole job.
+  const fileList = $("[data-attachments]");
+  if (fileList) loadAttachments(fileList);
+  async function loadAttachments(box) {
+    const list = box.querySelector("[data-attachment-list]"), pageId = document.body.dataset.pageId;
+    const note = (text) => { const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = text; list.replaceChildren(p); };
+    if (document.body.dataset.mode === "preview" || !pageId) { note("Preview: in Confluence, every file added to this page is listed here, newest first."); return; }
+    const ctx = document.body.dataset.context || "";
+    const add = safeLink(ctx + "/pages/viewpageattachments.action?pageId=" + encodeURIComponent(pageId));
+    if (add) {
+      const a = document.createElement("a"); a.className = "text-link attachments-add"; a.href = add; a.textContent = box.dataset.addLabel || "Add a file";
+      box.querySelector(".attachments-head")?.append(a);
+    }
+    let files = [];
+    try {
+      const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200", expand: "version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+      if (!res.ok) { note("The files on this page could not be loaded."); return; }
+      files = ((await res.json()).results || []).filter((f) => !/^canto-|\.json$/i.test(String(f.title || "")));
+    } catch { note("The files on this page could not be loaded."); return; }
+    const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const rows = files.map((f) => {
+      const title = String(f.title || ""), ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase();
+      const href = safeLink(ctx + (f._links?.download || ""));
+      // "2026-10 Name Event.pptx" reads as "Name Event", given October 2026.
+      const base = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").trim();
+      const dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
+      const month = dm && +dm[2] >= 1 && +dm[2] <= 12 ? MONTHS[+dm[2] - 1] + " " + dm[1] : "";
+      return { title, ext, href, name: dm ? dm[3].trim() : base, month, when: Date.parse(f.version?.when || "") || 0, size: f.extensions?.fileSize };
+    }).filter((r) => r.href).sort((x, y) => y.when - x.when);
+    if (!rows.length) { note(box.dataset.empty || "Nothing here yet."); return; }
+    const fmt = (t) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(t)); } catch { return ""; } };
+    const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+    const group = document.createElement("section"); group.className = "dl-group file-group";
+    const ul = document.createElement("ul");
+    rows.forEach((r, i) => {
+      const li = document.createElement("li"); li.className = "dl-row file-row";
+      const text = document.createElement("span"); text.className = "file-text";
+      const name = document.createElement("strong"); name.textContent = r.name;
+      if (i === 0) { const tag = document.createElement("span"); tag.className = "file-latest"; tag.textContent = "Latest"; name.append(tag); }
+      const meta = document.createElement("span"); meta.className = "file-meta";
+      meta.textContent = [r.month, r.when && "added " + fmt(r.when)].filter(Boolean).join(", ").replace(/^added/, "Added");
+      text.append(name, meta);
+      const a = document.createElement("a"); a.className = "dl-file"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title;
+      a.setAttribute("aria-label", `Download ${r.name}, ${r.ext.toUpperCase()}${size(r.size) ? ", " + size(r.size) : ""}`);
+      const b = document.createElement("b"); b.textContent = r.ext.toUpperCase(); b.dataset.ext = r.ext;
+      const small = document.createElement("small"); small.textContent = size(r.size);
+      a.append(b, small);
+      li.append(text, a); ul.append(li);
+    });
+    group.append(ul); list.replaceChildren(group);
   }
   // Downloads grouped by the choice people are making: classification, office, partner, then file type.
   function renderDownloads(files, ctx) {

@@ -72,7 +72,7 @@ for name,(title,body) in PAGES.items():
 for folder in ['css','js','images','fonts']:shutil.copytree(R/folder,D/folder,dirs_exist_ok=True)
 index=[{'title':t,'href':name,'group':INTERIOR_META.get(name,{}).get('group',''),'excerpt':{'request.html':'Prepare a brief and submit a creative request.','contribute.html':'Share slides, photos, video or corrections for review.'}.get(name) or summary(body),'keywords':text(re.sub(r'<section class="catalogue".*?</section>','',body,flags=re.S))} for name,(t,body) in PAGES.items() if name!='index.html' and name not in gethelp.MOVED]
 # Moved pages stay findable by their old names and open the part of Get help that holds them.
-index+=[{'title':PAGES[name][0],'href':url,'group':'Get help','excerpt':'Now part of Get help: '+part+'.','keywords':PAGES[name][0]+' '+part} for name,(url,part) in gethelp.MOVED.items() if url.startswith(gethelp.HOME+'#')]
+index+=[{'title':PAGES[name][0],'href':url,'group':'Get help' if url.startswith(gethelp.HOME) else INTERIOR_META.get(url,{}).get('group',''),'excerpt':('Now part of Get help: ' if url.startswith(gethelp.HOME) else 'Now part of ')+part+'.','keywords':PAGES[name][0]+' '+part} for name,(url,part) in gethelp.MOVED.items() if url!='index.html' and name not in gethelp.RETIRED and (url.startswith(gethelp.HOME+'#') or not url.startswith(gethelp.HOME))]
 # Retired pages people may still look for explain where the work went.
 index+=[{'title':PAGES[name][0],'href':name,'group':INTERIOR_META.get(name,{}).get('group',''),'excerpt':eyebrow+'.','keywords':PAGES[name][0]+' '+message} for name,(eyebrow,message,searchable) in gethelp.RETIRED.items() if searchable]
 (D/'search-index.json').write_text(json.dumps(index))
@@ -155,6 +155,10 @@ routes='''<div id="hubRoutes" hidden>
 #hubRoute($pages.home)
 </div>'''
 prod=prod.replace('</body>',routes+'</body>')
+# Staff never see "link to follow": production leaves out whatever still waits for its link.
+import links
+prod=links.strip_pending(prod)
+assert 'pending-link' not in prod and '<!--pending' not in prod
 # Pages not yet in Confluence are matched by title until their IDs are known.
 for page_id,title in PLANNED.items():
  prod=prod.replace(f'$page.id.toString() == "{page_id}"',f'$page.title == "{title}"').replace(f'data-page-id="{page_id}"','data-page-id="$page.id"')

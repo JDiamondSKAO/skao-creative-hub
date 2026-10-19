@@ -75,6 +75,17 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         url = urlparse(self.path)
+        # Every file on one page, whatever its labels (Recent talks and the site progress pages).
+        m = re.fullmatch(r'/rest/api/content/(\d+)/child/attachment', url.path)
+        if m:
+            rows = [r for r in attachments(False) if r['container']['id'] == m.group(1)]
+            return self.send_json({'results': rows})
+        if url.path == '/pages/viewpageattachments.action':
+            body = ('<!doctype html><meta charset="utf-8"><title>Attachments</title><body style="font:16px system-ui;margin:3rem;max-width:40rem">'
+                    '<h1>Page attachments</h1><p>Local test mode. In Confluence this opens the page\'s attachments, where you add or update files. '
+                    'They then appear on the Hub page, newest first.</p><p><a href="javascript:history.back()">Back</a></p>').encode()
+            self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.end_headers(); self.wfile.write(body)
+            return
         if url.path == '/rest/api/content/search':
             q = parse_qs(url.query)
             return self.send_json({'results': search(q.get('cql', [''])[0], int(q.get('limit', ['25'])[0]))})

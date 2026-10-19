@@ -1440,12 +1440,6 @@ body .content-body a.dl-file:any-link {justify-content:flex-start;min-width:122p
 .dl-file b {min-width:2.9em;}
 .dl-file small {min-width:4.6em;margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;}
 
-/* Presentations: sharing a deck is the last row of the decks people reuse */
-body .content-body a.dir-row.dir-add:any-link {margin-top:6px;border:1px dashed color-mix(in srgb,var(--link) 30%,var(--line));border-radius:10px;}
-body .content-body a.dir-row.dir-add:any-link:hover {border-style:solid;border-color:color-mix(in srgb,var(--link) 55%,var(--line));}
-.dir-row.dir-add:after {content:"+";font-size:1.25rem;line-height:1;}
-.dir-row.dir-add:hover:after {transform:rotate(90deg);}
-
 /* ===== 2.16: third review round ===== */
 /* Intro actions sit with their text, not on the far edge of the page */
 .task-intro:not(.asset-panel) {flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:16px;}
@@ -1535,3 +1529,30 @@ body .content-body a.dir-row.dir-add:any-link:hover {border-style:solid;border-c
 .dark .dl-group[data-site="uk"] {--site:#8e88ff;}
 .dark .dl-group[data-site="au"] {--site:#d6b07a;}
 .content-body .dl-group[data-site] h3 {color:color-mix(in srgb,var(--site) 70%,var(--ink));}
+
+/* ===== 2.17: pages people keep current themselves ===== */
+/* Every file on the page, newest first: talks and site progress slides */
+.attachments {margin:0 0 30px;}
+.attachments-head {display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.content-body .attachments-head h2 {margin:0;font-size:1.15rem;}
+.attachments-add {font-size:.86rem;font-weight:700;}
+.attachments-note {margin:0;padding:14px 16px;border:1px dashed var(--line);border-radius:12px;font-size:.86rem;color:var(--muted);}
+.file-row {padding:10px 16px;}
+.file-text {display:flex;flex-direction:column;gap:2px;min-width:0;}
+.file-text strong {display:flex;align-items:center;gap:8px;font-size:.93rem;line-height:1.35;color:var(--ink);}
+.file-meta {font-size:.78rem;color:var(--muted);}
+.file-latest {padding:1px 7px;border-radius:999px;background:var(--tint);color:var(--link);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+@media(max-width:600px){.file-row{flex-wrap:wrap;}}
+
+/* Site progress: the live dashboard sits with its one action */
+.live-link {display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;margin:0 0 26px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--surface);}
+.content-body .live-link h2 {margin:0 0 4px;font-size:1.05rem;}
+.live-link p {margin:0;font-size:.88rem;color:var(--muted);}
+
+/* Photos and video: weekly all-hands photos from each site */
+.site-photos {display:flex;align-items:center;justify-content:space-between;gap:14px 24px;flex-wrap:wrap;margin:0 0 34px;padding:18px 22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,#b5814e 7%,var(--bg)),var(--bg) 70%);}
+.dark .site-photos {background:linear-gradient(135deg,color-mix(in srgb,#d6b07a 9%,var(--bg)),var(--bg) 70%);}
+.site-photos .eyebrow {margin:0 0 4px;}
+.content-body .site-photos h2 {margin:0 0 4px;font-size:1.1rem;}
+.site-photos p:not(.eyebrow) {margin:0;font-size:.88rem;color:var(--muted);}
+.site-photo-links {display:flex;gap:10px;flex-wrap:wrap;}

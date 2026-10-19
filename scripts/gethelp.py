@@ -25,12 +25,27 @@ MOVED = {
  'archive.html': ('index.html', 'Just added, on the homepage'),
  'email-signatures.html': ('documents.html', 'Documents'),
  'canto-guide.html': ('canto-access.html', 'Using the Canto library'),
+ # 2.17: pages folded into fuller ones.
+ 'widescreen-template.html': ('standard-template.html', 'Standard SKAO template'),
+ 'science-slides.html': ('master-deck.html', 'Decks to reuse'),
+ 'construction-slides.html': ('master-deck.html', 'Decks to reuse'),
+ 'specialised-slides.html': ('master-deck.html', 'Decks to reuse'),
+ 'reports.html': ('memos.html', 'Memo and report templates'),
+ 'hero-images.html': ('media.html', 'Photos and video'),
+ 'telescope-images.html': ('media.html', 'Photos and video'),
+ 'event-photos.html': ('media.html', 'Photos and video'),
+ 'b-roll.html': ('media.html', 'Photos and video'),
+ 'recordings.html': ('media.html', 'Photos and video'),
+ 'animations.html': ('media.html', 'Photos and video'),
+ 'event-safety.html': ('events.html', 'Plan event materials'),
+ 'merchandise.html': ('stands.html', 'Stands and merchandise'),
 }
 
 # Retired pages say why, rather than only where to go: (eyebrow, message, searchable).
 RETIRED = {
  'email-signatures.html': ('Now looked after by IT', 'Email signatures are now managed by IT. For a new or updated signature, contact the IT service desk.', True),
  'canto-guide.html': ('This page has moved', 'All the Canto guidance is now on one page: Using the Canto library.', False),
+ 'widescreen-template.html': ('This page has moved', 'All SKAO presentation templates are 16:9, so the Standard SKAO template is the widescreen one.', False),
 }
 
 TEMPLATE = '\n'.join([
@@ -151,10 +166,6 @@ def rename(h):
   h = h.replace(o, n)
  return h
 
-# Presentations: sharing a deck sits at the end of the decks people reuse.
-SHARE_ROW = ('<li><a class="dir-row dir-add" href="contribute.html"><span class="dir-text"><strong>Share a deck</strong>'
- '<span>Given a talk others could reuse? Send it for review and it can join this list.</span></span></a></li>')
-
 def apply(pages, jira):
  for name, target in MOVED.items():
   if name in pages: pages[name] = (pages[name][0], moved(pages[name][0], target, name))
@@ -163,10 +174,6 @@ def apply(pages, jira):
  pages['contribute.html'] = ('Share material', share(jira))
  pages = {n: (t, b if n in MOVED else rename(trim_asks(relink(b)))) for n, (t, b) in pages.items()}
  pages['resources.html'] = ('All resources', pages['resources.html'][1])
- t, b = pages['presentations.html']
- g = b.find('<h2>Decks to reuse')
- at = b.find('</ul></section>', g) if g >= 0 else -1
- if at > 0: pages['presentations.html'] = (t, b[:at] + SHARE_ROW + b[at:])
  t, b = pages['print-preparation.html']
  pages['print-preparation.html'] = (t, b.replace('<a href="working-with-us.html" class="text-link">Brief the print work', '<a href="working-with-us.html#print" class="text-link">Brief the print work'))
  return pages

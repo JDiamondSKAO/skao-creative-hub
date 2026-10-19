@@ -38,9 +38,15 @@ python3 scripts/dev_server.py --no-announcement  # no announcement banner
 
 `dev/` is excluded from Git. The map points at local files, which are streamed on download and never copied into the repository.
 
+## Files on a page
+
+- **Resource pages** (templates, logos, the Brand Book and similar) list the files attached to their Confluence page and labelled `approved`, grouped by the rules in `brandkit.DOWNLOAD_GROUPS`.
+- **Pages people keep current themselves** (Recent talks, SKA-Low progress, SKA-Mid progress) list every file attached to the page, newest first, with no label needed. A file name starting with the year and month (`2026-10 Name Event.pptx`) shows that month. Staff need permission to add attachments to those pages.
+- **Links still to come** live in `scripts/links.py`. Until a link is filled in, the preview and local test mode show it as "link to follow", and the production theme leaves the content that depends on it out.
+
 ## Canto showcase
 
-Photos and video shows a gallery of the Canto **Staff media library** folder, and Telescope imagery, Hero images and Event photography show matching albums. Staff browsers never talk to Canto: `scripts/canto_sync.py` copies web-sized previews and a manifest (`canto-showcase.json`) into attachments on one Hub page, and the theme reads them from Confluence. Tiles open the asset in Canto.
+Photos and video shows a slideshow of the Canto **Staff media library** folder, and Video and animation shows matching video albums. Staff browsers never talk to Canto: `scripts/canto_sync.py` copies web-sized previews and a manifest (`canto-showcase.json`) into attachments on one Hub page, and the theme reads them from Confluence.
 
 ```sh
 export CANTO_DOMAIN=skao CANTO_APP_ID=... CANTO_APP_SECRET=...   # or CANTO_API_KEY (a generated token)

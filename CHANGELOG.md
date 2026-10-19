@@ -1,5 +1,23 @@
 # Changes
 
+## 2.17.0 Fewer, fuller pages
+
+The Hub goes from 51 pages to 38, and adds the three things asked for in the repository request: site progress, recent talks and the sites' weekly photos.
+
+- **Presentations:**
+  - Widescreen template is gone: every SKAO template is 16:9, so the Standard SKAO template is the widescreen one.
+  - The six reusable decks become one **Decks to reuse** page that grows as files land: about the SKAO, science case, construction progress, SRCNet, local communities and specialised topics.
+  - SKA-Low and SKA-Mid overviews become **SKA-Low progress** and **SKA-Mid progress**: the team's live dashboard and every slide deck the team adds, newest first.
+  - New **Recent talks**: staff add their own slides, shown newest first, labelled as not reviewed. "Share a deck" is folded into it.
+- **Pages people keep current themselves** (Recent talks and the progress pages) list every file on the page, so adding a file in Confluence is the whole job; no "approved" label needed. Names starting with the year and month ("2026-10 …") show the month.
+- **Photos and video:** the six topic pages that only pointed to Canto are folded into the landing, which keeps their search tips under "Looking for something specific?". It also gets a "Weekly all-hands photos" card linking the SKA-Low and SKA-Mid albums.
+- **Documents:** Memo and report templates are one page.
+- **Events:** Stands and merchandise are one page; event safety is a short note with the HSSE link on the landing.
+- **How-to guides:** Format a presentation is listed once, under Presentations.
+- **Links still to come** (Google Slides, logo request form, AI policy, dashboards, all-hands albums) show as "link to follow" in the preview and local test mode, and are left out of the live theme until they arrive.
+- Old addresses show a short "this page has moved" note, and search still finds them by their old names.
+- The folded pages are kept as they were in `archive/removed-v2.16.html` and at the git tag `v2.16.0`.
+
 ## 2.16.0 Third round of board feedback
 
 - **Main cards on resource pages** no longer carry "Ask for this file". Pages without files yet say "Not yet available to download". Once the approved files load, the card shows the version, the last updated date and "Approved by Communications", read from the files themselves (Brand Book keeps its edition instead of a version).

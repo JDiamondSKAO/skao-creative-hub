@@ -28,7 +28,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual(['video','print','business-cards','what-happens-next','what-we-do'].map(id=>!!ghd.getElementById(id)),[true,true,true,true,false]);
  assert(ghq('.brief-card .brief-send a.button[href*="servicedesk"]'),'the helpdesk button closes the brief card');assert(!ghq('.gh-intro a'),'no button beside the intro');assert.equal(ghd.querySelectorAll('.gh-steps li').length,4);
  assert(!ghq('#briefForm'),'no brief form: the checklist and template replace it');gh.window.close();
- for(const [old,to] of [['request.html','working-with-us.html'],['video-request.html','working-with-us.html#video'],['timing.html','working-with-us.html#what-happens-next'],['help.html','faq.html'],['creative-services.html','working-with-us.html'],['canto-guide.html','canto-access.html'],['email-signatures.html','documents.html']]){
+ for(const [old,to] of [['request.html','working-with-us.html'],['video-request.html','working-with-us.html#video'],['timing.html','working-with-us.html#what-happens-next'],['help.html','faq.html'],['creative-services.html','working-with-us.html'],['canto-guide.html','canto-access.html'],['email-signatures.html','documents.html'],['widescreen-template.html','standard-template.html'],['science-slides.html','master-deck.html'],['reports.html','memos.html'],['hero-images.html','media.html'],['event-safety.html','events.html'],['merchandise.html','stands.html']]){
   const mv=dom(old).window.document;assert.equal(mv.querySelector('.moved-note a.button').getAttribute('href'),to,old+' points to its new home');}
  assert(dom('email-signatures.html').window.document.querySelector('.moved-note').textContent.includes('managed by IT'),'retired signatures page says why');
  const share=dom('contribute.html').window.document;assert(!share.querySelector('.task-intro a.button'),'Share material has no helpdesk button');assert(share.querySelector('.task-intro p a[href*="servicedesk"]'));
@@ -55,7 +55,8 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  for(const t of ['presentations','documents','brand','media'])assert(rq(`[data-type-filter="${t}"]`),t);rd.window.close();pass('Templates and assets is one full-width catalogue with type filters instead of duplicate cards');
  const pd=new JSDOM(fs.readFileSync(path.join(root,'docs/presentations.html'),'utf8'));
  const pdoc=pd.window.document,destinations=[...pdoc.querySelectorAll('.directory .dir-row')].map(a=>a.getAttribute('href'));
- for(const f of ['standard-template.html','widescreen-template.html','master-deck.html','science-slides.html','low-slides.html','mid-slides.html','construction-slides.html','specialised-slides.html','formatting-slides.html'])assert(destinations.includes(f),f);
+ for(const f of ['standard-template.html','partner-templates.html','master-deck.html','low-slides.html','mid-slides.html','recent-talks.html','formatting-slides.html'])assert(destinations.includes(f),f);
+ assert.deepEqual([...pdoc.querySelectorAll('.directory .dir-group h2')].map(h=>h.firstChild.textContent.trim()),['Templates','Decks to reuse','Site progress','Shared by staff','How to']);assert(!pdoc.querySelector('.dir-add'),'no separate share row: Recent talks covers it');
  assert.equal(new Set(destinations).size,destinations.length);assert(!pdoc.querySelector('details .dir-row'),'page links are never collapsed');const railItems=[...pdoc.querySelectorAll('.landing-rail details.rail-item')];assert.equal(railItems.length,3);assert(railItems[0].open&&!railItems[1].open,'first piece of advice open, the rest one click away');assert(!pdoc.querySelector('.landing-rail a.button'),'no on-request box: help lives in the footer');assert(!pdoc.querySelector('.dir-meta.req,.dir-legend'),'no status dots or legend');assert(pdoc.querySelector('.landing-rail .source-check'));assert(pdoc.querySelector('.landing-rail .reuse-decision'));
  pass('Presentations landing shows every presentation page, grouped and visible, with freshness/reuse guidance');
  for(const id of ['381891696','381891810']){const out=Velocity.render(tpl,{page:page(id,'Test'),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,title)=>'/crh/'+encodeURIComponent(title)}});const doc=new JSDOM(out).window.document;assert(doc.querySelector(id==='381891696'?'.page-grid.full-width .catalogue':'.content-body .task-intro a[href*="servicedesk"]'));assert(![...doc.querySelectorAll('a')].some(a=>a.getAttribute('href').includes('$link')));}pass('Catalogue and contribution landing pages render in the production template');
@@ -63,7 +64,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   assert.equal(doc.querySelector('.asset-panel').dataset.pageId,'555001',title+' reads its own attachments');assert.equal(doc.querySelector('.sidebar .section-nav h2').textContent,section);assert(!out.includes('99000000'),'no stand-in IDs in production');}
  pass('New partner pages render in production by title, before their page IDs are known');
  const routes=JSON.parse(fs.readFileSync(path.join(root,'evidence/interior-route-map.json')));
- assert.equal(Object.keys(routes).length,62);
+ assert.equal(Object.keys(routes).length,63);
  for(const [file,route] of Object.entries(routes)){
   const out=Velocity.render(tpl,{page:page(route.id,route.source_title),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,title)=>'/crh/'+encodeURIComponent(title)}});
   const doc=new JSDOM(out).window.document;
@@ -94,7 +95,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(quick.length>=10);assert(quick.every(h=>h.startsWith('/crh/')||h.startsWith('https://')),quick.join(' '));
  pass('Quick links resolve to Confluence pages in the production template');
  const cd=dom('resources.html'),cw=cd.window,cq=s=>cw.document.querySelector(s),shown=()=>[...cw.document.querySelectorAll('[data-resource]')].filter(c=>!c.closest('li').hidden).length;
- const cardTitles=[...cw.document.querySelectorAll('.resource-row strong')].map(h=>h.textContent);assert(cardTitles.length>=40);assert.equal(new Set(cardTitles).size,cardTitles.length,'catalogue titles are unique');
+ const cardTitles=[...cw.document.querySelectorAll('.resource-row strong')].map(h=>h.textContent);assert(cardTitles.length>=30&&cardTitles.length<=40,"the catalogue lists the fuller page set");assert.equal(new Set(cardTitles).size,cardTitles.length,'catalogue titles are unique');
  const total=shown();cq('[data-type-filter="brand"]').click();assert(shown()<total&&shown()>0);assert.equal(cq('[data-type-filter="brand"]').getAttribute('aria-pressed'),'true');
  cq('#resourceFilter').value='color';cq('#resourceFilter').dispatchEvent(new cw.Event('input'));assert(shown()>0,'synonyms apply to the catalogue filter');
  cq('#resourceFilter').value='zzzz';cq('#resourceFilter').dispatchEvent(new cw.Event('input'));assert.equal(shown(),0);assert(!cq('#catalogueEmpty').hidden);
@@ -104,7 +105,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  hsq('#heroSearch').value='l';hsq('#heroSearch').dispatchEvent(new hsw.Event('input'));assert(hsq('dialog').open);assert.equal(hsq('#searchInput').value,'l');assert.equal(hsq('#heroSearch').value,'');
  pass('Homepage search box hands typing over to the search dialog');hs.window.close();
  const resOut=Velocity.render(tpl,{page:page('381891696','Templates & Assets'),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,title)=>'/crh/'+encodeURIComponent(title)}});
- const rdoc=new JSDOM(resOut).window.document;const rlinks=[...rdoc.querySelectorAll('.resource-row')].map(a=>a.getAttribute('href'));assert(rlinks.length>=40);assert(rlinks.every(h=>h.startsWith('/crh/')),rlinks.find(h=>!h.startsWith('/crh/')));
+ const rdoc=new JSDOM(resOut).window.document;const rlinks=[...rdoc.querySelectorAll('.resource-row')].map(a=>a.getAttribute('href'));assert(rlinks.length>=30);assert(rlinks.every(h=>h.startsWith('/crh/')),rlinks.find(h=>!h.startsWith('/crh/')));
  assert(rdoc.querySelector('.page-band h1'));assert.equal(rdoc.querySelectorAll('.footer-base nav a').length,4);assert.equal(rdoc.querySelectorAll('.footer-cta-actions a').length,1,'one call to action');assert(rdoc.querySelector('.footer-cta a.button').getAttribute('href').includes('servicedesk'),'it opens the helpdesk');assert(rdoc.querySelector('.footer-brand img').getAttribute('src').startsWith('/theme/'));assert(rdoc.querySelector('#announcement[hidden]'),'banner stays hidden until an announcement loads');assert(rdoc.querySelector('.page-grid.full-width'));assert(!rdoc.querySelector('.sidebar'));
  pass('Production catalogue, title band and footer render with resolved Confluence links');
  const md=new JSDOM(fs.readFileSync(path.join(root,'docs/master-deck.html'),'utf8')).window.document;
@@ -138,7 +139,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  for(const a of top){const land=new JSDOM(fs.readFileSync(path.join(root,'docs',a.getAttribute('href')),'utf8')).window.document;
   assert(land.querySelector('.page-grid.full-width'),'landing is full width');assert(!land.querySelector('.sidebar'),'landing has no repeated list');
   land.querySelectorAll('.dir-row').forEach(c=>twoClicks.add(c.getAttribute('href')));}
- for(const f of Object.keys(routes).filter(f=>!['canto-guide.html','email-signatures.html','resources.html','request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html'].includes(f)))assert(twoClicks.has(f),'two clicks reach '+f);
+ for(const f of Object.keys(routes).filter(f=>!['canto-guide.html','email-signatures.html','widescreen-template.html','science-slides.html','construction-slides.html','specialised-slides.html','reports.html','hero-images.html','telescope-images.html','event-photos.html','b-roll.html','recordings.html','animations.html','event-safety.html','merchandise.html','resources.html','request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html'].includes(f)))assert(twoClicks.has(f),'two clicks reach '+f);
  const navGroups=[...nw.document.querySelectorAll('.section-nav .nav-group')];assert.equal(navGroups.map(g=>g.querySelector('h3').textContent).join('|'),'Artwork and files|Using the brand|Partner brands');
  assert(!nw.document.querySelector('.section-nav details,.section-nav summary'),'section menus hide nothing behind toggles');assert.equal(nq('.section-nav a.section-home').textContent,'Overview');assert.equal(nq('.section-nav > h2').textContent,'Brand');assert.equal(nq('.section-nav a[aria-current]').getAttribute('href'),'fonts.html');nd.window.close();
  const fq=dom('faq.html'),fqq=s=>fq.window.document.querySelector(s),qs=[...fq.window.document.querySelectorAll('.content-body > details.guidance-detail')];
@@ -162,7 +163,10 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const read=f=>new JSDOM(fs.readFileSync(path.join(root,'docs',f),'utf8')).window.document;
  const st=read('standard-template.html');assert.deepEqual([...st.querySelectorAll('.variant-list li')].map(l=>l.textContent),['Unrestricted','Staff Resources','SKAO Staff Only','For Project Use','Confidential','Strictly Confidential']);
  assert.deepEqual([...read('poster-templates.html').querySelectorAll('.variant-list li')].map(l=>l.textContent),['A0','A1','A2']);
- assert(read('widescreen-template.html').querySelector('.asset-facts a[href="standard-template.html"]'));
+ const decks=read('master-deck.html');assert.deepEqual([...decks.querySelectorAll('.asset-actions a')].map(a=>a.getAttribute('href')),['formatting-slides.html','low-slides.html','mid-slides.html','recent-talks.html']);assert(decks.querySelector('[data-fact="planned"]'));
+ assert.equal(read('memos.html').querySelector('.page-head h1').textContent,'Memo and report templates');assert(read('stands.html').body.textContent.includes('Existing designs to reuse'));
+ assert(read('standard-template.html').querySelector('[data-fact="google slides"] .pending-link'),'the review build shows what still needs a link');
+ const prodVm=fs.readFileSync(path.join(root,'page.vm'),'utf8');assert(!prodVm.includes('pending-link')&&!prodVm.includes('link to follow')&&!prodVm.includes('data-fact="google slides"'),'production leaves out content still waiting for a link');assert(!prodVm.includes('Weekly all-hands photos'),'site photo links stay out until the albums exist');
  const ct=read('colours-and-type.html');assert.equal(ct.querySelectorAll('.accent-palettes .swatch').length,30);assert(ct.querySelector('[data-copy="2745 C"]')&&ct.querySelector('[data-copy="3, 100, 35, 0"]'));
  assert(read('logo-guidance.html').body.textContent.includes('20 mm'));
  for(const f of fs.readdirSync(path.join(root,'docs')).filter(f=>f.endsWith('.html')))assert(!fs.readFileSync(path.join(root,'docs',f),'utf8').includes('Brand Book v2'),f);
@@ -203,6 +207,22 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const pl=await runGroups('partner-logos.html',['SKAO_SRCnet_logo_colour_rgb.png','SKAO_SRCnet_logo_colour_rgb.ai','SKAO_SRCnet_avatar_monowhite_rgb.eps','SKAO_ukSRC_logofiles.zip','SKAO_zaSRC_logofiles.zip']);
  assert.deepEqual(pl.out,{'SRCNet':['Logo colour','Avatar white'],'SRCNet regional centres':['ukSRC','zaSRC']});
  pass('Downloads group by classification, office and partner, merge formats into one row and use readable labels; page rules group by site, format and partner');
+ const talksId=routes['recent-talks.html'].id;let talkUrl='';
+ const tk=dom('recent-talks.html','confluence'),tw=tk.window;tw.document.body.dataset.pageId=talksId;
+ tw.fetch=async u=>{const s=String(u);if(s.includes('/child/attachment')){talkUrl=s;return {ok:true,json:async()=>({results:[
+  {title:'2026-07 Name SRCNet update.key',version:{when:'2026-07-15T10:00:00Z'},extensions:{fileSize:2097152},_links:{download:`/download/attachments/${talksId}/a.key`}},
+  {title:'2026-10 Name Science overview.pptx',version:{when:'2026-10-15T10:00:00Z'},extensions:{fileSize:4194304},_links:{download:`/download/attachments/${talksId}/b.pptx`}},
+  {title:'canto-123.jpg',version:{when:'2026-10-16T10:00:00Z'},_links:{download:`/download/attachments/${talksId}/c.jpg`}},
+  {title:'off-site.pptx',version:{when:'2026-10-17T10:00:00Z'},_links:{download:'//evil.example/x'}}]})};}
+  return {ok:true,json:async()=>({results:[]})};};
+ tw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
+ const talkQ=s=>tw.document.querySelector(s),trows=[...tw.document.querySelectorAll('.file-row')];
+ assert(talkUrl.includes(`/rest/api/content/${talksId}/child/attachment`),'every file on the page, no label needed');
+ assert.deepEqual(trows.map(r=>r.querySelector('strong').firstChild.textContent),['Name Science overview','Name SRCNet update'],'newest first, Canto thumbnails and off-site links dropped, date prefix read');
+ assert.equal(talkQ('.file-latest').textContent,'Latest');assert(talkQ('.file-meta').textContent.startsWith('October 2026, added'));
+ assert(talkQ('.attachments-add').href.includes('/pages/viewpageattachments.action?pageId='+talksId));assert.equal(talkQ('.attachments-add').textContent,'Add your talk');tk.window.close();
+ const tp=dom('recent-talks.html');assert(tp.window.document.querySelector('.attachments-note').textContent.startsWith('Preview'));tp.window.close();
+ pass('Recent talks and site progress list every file on their page, newest first, with an add link for the people who keep them current');
  const mediaId=routes['media.html'].id;
  const cantoManifest={version:1,albums:[
   {id:'a1',name:'Telescopes',path:'Asset library - Staff / Telescopes',count:40,href:'https://skao.canto.global/album/a1',assets:[
@@ -226,9 +246,10 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  kq2('.show-play').click();assert.equal(kq2('.show-play').getAttribute('aria-pressed'),'false');
  assert(kq2('.show-foot a.button[href*="canto.global"]'),'the Canto button sits under the slideshow');assert(!kq2('.content-body > .task-intro a.button'));
  assert(!kq2('.media-handoff'),'slideshow replaces the generic Canto box');cMedia.window.close();
- const cTel=await runCanto('telescope-images.html',cantoManifest),tel=cTel.window.document;assert(!tel.querySelector('.canto-show').hidden);assert.equal(tel.querySelector('.show-foot a.button').href,'https://skao.canto.global/album/a1');
- assert(tel.querySelector('.show-note').textContent.startsWith('Search by telescope'),'the page search tip moves under the slideshow');cTel.window.close();
- const cHero=await runCanto('hero-images.html',cantoManifest);assert(cHero.window.document.querySelector('.canto-show').hidden,'no matching album, nothing shown');assert(cHero.window.document.querySelector('.content-body > .task-intro a.button'),'the button stays with the intro');cHero.window.close();
+ const videoManifest={...cantoManifest,albums:[...cantoManifest.albums,{id:'a3',name:'Promo videos',path:'Asset library - Staff / Promo videos',count:3,href:'https://skao.canto.global/album/a3',assets:[{title:'Promo cut',src:`/download/attachments/${mediaId}/canto-6.jpg`,href:'https://skao.canto.global/asset/6'}]}]};
+ const cVid=await runCanto('video.html',videoManifest),vd=cVid.window.document;assert(!vd.querySelector('.canto-show').hidden);assert.equal(vd.querySelector('.show-foot a.button').href,'https://skao.canto.global/album/a3');
+ assert(vd.querySelector('.show-note').textContent.startsWith('Search for the topic'),'the page search tip moves under the slideshow');cVid.window.close();
+ const cNoVid=await runCanto('video.html',cantoManifest);assert(cNoVid.window.document.querySelector('.canto-show').hidden,'no matching album, nothing shown');assert(cNoVid.window.document.querySelector('.content-body > .task-intro a.button'),'the button stays with the intro');cNoVid.window.close();
  const cNone=await runCanto('media.html',null);assert(cNone.window.document.querySelector('.canto-show').hidden,'no cantoManifest, nothing shown');cNone.window.close();
  require('child_process').execFileSync('python3',[path.join(root,'scripts/canto_sync.py'),'--self-test'],{stdio:'pipe'});
  const cCur=await runCanto('media.html',curatedManifest),cc=cCur.window.document;

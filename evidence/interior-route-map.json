@@ -135,7 +135,7 @@
     "id": "381891709",
     "source_title": "Memo Templates",
     "group": "Documents",
-    "display_title": "Memo templates"
+    "display_title": "Memo and report templates"
   },
   "reports.html": {
     "id": "381891712",
@@ -207,7 +207,7 @@
     "id": "381891798",
     "source_title": "About SKAO Master Deck",
     "group": "Presentations",
-    "display_title": "About SKAO master deck"
+    "display_title": "Decks to reuse"
   },
   "construction-slides.html": {
     "id": "381891805",
@@ -237,13 +237,13 @@
     "id": "381891829",
     "source_title": "SKA-Low Overview",
     "group": "Presentations",
-    "display_title": "SKA-Low overview"
+    "display_title": "SKA-Low progress"
   },
   "mid-slides.html": {
     "id": "381891832",
     "source_title": "SKA-Mid Overview",
     "group": "Presentations",
-    "display_title": "SKA-Mid overview"
+    "display_title": "SKA-Mid progress"
   },
   "specialised-slides.html": {
     "id": "381891838",
@@ -321,7 +321,7 @@
     "id": "381891649",
     "source_title": "Stand Design and Materials",
     "group": "Events",
-    "display_title": "Plan stand graphics"
+    "display_title": "Stands and merchandise"
   },
   "help.html": {
     "id": "381891870",
@@ -370,5 +370,11 @@
     "source_title": "Partner logos",
     "group": "Brand",
     "display_title": "Partner logos"
+  },
+  "recent-talks.html": {
+    "id": "990000003",
+    "source_title": "Recent talks",
+    "group": "Presentations",
+    "display_title": "Recent talks"
   }
 }
