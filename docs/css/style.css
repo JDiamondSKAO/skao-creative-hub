@@ -1597,12 +1597,10 @@ body .site-photo-rows a.text-link {font-size:.84rem;}
 
 /* Compact header logo: the official SKAO lettermark as vector art, with the Hub's name */
 .nav-home {width:auto;max-width:0;gap:14px;margin-right:0;text-decoration:none;color:var(--ink);transition:max-width var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),margin var(--t-slow) var(--ease-out);}
-header.is-pinned .nav-home {width:auto;max-width:270px;margin-right:22px;}
+header.is-pinned .nav-home {width:auto;max-width:120px;margin-right:22px;}
 .nav-home .skao-mark {flex:none;display:block;width:auto;height:28px;--logo-ink:#15265c;--logo-accent:#fe3377;}
 .dark .nav-home .skao-mark {--logo-ink:#fff;--logo-accent:#fff;} /* dark mode: the all-white lettermark */
-.nav-home-title {flex:none;padding-left:14px;border-left:1px solid var(--line);font-size:1.05rem;font-weight:400;letter-spacing:-.02em;line-height:1.1;white-space:nowrap;color:var(--ink);}
-.nav-home-title strong {font-weight:700;}
-@media(max-width:1240px){.nav-home-title{display:none;}header.is-pinned .nav-home{max-width:110px;margin-right:16px;}}
+@media(max-width:1240px){header.is-pinned .nav-home{max-width:110px;margin-right:16px;}}
 @media(max-width:1000px){.nav-home .skao-mark{height:24px;}header.is-pinned .nav-home{margin-right:4px;}}
 
 /* Header search: a compact "Search ⌘K" at every width, so the row fits beside the logo and the Hub's name */
