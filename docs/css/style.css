@@ -1586,50 +1586,6 @@ body .announce-text a,body .announce-text a:visited {font-weight:650;}
 .announce-text a:hover:after {opacity:1;}
 @media(max-width:700px){.announce-tag{font-size:.74rem;padding-right:10px;margin-right:10px;}}
 
-/* ===== Navigation trim =====
-   Inner pages start in the compact one-row header (logo, sections, search, theme) under a thin brand line;
-   the full masthead stays on the homepage. No breadcrumb: the section label above the title links back. */
-body:has(.page-band) {--brand-h:0px;}
-body:has(.page-band) .brandbar {display:none;}
-body:has(.page-band) header {border-top:3px solid transparent;border-image:linear-gradient(90deg,#070068,#58005f 60%,#aa005c) 1;}
-.navrow .tool-button {flex:none;width:40px;height:40px;margin-left:10px;border:1px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);}
-.navrow .tool-button:hover,.navrow .tool-button:focus-visible {border-color:color-mix(in srgb,var(--link) 40%,var(--line));background:var(--surface);color:var(--link);}
-.page-band .page-head {padding-top:26px;}
-body .page-band .page-head a.eyebrow-link {display:inline-block;color:var(--magenta);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;padding-bottom:1px;transition:background-size var(--t) var(--ease-out);}
-.dark body .page-band .page-head a.eyebrow-link,body.dark .page-band .page-head a.eyebrow-link {color:#ff85bc;}
-body .page-band .page-head a.eyebrow-link:hover,body .page-band .page-head a.eyebrow-link:focus-visible {background-size:100% 1px;}
-/* Foot of the page: previous and next on wide screens, the "More in" list on phones */
-.page-pager {display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:22px;border-top:1px solid var(--line);}
-body .content-body .page-pager a {display:inline-flex;align-items:center;gap:10px;max-width:48%;color:var(--link);font-weight:600;text-decoration:none;}
-body .content-body .page-pager a:hover {color:var(--ink);}
-.page-pager a span {transition:transform var(--t) var(--ease-out);}
-.page-pager .pager-prev:hover span {transform:translateX(-3px);}
-.page-pager .pager-next {margin-left:auto;text-align:right;}
-.page-pager .pager-next:hover span {transform:translateX(3px);}
-@media(min-width:761px){.page-pager ~ .section-next{display:none;}}
-@media(max-width:760px){.page-pager{display:none;}}
-body:not(:has(.page-band)) .navrow .tool-button {margin-left:auto;}
-@media(max-width:1000px){
- .navrow .search-trigger {flex:1 1 0;min-width:0;}
- .navrow .search-trigger > span {display:none;}
- .navrow .search-trigger:after {content:"Search";}
- .navrow .tool-button {width:38px;height:38px;margin-left:0;}
-}
-
-/* Search: a quick answer above the results */
-body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--link) 18%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--link) 5%,var(--bg));box-shadow:none;text-decoration:none;}
-.search-answer strong {font-size:.98rem;color:var(--ink);}
-.search-answer small {font-size:.86rem;line-height:1.5;color:var(--muted);}
-.search-answer em {margin-top:2px;font-size:.84rem;font-style:normal;font-weight:600;color:var(--link);}
-/* Section headings: a quiet link button that appears on hover */
-.content-body h2 {scroll-margin-top:90px;}
-.heading-link {display:inline-grid;place-items:center;width:28px;height:28px;margin-left:6px;padding:0;border:0;border-radius:7px;background:none;color:var(--muted);vertical-align:middle;cursor:pointer;opacity:0;transition:opacity var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
-.content-body h2:hover .heading-link,.heading-link:focus-visible,.heading-link.is-copied {opacity:1;}
-.heading-link:hover {background:var(--surface);color:var(--link);}
-.heading-link.is-copied {color:#1f7a4d;}
-@media(hover:none){.heading-link{opacity:.6;}}
-/* When the page last changed, under its title */
-.page-updated {margin:10px 0 0;font-size:.8rem;color:var(--muted);}
 /* Weekly all-hands photos: a row per site, to see the album or add to it */
 .site-photo-rows {list-style:none;display:grid;gap:8px;margin:0;padding:0;}
 .site-photo-rows li {display:flex;align-items:center;gap:12px;}
@@ -1639,91 +1595,27 @@ body .site-photo-rows a.text-link {font-size:.84rem;}
 @media(max-width:700px){.site-photo-rows{grid-column:1/-1;}}
 .all-hands-note a + a,.all-hands-note .pending-link + .pending-link {margin-left:14px;}
 
-/* Section overviews: the intro sits in the left column, so "Before you start" starts at the top beside it */
-.landing-main > .task-intro {margin-bottom:28px;}
-.landing-rail {top:90px;}
 /* Compact header logo: the official SKAO lettermark as vector art, with the Hub's name */
-.nav-home {width:auto;max-width:0;gap:14px;margin-right:0;text-decoration:none;color:var(--ink);transition:max-width var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),margin var(--t-slow) var(--ease-out);}
+.nav-home {width:auto;max-width:0;gap:14px;margin-right:-20px;text-decoration:none;color:var(--ink);transition:max-width var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),margin var(--t-slow) var(--ease-out);}
 header.is-pinned .nav-home {width:auto;max-width:120px;margin-right:22px;}
 .nav-home .skao-mark {flex:none;display:block;width:auto;height:28px;--logo-ink:#15265c;--logo-accent:#fe3377;}
 .dark .nav-home .skao-mark {--logo-ink:#fff;--logo-accent:#fff;} /* dark mode: the all-white lettermark */
 @media(max-width:1240px){header.is-pinned .nav-home{max-width:110px;margin-right:16px;}}
-@media(max-width:1000px){.nav-home .skao-mark{height:24px;}header.is-pinned .nav-home{margin-right:4px;}}
+/* Until the logo slides in, it cancels the row gap so the sections line up with the logo and content above and below */
+@media(max-width:1000px){.nav-home{margin-right:-10px;}.nav-home .skao-mark{height:24px;}header.is-pinned .nav-home{margin-right:4px;}}
 
-/* Inner pages: the compact header always carries the logo and the Hub's name */
-body:has(.page-band) .nav-home {width:auto;max-width:120px;margin-right:22px;opacity:1;visibility:visible;}
-@media(max-width:1240px){body:has(.page-band) .nav-home{max-width:110px;margin-right:16px;}}
-@media(max-width:1000px){body:has(.page-band) .nav-home{margin-right:4px;}}
+/* Header search: the full "Search the Hub ⌘K" on wide screens; a compact "Search" on mid-size and small screens so the row fits */
+@media(max-width:1240px){
+ .navrow .search-trigger {min-width:0;}
+ .navrow .search-trigger > span {display:none;}
+ .navrow .search-trigger:after {content:"Search";order:1;}
+ .navrow .search-trigger kbd {order:2;margin-left:10px;}
+ .navrow .search-trigger svg {flex:none;}
+}
+@media(min-width:1001px) and (max-width:1240px){.navlinks{gap:18px;}}
+@media(max-width:1100px){.navrow .search-trigger kbd{display:none;}}
 
-/* Header search: a compact "Search ⌘K" at every width, so the row fits beside the logo and the Hub's name */
-.navrow .search-trigger {min-width:0;}
-.navrow .search-trigger > span {display:none;}
-.navrow .search-trigger:after {content:"Search";order:1;}
-.navrow .search-trigger kbd {order:2;margin-left:10px;}
-.navrow .search-trigger svg {flex:none;}
-@media(min-width:1001px){.navlinks{gap:18px;}header.is-pinned .nav-home{margin-right:18px;}}
-
-/* With dark mode in the row, the header button drops its shortcut hint (shown on hover instead) and the row's gap does the spacing */
-.navrow .search-trigger kbd {display:none;}
-.navrow .tool-button {margin-left:0;}
-body:has(.page-band) .nav-home,header.is-pinned .nav-home {margin-right:14px;}
-
-/* Dark mode: the compact header carries the masthead's navy-to-magenta, so the top of the page keeps its colour */
-.dark body:has(.page-band) header,.dark header.is-pinned {background:linear-gradient(110deg,#070068 0%,#070068 48%,#58005f 78%,#aa005c 100%);border-top:0;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a {color:#d9d6f0;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a:hover,:is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a[aria-current] {color:#fff;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .search-trigger {background:#ffffff14;border-color:#ffffff33;color:#fff;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .search-trigger:hover {background:#ffffff24;border-color:#ffffff66;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .tool-button {background:transparent;border-color:#ffffff40;color:#fff;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .tool-button:hover {background:#ffffff1f;border-color:#ffffff70;}
-:is(.dark body:has(.page-band) header,.dark header.is-pinned) .mobile-menu {background:#ffffff14;border-color:#ffffff33;color:#fff;}
-
-/* ===== One header everywhere =====
-   Every page, light or dark, has the same compact bar: navy to magenta, the white SKAO lettermark and the Hub's
-   name, the sections, search and dark mode. The masthead's slow lenses still drift behind it. */
-body {--brand-h:0px;}
-.brandbar {display:none;}
-header,.dark header,body:has(.page-band) header,.dark body:has(.page-band) header,header.is-pinned,.dark header.is-pinned {position:sticky;top:0;isolation:isolate;overflow:hidden;background:linear-gradient(110deg,#070068 0%,#070068 48%,#58005f 78%,#aa005c 100%);border-top:0;border-image:none;}
-header:before,header:after {content:"";position:absolute;z-index:-1;left:-540px;top:-320px;width:440px;height:440px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 44px #ffffff05,0 0 0 88px #ffffff04;background:radial-gradient(circle at 65% 55%,#ffffff06,transparent 68%);pointer-events:none;opacity:.65;animation:header-lens-pass 48s linear infinite;}
-header:after {top:-235px;opacity:.4;animation-delay:-24s;}
-@media(prefers-reduced-motion:reduce){header:before,header:after{animation:none;left:auto;right:-120px;}}
-header .navrow {border-bottom:0;}
-header .nav-home,header.is-pinned .nav-home,body:has(.page-band) .nav-home {width:auto;max-width:none;margin-right:14px;opacity:1;visibility:visible;color:#fff;}
-header .nav-home .skao-mark,.dark header .nav-home .skao-mark {--logo-ink:#fff;--logo-accent:#fff;}
-.nav-home-title {flex:none;padding-left:14px;border-left:1px solid #ffffff48;font-size:1.05rem;font-weight:400;letter-spacing:-.02em;line-height:1.1;white-space:nowrap;color:#fff;}
-.nav-home-title strong {font-weight:700;}
-header .navlinks a,.dark header .navlinks a {color:#d9d6f0;}
-header .navlinks a:hover,header .navlinks a:focus-visible,header .navlinks a[aria-current] {color:#fff;}
-header .navlinks a:not([aria-current]):hover {box-shadow:inset 0 -3px #ffffff40;}
-header .search-trigger,.dark header .search-trigger {background:#ffffff14;border-color:#ffffff33;color:#fff;}
-header .search-trigger:hover {background:#ffffff24;border-color:#ffffff66;color:#fff;box-shadow:none;}
-header .tool-button,header .navrow .tool-button {background:transparent;border-color:#ffffff40;color:#fff;}
-header .tool-button:hover,header .navrow .tool-button:hover {background:#ffffff1f;border-color:#ffffff70;color:#fff;}
-header .mobile-menu {background:#ffffff14;border-color:#ffffff33;color:#fff;}
-body:has(.hero-search) .navrow .search-trigger {display:flex;}
-@media(max-width:1240px){.nav-home-title{display:none;}}
-@media(max-width:1000px){header .navlinks a{border-bottom-color:#ffffff1f;}header .nav-home{margin-right:4px;}}
-body:not(:has(.page-band)) .navrow .tool-button {margin-left:0;}
-@media(max-width:480px){.navrow .search-trigger{flex:none;width:40px;padding:0;justify-content:center;}.navrow .search-trigger:after{content:none;}}
-
-/* ===== Calmer top of page =====
-   One colour band, not two: the header keeps the navy-to-magenta; the notification becomes a light warm wash.
-   No boxes in the header: search and dark mode are quiet buttons; links are soft white, the current one full white. */
-header,.dark header,body:has(.page-band) header,.dark body:has(.page-band) header,header.is-pinned,.dark header.is-pinned {background:linear-gradient(100deg,#070068 0%,#070068 52%,#3a0468 80%,#86005f 100%);}
-header:before {opacity:.32;}
-header:after {opacity:.18;}
-header .navrow {min-height:60px;}
-header .navlinks {gap:24px;}
-header .navlinks a,.dark header .navlinks a {color:#ffffffbd;font-weight:500;}
-header .navlinks a:hover,header .navlinks a:focus-visible {color:#fff;}
-header .navlinks a[aria-current] {color:#fff;font-weight:600;}
-header .navlinks a:not([aria-current]):hover {box-shadow:none;}
-.nav-home-title {border-left-color:#ffffff33;font-size:1rem;}
-header .search-trigger,.dark header .search-trigger {min-height:36px;padding:0 14px 0 12px;border:0;border-radius:999px;background:#ffffff14;color:#ffffffd9;}
-header .search-trigger:hover {background:#ffffff26;color:#fff;}
-header .tool-button,header .navrow .tool-button {width:36px;height:36px;border:0;background:transparent;color:#ffffffd9;}
-header .tool-button:hover,header .navrow .tool-button:hover {background:#ffffff1f;border:0;color:#fff;}
-@media(min-width:1001px){header .navlinks{gap:22px;}}
+/* ===== Notification bar: slim, in SKAO accent swatches ===== */
 /* The notification: a light warm wash from the same accents, slimmer and quieter */
 .announce,.dark .announce {background:linear-gradient(90deg,#fff2cf,#ffe9d4 55%,#ffe0cf);border-bottom:1px solid #f0c9a4;}
 .dark .announce {background:linear-gradient(90deg,#2d2410,#2e1d14 55%,#2f1a15);border-bottom-color:#5a3a22;}
@@ -1748,3 +1640,38 @@ body .announce-text a,body .announce-text a:visited {color:#0D1D2C;}
 .dark body .announce-text a,.dark body .announce-text a:visited {color:#fff;}
 .dark .announce-tag,.dark .announce-tag svg,.dark .announce-close {color:#F9B34C;}
 .dark .announce-tag {border-right-color:#F9B34C40;}
+
+/* ===== Navigation trim =====
+   No breadcrumb: the section label above the title links back to the section. */
+.page-band .page-head {padding-top:26px;}
+body .page-band .page-head a.eyebrow-link {display:inline-block;color:var(--magenta);text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;padding-bottom:1px;transition:background-size var(--t) var(--ease-out);}
+.dark body .page-band .page-head a.eyebrow-link,body.dark .page-band .page-head a.eyebrow-link {color:#ff85bc;}
+body .page-band .page-head a.eyebrow-link:hover,body .page-band .page-head a.eyebrow-link:focus-visible {background-size:100% 1px;}
+/* Foot of the page: previous and next on wide screens, the "More in" list on phones */
+.page-pager {display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:22px;border-top:1px solid var(--line);}
+body .content-body .page-pager a {display:inline-flex;align-items:center;gap:10px;max-width:48%;color:var(--link);font-weight:600;text-decoration:none;}
+body .content-body .page-pager a:hover {color:var(--ink);}
+.page-pager a span {transition:transform var(--t) var(--ease-out);}
+.page-pager .pager-prev:hover span {transform:translateX(-3px);}
+.page-pager .pager-next {margin-left:auto;text-align:right;}
+.page-pager .pager-next:hover span {transform:translateX(3px);}
+@media(min-width:761px){.page-pager ~ .section-next{display:none;}}
+@media(max-width:760px){.page-pager{display:none;}}
+
+/* Search: a quick answer above the results */
+body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--link) 18%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--link) 5%,var(--bg));box-shadow:none;text-decoration:none;}
+.search-answer strong {font-size:.98rem;color:var(--ink);}
+.search-answer small {font-size:.86rem;line-height:1.5;color:var(--muted);}
+.search-answer em {margin-top:2px;font-size:.84rem;font-style:normal;font-weight:600;color:var(--link);}
+/* Section headings: a quiet link button that appears on hover */
+.content-body h2 {scroll-margin-top:90px;}
+.heading-link {display:inline-grid;place-items:center;width:28px;height:28px;margin-left:6px;padding:0;border:0;border-radius:7px;background:none;color:var(--muted);vertical-align:middle;cursor:pointer;opacity:0;transition:opacity var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
+.content-body h2:hover .heading-link,.heading-link:focus-visible,.heading-link.is-copied {opacity:1;}
+.heading-link:hover {background:var(--surface);color:var(--link);}
+.heading-link.is-copied {color:#1f7a4d;}
+@media(hover:none){.heading-link{opacity:.6;}}
+/* When the page last changed, under its title */
+.page-updated {margin:10px 0 0;font-size:.8rem;color:var(--muted);}
+/* Section overviews: the intro sits in the left column, so "Before you start" starts at the top beside it */
+.landing-main > .task-intro {margin-bottom:28px;}
+.landing-rail {top:90px;}
