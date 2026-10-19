@@ -1705,3 +1705,34 @@ body:has(.hero-search) .navrow .search-trigger {display:flex;}
 @media(max-width:1000px){header .navlinks a{border-bottom-color:#ffffff1f;}header .nav-home{margin-right:4px;}}
 body:not(:has(.page-band)) .navrow .tool-button {margin-left:0;}
 @media(max-width:480px){.navrow .search-trigger{flex:none;width:40px;padding:0;justify-content:center;}.navrow .search-trigger:after{content:none;}}
+
+/* ===== Calmer top of page =====
+   One colour band, not two: the header keeps the navy-to-magenta; the notification becomes a light warm wash.
+   No boxes in the header: search and dark mode are quiet buttons; links are soft white, the current one full white. */
+header,.dark header,body:has(.page-band) header,.dark body:has(.page-band) header,header.is-pinned,.dark header.is-pinned {background:linear-gradient(100deg,#070068 0%,#070068 52%,#3a0468 80%,#86005f 100%);}
+header:before {opacity:.32;}
+header:after {opacity:.18;}
+header .navrow {min-height:60px;}
+header .navlinks {gap:24px;}
+header .navlinks a,.dark header .navlinks a {color:#ffffffbd;font-weight:500;}
+header .navlinks a:hover,header .navlinks a:focus-visible {color:#fff;}
+header .navlinks a[aria-current] {color:#fff;font-weight:600;}
+header .navlinks a:not([aria-current]):hover {box-shadow:none;}
+.nav-home-title {border-left-color:#ffffff33;font-size:1rem;}
+header .search-trigger,.dark header .search-trigger {min-height:36px;padding:0 14px 0 12px;border:0;border-radius:999px;background:#ffffff14;color:#ffffffd9;}
+header .search-trigger:hover {background:#ffffff26;color:#fff;}
+header .tool-button,header .navrow .tool-button {width:36px;height:36px;border:0;background:transparent;color:#ffffffd9;}
+header .tool-button:hover,header .navrow .tool-button:hover {background:#ffffff1f;border:0;color:#fff;}
+@media(min-width:1001px){header .navlinks{gap:22px;}}
+/* The notification: a light warm wash from the same accents, slimmer and quieter */
+.announce,.dark .announce {background:linear-gradient(90deg,#fff2cf,#ffe9d4 55%,#ffe0cf);border-bottom:1px solid #f0c9a4;}
+.dark .announce {background:linear-gradient(90deg,#2d2410,#2e1d14 55%,#2f1a15);border-bottom-color:#5a3a22;}
+.announce-inner {min-height:36px;padding-block:4px;}
+.announce-tag {color:#7a4a12;border-right-color:#7a4a1233;font-size:.76rem;}
+.announce-tag svg {color:#e07a1f;opacity:1;}
+body .announce-text a,body .announce-text a:visited {color:#1b1530;font-size:.82rem;}
+.dark .announce-tag {color:#f3c48a;border-right-color:#f3c48a33;}
+.dark .announce-tag svg {color:#f9b34c;}
+.dark body .announce-text a,.dark body .announce-text a:visited {color:#fff1dc;}
+.announce-close {width:28px;height:28px;color:#7a4a12b3;}
+.dark .announce-close {color:#f3c48ab3;}
