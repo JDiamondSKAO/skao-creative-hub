@@ -1680,3 +1680,11 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .content-body .help-share h2 {margin:0 0 6px;font-size:1.3rem;}
 .help-lead {margin:0 0 14px;color:var(--muted);}
 .help-share details {scroll-margin-top:90px;}
+
+/* Homepage quick links: one row, each tinted with its section's colour (as on All resources) */
+.welcome-copy .quick-links {gap:6px;}
+:where(.welcome-copy .quick-links a) {--c:var(--link);}
+.welcome-copy .quick-links a {min-height:32px;padding:0 11px;border-color:color-mix(in srgb,var(--c) 26%,var(--line));background:color-mix(in srgb,var(--c) 9%,var(--bg));color:color-mix(in srgb,var(--c) 80%,var(--ink));font-size:.8rem;font-weight:600;white-space:nowrap;}
+.welcome-copy .quick-links a:hover {border-color:color-mix(in srgb,var(--c) 50%,var(--line));background:color-mix(in srgb,var(--c) 16%,var(--bg));}
+.dark .welcome-copy .quick-links a {background:color-mix(in srgb,var(--c) 14%,var(--bg));color:var(--c);}
+
