@@ -1566,3 +1566,12 @@ body .sidebar .section-nav > h2 {display:flex;align-items:center;min-height:32px
 }
 @media(max-width:760px){.toc-rail{display:none;}}
 @media print{.toc-rail,.rail-toggle{display:none!important;}}
+
+/* Notification bar: a warm sweep from the accent palettes (Technology #F7BE00, Sites #F9B34C, Science #EF7C38) with dark text */
+.announce,.dark .announce {background:linear-gradient(90deg,#F7BE00,#F9B34C 45%,#EF7C38);border-bottom:0;}
+.dark .announce {background:linear-gradient(90deg,#DDA800,#E39B3E 45%,#D66A2E);}
+body .announce-text a,body .announce-text a:visited,.dark body .announce-text a {color:#1b1530;}
+.announce-tag {background:#1b1530;color:#fff;}
+.announce-close {color:#1b1530cc;}
+.announce-close:hover,.dark .announce-close:hover {background:#1b153014;color:#1b1530;}
+.announce-close:focus-visible,.announce-text a:focus-visible {outline-color:#1b1530;}

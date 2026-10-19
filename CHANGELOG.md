@@ -20,6 +20,7 @@ The Hub goes from 51 pages to 38, and adds the three things asked for in the rep
 - **Photos and video:** the slideshow uses Canto's large preview (2000 px instead of 640–800 px), loads each image just before it shows, and its caption band runs the full width. Weekly all-hands photos are one card with a single link to one Canto folder, sorted into subfolders.
 - **More in…** cards at the foot of each page no longer carry a "Next" label.
 - **All resources** opens on a search box, then the type filters. In Confluence every row is dated ("Added" for the newest approved file on that page, otherwise "Updated" for the page's last edit) and the list runs newest first, so it follows on from "Just added" on the homepage. A Sort menu switches to A to Z.
+- **Notification bar** uses a warm sweep from the accent palettes (Technology #F7BE00, Sites #F9B34C, Science #EF7C38) with dark text, instead of the SKAO navy and magenta.
 - **Side menus.** "On this page" moves to its own column on the right, away from the section menu. Both fold to a slim strip with the button at their top to give the page more room, and each viewer's choice is remembered. On narrower screens "On this page" sits in a box above the content.
 - **How-to guides** read as numbered steps, each with a short description of what to do and why, instead of tick lists. The Event materials checklist keeps its ticks.
 - Old addresses show a short "this page has moved" note, and search still finds them by their old names.
