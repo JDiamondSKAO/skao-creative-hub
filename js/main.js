@@ -382,6 +382,50 @@ document.addEventListener("DOMContentLoaded", () => {
     chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
     filterResources();
   }));
+  // All resources: dated by the newest approved file on each page, else the page's last edit, and sorted newest first.
+  const resourceList = $(".resource-list"), sortBy = $("#resourceSort");
+  const resourceRows = resourceList ? [...resourceList.children] : [];
+  function sortResources() {
+    const title = (li) => li.querySelector("strong")?.textContent.trim().toLowerCase() || "";
+    const when = (li) => Number(li.querySelector("[data-when]")?.dataset.when) || 0;
+    const rows = [...resourceRows];
+    if (sortBy?.value === "az") rows.sort((a, b) => title(a).localeCompare(title(b)));
+    else rows.sort((a, b) => when(b) - when(a));
+    resourceList.append(...rows);
+  }
+  sortBy?.addEventListener("change", sortResources);
+  if (resourceList && document.body.dataset.mode !== "preview") datedResources();
+  async function datedResources() {
+    const ctx = document.body.dataset.context || "";
+    const get = async (cql) => {
+      const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: "200", expand: "container,version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+      return res.ok ? (await res.json()).results || [] : [];
+    };
+    let files, edits;
+    try {
+      [files, edits] = await Promise.all([get('type=attachment AND space="CRH" AND label="approved" ORDER BY created DESC'), get('type=page AND space="CRH" ORDER BY lastmodified DESC')]);
+    } catch { return; }
+    const added = new Map(), edited = new Map();
+    files.forEach((f) => { const id = String(f.container?.id || ""), t = Date.parse(f.version?.when); if (id && t && !(added.get(id) >= t)) added.set(id, t); });
+    edits.forEach((p) => { const t = Date.parse(p.version?.when); if (p.id && t) edited.set(String(p.id), t); });
+    const day = (t) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(t); } catch { return ""; } };
+    let dated = 0;
+    resourceRows.forEach((li) => {
+      const row = li.querySelector("[data-resource]"), id = row?.dataset.pageId;
+      // Pages matched by title in Confluence carry this page's ID, so they stay undated.
+      if (!id || id === document.body.dataset.pageId) return;
+      const t = added.get(id) || edited.get(id);
+      if (!t) return;
+      const when = document.createElement("span");
+      when.className = "resource-when"; when.dataset.when = String(t);
+      when.textContent = (added.has(id) ? "Added " : "Updated ") + day(t);
+      row.querySelector(".resource-type")?.before(when);
+      dated++;
+    });
+    if (!dated) return;
+    $(".resource-sort").hidden = false;
+    sortResources();
+  }
   $("#clearFilters")?.addEventListener("click", () => {
     filter.value = ""; type = "all";
     chips.forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.typeFilter === "all")));

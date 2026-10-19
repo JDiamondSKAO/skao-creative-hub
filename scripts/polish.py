@@ -186,10 +186,12 @@ def catalogue(pages, meta, summaries, on_request):
    counts[key] = counts.get(key, 0) + 1
  chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
   f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label, _ in TYPES if counts.get(key))
- return ('<section class="catalogue" aria-labelledby="catalogueHeading"><div class="catalogue-head"><h2 id="catalogueHeading">Filter by type or name</h2>'
-  '<label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Filter resources by name</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Filter by name, e.g. letterhead"></label></div>'
+ # Search first, then type, then the list. In Confluence the list is dated and sorted newest first.
+ return ('<section class="catalogue" aria-label="All resources">'
+  '<label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search resources</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Search resources, e.g. letterhead or poster"></label>'
   '<div class="type-chips" role="group" aria-label="Show resource type">' + chips + '</div>'
-  '<p id="filterStatus" class="filter-status" role="status"></p>'
+  '<div class="catalogue-tools"><p id="filterStatus" class="filter-status" role="status"></p>'
+  '<label class="resource-sort" hidden>Sort <select id="resourceSort"><option value="new">Newest first</option><option value="az">A to Z</option></select></label></div>'
   '<ul class="resource-list">' + ''.join(cards) + '</ul>'
   '<div id="catalogueEmpty" class="catalogue-empty" hidden><p>Nothing matches that filter.</p><button type="button" id="clearFilters" class="button secondary">Show everything</button></div></section>')
 
@@ -400,7 +402,7 @@ def revise(pages, meta, jira, canto=''):
   m = re.search(r'<div class="media-handoff">.*?</div></div>', body, re.S)
   pages[name] = (title, body[:m.end()] + canto_strip(words, canto) + body[m.end():] if m else body)
  title, body = pages['resources.html']
- body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Every template, guide and service in the Hub in one list. Filter by type or name, then open a page to see the file, guidance or availability.', 1)
+ body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Everything in the Hub in one list, with the newest first. Search or pick a type, then open a page for its files and guidance.', 1)
  body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)
  at = body.find('<aside class="next-step">')
  cat = catalogue(pages, meta, summaries, on_request)

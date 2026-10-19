@@ -239,6 +239,17 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   w.fetch=async u=>{const s=String(u);if(s.includes('/rest/api/content/search')){const cql=new URL(s,'http://localhost').searchParams.get('cql');return {ok:true,json:async()=>({results:cql.includes('canto-showcase.json')&&m?[{title:'canto-showcase.json',_links:{download:`/download/attachments/${mediaId}/canto-showcase.json`}}]:[]})};}
    if(s.includes('canto-showcase.json'))return {ok:true,json:async()=>m};return {ok:false,json:async()=>({})};};
   w.document.body.dataset.mode='confluence';w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();return d;};
+ {const d=dom('resources.html','confluence'),w=d.window,doc=w.document,rows=[...doc.querySelectorAll('.resource-row')],idOf=h=>rows.find(r=>r.getAttribute('href')===h).dataset.pageId;
+  const lid=idOf('letterheads.html'),fid=idOf('fonts.html');
+  w.fetch=async u=>{const cql=new URL(String(u),'http://localhost').searchParams.get('cql')||'';return {ok:true,json:async()=>({results:cql.includes('type=attachment')?[{title:'a.dotx',container:{id:lid},version:{when:'2026-10-10T09:00:00Z'}}]:[{id:fid,version:{when:'2026-10-12T09:00:00Z'}},{id:lid,version:{when:'2026-01-01T09:00:00Z'}}]})};};
+  doc.body.dataset.mode='confluence';w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();
+  const titles=()=>[...doc.querySelectorAll('.resource-row')].map(r=>r.getAttribute('href'));
+  assert.deepEqual(titles().slice(0,2),['fonts.html','letterheads.html'],'All resources lists the newest first');
+  assert.equal(doc.querySelector('.resource-row[href="letterheads.html"] .resource-when').textContent,'Added 10 Oct 2026','a new approved file dates its page');
+  assert.equal(doc.querySelector('.resource-row[href="fonts.html"] .resource-when').textContent,'Updated 12 Oct 2026','otherwise the page edit does');
+  const sel=doc.querySelector('#resourceSort');assert(!doc.querySelector('.resource-sort').hidden);sel.value='az';sel.dispatchEvent(new w.Event('change'));
+  const az=[...doc.querySelectorAll('.resource-row strong')].map(s=>s.textContent.toLowerCase());assert.deepEqual(az,[...az].sort((a,b)=>a.localeCompare(b)),'A to Z sorts by title');
+  w.close();pass('All resources is dated and sorted newest first, with an A to Z option');}
  const cMedia=await runCanto('media.html',cantoManifest),kq2=s=>cMedia.window.document.querySelector(s),kqa=s=>[...cMedia.window.document.querySelectorAll(s)];
  assert(!kq2('.canto-show.wide').hidden);assert.equal(kqa('.show-slide').length,3,'off-site images and links are dropped');assert(!kq2('.canto-show a:not(.button)'),'the slideshow is view only');
  assert(kqa('.show-slide img').every(i=>(i.getAttribute('src')||i.dataset.src||'').startsWith('http://localhost/download/attachments/')));assert(kqa('.show-slide img').filter(i=>i.getAttribute('src')).length===2,'large slideshow images load as they come up, not all at once');assert(!kq2('.show-slide img[onerror]')&&!kq2('.show-caption img'));

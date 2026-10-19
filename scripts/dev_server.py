@@ -14,7 +14,8 @@ Links to internal documents are filled in from dev/links.json as each page is se
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, unquote, quote
-import html as htmllib, json, mimetypes, re, sys
+import html as htmllib, json, mimetypes, re, sys, zlib
+from datetime import datetime, timedelta
 import links
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,6 +51,16 @@ def search(cql, limit):
         if wanted: rows = [r for r in rows if r['title'] == wanted.group(1)]
         rows.sort(key=lambda r: r['title'].lower()) if 'ORDER BY title' in cql else rows.sort(key=lambda r: r['_when'], reverse=True)
         return rows[:limit]
+    if 'type=page' in cql and 'lastmodified' in cql:
+        # Stand-in edit dates: a page's newest file, else a fixed date over the past few months.
+        newest = {}
+        for a in FIXTURES['attachments']: newest[a['page']] = max(newest.get(a['page'], ''), a['when'])
+        rows = []
+        for name in ROUTES:
+            ref = page_ref(name)
+            ref['version'] = {'number': 1, 'when': newest.get(name) or (datetime(2026, 9, 30) - timedelta(days=zlib.crc32(name.encode()) % 150)).strftime('%Y-%m-%dT10:00:00+00:00')}
+            rows.append(ref)
+        return sorted(rows, key=lambda r: r['version']['when'], reverse=True)[:limit]
     if 'label="announcement"' in cql:
         ann = FIXTURES.get('announcement')
         if not ann or '--no-announcement' in ARGS: return []
