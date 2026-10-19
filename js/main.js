@@ -901,11 +901,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (curated.length >= 4) curated.slice(0, 12).forEach((a) => { if (!seen.has(a.src)) { seen.add(a.src); all.push(a); } });
         else { take(false); take(true); }
         list = all; href = folderHref;
-        const names = slot.querySelector(".show-collections");
-        if (names) {
-          names.textContent = "In the library: " + matches.map((al) => al.path + (al.count ? " (" + al.count.toLocaleString("en-GB") + ")" : "")).join(" · ");
-          names.hidden = false;
-        }
       } else {
         const al = matches[0];
         list = matches.flatMap((m) => m.assets.filter((a) => !a.video)).concat(matches.flatMap((m) => m.assets.filter((a) => a.video)));

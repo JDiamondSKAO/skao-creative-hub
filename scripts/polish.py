@@ -378,19 +378,17 @@ def canto_show(words, heading, eyebrow='', wide=False):
   '<div class="show-dots" role="group" aria-label="Choose an image"></div>'
   '<div class="show-foot"><p class="show-note">A few of the approved images in the library. Open Canto to search everything, see each credit and download.'
   + (' First time? Choose <strong>Register Now</strong> and use your SKAO email address.' if wide else '') + '</p></div>'
-  '<p class="show-collections" hidden></p></section>')
+  '</section>')
 
 PHOTOS_ICON = ('<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
  '<rect x="3" y="7" width="14" height="12" rx="2"/><path d="M7 4h11a3 3 0 0 1 3 3v9"/><circle cx="8" cy="11" r="1.4"/><path d="m3.5 17 4-4 3.5 3.5 2-2 3.5 3.5"/></svg>')
 
 def site_photos():
- """Weekly all-hands photos: an album per site in the staff portal, each with an upload link."""
- rows = ''.join(f'<li><strong>{site}</strong>' + links.pending(f'ALLHANDS_{key}', 'See photos', 'button secondary')
-  + links.pending(f'ALLHANDS_UPLOAD_{key}', 'Add photos', 'text-link') + '</li>' for site, key in [('SKA-Low', 'LOW'), ('SKA-Mid', 'MID')])
+ """Weekly all-hands photos: one link to where they are stored."""
  return links.needs('<section class="site-photos"><span class="site-photos-icon">' + PHOTOS_ICON + '</span>'
   '<div><p class="eyebrow">From the sites · New each week</p><h2>Weekly all-hands photos</h2>'
-  '<p>Photos from each site’s weekly all-hands update, in the staff media library. Presenting this week? Add yours with your site’s upload link.</p></div>'
-  f'<ul class="site-photo-rows">{rows}</ul></section>', links.url('ALLHANDS_LOW') or links.url('ALLHANDS_MID'))
+  '<p>Photos from each site’s weekly all-hands update, in the staff media library.</p></div>'
+  + links.pending('ALLHANDS', 'See the all-hands photos', 'button secondary') + '</section>', links.url('ALLHANDS'))
 
 def canto_gallery(canto):
  return canto_show('', 'A look inside the staff media library', wide=True)
