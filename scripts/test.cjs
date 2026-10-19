@@ -261,7 +261,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const cMedia=await runCanto('media.html',cantoManifest),kq2=s=>cMedia.window.document.querySelector(s),kqa=s=>[...cMedia.window.document.querySelectorAll(s)];
  assert(!kq2('.canto-show.wide').hidden);assert.equal(kqa('.show-slide').length,3,'off-site images and links are dropped');assert(!kq2('.canto-show a:not(.button)'),'the slideshow is view only');
  assert(kqa('.show-slide img').every(i=>(i.getAttribute('src')||i.dataset.src||'').startsWith('http://localhost/download/attachments/')));assert(kqa('.show-slide img').filter(i=>i.getAttribute('src')).length===2,'large slideshow images load as they come up, not all at once');assert(!kq2('.show-slide img[onerror]')&&!kq2('.show-caption img'));
- assert.equal(kq2('.show-caption small').textContent,'© SKAO');assert.equal(kq2('.show-collections').textContent,'In the library: Telescopes (40) · Future visions (5)','shared folder levels dropped from collection names');
+ assert.equal(kq2('.show-caption small').textContent,'© SKAO');assert(!kq2('.show-collections'),'no list of library collections under the slideshow');
  assert.equal(kqa('.show-slide.is-on').length,1);assert.equal(kqa('.show-slide[aria-hidden="false"]').length,1);
  kq2('.show-next').click();assert.equal(kqa('.show-dots button')[1].getAttribute('aria-current'),'true');assert.equal(kq2('.show-play').getAttribute('aria-pressed'),'true','moving by hand pauses the slideshow');
  kq2('.show-play').click();assert.equal(kq2('.show-play').getAttribute('aria-pressed'),'false');
