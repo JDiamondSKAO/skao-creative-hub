@@ -1669,3 +1669,14 @@ body:has(.page-band) .nav-home {width:auto;max-width:270px;margin-right:22px;opa
 .navrow .search-trigger kbd {display:none;}
 .navrow .tool-button {margin-left:0;}
 body:has(.page-band) .nav-home,header.is-pinned .nav-home {margin-right:6px;}
+
+/* Dark mode: the compact header carries the masthead's navy-to-magenta, so the top of the page keeps its colour */
+.dark body:has(.page-band) header,.dark header.is-pinned {background:linear-gradient(110deg,#070068 0%,#070068 48%,#58005f 78%,#aa005c 100%);border-top:0;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a {color:#d9d6f0;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a:hover,:is(.dark body:has(.page-band) header,.dark header.is-pinned) .navlinks a[aria-current] {color:#fff;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .nav-home-title {color:#fff;border-left-color:#ffffff48;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .search-trigger {background:#ffffff14;border-color:#ffffff33;color:#fff;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .search-trigger:hover {background:#ffffff24;border-color:#ffffff66;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .tool-button {background:transparent;border-color:#ffffff40;color:#fff;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .tool-button:hover {background:#ffffff1f;border-color:#ffffff70;}
+:is(.dark body:has(.page-band) header,.dark header.is-pinned) .mobile-menu {background:#ffffff14;border-color:#ffffff33;color:#fff;}
