@@ -1,5 +1,16 @@
 # Changes
 
+## 2.18.0 Lighter navigation (proposal, branch claude/creative-hub-nav)
+
+Built on 2.17 after a look at how current documentation and resource sites handle navigation. The Hub only goes Home › Section › Page, so it now says where you are once, not four times.
+
+- **One-row header on inner pages:** logo, sections, search and dark mode in a single bar under a thin brand line. The homepage keeps the full masthead. Content starts about 100 px higher.
+- **No breadcrumb.** The section label above the title links back to the section.
+- **On this page** appears only on long pages (four sections or more).
+- **Previous and next** at the foot of each page on wide screens; phones, which have no sidebar, keep the "More in" list.
+- **Search:** plain questions work ("where do I find the letterhead"), quick answers to the most common questions appear above the results, approved files are found by name, and / opens search.
+- **Small touches:** a copy-link button on section headings, and an "Updated" date under each page title.
+
 ## 2.17.0 Fewer, fuller pages
 
 The Hub goes from 51 pages to 38, and adds the three things asked for in the repository request: site progress, recent talks and the sites' weekly photos.

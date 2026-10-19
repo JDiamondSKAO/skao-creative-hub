@@ -14,7 +14,7 @@ build(True)
 try:
  files=[R/'page.vm']+[p for d in ['css','js','images','fonts'] for p in (R/d).rglob('*') if p.is_file()]
  plugin=ET.Element('atlassian-plugin',{'key':'skao-creative-hub-v2','name':'SKAO Creative Hub v2 - Scroll Sites Theme','plugins-version':'2'})
- info=ET.SubElement(plugin,'plugin-info');ET.SubElement(info,'version').text='2.17.0'
+ info=ET.SubElement(plugin,'plugin-info');ET.SubElement(info,'version').text='2.18.0'
  theme=ET.SubElement(plugin,'scroll-viewport-theme',{'key':'skao-creative-hub-v2','name':'SKAO Creative Hub v2'})
  for p in files:
   name=str(p.relative_to(R));ET.SubElement(theme,'resource',{'name':name,'location':name})
@@ -31,7 +31,7 @@ try:
  import subprocess,sys
  version=info.find('version').text
  subprocess.run([sys.executable,str(R/'scripts/staging_files.py')],check=True,capture_output=True)
- for old in (R/'release').glob('*-flat-upload.zip'):old.unlink()
+ # Other versions' uploads stay, so each branch's release can sit side by side.
  with zipfile.ZipFile(R/f'release/skao-creative-hub-v{version}-flat-upload.zip','w',zipfile.ZIP_DEFLATED) as z:
   for p in sorted((R/'release/staging-files').iterdir()):
    if p.is_file():z.write(p,p.name)
