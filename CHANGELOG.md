@@ -2,19 +2,29 @@
 
 ## 2.22.0 Events: reuse what we've made (proposal, branch claude/creative-hub-v2.22)
 
-Built on 2.21. Events no longer reads as if Communications plans people's events. It now shows what we've already made, so staff can borrow it, reuse it or adapt it, with sustainability in mind. Planning an event starts at the Comms helpdesk. After Joe's first look ("all over the shop"), all three pages share one calm layout.
+Built on 2.21. Events no longer reads as if Communications plans people's events. It now shows what we've already made, so staff can borrow it, reuse it or adapt it, with sustainability in mind. Planning an event starts at the Comms helpdesk. Refined over three rounds of Joe's feedback.
 
-- **Reuse for events** (was Plan event materials). The landing has:
-  - a short intro, with a "Planning an event?" card beside it that leads to the Comms helpdesk;
-  - two picture cards, Event kit and Designs to reuse, in place of the section list;
-  - a "Reuse first" panel with four steps along a line, each with an icon and its number: Reuse it, Adapt it, Go digital (screens instead of print), Make it last. On phones it becomes a vertical stepper.
-
-  The lead-times table, the request steps and the "Before you start" panels are gone. The "Planning something bigger?" band at the foot of every page still covers bigger work.
-- **Event kit** (was Stands and merchandise). It covers the backdrops, banners, kiosk and table cloths, which the Comms teams look after at all three sites, with an "Ask to borrow it" button. Tiles show a picture, the name and one line of detail. "Looking after it" covers care and returns, followed by the Events Production Manual. The brief lists are gone.
-- **Designs to reuse** (new; it reuses the old Merchandise and Giveaways page). It has 16 designs that can be reprinted or adapted, in four groups: banners and backdrops, partner versions (SARAO, CETC, ngVLA), programmes and logos, and giveaways. Each group has a name, a count and a one-line note. One-off builds, such as the IAU GA 2024 stand, are left out. There is no "On this page" column, so the gallery uses the full width. Staff ask for files through the Comms helpdesk.
-  - Pictures are attached as `design-*.webp`, made by `scripts/design_images.py` from the reusable event assets and merchandise folders (read only), with an outline until they're uploaded.
-- Pictures can now come from another page (`data-kit-page`); the landing cards use this. Sections whose pages all have a picture show picture cards instead of a list (`polish.DIR_CARDS`).
-- Event safety and the event checklist now say why they've gone, and point to Reuse for events. Search answers "Can you help plan my event?" and "Do we have a stand, banners or giveaways?".
+- **Event materials** (the Events landing, was Plan event materials):
+  - The intro has three key numbers (pieces of kit, designs, sites) and a "Planning an event?" card beside it that opens the Comms helpdesk.
+  - **Borrow or reprint** is a shelf of the five kinds of material in place of the section list: Stand kit, Banners and backdrops, Giveaways, With partners, Programmes and logos. Each has a picture and what you can do with it ("Borrow · 5 pieces"), and links straight to its place.
+  - **Reuse first** is a panel of four steps along a line, each with an icon and its number: Reuse it, Adapt it, Go digital, Make it last. It is two by two on tablets and a vertical stepper on phones.
+  - **Also useful for events** links to slides, posters, and photos and video.
+  - The lead-times table, request steps and "Before you start" panels are gone. The "Planning something bigger?" band still covers bigger work.
+- **Event kit** (was Stands and merchandise):
+  - It covers the backdrops, banners, kiosk and table cloths, which the Comms teams look after at all three sites.
+  - A three-step strip explains borrowing.
+  - The kit is a tile grid led by the 3 m backdrop.
+  - "Looking after it" is followed by the Events Production Manual.
+- **Designs to reuse** (new; it reuses the old Merchandise and Giveaways page):
+  - It has 16 designs that can be reprinted or adapted, with links to each group at the top: banners and backdrops, partner versions (SARAO, CETC, ngVLA), programmes and logos, and giveaways.
+  - One-off builds are left out. The gallery uses the full width, with one tile style: picture, name and one line.
+  - Pictures are attached as `design-*.webp`, made by `scripts/design_images.py` from the reusable event assets and merchandise folders (read only), with outlines until they're uploaded.
+- Landings can now:
+  - put a card level with the intro (`data-landing-beside`);
+  - put their own list in place of the section list (`data-landing-directory`);
+  - show pictures from other pages (`data-kit-page`).
+- Event safety and the event checklist now say why they've gone. Search answers "Can you help plan my event?" and "Do we have a stand, banners or giveaways?".
+- Fixed: on the other landings, "Before you start" sits level with the intro again. An earlier 2.22 change had moved it down, and a test now guards it.
 
 ## 2.21.0 Review board feedback, round 4 (proposal, branch claude/creative-hub-v2.21)
 

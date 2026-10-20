@@ -63,10 +63,12 @@ def tiles(items):
  """Picture tiles: the picture (or its outline), the name and one line of detail."""
  return '<ul class="kit-grid">'+''.join(f'<li class="kit-item"><div class="kit-pic" data-kit-image="{f}" data-shape="{shape}"></div><h3>{name}</h3><p class="kit-meta">{meta}</p></li>' for f,name,meta,shape in items)+'</ul>'
 def kit():
- return ('<section class="kit" id="event-kit" data-kit data-summary="Backdrops, banners, a kiosk and table cloths, kept by the Comms teams at all three sites."><h2>What you can borrow</h2>'
-  '<p>Say which pieces you’d like, your dates and where they’re needed.</p>'+tiles(KIT)+'</section>'
-  '<section class="reading-section" id="looking-after-it"><h2>Looking after it</h2><p>Each banner travels in its own case with everything needed to put it up, and the Events Production Manual shows every step. Roll the fabric rather than folding it, and plug the lights into an approved power supply.</p>'
-  '<p>When it comes back, say if anything is missing or damaged, so it’s ready for the next event.</p></section>'
+ return ('<ol class="borrow-steps" aria-label="How borrowing works"><li><b>1</b><span>Choose the pieces you need from the kit below.</span></li>'
+  '<li><b>2</b><span>Ask through the Comms helpdesk, with your dates and where it’s needed.</span></li>'
+  '<li><b>3</b><span>Look after it while it’s with you, and bring it back complete.</span></li></ol>'
+  '<section class="kit" id="event-kit" data-kit data-summary="Backdrops, banners, a kiosk and table cloths, kept by the Comms teams at all three sites."><h2>The kit</h2>'
+  '<ul class="kit-grid kit-bento">'+''.join(f'<li class="kit-item"><div class="kit-pic" data-kit-image="{f}" data-shape="{shape}"></div><h3>{name}</h3><p class="kit-meta">{meta}</p></li>' for f,name,meta,shape in KIT)+'</ul></section>'
+  '<section class="reading-section kit-care" id="looking-after-it"><h2>Looking after it</h2><p>Each banner travels in its own case with everything needed to put it up, and the Events Production Manual below shows every step. Roll the fabric rather than folding it, plug the lights into an approved power supply, and say if anything comes back missing or damaged, so it’s ready for the next event.</p></section>'
   '<div data-downloads-slot hidden></div>')
 # Designs to reuse: work from past events that can be reprinted or adapted (one-off builds stay out).
 # Pictures work like the kit's, attached to the page (made by scripts/design_images.py).
@@ -91,9 +93,11 @@ DESIGNS=[
   ('design-coasters','Coasters','95 mm · two designs','square'),
   ('design-notepads','Notepads and sticky notes','A5 and A6 pads, A7 notes','tall'),
   ('design-t-shirts','T-shirts','Science is for everyone, and SRCNet','wide')])]
+def design_slug(t):return '-'.join(''.join(c if c.isalnum() else ' ' for c in t.lower()).split())
 def designs():
- slug=lambda t:'-'.join(''.join(c if c.isalnum() else ' ' for c in t.lower()).split())
+ slug=design_slug
  return ('<div class="design-library" data-kit data-no-toc data-summary="Banners, partner designs, programmes and giveaways from past events, ready to reprint or adapt.">'
+  +'<nav class="design-jump" aria-label="Groups on this page">'+''.join(f'<a href="#{slug(group)}">{group}<span>{len(items)}</span></a>' for group,_,items in DESIGNS)+'</nav>'
   +''.join(f'<section class="design-group" id="{slug(group)}"><div class="design-head"><h2>{group}</h2><span class="design-count">{len(items)} designs</span></div><p>{lede}</p>'+tiles(items)+'</section>' for group,lede,items in DESIGNS)+'</div>')
 def revise(pages,jira,canto):
  def put(name,title,body):pages[name]=(title,body)
@@ -121,17 +125,31 @@ def revise(pages,jira,canto):
  brand_essentials='<div class="brand-specimens"><div class="colour-spec navy"><strong>Blueshift Navy</strong><div class="copy-row"><button type="button" class="copy-value" data-copy="#070068" aria-label="Copy Blueshift Navy hex #070068"><code>#070068</code><span>Copy</span></button><button type="button" class="copy-value" data-copy="7, 0, 104" aria-label="Copy Blueshift Navy RGB 7, 0, 104"><code>RGB 7, 0, 104</code><span>Copy</span></button></div></div><div class="colour-spec magenta"><strong>Redshift Magenta</strong><div class="copy-row"><button type="button" class="copy-value" data-copy="#E70068" aria-label="Copy Redshift Magenta hex #E70068"><code>#E70068</code><span>Copy</span></button><button type="button" class="copy-value" data-copy="231, 0, 104" aria-label="Copy Redshift Magenta RGB 231, 0, 104"><code>RGB 231, 0, 104</code><span>Copy</span></button></div></div><div class="type-spec"><span class="type-sample" aria-hidden="true">Aa</span><strong>Noto Sans</strong><small>Fallback: Verdana</small></div></div>'
  put('brand.html','Brand guidance',intro('Start from the official artwork and the Brand Book. Use these essentials as a quick reference.',tag='A consistent SKAO identity')+brand_essentials+cards([('Logo artwork','Find the supplied files and choose a suitable version.','logos.html','Find logo files'),('Colours and type','Digital colour values and practical typography guidance.','colours-and-type.html','Check the essentials'),('Brand Book','The source for detailed rules and applications.','brand-book.html','Open the source page')])+detail('Working with partner brands','<p>Use the current guidance for the specific partner and application. Do not assemble a new logo lock-up from memory.</p>'+link('co-branding-csiro.html','CSIRO co-branding')+' · '+link('co-branding-sarao.html','SARAO co-branding'))+nextstep('Need a second pair of eyes?','Include the draft, intended use and partner requirements.',jira,'Ask about the brand ↗'))
  # Events: what we've already made, to borrow and reuse. Planning an event starts at the Comms helpdesk.
- # The section list shows Event kit and Designs to reuse as picture cards (polish.DIR_CARDS); the reuse steps follow.
+ # A shelf of what there is (pictures from Event kit and Designs to reuse) takes the place of the section list.
  icon=lambda d:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>'
+ count={g:len(items) for g,_,items in DESIGNS}
+ shelf=[('Stand kit','stands.html','stands.html','kit-fabrilux-3m','Borrow',f'{len(KIT)} pieces')]+[
+  (g,'merchandise.html','merchandise.html#'+design_slug(g),pic,verb,f'{count[g]} designs') for g,pic,verb in
+  [('Banners and backdrops','design-roller-banners','Reprint'),('Giveaways','design-coasters','Reprint'),('With partners','design-sarao','Adapt'),('Programmes and logos','design-programmes','Adapt')]]
  reuse=[('Reuse it','Borrow the kit, or use a design just as it is.','<path d="M4 12a8 8 0 0 1 13.66-5.66L20 8.5"/><path d="M20 4v4.5h-4.5"/><path d="M20 12a8 8 0 0 1-13.66 5.66L4 15.5"/><path d="M4 20v-4.5h4.5"/>'),
   ('Adapt it','New fabric for an existing frame, or new words on an existing design.','<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>'),
   ('Go digital','Show video and photos on a screen, with nothing to print.','<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'),
   ('Make it last','If nothing fits, we design something new to be reused: no dates, standard sizes.','<path d="M6 3h12M6 21h12"/><path d="M7 3v2a5 5 0 0 0 10 0V3M7 21v-2a5 5 0 0 1 10 0v2"/>')]
- put('events.html','Reuse for events',intro('Backdrops, banners, designs and giveaways we’ve already made for SKAO events. Borrow them, reuse them, and only make something new when nothing fits.')+
+ also=[('Slides for your talk','Approved decks and the SKAO template.','master-deck.html','<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 21h10M12 17v4M7 9h6M7 12h10"/>'),
+  ('A poster','Templates, and how to prepare one.','poster-templates.html','<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7h8M8 10h5"/><circle cx="12" cy="15" r="2.5"/>'),
+  ('Photos and video for a screen','From the Canto Media Library.',canto,'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/>')]
+ designs_total=sum(count.values())
+ put('events.html','Event materials','<div class="task-intro"><div><span class="eyebrow">Ready-made for SKAO events</span><p>Backdrops, banners, designs and giveaways we’ve already made for SKAO events. Borrow them or reuse them, and only make something new when nothing fits.</p>'
+  f'<p class="intro-stats"><span><b>{len(KIT)}</b>pieces of kit to borrow</span><span><b>{designs_total}</b>designs to reuse</span><span><b>3</b>sites to borrow from</span></p></div></div>'+
   '<aside class="plan-card" data-landing-beside><span class="plan-icon" aria-hidden="true">'+icon('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>')+'</span>'
   '<div><h2>Planning an event?</h2><p>The Comms helpdesk is the place to start.</p>'+link(jira,'Open the Comms helpdesk ↗','button')+'</div></aside>'
+  '<section class="shelf" id="what-there-is" data-landing-directory><h2>Borrow or reprint</h2><ul class="shelf-grid" data-kit>'
+  +''.join(f'<li><a class="shelf-item" href="{href}"><span class="kit-pic" data-kit-image="{pic}" data-kit-page="{META[page]["id"]}" data-shape="wide"></span>'
+   f'<strong>{name}</strong><span class="shelf-meta"><b>{verb}</b> · {n}</span></a></li>' for name,page,href,pic,verb,n in shelf)+'</ul></section>'
   '<section class="reuse-steps" id="reuse-first" data-landing-main><div class="reuse-head"><h2>Reuse first</h2><p>Before making something new, work through these in order.</p></div><ol>'
-  +''.join(f'<li><span class="reuse-icon">{icon(d)}<em aria-hidden="true">{i}</em></span><strong>{t}</strong><span class="reuse-text">{x}</span></li>' for i,(t,x,d) in enumerate(reuse,1))+'</ol></section>')
+  +''.join(f'<li><span class="reuse-icon">{icon(d)}<em aria-hidden="true">{i}</em></span><strong>{t}</strong><span class="reuse-text">{x}</span></li>' for i,(t,x,d) in enumerate(reuse,1))+'</ol></section>'
+  '<section class="also" id="also-useful" data-landing-main><h2>Also useful for events</h2><ul class="also-grid">'
+  +''.join(f'<li><a class="also-item" href="{href}"><span class="also-icon">{icon(d)}</span><span class="also-text"><strong>{t}{" ↗" if href.startswith("http") else ""}</strong><span>{x}</span></span></a></li>' for t,x,href,d in also)+'</ul></section>')
  put('help.html','Help with the Hub',intro('Find the right service or recover from a missing file or access problem.',tag='Support and useful tools')+cards([('Find photos or video','Search and download from the staff media library.','canto-access.html','Get to Canto'),('Request creative work','Brief new work or ask for a review.','request.html','Open the request guide'),('A missing or broken resource','Send the exact page link and what happened.',jira,'Report a problem ↗')])+
  detail('Where should I look for presentations?','<p>Start with '+link('presentations.html','presentation resources')+'. Released decks belong in the Hub. A page description is not a file download.</p>')+
  detail('Why can I browse but not upload?','<p>Browsing, downloading and contributing can have different permissions. Ask for the '+link('contribute.html','appropriate contribution route')+' rather than treating a library link as an upload form.</p>')+
@@ -223,7 +241,7 @@ def revise(pages,jira,canto):
    '<section class="attachments progress-files" data-attachments="all" data-site-files hidden><div class="attachments-head"><h2>Earlier slides</h2><p class="attachments-count" data-file-count></p></div><div data-attachment-list></div></section>'+
    live([(key+'_STATUS',f'{site} status slides','The team’s own status deck, updated as the work moves on.','slides','Google Slides'),dashboard])+'<div data-site-photos></div>')
  put('memos.html','Memo and report templates',intro('Starting points for internal memos and structured reports.',tag='Resource source')+missing('',jira)+block('Before you use the file',['Check that it is the appropriate released template for your use.','Create a separate working copy and use the supplied styles.','Review the finished document before sharing.']))
- put('stands.html','Event kit',intro('Backdrops, banners, a kiosk and table cloths for stands, talks and press areas. The Comms teams look after the kit at all three sites.',jira,'Ask to borrow it ↗','Borrow it')+kit())
+ put('stands.html','Event kit',intro('Backdrops, banners, a kiosk and table cloths for stands, talks and press areas, kept by the Comms teams at all three sites.',jira,'Ask to borrow it ↗','Borrow it')+kit())
  put('merchandise.html','Designs to reuse',intro('Banners, partner designs, programmes and giveaways from past events. Reprinting or adapting one is quicker and cheaper than starting again, and wastes less. Ask for the files with the design’s name.',jira,'Ask for the files ↗','Reuse or adapt')+designs())
  # Photos and video: one landing with the search tips the topic pages used to hold.
  tips=[('Hero images','search by subject; check the crop, resolution and use restrictions.'),('Telescopes','search by telescope, location and date; tell photography apart from artist impressions.'),

@@ -156,7 +156,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const twoClicks=new Set([...top,...nw.document.querySelectorAll('.footer a')].map(a=>a.getAttribute('href')));
  for(const a of top){const land=new JSDOM(fs.readFileSync(path.join(root,'docs',a.getAttribute('href')),'utf8')).window.document;
   assert(land.querySelector('.page-grid.full-width'),'landing is full width');assert(!land.querySelector('.sidebar'),'landing has no repeated list');
-  land.querySelectorAll('.dir-row, .dir-card').forEach(c=>twoClicks.add(c.getAttribute('href')));}
+  land.querySelectorAll('.dir-row, .shelf-item').forEach(c=>twoClicks.add(c.getAttribute('href').split('#')[0]));}
  for(const f of Object.keys(routes).filter(f=>!['canto-guide.html','email-signatures.html','widescreen-template.html','science-slides.html','construction-slides.html','specialised-slides.html','reports.html','hero-images.html','telescope-images.html','event-photos.html','b-roll.html','recordings.html','animations.html','event-safety.html','event-checklist.html','resources.html','request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html','working-with-us.html','contribute.html',
   // The site pages sit one click under Construction overview, whose tiles lead to them.
   'low-slides.html','mid-slides.html'].includes(f)))assert(twoClicks.has(f),'two clicks reach '+f);
@@ -319,16 +319,19 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...progQ('.deck-row .deck-date').children].map(e=>e.textContent),['Sep','2026'],'each earlier deck has a month tile');assert.equal(progQ('[data-file-count]').textContent,'1 deck');assert(progQ('.deck-row a.deck-get[download]').getAttribute('aria-label').startsWith('Download SKA-Low progress, September 2026'));
  assert(progQ('[data-site-photo] img'),'the telescope photo loads into the panel');lw.window.close();
  pass('Construction overview tiles show each telescope and the month of its newest slides; site pages lead with the latest deck, then a dated list of earlier ones');
- // Events is a reuse library: the landing has a card saying planning an event starts at the Comms helpdesk,
- // picture cards for Event kit and Designs to reuse, then the reuse steps; both pages show attached pictures.
+ // Event materials: a card saying planning an event starts at the Comms helpdesk, a shelf of what there is,
+ // the reuse steps and links elsewhere; Event kit and Designs to reuse show the pictures attached to them.
  const ev=read('events.html');
- assert.equal(ev.querySelector('.page-head h1').textContent,'Reuse for events');
+ assert.equal(ev.querySelector('.page-head h1').textContent,'Event materials');
  assert(!ev.querySelector('.lead-table, .request-flow, .landing-rail'),'no lead times, request steps or rail');
- const cards=[...ev.querySelectorAll('.dir-cards a.dir-card')];assert.deepEqual(cards.map(a=>a.getAttribute('href')),['stands.html','merchandise.html'],'the two pages as picture cards');
- assert.deepEqual(cards.map(a=>a.querySelector('[data-kit-image]').dataset.kitPage),[routes['stands.html'].id,routes['merchandise.html'].id],'each card shows a picture attached to its page');
- assert(!ev.querySelector('.directory, .reuse-peek'),'no second list of the same pages');
+ const shelf=[...ev.querySelectorAll('.shelf-grid a.shelf-item')];assert.deepEqual(shelf.map(a=>a.getAttribute('href')),['stands.html','merchandise.html#banners-and-backdrops','merchandise.html#giveaways','merchandise.html#with-partners','merchandise.html#programmes-and-logos'],'a shelf of what there is, in place of the section list');
+ assert.deepEqual(shelf.map(a=>a.querySelector('[data-kit-image]').dataset.kitPage),[routes['stands.html'].id,...Array(4).fill(routes['merchandise.html'].id)],'each with a picture attached to its page');
+ assert.deepEqual(shelf.map(a=>a.querySelector('.shelf-meta').textContent),['Borrow · 5 pieces','Reprint · 6 designs','Reprint · 5 designs','Adapt · 3 designs','Adapt · 2 designs']);
+ assert(!ev.querySelector('.directory'),'no second list of the same pages');
+ assert(read('presentations.html').querySelector('.landing-layout > .landing-main > .task-intro'),'on other landings, Before you start still sits level with the intro');
+ assert.deepEqual([...ev.querySelectorAll('.also-grid a.also-item')].map(a=>a.getAttribute('href').replace(/^https?:.*/,'canto')),['master-deck.html','poster-templates.html','canto'],'slides, posters and photos from elsewhere in the Hub');
  assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Reuse it','Adapt it','Go digital','Make it last']);
- assert(ev.querySelector('.dir-cards').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4,'the cards, then the steps');
+ assert(ev.querySelector('.shelf').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4&&ev.querySelector('.reuse-steps').compareDocumentPosition(ev.querySelector('.also'))&4,'the shelf, the steps, then the rest of the Hub');
  assert(/servicedesk/.test(ev.querySelector('.intro-split .plan-card a.button').getAttribute('href')),'planning an event starts at the Comms helpdesk, in a card beside the intro');
  assert.deepEqual([...ev.querySelectorAll('.reuse-steps .reuse-icon')].map(e=>[!!e.querySelector('svg'),e.querySelector('em').textContent]),[[true,'1'],[true,'2'],[true,'3'],[true,'4']],'each step has its icon and number');
  const standsId=routes['stands.html'].id,sk=dom('stands.html','confluence'),skw=sk.window;skw.document.body.dataset.pageId=standsId;
@@ -350,7 +353,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...dgw.document.querySelectorAll('.design-group h2')].map(h=>h.textContent),['Banners and backdrops','With partners','Programmes and logos','Giveaways']);
  assert(dgw.document.querySelector('[data-kit-image="design-gazebo"] img').getAttribute('src').endsWith('/design-gazebo.webp'),'a design picture loads by name');
  assert(!dgw.document.querySelector('[data-kit-image="design-sarao"] img'),'the rest keep their outline');assert(dgw.document.querySelector('.toc-rail').hidden,'the gallery keeps its width: no contents list');dg.window.close();
- pass('Events is a reuse library: a planning note to the Comms helpdesk, picture cards for Event kit and Designs to reuse, then the reuse steps; both pages show pictures attached to them, or outlines until then');
+ pass('Event materials: a planning card for the Comms helpdesk, a shelf of what there is, the reuse steps and links to slides, posters and photos; Event kit and Designs to reuse show pictures attached to them, or outlines until then');
  const mediaId=routes['media.html'].id;
  const cantoManifest={version:1,albums:[
   {id:'a1',name:'Telescopes',path:'Asset library - Staff / Telescopes',count:40,href:'https://skao.canto.global/album/a1',assets:[

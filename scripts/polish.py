@@ -211,25 +211,9 @@ def row_meta(m, key):
  if not primary(m, key): return '<span class="dir-meta">In ' + section_of(m)[1] + '</span>'
  return ''
 
-# Pages with a picture of their own, shown as picture cards when a section lists only such pages:
-# (picture attached to that page, call to action). The picture loads like the event kit's.
-DIR_CARDS = {'stands.html': ('kit-fabrilux-3m', 'Borrow the kit'), 'merchandise.html': ('design-roller-banners', 'Browse the designs')}
-
-def dir_cards(items, pages, summaries):
- out = '<ul class="dir-cards" data-kit>'
- for m in items:
-  pic, go = DIR_CARDS[m]
-  pid = STATE["ids"].get(m, "")
-  out += (f'<li><a class="dir-card" href="{m}" data-page-id="{pid}"><span class="kit-pic" data-kit-image="{pic}" data-kit-page="{pid}" data-shape="wide"></span>'
-   f'<span class="dir-card-text"><strong>{html.escape(pages[m][0])}</strong><span>{html.escape(summaries[m])}</span>'
-   f'<span class="dir-card-go">{go} <span aria-hidden="true">→</span></span></span></a></li>')
- return out + '</ul>'
-
 def directory(name, pages, summaries):
  """A section as grouped link lists: label left, title and summary right."""
  key, label, landing, members, groups = section_of(name)
- items = [m for g, ms in groups for m in ms]
- if items and all(m in DIR_CARDS for m in items): return dir_cards(items, pages, summaries)
  out = '<div class="directory">'
  for g, items in groups:
   # Each group can be linked to, e.g. presentations.html#site-progress.
@@ -310,14 +294,15 @@ def landing(name, body, pages, summaries):
  def after(head, rest, beside=False):
   # Sections marked data-landing-top (the Events planning note, say) sit under the intro, above the list;
   # data-landing-main ones (the Events reuse steps) stay under the list. Neither goes into the rail.
-  # data-landing-beside (the Events planning card) sits level with the intro, on its right.
-  top = [el for el in top_level(rest) if 'data-landing-top' in el[:200]]
-  keep = [el for el in top_level(rest) if 'data-landing-main' in el[:200]]
-  beside = [el for el in top_level(rest) if 'data-landing-beside' in el[:200]]
-  for el in top + keep + beside: rest = rest.replace(el, '', 1)
-  if beside: head = f'<div class="intro-split">{head}{"".join(beside)}</div>'
+  # data-landing-beside (the Events planning card) sits level with the intro, on its right, and a
+  # data-landing-directory section (the Events shelf) takes the place of the section list.
+  parts = top_level(rest)
+  pick = lambda attr: [el for el in parts if attr in el[:200]]
+  top, keep, level, own = pick('data-landing-top'), pick('data-landing-main'), pick('data-landing-beside'), pick('data-landing-directory')
+  for el in top + keep + level + own: rest = rest.replace(el, '', 1)
+  if level: head = f'<div class="intro-split">{head}{"".join(level)}</div>'
   head += ''.join(top)
-  main = d + ''.join(keep)
+  main = (''.join(own) or d) + ''.join(keep)
   side = rail(rest.strip())
   if side and beside:
    # "Before you start" sits level with the intro, at the top of the page, rather than halfway down.
