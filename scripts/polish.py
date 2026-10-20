@@ -1,11 +1,12 @@
 """Visual and journey layer on top of the reviewed pages.
 
-Adds section navigation, related pages, resource panels, checklists, the
-resource catalogue and the homepage search and latest-assets bands. It only
-reorganises reviewed content; it never invents files or availability.
+Adds section navigation, related pages, resource panels, Latest files and the
+homepage search and latest-assets bands. It only reorganises reviewed content;
+it never invents files or availability.
 """
 import html, json, re
 from gethelp import MOVED
+from interiors import PLANNED
 import brandkit, links
 
 def text(fragment):
@@ -29,9 +30,8 @@ SEARCH_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" strok
 SECTIONS = [
  ('presentations', 'Presentations', 'presentations.html', [
   ('Templates', ['standard-template.html', 'partner-templates.html']),
-  ('Decks to reuse', ['master-deck.html']),
+  ('Slide decks', ['master-deck.html']),
   ('Site progress', ['site-progress.html', 'low-slides.html', 'mid-slides.html']),
-  ('Shared by staff', ['recent-talks.html']),
   ('How to', ['formatting-slides.html'])]),
  ('documents', 'Documents', 'documents.html', [
   ('Templates', ['letterheads.html', 'memos.html']),
@@ -41,8 +41,7 @@ SECTIONS = [
   ('Using the brand', ['logo-guidance.html', 'colours-and-type.html', 'brand-in-practice.html']),
   ('Partner brands', ['co-branding-csiro.html', 'co-branding-sarao.html'])]),
  ('media', 'Photos and video', 'media.html', [
-  ('Find and use media', ['canto-access.html', 'image-usage.html']),
-  ('Downloads', ['video.html'])]),
+  ('Find and use media', ['canto-access.html', 'video.html', 'image-usage.html'])]),
  ('events', 'Events', 'events.html', [
   ('Materials', ['stands.html'])]),
  ('guides', 'How-to guides', 'self-service.html', [
@@ -77,10 +76,8 @@ def primary(name, key):
  sec = section_of(name)
  return bool(sec) and sec[0] == key
 
-# Catalogue filters, in the order staff usually look for things.
-# All resources filters by the Hub's own sections, so a page sits under the same name everywhere.
+# Latest files filters by the Hub's own sections, so a page sits under the same name everywhere.
 TYPES = [(key, label) for key, label, _, _ in SECTIONS]
-SKIP = {'resources.html'} | set(MOVED)
 
 # Side menus fold away to give the page more room: section pages on the left, "On this page" on the right.
 PANEL_LEFT = ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>')
@@ -107,7 +104,7 @@ def sidebar(current, titles):
   out += '</nav>'
  else:
   out += '<nav class="section-nav" id="sectionNav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
-   f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">Templates and assets</a></li></ul></nav>'
+   f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">Latest files</a></li></ul></nav>'
  return out + '</aside>'
 
 def related(name, pages, summaries):
@@ -150,7 +147,7 @@ APPROVER = 'Communications'
 CARD_LINKS = {'standard-template.html': [('partner-templates.html', 'Partner templates')],
  'logos.html': [('partner-logos.html', 'Partner logos')],
  'partner-logos.html': [('logos.html', 'SKAO logos')],
- 'master-deck.html': [('site-progress.html', 'Construction overview'), ('recent-talks.html', 'Recent talks')]}
+ 'master-deck.html': [('site-progress.html', 'Construction overview')]}
 
 def asset_panel(name, body, jira):
  m = re.search(r'<div class="task-intro"><div>(?:<span class="eyebrow">.*?</span>)?<p>(.*?)</p></div></div>', body, re.S)
@@ -175,27 +172,30 @@ def asset_panel(name, body, jira):
  body = body.replace(m.group(0), panel).replace(n.group(0), '')
  return re.sub(r'<aside class="next-step"><div><h2>Choose a different starting point</h2>.*?</aside>', '', body, flags=re.S)
 
-def catalogue(pages, meta, summaries, on_request):
- cards, counts, seen = [], {}, set()
- for key, label in TYPES:
-  for name, m in sorted(meta.items(), key=lambda kv: pages[kv[0]][0].lower()):
-   if name in SKIP or (section_of(name) or ('',))[0] != key: continue
-   title = pages[name][0]
-   if title in seen: continue
-   seen.add(title)
-   cards.append(f'<li><a class="resource-row" href="{name}" data-page-id="{STATE["ids"].get(name, "")}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-meta"><span class="resource-type">{label}</span></span></a></li>')
-   counts[key] = counts.get(key, 0) + 1
- chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
-  f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label in TYPES if counts.get(key))
- # Search first, then type, then the list. In Confluence the list is dated and sorted newest first.
- return ('<section class="catalogue" aria-label="All resources">'
-  # Search and sort share one row; the section filters sit under them, the same width as the list.
-  '<div class="catalogue-bar"><label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search resources</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Search resources, e.g. letterhead or poster"></label>'
-  '<label class="resource-sort" hidden><span>Sort</span><select id="resourceSort"><option value="new">Newest first</option><option value="az">A to Z</option></select></label></div>'
-  '<div class="type-chips" role="group" aria-label="Show a section">' + chips + '</div>'
-  '<p id="filterStatus" class="filter-status" role="status"></p>'
-  '<ul class="resource-list">' + ''.join(cards) + '</ul>'
-  '<div id="catalogueEmpty" class="catalogue-empty" hidden><p>Nothing matches that filter.</p><button type="button" id="clearFilters" class="button secondary">Show everything</button></div></section>')
+def feed(pages, meta):
+ """Latest files: every approved file in the Hub and the site teams' progress slides, newest first.
+ main.js fills it from Confluence. Each file shows the page it's on and that page's Hub section, so
+ the page map below covers every route by ID and by title (Confluence titles in production)."""
+ where = {}
+ for name, m in meta.items():
+  home = MOVED.get(name, (name,))[0].split('#')[0]
+  sec = section_of(home)
+  if not sec or home not in pages: continue
+  row = [sec[0], pages[home][0]]
+  # Pages not yet in Confluence only have stand-in IDs, so they are found by title.
+  if m['id'] not in PLANNED: where['i:' + m['id']] = row
+  for t in (m['source_title'], pages[name][0]): where['t:' + t.lower()] = row
+ sites = [meta[n]['id'] for n in ('low-slides.html', 'mid-slides.html')]
+ return ('<section class="file-feed" data-file-feed aria-label="Latest files"'
+  f' data-pages="{html.escape(json.dumps(where, separators=(",", ":")), quote=True)}"'
+  f' data-sections="{html.escape(json.dumps(TYPES, separators=(",", ":")), quote=True)}"'
+  f' data-site-pages="{html.escape(json.dumps(sites), quote=True)}">'
+  '<div class="catalogue-bar"><label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search the latest files</span>'
+  '<input id="fileFilter" type="search" autocomplete="off" placeholder="Search files, e.g. letterhead or logo"></label></div>'
+  '<div class="type-chips" role="group" aria-label="Show a section" hidden></div>'
+  '<p id="feedStatus" class="filter-status" role="status"></p>'
+  '<div class="feed-body" data-feed-list></div>'
+  '<div id="feedEmpty" class="catalogue-empty" hidden><p>No files match that search.</p><button type="button" id="clearFeed" class="button secondary">Show everything</button></div></section>')
 
 def request_routes(body, jira):
  """Two clear routes first: submit a brief, or write one with the helper."""
@@ -323,7 +323,7 @@ def nav(current=''):
 FULL_WIDTH = {sec[2] for sec in SECTIONS} | {'resources.html', 'faq.html'}
 
 TILES = [
- ('presentations', 'slides', 'Templates, decks, site progress and recent talks.', ['standard-template.html', 'master-deck.html', 'recent-talks.html']),
+ ('presentations', 'slides', 'Templates, approved decks and site progress.', ['standard-template.html', 'master-deck.html', 'site-progress.html']),
  ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'memos.html', 'poster-templates.html']),
  ('brand', 'brand', 'Logos, colours, fonts and partner rules.', ['logos.html', 'colours-and-type.html', 'fonts.html']),
  ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'video.html', 'image-usage.html']),
@@ -397,7 +397,8 @@ def revise(pages, meta, jira, canto=''):
   if name in on_request: body = asset_panel(name, body, jira)
   if name == 'request.html': body = request_routes(body, jira)
   if name in brandkit.DOWNLOAD_GROUPS:
-   body = f'<div hidden data-dl-groups="{html.escape(json.dumps(brandkit.DOWNLOAD_GROUPS[name]), quote=True)}"></div>' + body
+   view = brandkit.DOWNLOAD_VIEW.get(name, 'list')
+   body = f'<div hidden data-dl-groups="{html.escape(json.dumps(brandkit.DOWNLOAD_GROUPS[name]), quote=True)}" data-dl-view="{view}"></div>' + body
   pages[name] = (title, body)
  landings = {sec[2] for sec in SECTIONS}
  for name in meta:
@@ -408,19 +409,21 @@ def revise(pages, meta, jira, canto=''):
  title, body = pages['media.html']
  at = body.find('<div class="landing-layout">')
  pages['media.html'] = (title, body[:at] + canto_gallery(canto) + site_photos() + body[at:] if at >= 0 else body + canto_gallery(canto) + site_photos())
- title, body = pages['site-progress.html']
- pages['site-progress.html'] = (title, body.replace('<div data-site-photos></div>', site_photos()))
+ # The weekly all-hands photos have their own band on the construction pages too.
+ for name in ('site-progress.html', 'low-slides.html', 'mid-slides.html'):
+  title, body = pages[name]
+  assert '<div data-site-photos></div>' in body, name
+  pages[name] = (title, body.replace('<div data-site-photos></div>', site_photos()))
  for name, words in CANTO_STRIPS.items():
   title, body = pages[name]
   m = re.search(r'<div class="media-handoff">.*?</div></div>', body, re.S)
   pages[name] = (title, body[:m.end()] + canto_strip(words, canto) + body[m.end():] if m else body)
  title, body = pages['resources.html']
- body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Everything in the Hub, newest first. Search, or pick a section.', 1)
+ body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'New and updated files from across the Hub, newest first: templates, slide decks, logos and more.', 1)
  body = re.sub(r'<span class="eyebrow">[^<]*</span>', '', body, count=1)
  body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)
- at = body.find('<aside class="next-step">')
- cat = catalogue(pages, meta, summaries, on_request)
- pages['resources.html'] = (title, body[:at] + cat + body[at:] if at >= 0 else body + cat)
+ body = re.sub(r'<aside class="next-step">.*?</aside>', '', body, flags=re.S)
+ pages['resources.html'] = (title, body + feed(pages, meta))
  # Homepage: search first, then the latest approved files.
  title, home = pages['index.html']
  old = '<div class="actions"><a class="button" href="#library">Find a resource →</a></div>'

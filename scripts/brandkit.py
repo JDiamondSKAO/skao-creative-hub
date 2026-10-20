@@ -27,15 +27,14 @@ PACK = {
  ],
  'partner-templates.html': [
   ('Format', 'PowerPoint (.pptx), 16:9; the SRCNet template also comes as Keynote (.key)'),
-  ('Partners', ['SKAO–SARAO', 'SRCNet']),
  ],
  'letterheads.html': [
   ('Format', 'Word (.docx)'),
-  ('Versions', ['One per office address', 'Landscape layout', 'Classification-labelled versions', 'SKAO–CSIRO co-branded']),
+  ('Versions', ['One per office address', 'Landscape layout', 'Classification-labelled versions']),
  ],
  'poster-templates.html': [
   ('Sizes', ['A0', 'A1', 'A2']),
-  ('Formats', 'Illustrator (.ai), Word (.docx) and PDF for each size'),
+  ('Formats', 'Word (.docx) and PDF for each size'),
  ],
  'logos.html': [
   ('Marks', ['Logo (lettermark)', 'Pictorial mark (roundel)']),
@@ -57,27 +56,29 @@ PACK = {
 # How a page's downloads are grouped, where file type alone would not say enough.
 # Rules are tried in order against each file name (case-insensitive); files matching none
 # fall back to the automatic groups. "label" names the row outright; "strip" removes words
-# from the name to make the row label; "note" sits under the group heading.
-# "site" gives a group its site colour, so offices read by where they are.
+# from the name to make the row label; "note" sits under the group heading; "desc" is a line
+# on a card. "site" gives a group its site colour, so offices read by where they are.
 OFFICES_UK = {'group': 'United Kingdom', 'note': 'Global Headquarters, Jodrell Bank', 'match': 'landscape|jodrell', 'label': 'Landscape layout', 'site': 'uk'}
+AU = {'group': 'Australia', 'note': 'Geraldton and Perth offices', 'site': 'au'}
 DOWNLOAD_GROUPS = {
  'letterheads.html': [OFFICES_UK,
-  {'group': 'Australia', 'note': 'Geraldton offices', 'match': 'bradford|chapman|kensington', 'site': 'au'}],
+  {**AU, 'match': 'bradford', 'label': 'Bradford Office, Geraldton'},
+  {**AU, 'match': 'chapman', 'label': 'Chapman Office, Geraldton'},
+  {**AU, 'match': 'kensington', 'label': 'Kensington Office, Perth (with CSIRO)'}],
  'co-branding-csiro.html': [
-  {'group': 'Co-branding guidelines', 'match': 'guideline', 'label': 'SKAO–CSIRO guidelines'},
-  {'group': 'Australia', 'note': 'Geraldton and Perth offices', 'match': 'bradford|chapman|kensington', 'site': 'au', 'strip': r'\bv\d+\b|\bskao:csiro\b'},
-  OFFICES_UK],
+  {'group': 'Co-branding guidelines', 'match': 'guideline', 'label': 'SKAO and CSIRO co-branding guidelines'}],
  'co-branding-sarao.html': [
-  {'group': 'Co-branding guidelines', 'match': 'guideline', 'label': 'SKAO–SARAO guidelines'}],
+  {'group': 'Co-branding guidelines', 'match': 'guideline', 'label': 'SKAO and SARAO co-branding guidelines'}],
  'partner-templates.html': [
-  {'group': 'SKAO–SARAO', 'note': 'With the South African Radio Astronomy Observatory', 'match': 'sarao', 'label': 'Presentation template'},
-  {'group': 'SRCNet', 'note': 'For the SKA Regional Centre Network', 'match': 'rcn|srcnet', 'label': 'Presentation template'}],
+  {'group': 'Templates', 'match': 'sarao', 'label': 'SKAO and SARAO', 'desc': 'For joint work with the South African Radio Astronomy Observatory.'},
+  {'group': 'Templates', 'match': 'rcn|srcnet', 'label': 'SRCNet', 'desc': 'For the SKA Regional Centre Network, in PowerPoint or Keynote.'}],
  'partner-logos.html': [
-  {'group': 'SRCNet', 'note': 'The network logo and avatar', 'match': 'srcnet_(logo|avatar)', 'strip': r'\bsrcnet\b|\brgb\b|\bmono'},
-  {'group': 'SRCNet regional centres', 'note': 'One logo pack per centre', 'match': 'src'}],
+  {'group': 'SRCNet logo', 'note': 'The full logo, for most uses', 'match': 'srcnet_logo', 'strip': r'\bskao\b|\bsrcnet\b|\brgb\b|\blogo\b|\bmono'},
+  {'group': 'SRCNet avatar', 'note': 'The round mark, for small spaces and social media', 'match': 'srcnet_avatar', 'strip': r'\bskao\b|\bsrcnet\b|\brgb\b|\bavatar\b|\bmono'},
+  {'group': 'Regional centres', 'note': 'One pack per centre, with every version of its logo in AI, EPS and PNG', 'match': 'src'}],
  'master-deck.html': [
-  {'group': 'About the SKAO', 'match': 'about|master|overview|introduc'},
-  {'group': 'Science case', 'match': 'science'},
+  {'group': 'About the SKAO', 'match': 'about|master|overview|introduc|briefing|press|media|colloquium|exhibition|samagam'},
+  {'group': 'Science', 'match': 'science'},
   {'group': 'Construction progress', 'match': 'construction|progress'},
   {'group': 'SRCNet', 'match': 'srcnet|rcn'},
   {'group': 'Working with local communities', 'match': 'communit'},
@@ -85,13 +86,11 @@ DOWNLOAD_GROUPS = {
  'memos.html': [
   {'group': 'Memos', 'match': 'memo'},
   {'group': 'Reports', 'match': 'report'}],
- 'video.html': [
-  {'group': 'Logo intros and outros: landscape', 'note': '16:9, for most video', 'match': '^logo_flare(?!_portrai)'},
-  {'group': 'Logo intros and outros: portrait', 'note': '9:16, for social stories and reels', 'match': '^logo_flare_portrai', 'strip': r'\bportrai[tr]\b'},
-  {'group': 'Logo animations', 'note': 'Short animated logo, for the start or end of a film', 'match': 'logo (animation|intro)'},
-  {'group': 'Lower thirds', 'note': 'Motion graphics templates for Premiere Pro', 'match': 'lower_thirds'},
-  {'group': 'Framing guides', 'match': 'safe_zone'}],
 }
+# How a page shows its downloads: a list (the default), cards with a cover (decks and
+# templates), or logo tiles with a preview. A cover is a picture attached to the same page
+# under the file's own name (Template.pptx and Template.jpg); without one, the card shows the title.
+DOWNLOAD_VIEW = {'partner-templates.html': 'cards', 'master-deck.html': 'cards', 'partner-logos.html': 'logos'}
 
 # Primary colours from the Brand Book colour pages.
 PRIMARY_EXTRA = {
@@ -173,15 +172,6 @@ def apply(pages):
  def brand_book(name, body):
   return re.sub(r'<p class="quiet-note">The quick reference in this review build uses the retained SKAO Brand Book v2, March 2022\..*?</p>', '', body, count=1, flags=re.S)
  edit('brand-book.html', brand_book)
-
- def video(name, body):
-  kit = ('<section class="reading-section"><h2>Brand video kit</h2><p>For your own edits, the kit includes:</p><ul>'
-   '<li>Logo intro and outro animations, landscape and portrait, with title and statement versions.</li>'
-   '<li>Lower thirds and motion graphics templates for Premiere Pro (.mogrt).</li>'
-   '<li>Safe-zone guides for framing.</li></ul></section>')
-  at = body.find('<section class="reading-section">')
-  return body[:at] + kit + body[at:]
- edit('video.html', video)
 
  def merch(name, body):
   reuse = ('<section class="reading-section"><h2>Existing designs to reuse</h2><ul>'

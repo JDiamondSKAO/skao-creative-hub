@@ -1,5 +1,21 @@
 # Changes
 
+## 2.21.0 Review board feedback, round 4 (proposal, branch claude/creative-hub-v2.21)
+
+Built on 2.20, from the notes on the review board. The Events pages wait for the next round.
+
+- **Latest files** replaces All resources. It lists the files themselves rather than every page: each new or updated file in the Hub, newest first and grouped by month, with the page it's on, its Hub section and a download button. Search and section filters sit above the list. Several files added to one page on the same day fold into one row ("6 new files"), which opens to list them. The site teams' progress slides are included without needing a label. The footer link, a search answer and the old Hub updates pages now point here.
+- **Approved slide decks** (was Decks to reuse) takes over from Recent talks, which is gone, and the "Shared by staff" group leaves Presentations. Decks show as cards in topic groups, newest first. Each card has a cover: a picture attached under the deck's own name (Deck.pptx and Deck.jpg), or else a drawn title slide in the topic's colour. Under the cover are the month from the file name and a button for each format. Tested with eight decks from the public talk bank.
+- **Partner templates:** the downloads are two cards, each with a cover and a plain name (SKAO and SARAO; SRCNet), and buttons that say PowerPoint or Keynote.
+- **Partner logos:** each logo is a tile with a preview (white versions on navy) and AI, EPS and PNG buttons, grouped as SRCNet logo, SRCNet avatar and Regional centres. Each regional pack is a compact card naming the centre's country.
+- **Construction overview, SKA-Low and SKA-Mid:** "Status and photos" becomes "Live status", with two larger cards. On the overview these are the dashboard and the overall status; on the site pages, the site's status slides and the dashboard. The weekly all-hands photos get their own band, as on Photos and video. On the site pages, earlier slides now follow the latest deck as a dated list (a month tile, the details and a download button), showing six before a "Show all" button.
+- **Video and animation** starts with the Canto slideshow. The downloads, the brand video kit and "Need new video?" are gone.
+- **Poster templates:** Word and PDF only. The Illustrator files and the mention of them are gone.
+- **Co-branding with CSIRO** keeps the co-branding guidelines and points to Letterheads for the office letterheads. Letterheads now names each Australian office, including Kensington, Perth (with CSIRO).
+- **Link cards:** the AI policy and AI pages on Using AI image tools, the W3C reference on Accessibility checks, and the logo use request form on Using the SKAO logo (its link is now known). Each card shows what the link is and where it lives.
+- **Apply the brand** drops the "Want a second opinion?" box.
+- **Test mode:** `scripts/cover_images.py` makes covers with Quick Look. Examples in `dev/brandbank-map.json` can now come from another folder (the talk bank), with labels and covers.
+
 ## 2.20.0 Construction overview (proposal, branch claude/creative-hub-progress)
 
 Built on 2.19. The SKA-Low and SKA-Mid pages were hard to follow, so both telescopes now sit under one page, and all three are simpler.

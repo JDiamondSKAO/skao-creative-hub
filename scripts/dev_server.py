@@ -94,7 +94,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         url = urlparse(self.path)
-        # Every file on one page, whatever its labels (Recent talks and the site progress pages).
+        # Every file on one page, whatever its labels (the site progress pages, covers for the deck cards).
         m = re.fullmatch(r'/rest/api/content/(\d+)', url.path)
         if m and m.group(1) in FILE_OF:
             ref = page_ref(FILE_OF[m.group(1)]); ref['version'] = {'number': 1, 'when': edited(FILE_OF[m.group(1)])}

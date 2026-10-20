@@ -431,80 +431,147 @@ document.addEventListener("DOMContentLoaded", () => {
     if (rendered && rendered === input.value.trim() && first) { location.href = first.href; return; }
     search();
   });
-  // Resource catalogue: text filter plus type chips.
-  const filter = $("#resourceFilter"),
-    chips = $$("[data-type-filter]");
-  let type = "all";
-  function filterResources() {
-    const words = terms(filter?.value || "");
-    let n = 0;
-    $$("[data-resource]").forEach((card) => {
-      const hay = card.textContent.toLowerCase();
-      const match = (type === "all" || card.dataset.type === type) &&
-        words.every((w) => expand(w).some((alt) => hay.includes(alt)));
-      (card.closest("li") || card).hidden = !match;
-      if (match) n++;
-    });
-    const status = $("#filterStatus");
-    if (status) status.textContent = n ? `Showing ${n} resource${n === 1 ? "" : "s"}.` : "";
-    const empty = $("#catalogueEmpty");
-    if (empty) empty.hidden = n > 0;
-  }
-  filter?.addEventListener("input", filterResources);
-  chips.forEach((chip) => chip.addEventListener("click", () => {
-    type = chip.dataset.typeFilter;
-    chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
-    filterResources();
-  }));
-  // All resources: dated by the newest approved file on each page, else the page's last edit, and sorted newest first.
-  const resourceList = $(".resource-list"), sortBy = $("#resourceSort");
-  const resourceRows = resourceList ? [...resourceList.children] : [];
-  function sortResources() {
-    const title = (li) => li.querySelector("strong")?.textContent.trim().toLowerCase() || "";
-    const when = (li) => Number(li.querySelector("[data-when]")?.dataset.when) || 0;
-    const rows = [...resourceRows];
-    if (sortBy?.value === "az") rows.sort((a, b) => title(a).localeCompare(title(b)));
-    else rows.sort((a, b) => when(b) - when(a));
-    resourceList.append(...rows);
-  }
-  sortBy?.addEventListener("change", sortResources);
-  if (resourceList && document.body.dataset.mode !== "preview") datedResources();
-  async function datedResources() {
-    const ctx = document.body.dataset.context || "";
-    const get = async (cql) => {
-      const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: "200", expand: "container,version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
-      return res.ok ? (await res.json()).results || [] : [];
+  // Latest files: every approved file in the Hub and the site teams' progress slides, newest first,
+  // grouped by month. Each file names the page it is on and that page's Hub section.
+  async function loadFeed(box) {
+    const list = box.querySelector("[data-feed-list]"), chipBox = box.querySelector(".type-chips");
+    const search = box.querySelector("#fileFilter"), status = box.querySelector("#feedStatus"), empty = box.querySelector("#feedEmpty");
+    const read = (key, fallback) => { try { return JSON.parse(box.dataset[key] || "null") || fallback; } catch { return fallback; } };
+    const pages = read("pages", {}), sections = new Map(read("sections", [])), sitePages = read("sitePages", []);
+    const preview = document.body.dataset.mode === "preview", ctx = document.body.dataset.context || "";
+    const note = (text) => { const p = document.createElement("p"); p.className = "feed-note"; p.textContent = text; list.replaceChildren(p); };
+    const placeOf = (id, title) => pages["i:" + id] || pages["t:" + String(title || "").toLowerCase()] || null;
+    const routeHref = (id) => { const a = $$("#hubRoutes a").find((x) => x.dataset.pageId === String(id)); return a ? safeLink(a.getAttribute("href")) : null; };
+    const toRow = (f, site) => {
+      const title = String(f.title || ""), href = preview ? null : safeLink(ctx + (f._links?.download || ""));
+      if (!preview && !href) return null;
+      const id = String(f.container?.id || ""), at = placeOf(id, f.container?.title);
+      const base = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").replace(/\s+/g, " ").trim();
+      const dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
+      const webui = f.container?._links?.webui;
+      return {
+        href, name: dm ? dm[3].trim() : base, title, ext: (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase(),
+        when: Date.parse(f.version?.when || "") || 0, updated: Number(f.version?.number) > 1, size: f.extensions?.fileSize,
+        type: at?.[0] || "", page: at?.[1] || String(f.container?.title || ""),
+        pageHref: preview ? null : (webui ? safeLink(ctx + webui) : routeHref(id)), downloads: !site,
+      };
     };
-    let files, edits;
-    try {
-      [files, edits] = await Promise.all([get('type=attachment AND space="CRH" AND label="approved" ORDER BY created DESC'), get('type=page AND space="CRH" ORDER BY lastmodified DESC')]);
-    } catch { return; }
-    const added = new Map(), edited = new Map();
-    files.forEach((f) => { const id = String(f.container?.id || ""), t = Date.parse(f.version?.when); if (id && t && !(added.get(id) >= t)) added.set(id, t); });
-    edits.forEach((p) => { const t = Date.parse(p.version?.when); if (p.id && t) edited.set(String(p.id), t); });
-    const day = (t) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(t); } catch { return ""; } };
-    let dated = 0;
-    resourceRows.forEach((li) => {
-      const row = li.querySelector("[data-resource]"), id = row?.dataset.pageId;
-      // Pages matched by title in Confluence carry this page's ID, so they stay undated.
-      if (!id || id === document.body.dataset.pageId) return;
-      const t = added.get(id) || edited.get(id);
-      if (!t) return;
-      const when = document.createElement("span");
-      when.className = "resource-when"; when.dataset.when = String(t);
-      when.textContent = (added.has(id) ? "Added " : "Updated ") + day(t);
-      (row.querySelector(".resource-meta") || row).append(when);
-      dated++;
+    let rows = [];
+    if (preview) {
+      const day = 864e5, now = Date.now();
+      rows = [
+        { title: "SKAO_PPT_Unrestricted.pptx", container: { title: "Standard SKAO template" }, version: { when: new Date(now - 2 * day).toISOString() }, extensions: { fileSize: 3.4 * 1048576 } },
+        { title: "2026-10 SKA-Low progress.pptx", container: { title: "SKA-Low progress" }, version: { when: new Date(now - 5 * day).toISOString() }, extensions: { fileSize: 12.6 * 1048576 } },
+        { title: "SKAO_Letterhead_UNRESTRICTED.docx", container: { title: "Letterheads" }, version: { when: new Date(now - 9 * day).toISOString(), number: 2 }, extensions: { fileSize: 143 * 1024 } },
+        { title: "SKAO_SRCnet_logo_colour_rgb.png", container: { title: "Partner logos" }, version: { when: new Date(now - 41 * day).toISOString() }, extensions: { fileSize: 62 * 1024 } },
+      ].map((f) => toRow(f, false));
+    } else {
+      try {
+        const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql: 'type=attachment AND space="CRH" AND label="approved" ORDER BY lastmodified DESC', limit: "200", expand: "container,version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+        if (!res.ok) throw Error(String(res.status));
+        const approved = (await res.json()).results || [];
+        // Progress slides need no label: the site teams add them to their own pages.
+        const decks = await Promise.all(sitePages.map((id) => attachmentsOf(id, ctx).then((fs) => fs.filter((f) => !/^canto-|^site-photo\.|\.json$/i.test(String(f.title || ""))).map((f) => ({ ...f, container: { id } }))).catch(() => [])));
+        const seen = new Set();
+        rows = [...approved.map((f) => toRow(f, false)), ...decks.flat().map((f) => toRow(f, true))].filter((r) => r && !seen.has(r.href) && seen.add(r.href));
+      } catch (e) {
+        note(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the latest files." : "The latest files could not be loaded.");
+        return;
+      }
+    }
+    rows.sort((x, y) => y.when - x.when);
+    if (!rows.length) { note("No new files yet. Files appear here as soon as they are approved."); return; }
+    const monthOf = (t) => { const d = new Date(t); return MONTHS[d.getMonth()] + " " + d.getFullYear(); };
+    const day = (t) => { try { return new Intl.DateTimeFormat("en-GB", new Date(t).getFullYear() === new Date().getFullYear() ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" }).format(t); } catch { return ""; } };
+    const months = new Map();
+    rows.forEach((r) => { const k = r.when ? monthOf(r.when) : "Earlier"; if (!months.has(k)) months.set(k, []); months.get(k).push(r); });
+    list.replaceChildren(...[...months].map(([label, items]) => {
+      const sec = document.createElement("section"); sec.className = "feed-month";
+      const h = document.createElement("h2"), count = document.createElement("span");
+      h.textContent = label; count.textContent = items.length + (items.length === 1 ? " file" : " files"); h.append(count);
+      const ul = document.createElement("ul"); ul.className = "feed-list";
+      const batches = new Map();
+      items.forEach((r) => { const k = r.page + "|" + new Date(r.when).toDateString(); if (!batches.has(k)) batches.set(k, []); batches.get(k).push(r); });
+      batches.forEach((group) => { if (group.length >= 3) ul.append(batch(group)); else group.forEach((r) => ul.append(row(r))); });
+      sec.append(h, ul); return sec;
+    }));
+    // One file: its type, name, page and section, when it was added, and a download button.
+    function row(r, inBatch) {
+      const li = document.createElement("li"); li.className = inBatch ? "feed-file" : "feed-row"; li.dataset.type = r.type || "other";
+      const badge = document.createElement("span"); badge.className = "file-badge"; badge.dataset.ext = r.ext; badge.textContent = r.ext.toUpperCase().slice(0, 4);
+      const text = document.createElement("span"); text.className = "feed-text";
+      const name = document.createElement("strong"); name.className = "feed-name"; name.textContent = r.name;
+      const where = document.createElement("span"); where.className = "feed-where";
+      const page = document.createElement(r.pageHref ? "a" : "span"); page.textContent = r.page || "Creative Hub";
+      if (r.pageHref) page.href = r.pageHref + (r.downloads ? "#downloads" : "");
+      where.append(page);
+      if (sections.has(r.type)) { const s2 = document.createElement("span"); s2.className = "feed-section"; s2.textContent = sections.get(r.type); where.append(s2); }
+      text.append(name, where);
+      const when = document.createElement("span"); when.className = "feed-when"; when.textContent = r.when ? (r.updated ? "Updated " : "Added ") + day(r.when) : "";
+      const get = document.createElement("a"); get.className = "dl-file";
+      if (r.href) { get.href = r.href; get.setAttribute("download", ""); get.title = r.title; } else get.setAttribute("aria-disabled", "true");
+      get.setAttribute("aria-label", `Download ${r.name}, ${r.ext.toUpperCase()}${size(r.size) ? ", " + size(r.size) : ""}`);
+      const b = document.createElement("b"); b.textContent = "Download"; const small = document.createElement("small"); small.textContent = size(r.size);
+      get.append(b, small);
+      if (inBatch) li.append(badge, name, get); else li.append(badge, text, when, get);
+      if (preview && !inBatch) { const tag = document.createElement("span"); tag.className = "example-tag"; tag.textContent = "Example"; name.append(tag); }
+      return li;
+    }
+    // Several files added to one page on the same day: one row, with the files listed underneath on request.
+    function batch(group) {
+      const r = group[0], li = row({ ...r, name: group.length + (group.every((x) => x.updated) ? " updated files" : " new files") });
+      li.classList.add("feed-batch");
+      const tally = group.reduce((t, x) => ({ ...t, [x.ext]: (t[x.ext] || 0) + 1 }), {}), common = Object.keys(tally).sort((x, y) => tally[y] - tally[x])[0];
+      const badge = li.querySelector(".file-badge"); badge.dataset.ext = common; badge.textContent = common.toUpperCase().slice(0, 4); badge.classList.add("is-stack");
+      li.querySelector(".example-tag")?.remove();
+      const list = document.createElement("ul"); list.className = "feed-sub"; list.hidden = true; list.id = "batch-" + Math.random().toString(36).slice(2, 9);
+      group.forEach((x) => list.append(row(x, true)));
+      const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "feed-toggle";
+      toggle.setAttribute("aria-expanded", "false"); toggle.setAttribute("aria-controls", list.id);
+      const label = () => { toggle.textContent = list.hidden ? "Show files" : "Hide files"; };
+      toggle.addEventListener("click", () => { list.hidden = !list.hidden; li.dataset.userOpen = String(!list.hidden); toggle.setAttribute("aria-expanded", String(!list.hidden)); label(); });
+      label();
+      li.querySelector(".dl-file").replaceWith(toggle);
+      li.append(list);
+      return li;
+    }
+    // Section filters for the sections that have files, in the Hub's own order.
+    let type = "all";
+    const counts = rows.reduce((m, r) => m.set(r.type, (m.get(r.type) || 0) + 1), new Map());
+    const chip = (key, label, n) => {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.typeFilter = key; b.setAttribute("aria-pressed", String(key === "all"));
+      const c = document.createElement("span"); c.textContent = n; b.append(label + " ", c);
+      b.addEventListener("click", () => { type = key; chipBox.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); apply(); });
+      return b;
+    };
+    const present = [...sections].filter(([key]) => counts.get(key));
+    if (present.length > 1) { chipBox.replaceChildren(chip("all", "All", rows.length), ...present.map(([key, label]) => chip(key, label, counts.get(key)))); chipBox.hidden = false; }
+    function apply() {
+      const words = terms(search?.value || "");
+      const fits = (hay) => words.every((w) => expand(w).some((alt) => hay.includes(alt)));
+      let n = 0;
+      list.querySelectorAll(".feed-row").forEach((li) => {
+        const inType = type === "all" || li.dataset.type === type;
+        if (!li.classList.contains("feed-batch")) { const match = inType && fits(li.textContent.toLowerCase()); li.hidden = !match; if (match) n++; return; }
+        // A folded group matches on its page and section, or on any of its files, which then show.
+        const head = li.querySelector(".feed-text").textContent.toLowerCase(), sub = li.querySelector(".feed-sub"), files = [...sub.children];
+        let shown = 0;
+        files.forEach((f) => { const match = inType && fits(head + " " + f.textContent.toLowerCase()); f.hidden = !match; if (match) shown++; });
+        li.hidden = !shown; n += shown;
+        const open = (words.length && shown) || li.dataset.userOpen === "true";
+        sub.hidden = !open; li.querySelector(".feed-toggle").setAttribute("aria-expanded", String(!!open)); li.querySelector(".feed-toggle").textContent = open ? "Hide files" : "Show files";
+      });
+      list.querySelectorAll(".feed-month").forEach((m) => { m.hidden = !m.querySelector(".feed-row:not([hidden])"); });
+      if (status) status.textContent = n === rows.length ? "" : `Showing ${n} of ${rows.length} files.`;
+      if (empty) empty.hidden = n > 0;
+    }
+    search?.addEventListener("input", apply);
+    box.querySelector("#clearFeed")?.addEventListener("click", () => {
+      if (search) search.value = ""; type = "all";
+      chipBox.querySelectorAll("button").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.typeFilter === "all")));
+      apply(); search?.focus();
     });
-    if (!dated) return;
-    $(".resource-sort").hidden = false;
-    sortResources();
   }
-  $("#clearFilters")?.addEventListener("click", () => {
-    filter.value = ""; type = "all";
-    chips.forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.typeFilter === "all")));
-    filterResources(); filter.focus();
-  });
   // Homepage search box hands over to the full search dialog as you type.
   const hero = $("#heroSearch");
   hero?.addEventListener("input", () => {
@@ -605,7 +672,10 @@ document.addEventListener("DOMContentLoaded", () => {
     files.forEach((f) => { const id = String(f.container?.id || ""); if (id) byPage.set(id, [...(byPage.get(id) || []), f]); });
     const mine = pageId ? byPage.get(String(pageId)) : null;
     if (!mine?.length) return;
-    const section = renderDownloads(mine, ctx);
+    // Cards show a cover: a picture attached to the page under the file's own name.
+    const view = $("[data-dl-groups]")?.dataset.dlView || "list";
+    const pictures = view === "cards" && pageId ? await attachmentsOf(pageId, ctx).catch(() => []) : [];
+    const section = renderDownloads(mine, ctx, pictures);
     if (!section) return;
     // Links from "Just added" point at #downloads, which only exists once the files have loaded.
     const arrive = () => { if (location.hash === "#downloads") section.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" }); };
@@ -616,14 +686,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     panel.querySelectorAll('.how-to-get, [data-fact=versions], [data-fact=sizes], [data-fact="partner versions"], [data-fact=planned]').forEach((el) => el.remove());
-    release(panel, mine.filter((f) => safeLink(ctx + (f._links?.download || ""))));
+    release(panel, mine.filter((f) => safeLink(ctx + (f._links?.download || ""))), view);
     panel.after(section);
-    beside(section);
+    beside(section, view);
     arrive();
   }
   // Release details on the main card, read from the approved files: the newest upload date and,
   // when every file agrees on it, the version (from the file names, or Confluence's own count).
-  function release(panel, files) {
+  function release(panel, files, view = "list") {
     const fact = (key, value) => { const el = panel.querySelector(`[data-fact="${key}"]`); if (!el) return; if (value) el.querySelector("dd").textContent = value; el.hidden = !el.querySelector("dd").textContent; };
     const times = files.map((f) => Date.parse(f.version?.when || "")).filter((t) => !isNaN(t));
     let updated = "";
@@ -631,24 +701,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const one = (list) => list.length === files.length && new Set(list).size === 1 ? list[0] : "";
     const named = one(files.map((f) => (String(f.title || "").match(/(?:^|[\s_-])v(\d+(?:\.\d+)?)(?=[\s_.-]|$)/i) || [])[1]).filter(Boolean));
     const counted = one(files.map((f) => String(f.version?.number || "")).filter(Boolean));
-    fact("version", named || counted ? "Version " + (named || counted) : "");
+    fact("version", view === "list" && (named || counted) ? "Version " + (named || counted) : "");
     fact("updated", updated);
     fact("approved", "");
   }
-  // "Before you use the file" sits beside the downloads as a card, rather than below them.
-  function beside(section) {
+  // "Before you use the file" sits beside a list of downloads as a card. Cards and logo tiles need the
+  // width, so there the checks follow them as a band.
+  function beside(section, view = "list") {
     const read = $$(".content-body > .reading-section").find((r) => r.querySelector("h2")?.textContent.trim() === "Before you use the file");
     if (!read) return;
+    if (view !== "list") { read.classList.add("dl-checks"); read.querySelector("h2").className = "rail-title"; section.after(read); return; }
     const wrap = document.createElement("div"); wrap.className = "dl-layout";
     const card = document.createElement("aside"); card.className = "dl-aside"; card.setAttribute("aria-labelledby", "beforeUse");
     const h = read.querySelector("h2"); h.id = "beforeUse"; h.className = "rail-title";
     card.append(...read.childNodes);
     section.replaceWith(wrap); wrap.append(section, card); read.remove();
   }
-  // Pages people keep current themselves (talks, site progress): every file on the page, newest first.
-  // No "approved" label is needed, so adding a file is the whole job.
-  // Files people add to a page themselves, newest first. "2026-10 Name Event.pptx" reads as
-  // "Name Event", given October 2026. Thumbnails, data files and off-site links are left out.
+  // The site progress pages list every file the site team adds, newest first: no "approved" label is
+  // needed, so adding a file is the whole job. "2026-10 SKA-Low progress.pptx" reads as "SKA-Low
+  // progress", given October 2026. Photos, Canto thumbnails, data files and off-site links are left out.
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   function pageFiles(files, ctx) {
     return files.filter((f) => !/^canto-|^site-photo\.|\.json$/i.test(String(f.title || ""))).map((f) => {
@@ -661,7 +732,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }).filter((r) => r.href).sort((x, y) => y.when - x.when);
   }
   const fmt = (t) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(t)); } catch { return ""; } };
-  const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+  const size = (n) => !n ? "" : n > 1073741824 ? (n / 1073741824).toFixed(1) + " GB" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
   async function attachmentsOf(pageId, ctx) {
     const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200", expand: "version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
     if (!res.ok) throw new Error(String(res.status));
@@ -686,45 +757,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const newest = pageFiles(files, ctx)[0], line = tile.querySelector("[data-latest-line]");
     if (newest && line) line.textContent = "Latest slides: " + (newest.month || fmt(newest.when));
   });
-  const fileList = $("[data-attachments]");
-  if (fileList) (fileList.hasAttribute("data-site-files") ? loadSitePage : loadAttachments)(fileList);
-  async function loadAttachments(box) {
-    const list = box.querySelector("[data-attachment-list]"), pageId = document.body.dataset.pageId;
-    const note = (text) => { const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = text; list.replaceChildren(p); };
-    if (document.body.dataset.mode === "preview" || !pageId) { note("Preview: in Confluence, every file added to this page is listed here, newest first."); return; }
-    const ctx = document.body.dataset.context || "";
-    const add = safeLink(ctx + "/pages/viewpageattachments.action?pageId=" + encodeURIComponent(pageId));
-    if (add) {
-      const a = document.createElement("a"); a.className = "text-link attachments-add"; a.href = add; a.textContent = box.dataset.addLabel || "Add a file";
-      box.querySelector(".attachments-head")?.append(a);
-    }
-    let files = [];
-    try { files = await attachmentsOf(pageId, ctx); } catch { note("The files on this page could not be loaded."); return; }
-    const rows = pageFiles(files, ctx);
-    if (!rows.length) { note(box.dataset.empty || "Nothing here yet."); return; }
-    list.replaceChildren(fileGroup(rows, true));
-  }
-  // A list of files with a download chip each; the newest can carry a "Latest" tag.
-  function fileGroup(rows, tagLatest) {
-    const group = document.createElement("section"); group.className = "dl-group file-group";
-    const ul = document.createElement("ul");
+  const fileList = $("[data-site-files]");
+  if (fileList) loadSitePage(fileList);
+  const feedBox = $("[data-file-feed]");
+  if (feedBox) loadFeed(feedBox);
+  // Earlier decks: a month tile, the deck and its details, and a download button. Long lists show the
+  // six newest first, with a button for the rest.
+  function deckList(rows) {
+    const ol = document.createElement("ol"); ol.className = "deck-list";
     rows.forEach((r, i) => {
-      const li = document.createElement("li"); li.className = "dl-row file-row";
-      const text = document.createElement("span"); text.className = "file-text";
+      const li = document.createElement("li"); li.className = "deck-row";
+      const d = new Date(r.when), [m, y] = r.month ? r.month.split(" ") : [r.when ? MONTHS[d.getMonth()] : "", r.when ? String(d.getFullYear()) : ""];
+      const date = document.createElement("span"); date.className = "deck-date"; date.setAttribute("aria-hidden", "true");
+      const mb = document.createElement("b"), yb = document.createElement("small"); mb.textContent = (m || "").slice(0, 3); yb.textContent = y || ""; date.append(mb, yb);
+      const text = document.createElement("span"); text.className = "deck-text";
       const name = document.createElement("strong"); name.textContent = r.name;
-      if (i === 0 && tagLatest) { const tag = document.createElement("span"); tag.className = "file-latest"; tag.textContent = "Latest"; name.append(tag); }
-      const meta = document.createElement("span"); meta.className = "file-meta";
-      meta.textContent = [r.month, r.when && "added " + fmt(r.when)].filter(Boolean).join(", ").replace(/^added/, "Added");
+      const meta = document.createElement("span"); meta.textContent = [r.month, r.ext.toUpperCase(), size(r.size), r.when && "added " + fmt(r.when)].filter(Boolean).join(" · ");
       text.append(name, meta);
-      const a = document.createElement("a"); a.className = "dl-file"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title;
-      a.setAttribute("aria-label", `Download ${r.name}, ${r.ext.toUpperCase()}${size(r.size) ? ", " + size(r.size) : ""}`);
-      const b = document.createElement("b"); b.textContent = r.ext.toUpperCase(); b.dataset.ext = r.ext;
-      const small = document.createElement("small"); small.textContent = size(r.size);
-      a.append(b, small);
-      li.append(text, a); ul.append(li);
+      const a = document.createElement("a"); a.className = "deck-get"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title;
+      a.setAttribute("aria-label", `Download ${r.name}${r.month ? ", " + r.month : ""}, ${r.ext.toUpperCase()}${size(r.size) ? ", " + size(r.size) : ""}`);
+      a.textContent = "Download";
+      li.append(date, text, a);
+      if (i >= 6 && rows.length > 8) li.hidden = true;
+      ol.append(li);
     });
-    group.append(ul);
-    return group;
+    if (rows.length <= 8) return ol;
+    const wrap = document.createElement("div"), more = document.createElement("button");
+    more.type = "button"; more.className = "button secondary deck-more"; more.textContent = `Show all ${rows.length} earlier decks`;
+    more.addEventListener("click", () => { ol.querySelectorAll(".deck-row[hidden]").forEach((li) => { li.hidden = false; }); more.remove(); });
+    wrap.append(ol, more); return wrap;
   }
   // SKA-Low and SKA-Mid progress: the newest deck leads in the telescope panel, earlier decks follow.
   async function loadSitePage(box) {
@@ -743,7 +804,8 @@ document.addEventListener("DOMContentLoaded", () => {
     a.className = "button on-dark"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title; a.textContent = "Download slides";
     hero.querySelector("[data-hero-actions]").replaceChildren(a);
     if (rows.length < 2) return;
-    box.querySelector("[data-attachment-list]").replaceChildren(fileGroup(rows.slice(1), false));
+    box.querySelector("[data-attachment-list]").replaceChildren(deckList(rows.slice(1)));
+    const count = box.querySelector("[data-file-count]"); if (count) count.textContent = rows.length - 1 + (rows.length === 2 ? " deck" : " decks");
     box.hidden = false;
   }
   // The event kit: each item's picture is a file attached to the page under a fixed name
@@ -770,14 +832,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   // Downloads grouped by the choice people are making: classification, office, partner, then file type.
-  function renderDownloads(files, ctx) {
+  // A page shows them as a list (the default), as cards with a cover (decks and templates) or as logo
+  // tiles with a preview (brandkit.DOWNLOAD_VIEW).
+  function renderDownloads(files, ctx, pictures = []) {
     const CLASSES = ["Unrestricted", "Staff Resources", "SKAO Staff Only", "For Project Use", "Confidential", "Strictly Confidential"];
     const KINDS = [["Templates", /^(pptx?|potx|key|docx?|dotx)$/], ["Guides and PDFs", /^pdf$/], ["ZIP packs", /^zip$/], ["Video", /^(mp4|mov|m4v)$/], ["Motion templates", /^mogrt$/], ["Artwork", /^(ai|eps|indd|psd|svg)$/], ["Images", /^(png|jpe?g|gif|webp)$/]];
     const FORMAT_ORDER = ["pptx", "potx", "key", "docx", "dotx", "pdf", "ai", "eps", "svg", "png", "jpg", "zip", "mp4", "mov", "mogrt"];
+    const FORMAT_NAMES = { pptx: "PowerPoint", ppt: "PowerPoint", potx: "PowerPoint", key: "Keynote", docx: "Word", doc: "Word", dotx: "Word", pdf: "PDF", zip: "ZIP" };
+    const view = $("[data-dl-groups]")?.dataset.dlView || "list";
     const partnerPage = /co-branding|partner/i.test($(".page-head h1")?.textContent || "");
     let rules = [];
     try { rules = JSON.parse($("[data-dl-groups]")?.dataset.dlGroups || "[]").map((r) => ({ ...r, re: new RegExp(r.match, "i"), cut: r.strip ? new RegExp(r.strip, "gi") : null })); } catch { rules = []; }
-    const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
     const pattern = (label) => new RegExp("(^|[\\s_-])" + label.replace(/ /g, "[\\s_-]+") + "($|[\\s_.-])", "i");
     const tidy = (label) => {
       let t = label.replace(/_+/g, " ").replace(/\s+/g, " ").trim();
@@ -790,6 +855,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const NOISE = new Set(["skao", "ska", "template", "templates", "letterhead", "wordletterhead", "ppt", "logofiles", "signature", "file", "files"]);
     // Split joined words ("KeynoteTemplate") but keep codes such as "ukSRC" whole.
     const words = (base) => tidy(base.replace(/PowerPoint/g, "Powerpoint").replace(/([a-z])([A-Z][a-z])/g, "$1 $2").replace(/[()]/g, " ")).split(" ").filter((w) => /[\p{L}\p{N}]/u.test(w));
+    // On cards, a picture attached under a deck's own name (Deck.pptx and Deck.jpg) is its cover, not a download.
+    const IMAGE = /\.(png|jpe?g|webp)$/i, baseOf = (t) => String(t || "").replace(/\.[a-z0-9]+$/i, "").toLowerCase();
+    const covers = new Map();
+    if (view === "cards") {
+      const named = new Set(files.filter((f) => !IMAGE.test(String(f.title || ""))).map((f) => baseOf(f.title)));
+      [...pictures, ...files].forEach((f) => { const href = safeLink(ctx + (f._links?.download || "")); if (href && IMAGE.test(String(f.title || "")) && named.has(baseOf(f.title))) covers.set(baseOf(f.title), href); });
+      files = files.filter((f) => !(IMAGE.test(String(f.title || "")) && covers.has(baseOf(f.title))));
+    }
     const variants = new Map();
     files.forEach((f) => {
       const title = String(f.title || ""), ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "").toLowerCase();
@@ -798,7 +871,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const base = title.replace(/\.[a-z0-9]+$/i, "");
       const w = words(base), key = w.filter((x) => !/^(keynote|powerpoint)$/i.test(x)).join(" ").toLowerCase();
       if (!variants.has(key)) variants.set(key, { base, words: w.filter((x) => !/^(keynote|powerpoint)$/i.test(x)), files: [] });
-      variants.get(key).files.push({ title, ext, href, size: size(f.extensions?.fileSize) });
+      variants.get(key).files.push({ title, ext, href, size: size(f.extensions?.fileSize), when: Date.parse(f.version?.when || "") || 0 });
     });
     if (!variants.size) return null;
     [...variants.values()].forEach((v) => {
@@ -811,7 +884,8 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (!partnerPage && /\b(sarao|csiro|srcnet|rcn)\b|[a-z]src\b/i.test(v.words.join(" "))) v.group = "Partner versions";
       else if (v.group === "Templates" && /office|landscape|portrait/i.test(v.base)) v.group = "By office and layout";
     });
-    const ORDER = ["By information classification", ...new Set(rules.map((r) => r.group)), "By office and layout", "Files", ...KINDS.map(([k]) => k), "Other files", "Partner versions"];
+    // A page's own group names come first; one may share a name with a file type ("Templates"), so each name is listed once.
+    const ORDER = [...new Set(["By information classification", ...rules.map((r) => r.group), "By office and layout", "Files", ...KINDS.map(([k]) => k), "Other files", "Partner versions"])];
     const groups = ORDER.map((name) => [name, [...variants.values()].filter((v) => v.group === name)]).filter(([, g]) => g.length);
     const total = [...variants.values()].reduce((n, v) => n + v.files.length, 0);
     const section = document.createElement("section"); section.className = "downloads"; section.id = "downloads"; section.setAttribute("aria-labelledby", "downloadsHeading");
@@ -819,7 +893,66 @@ document.addEventListener("DOMContentLoaded", () => {
     const h2 = document.createElement("h2"); h2.id = "downloadsHeading"; h2.textContent = "Downloads";
     const count = document.createElement("p"); count.textContent = total + (total === 1 ? " file" : " files");
     head.append(h2, count); section.append(head);
-    const wrap = document.createElement("div"); wrap.className = "dl-groups" + (groups.length > 1 ? " multi" : "");
+    const wrap = document.createElement("div"); wrap.className = "dl-groups" + (groups.length > 1 && view === "list" ? " multi" : "") + (view === "list" ? "" : " " + view);
+    // One download button per format, in a set order.
+    const chip = (row, i, friendly, bare) => {
+      const kind = (friendly && FORMAT_NAMES[i.ext]) || (i.ext || "file").toUpperCase();
+      const a = document.createElement("a"); a.className = "dl-file"; a.href = i.href; a.setAttribute("download", ""); a.title = i.title;
+      a.setAttribute("aria-label", `Download ${row.label}, ${kind}${i.size ? ", " + i.size : ""}`);
+      const b = document.createElement("b"); b.textContent = kind; b.dataset.ext = i.ext;
+      const small = document.createElement("small"); small.textContent = i.size;
+      a.append(b); if (!bare) a.append(small); return a;
+    };
+    const inOrder = (row) => row.files.sort((x, y) => (FORMAT_ORDER.indexOf(x.ext) + 99) % 99 - (FORMAT_ORDER.indexOf(y.ext) + 99) % 99);
+    // Decks and templates: a cover (or the title, set as a slide), the month from a "2026-10" prefix, and a button per format.
+    let tone = -1;  // each group of cards gets the next colour, starting from the brand's navy and magenta
+    const cards = (list) => {
+      tone++;
+      const ul = document.createElement("ul"); ul.className = "file-cards";
+      // Newest first: by the month in the file name, else by when it was added.
+      const dated = (row) => { const m = row.base.match(/^(\d{4})[-. ]?(\d{2})/); return m ? Date.UTC(+m[1], +m[2] - 1, 28) : Math.max(...row.files.map((i) => i.when)); };
+      [...list].sort((x, y) => dated(y) - dated(x)).forEach((row) => {
+        const base = row.base.replace(/_+/g, " ").replace(/\s+/g, " ").trim(), dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
+        const month = dm && +dm[2] >= 1 && +dm[2] <= 12 ? MONTHS[+dm[2] - 1] + " " + dm[1] : "";
+        row.label = row.rule?.label || (dm ? dm[3].trim() : base);
+        const li = document.createElement("li"); li.className = "file-card";
+        const cover = document.createElement("div"); cover.className = "file-cover"; cover.setAttribute("aria-hidden", "true");
+        const type = document.createElement("span"), brand = document.createElement("small");
+        type.className = "cover-type"; brand.textContent = "SKA Observatory"; type.append(brand, document.createElement("i"), document.createElement("i")); cover.append(type);
+        cover.dataset.tone = String(tone % 4);
+        const pic = row.files.map((i) => covers.get(baseOf(i.title))).find(Boolean);
+        if (pic) { const img = new Image(); img.alt = ""; img.decoding = "async"; img.loading = "lazy"; img.onload = () => cover.classList.add("has-image"); img.src = pic; cover.append(img); }
+        const body = document.createElement("div"); body.className = "file-card-body";
+        if (month) { const k = document.createElement("p"); k.className = "file-card-kicker"; k.textContent = month; body.append(k); }
+        const h = document.createElement("h4"); h.className = "file-card-title"; h.textContent = row.label; body.append(h);
+        if (row.rule?.desc) { const d = document.createElement("p"); d.className = "file-card-desc"; d.textContent = row.rule.desc; body.append(d); }
+        const get = document.createElement("p"); get.className = "file-card-files"; inOrder(row).forEach((i) => get.append(chip(row, i, true)));
+        body.append(get); li.append(cover, body); ul.append(li);
+      });
+      return ul;
+    };
+    // Logos: the PNG as a preview (white versions on navy), or the centre's code for a regional pack.
+    const COUNTRIES = { aus: "Australia", ca: "Canada", ch: "Switzerland", cn: "China", de: "Germany", es: "Spain", fr: "France", in: "India", it: "Italy", jp: "Japan", kr: "Republic of Korea", nl: "Netherlands", pt: "Portugal", se: "Sweden", uk: "United Kingdom", za: "South Africa" };
+    const tiles = (list) => {
+      const ul = document.createElement("ul"); ul.className = "logo-tiles";
+      if (list.every((row) => /^[a-z]{2,3}SRC$/.test(row.label))) ul.classList.add("packs");
+      list.forEach((row) => {
+        const code = row.label.match(/^([a-z]{2,3})SRC$/);
+        if (!code) row.label = row.label.replace(/^colou?r$/i, "Full colour");
+        const li = document.createElement("li"); li.className = "logo-tile" + (code ? " is-pack" : "");
+        if (/white/i.test(row.base)) li.dataset.tone = "dark";
+        const look = document.createElement("div"); look.className = "logo-preview"; look.setAttribute("aria-hidden", "true");
+        const png = row.files.find((i) => i.ext === "png");
+        if (png) { const img = new Image(); img.alt = ""; img.decoding = "async"; img.loading = "lazy"; img.onload = () => look.classList.add("has-image"); img.src = png.href; look.append(img); }
+        else if (code) { const t = document.createElement("span"), b = document.createElement("b"); t.className = "logo-code"; b.textContent = "SRC"; t.append(code[1], b); look.append(t); }
+        const body = document.createElement("div"); body.className = "logo-tile-body";
+        const name = document.createElement("strong"); name.textContent = row.label; body.append(name);
+        if (code && COUNTRIES[code[1]]) { const c = document.createElement("small"); c.textContent = COUNTRIES[code[1]]; body.append(c); }
+        const get = document.createElement("span"); get.className = "dl-files"; inOrder(row).forEach((i) => get.append(chip(row, i, false, !code)));
+        body.append(get); li.append(look, body); ul.append(li);
+      });
+      return ul;
+    };
     groups.forEach(([name, list]) => {
       // Drop words every version in the group shares, when they are brand/type words or the group is large enough.
       let lead = 0, tail = 0;
@@ -843,21 +976,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const note = list[0].rule?.note;
         if (note) { const n = document.createElement("p"); n.className = "dl-note"; n.textContent = note; g.append(n); }
       }
-      const ul = document.createElement("ul");
-      list.sort((x, y) => x.rank - y.rank).forEach((row) => {
-        const li = document.createElement("li"); li.className = "dl-row";
-        const label = document.createElement("span"); label.className = "dl-label"; label.textContent = row.label;
-        const formats = document.createElement("span"); formats.className = "dl-files";
-        row.files.sort((x, y) => (FORMAT_ORDER.indexOf(x.ext) + 99) % 99 - (FORMAT_ORDER.indexOf(y.ext) + 99) % 99).forEach((i) => {
-          const a = document.createElement("a"); a.className = "dl-file"; a.href = i.href; a.setAttribute("download", ""); a.title = i.title;
-          a.setAttribute("aria-label", `Download ${row.label}, ${(i.ext || "file").toUpperCase()}${i.size ? ", " + i.size : ""}`);
-          const b = document.createElement("b"); b.textContent = (i.ext || "file").toUpperCase(); b.dataset.ext = i.ext;
-          const small = document.createElement("small"); small.textContent = i.size;
-          a.append(b, small); formats.append(a);
+      list.sort((x, y) => x.rank - y.rank);
+      if (view === "cards") g.append(cards(list));
+      else if (view === "logos") g.append(tiles(list));
+      else {
+        const ul = document.createElement("ul");
+        list.forEach((row) => {
+          const li = document.createElement("li"); li.className = "dl-row";
+          const label = document.createElement("span"); label.className = "dl-label"; label.textContent = row.label;
+          const formats = document.createElement("span"); formats.className = "dl-files";
+          inOrder(row).forEach((i) => formats.append(chip(row, i, false)));
+          li.append(label, formats); ul.append(li);
         });
-        li.append(label, formats); ul.append(li);
-      });
-      g.append(ul); wrap.append(g);
+        g.append(ul);
+      }
+      wrap.append(g);
     });
     section.append(wrap);
     return section;
@@ -1141,7 +1274,7 @@ document.addEventListener("DOMContentLoaded", () => {
     route.textContent="Ask for the available resource ↗";
     notice.append(title,text,route); article.prepend(notice);
   }
-  if (article && toc && !filter && !article.querySelector(".directory")) {
+  if (article && toc && !$("[data-file-feed]") && !article.querySelector(".directory")) {
     const pageTitle = document.querySelector(".page-head h1");
     const first = article.querySelector("h1");
     if (
@@ -1152,7 +1285,7 @@ document.addEventListener("DOMContentLoaded", () => {
     )
       first.remove();
     const headings = [...article.querySelectorAll("h2")].filter(
-      (h) => !h.closest("[hidden], details, .choice-card, .section-next, .catalogue"),
+      (h) => !h.closest("[hidden], details, .choice-card, .section-next, .file-feed"),
     );
     const rail = toc.closest(".toc-rail"), grid = toc.closest(".page-grid");
     // Only long pages get a contents list: four sections or more.
@@ -1208,7 +1341,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bodyText = $(".content-body");
   if (bodyText && !bodyText.querySelector(".directory")) {
     bodyText.querySelectorAll("h2").forEach((h) => {
-      if (h.closest("[hidden], details, .section-next, .catalogue, .canto-show, .asset-panel, .live-link, .site-photos, .site-card, .kit-item, .attachments-head, .next-step, .downloads-head")) return;
+      if (h.closest("[hidden], details, .section-next, .file-feed, .canto-show, .asset-panel, .live-link, .site-photos, .site-card, .kit-item, .attachments-head, .next-step, .downloads-head")) return;
       if (!h.id) { let id = slugify(h.textContent); while (document.getElementById(id)) id += "-2"; h.id = id; }
       const b = document.createElement("button");
       b.type = "button"; b.className = "heading-link"; b.setAttribute("aria-label", "Copy a link to " + h.textContent.trim());
@@ -1224,7 +1357,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   // When the page was last changed, under its title.
   const head = $(".page-band .page-head"), thisPage = document.body.dataset.pageId;
-  if (head && thisPage && !$(".catalogue") && document.body.dataset.mode !== "preview") (async () => {
+  if (head && thisPage && !$("[data-file-feed]") && document.body.dataset.mode !== "preview") (async () => {
     try {
       const ctx = document.body.dataset.context || "";
       const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(thisPage) + "?expand=version", { credentials: "same-origin", headers: { Accept: "application/json" } });

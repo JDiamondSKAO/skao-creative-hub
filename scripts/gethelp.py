@@ -22,15 +22,15 @@ MOVED = {
  'print.html': (HOME, 'Common questions'),
  'business-cards.html': (HOME, 'Common questions'),
  'help.html': ('faq.html', 'Common questions'),
- 'updates.html': ('index.html', 'Just added, on the homepage'),
- 'archive.html': ('index.html', 'Just added, on the homepage'),
+ 'updates.html': ('resources.html', 'Latest files'),
+ 'archive.html': ('resources.html', 'Latest files'),
  'email-signatures.html': ('documents.html', 'Documents'),
  'canto-guide.html': ('canto-access.html', 'Using the Canto library'),
  # 2.17: pages folded into fuller ones.
  'widescreen-template.html': ('standard-template.html', 'Standard SKAO template'),
- 'science-slides.html': ('master-deck.html', 'Decks to reuse'),
- 'construction-slides.html': ('master-deck.html', 'Decks to reuse'),
- 'specialised-slides.html': ('master-deck.html', 'Decks to reuse'),
+ 'science-slides.html': ('master-deck.html', 'Approved slide decks'),
+ 'construction-slides.html': ('master-deck.html', 'Approved slide decks'),
+ 'specialised-slides.html': ('master-deck.html', 'Approved slide decks'),
  'reports.html': ('memos.html', 'Memo and report templates'),
  'hero-images.html': ('media.html', 'Photos and video'),
  'telescope-images.html': ('media.html', 'Photos and video'),
@@ -62,7 +62,7 @@ def faq(jira):
   'contact the Comms helpdesk. Say what you need, who it’s for and when you need it, and attach anything you already have.</p></div>'
   + link(jira, 'Open the Comms helpdesk ↗', 'button') + '</div>')
  answers = ('<section class="help-answers" aria-label="Common questions">'
-  + q('Where are templates and slides?', 'Start with ' + link('resources.html', 'All resources') + '. Presentation decks are under ' + link('presentations.html', 'Presentations') + '.')
+  + q('Where are templates and slides?', 'Slide templates and decks are under ' + link('presentations.html', 'Presentations') + ', and letterheads, memos and posters under ' + link('documents.html', 'Documents') + '. ' + link('resources.html', 'Latest files') + ' shows what’s new.')
   + q('Where are photos and video?', 'In the staff media library in Canto. ' + link('media.html', 'Photos and video') + ' shows a selection and links to it. Check each asset’s credit and permitted use.')
   + q('Can I adapt material myself?', 'Yes, within its usage notes, and keep the credits. Ask the content owner before changing facts or meaning, and the creative team before substantial design changes.')
   + q('Why can I browse but not upload?', 'Browsing and contributing have separate permissions. To add material, see ' + link('#share', 'Sharing your work') + ' below.')
@@ -73,7 +73,7 @@ def faq(jira):
  sharing = ('<section class="help-share" id="share"><h2>Sharing your work</h2>'
   '<p class="help-lead">Sharing starts a review: nothing is published until its owner has checked it.</p>'
   + q('How do I share a deck for others to reuse?', 'Send the editable deck, or a link to it, through the ' + link(jira, 'Comms helpdesk ↗') + ', with its audience, event date, content owner and any limits on reuse. '
-     'Once it’s reviewed it can join ' + link('master-deck.html', 'Decks to reuse') + '. Gave a talk recently? Add your slides to ' + link('recent-talks.html', 'Recent talks') + ' yourself.', 'share-a-deck')
+     'Once Communications has approved it, it can join ' + link('master-deck.html', 'Approved slide decks') + '.', 'share-a-deck')
   + q('How do I share photos or video?', 'Ask the ' + link(jira, 'Comms helpdesk ↗') + ' for an upload link; the Canto library is for browsing, not uploading. '
      'Include a title, who took it, where, and any rights or consent information.', 'share-photos')
   + '<p class="quiet-note">Keep working files where they are, so a new copy doesn’t become a competing version.</p></section>')
@@ -107,9 +107,9 @@ def relink(h):
  return h
 
 def rename(h):
- """The catalogue is the full list, so it is called what it is."""
- for o, n in [('>Templates and assets</a>', '>All resources</a>'), ('>All templates and assets <span', '>All resources <span'),
-              ('>Browse templates and assets <span', '>Browse all resources <span')]:
+ """The old Templates and assets page lists the newest files now, so it is called what it is."""
+ for o, n in [('>Templates and assets</a>', '>Latest files</a>'), ('>All templates and assets <span', '>Latest files <span'),
+              ('>Browse templates and assets <span', '>See the latest files <span')]:
   h = h.replace(o, n)
  return h
 
@@ -120,7 +120,7 @@ def apply(pages, jira):
   if name in pages: pages[name] = (pages[name][0], moved(pages[name][0], target, name))
  pages[HOME] = ('Common questions', faq(jira))
  pages = {n: (t, b if n in MOVED else rename(trim_asks(relink(b)))) for n, (t, b) in pages.items()}
- pages['resources.html'] = ('All resources', pages['resources.html'][1])
+ pages['resources.html'] = ('Latest files', pages['resources.html'][1])
  return pages
 
 # Search: short, ready-written answers to the questions staff ask most. When a search matches
@@ -141,7 +141,8 @@ ANSWERS = [
  ('ai firefly generative midjourney chatgpt', 'Can I use AI to make images?', 'Check the SKAO AI policy and use only approved tools. Never upload confidential or personal material.', 'firefly.html', 'Using AI image tools'),
  ('supplier suppliers printer printers printing', 'Who should print it?', 'Communications can recommend trusted print suppliers for your location and the kind of job you have.', 'print-suppliers.html', 'Work with print suppliers'),
  ('stand stands booth exhibition merchandise merch swag giveaway giveaways', 'Do we have a stand or merchandise?', 'Check the existing stand kit, designs and stock on Stands and merchandise before briefing anything new.', 'stands.html', 'Stands and merchandise'),
- ('talk talks speaker speakers', 'Where are the slides from staff talks?', 'Recent talks has slides shared by staff, newest first. You can add your own.', 'recent-talks.html', 'Recent talks'),
+ ('talk talks speaker speakers deck decks reuse', 'Where are slides I can reuse?', 'Approved slide decks has decks Communications has approved for reuse, including talks given by staff.', 'master-deck.html', 'Approved slide decks'),
+ ('new latest recent added update updates whats', 'What’s new in the Hub?', 'Latest files lists every new and updated file, newest first.', 'resources.html', 'Latest files'),
 ]
 
 def answers_html():
