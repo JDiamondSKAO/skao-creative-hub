@@ -1,6 +1,6 @@
 """Visual and journey layer on top of the reviewed pages.
 
-Adds section navigation, related pages, resource panels, Latest files and the
+Adds section navigation, related pages, resource panels, All files and the
 homepage search and latest-assets bands. It only reorganises reviewed content;
 it never invents files or availability.
 """
@@ -76,7 +76,7 @@ def primary(name, key):
  sec = section_of(name)
  return bool(sec) and sec[0] == key
 
-# Latest files filters by the Hub's own sections, so a page sits under the same name everywhere.
+# All files filters by the Hub's own sections, so a page sits under the same name everywhere.
 TYPES = [(key, label) for key, label, _, _ in SECTIONS]
 
 # Side menus fold away to give the page more room: section pages on the left, "On this page" on the right.
@@ -104,7 +104,7 @@ def sidebar(current, titles):
   out += '</nav>'
  else:
   out += '<nav class="section-nav" id="sectionNav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
-   f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">Latest files</a></li></ul></nav>'
+   f'<li><a href="{landing}">{label}</a></li>' for key, label, landing, _ in SECTIONS) + '<li><a href="resources.html">All files</a></li></ul></nav>'
  return out + '</aside>'
 
 def related(name, pages, summaries):
@@ -172,7 +172,7 @@ def asset_panel(name, body, jira):
  return re.sub(r'<aside class="next-step"><div><h2>Choose a different starting point</h2>.*?</aside>', '', body, flags=re.S)
 
 def feed(pages, meta):
- """Latest files: every approved file in the Hub and the site teams' progress slides, newest first.
+ """All files: every approved file in the Hub and the site teams' progress slides, by section and page or newest first.
  main.js fills it from Confluence. Each file shows the page it's on and that page's Hub section, so
  the page map below covers every route by ID and by title (Confluence titles in production)."""
  where = {}
@@ -180,18 +180,19 @@ def feed(pages, meta):
   home = MOVED.get(name, (name,))[0].split('#')[0]
   sec = section_of(home)
   if not sec or home not in pages: continue
-  row = [sec[0], pages[home][0]]
+  row = [sec[0], pages[home][0], sec[3].index(home)]
   # Pages not yet in Confluence only have stand-in IDs, so they are found by title.
   if m['id'] not in PLANNED: where['i:' + m['id']] = row
   for t in (m['source_title'], pages[name][0]): where['t:' + t.lower()] = row
  sites = [meta[n]['id'] for n in ('low-slides.html', 'mid-slides.html')]
- return ('<section class="file-feed" data-file-feed aria-label="Latest files"'
+ return ('<section class="file-feed" data-file-feed aria-label="All files"'
   f' data-pages="{html.escape(json.dumps(where, separators=(",", ":")), quote=True)}"'
   f' data-sections="{html.escape(json.dumps(TYPES, separators=(",", ":")), quote=True)}"'
   f' data-site-pages="{html.escape(json.dumps(sites), quote=True)}">'
-  '<div class="catalogue-bar"><label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search the latest files</span>'
+  '<div class="catalogue-bar"><label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search all files</span>'
   '<input id="fileFilter" type="search" autocomplete="off" placeholder="Search files, e.g. letterhead or logo"></label></div>'
-  '<div class="type-chips" role="group" aria-label="Show a section" hidden></div>'
+  '<div class="feed-filters"><div class="type-chips" role="group" aria-label="Show a section" hidden></div>'
+  '<div class="feed-views" role="group" aria-label="Order" hidden><button type="button" data-feed-view="section" aria-pressed="true">By section</button><button type="button" data-feed-view="newest" aria-pressed="false">Newest first</button></div></div>'
   '<p id="feedStatus" class="filter-status" role="status"></p>'
   '<div class="feed-body" data-feed-list></div>'
   '<div id="feedEmpty" class="catalogue-empty" hidden><p>No files match that search.</p><button type="button" id="clearFeed" class="button secondary">Show everything</button></div></section>')
@@ -357,7 +358,7 @@ def latest_strip():
  return ('<section class="latest-strip" id="latestStrip" aria-labelledby="latestHeading" hidden><div class="strip-label"><h2 id="latestHeading">Just added</h2>'
   '<p class="latest-lead" id="latestLead">Newest approved files</p></div>'
   '<div id="latestAssets" class="strip-items" data-approval-label="approved"></div>'
-  '<a class="strip-all" href="resources.html">See all <span aria-hidden="true">→</span></a></section>')
+  '<a class="strip-all" href="resources.html#newest">See all <span aria-hidden="true">→</span></a></section>')
 
 # Canto showcase slots: the gallery on Photos and video, and strips on topic pages
 # matched to album names. They stay hidden until the synced manifest has matching albums.
@@ -439,7 +440,7 @@ def revise(pages, meta, jira, canto=''):
   m = re.search(r'<div class="media-handoff">.*?</div></div>', body, re.S)
   pages[name] = (title, body[:m.end()] + canto_strip(words, canto) + body[m.end():] if m else body)
  title, body = pages['resources.html']
- body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'New and updated files from across the Hub, newest first: templates, slide decks, logos and more.', 1)
+ body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Every approved file in the Hub, by section and page: templates, slide decks, logos, print files and more. Choose Newest first to see what’s new.', 1)
  body = re.sub(r'<span class="eyebrow">[^<]*</span>', '', body, count=1)
  body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)
  body = re.sub(r'<aside class="next-step">.*?</aside>', '', body, flags=re.S)

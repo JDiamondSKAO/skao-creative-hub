@@ -27,6 +27,12 @@ Built on 2.21. Events no longer reads as if Communications plans people's events
   - show pictures from other pages (`data-kit-page`).
 - Event safety and the event checklist now say why they've gone. Search answers "Can you help plan my event?" and "Do we have exhibition kit, banners or giveaways?".
 - Fixed: on the other landings, "Before you start" sits level with the intro again, and a test guards it.
+- **All files** (was Latest files, and before that All resources) lists every file the way people look for one.
+  - Files are grouped by section, then by page in the Hub's own order, with each file's download button. Files from the last 30 days say "New".
+  - A page with more than six files shows five, with "Show all".
+  - Search and section filters work across everything. **Newest first** switches to the timeline by month.
+  - The homepage's "See all" opens the timeline (`resources.html#newest`).
+- File badges: every kind of file has its own clear colour. ZIP is now folder yellow, so it no longer looks like PowerPoint orange; Word is blue, PDF magenta, artwork violet, video teal and images green.
 - Homepage **Just added**:
   - Each item keeps to a third of the row, so one or two items don't stretch across the box (or their hover highlight with them).
   - The browser's plain tooltip with the file list is gone.

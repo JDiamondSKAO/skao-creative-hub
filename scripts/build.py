@@ -160,7 +160,7 @@ for folder in ['css','js','images']:prod=prod.replace('"'+folder+'/','"${theme.b
 prod=prod.replace('<title>$stringEscapeUtils.escapeHtml($page.title) | SKAO Creative Hub</title>','<title>$stringEscapeUtils.escapeHtml($page.title) | SKAO Creative Hub</title>')
 prod=prod.replace('<link rel="stylesheet"', '$webPanels\n$page.resources.meta\n$page.resources.css\n$page.resources.js\n<link rel="stylesheet"',1)
 prod=prod.replace('</footer>','<div class="wrap footer-platform">$attributionLine</div></footer>')
-display_titles={'381891696':'Latest files','381891810':'Share material','381891794':'Prepare a presentation','381891661':'Request creative help'}
+display_titles={'381891696':'All files','381891810':'Share material','381891794':'Prepare a presentation','381891661':'Request creative help'}
 display_titles.update({id:PAGES[filename][0] for id,title,filename,group in ROUTES})
 setup="#set($displayTitle = $page.title)\n#set($displayGroup = \"Creative Hub\")\n"
 for id,title,filename,group in ROUTES: setup+=f'#if($page.id.toString() == \"{id}\")#set($displayGroup = \"{group}\")#end\n'

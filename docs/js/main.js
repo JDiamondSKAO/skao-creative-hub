@@ -431,8 +431,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (rendered && rendered === input.value.trim() && first) { location.href = first.href; return; }
     search();
   });
-  // Latest files: every approved file in the Hub and the site teams' progress slides, newest first,
-  // grouped by month. Each file names the page it is on and that page's Hub section.
+  // All files: every approved file in the Hub and the site teams' progress slides, by section and page or newest first,
+  // with its page and that page's Hub section.
   async function loadFeed(box) {
     const list = box.querySelector("[data-feed-list]"), chipBox = box.querySelector(".type-chips");
     const search = box.querySelector("#fileFilter"), status = box.querySelector("#feedStatus"), empty = box.querySelector("#feedEmpty");
@@ -452,7 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return {
         href, name: dm ? dm[3].trim() : base, title, ext: (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase(),
         when: Date.parse(f.version?.when || "") || 0, updated: Number(f.version?.number) > 1, size: f.extensions?.fileSize,
-        type: at?.[0] || "", page: at?.[1] || String(f.container?.title || ""),
+        type: at?.[0] || "", page: at?.[1] || String(f.container?.title || ""), order: at?.[2] ?? 99,
         pageHref: preview ? null : (webui ? safeLink(ctx + webui) : routeHref(id)), downloads: !site,
       };
     };
@@ -475,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const seen = new Set();
         rows = [...approved.map((f) => toRow(f, false)), ...decks.flat().map((f) => toRow(f, true))].filter((r) => r && !seen.has(r.href) && seen.add(r.href));
       } catch (e) {
-        note(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the latest files." : "The latest files could not be loaded.");
+        note(e.message === "401" || e.message === "403" ? "Sign in to Confluence to see the files." : "The files could not be loaded.");
         return;
       }
     }
@@ -483,18 +483,55 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!rows.length) { note("No new files yet. Files appear here as soon as they are approved."); return; }
     const monthOf = (t) => { const d = new Date(t); return MONTHS[d.getMonth()] + " " + d.getFullYear(); };
     const day = (t) => { try { return new Intl.DateTimeFormat("en-GB", new Date(t).getFullYear() === new Date().getFullYear() ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" }).format(t); } catch { return ""; } };
-    const months = new Map();
-    rows.forEach((r) => { const k = r.when ? monthOf(r.when) : "Earlier"; if (!months.has(k)) months.set(k, []); months.get(k).push(r); });
-    list.replaceChildren(...[...months].map(([label, items]) => {
-      const sec = document.createElement("section"); sec.className = "feed-month";
-      const h = document.createElement("h2"), count = document.createElement("span");
-      h.textContent = label; count.textContent = items.length + (items.length === 1 ? " file" : " files"); h.append(count);
-      const ul = document.createElement("ul"); ul.className = "feed-list";
-      const batches = new Map();
-      items.forEach((r) => { const k = r.page + "|" + new Date(r.when).toDateString(); if (!batches.has(k)) batches.set(k, []); batches.get(k).push(r); });
-      batches.forEach((group) => { if (group.length >= 3) ul.append(batch(group)); else group.forEach((r) => ul.append(row(r))); });
-      sec.append(h, ul); return sec;
-    }));
+    // Two views of the same files: by section and page, which is how people look for a file, or newest
+    // first, for what's new (the homepage's "See all" opens that one, as #newest).
+    function byMonth() {
+      const months = new Map();
+      rows.forEach((r) => { const k = r.when ? monthOf(r.when) : "Earlier"; if (!months.has(k)) months.set(k, []); months.get(k).push(r); });
+      return [...months].map(([label, items]) => {
+        const sec = document.createElement("section"); sec.className = "feed-month";
+        const h = document.createElement("h2"), count = document.createElement("span");
+        h.textContent = label; count.textContent = items.length + (items.length === 1 ? " file" : " files"); h.append(count);
+        const ul = document.createElement("ul"); ul.className = "feed-list";
+        const batches = new Map();
+        items.forEach((r) => { const k = r.page + "|" + new Date(r.when).toDateString(); if (!batches.has(k)) batches.set(k, []); batches.get(k).push(r); });
+        batches.forEach((group) => { if (group.length >= 3) ul.append(batch(group)); else group.forEach((r) => ul.append(row(r))); });
+        sec.append(h, ul); return sec;
+      });
+    }
+    // Each section, then each page in it in the Hub's order, with its files; files from the last 30 days say so.
+    // A page with many files shows the first few and a button for the rest (a search shows every match).
+    function bySection() {
+      const recent = Date.now() - 30 * 864e5, groups = new Map([...sections.keys(), ""].map((k) => [k, []]));
+      rows.forEach((r) => groups.get(sections.has(r.type) ? r.type : "").push(r));
+      return [...groups].filter(([, list]) => list.length).map(([key, list]) => {
+        const sec = document.createElement("section"); sec.className = "feed-group"; sec.dataset.type = key || "other";
+        const h = document.createElement("h2"), count = document.createElement("span");
+        h.textContent = sections.get(key) || "Other files"; count.textContent = list.length + (list.length === 1 ? " file" : " files"); h.append(count); sec.append(h);
+        const byPage = new Map();
+        list.forEach((r) => { const k = r.page || "Creative Hub"; if (!byPage.has(k)) byPage.set(k, []); byPage.get(k).push(r); });
+        [...byPage].sort(([x, a], [y, b]) => a[0].order - b[0].order || x.localeCompare(y)).forEach(([page, files]) => {
+          const block = document.createElement("div"); block.className = "feed-page";
+          const ph = document.createElement("h3"), first = files[0], name = document.createElement(first.pageHref ? "a" : "span"), n = document.createElement("span");
+          name.textContent = page; if (first.pageHref) name.href = first.pageHref + (first.downloads ? "#downloads" : "");
+          n.textContent = files.length + (files.length === 1 ? " file" : " files"); ph.append(name, n);
+          const ul = document.createElement("ul"); ul.className = "feed-list";
+          const fold = files.length > 6;
+          [...files].sort((x, y) => x.name.localeCompare(y.name, undefined, { numeric: true })).forEach((r, i) => {
+            const li = row(r); if (r.when >= recent) li.classList.add("is-new"); if (fold && i >= 5) li.classList.add("is-extra"); ul.append(li);
+          });
+          block.append(ph, ul);
+          if (fold) {
+            block.classList.add("is-folded");
+            const more = document.createElement("button"); more.type = "button"; more.className = "feed-more";
+            const label = () => { more.textContent = block.classList.contains("is-folded") ? `Show all ${files.length} files` : "Show fewer"; };
+            more.addEventListener("click", () => { block.classList.toggle("is-folded"); label(); }); label(); block.append(more);
+          }
+          sec.append(block);
+        });
+        return sec;
+      });
+    }
     // One file: its type, name, page and section, when it was added, and a download button.
     function row(r, inBatch) {
       const li = document.createElement("li"); li.className = inBatch ? "feed-file" : "feed-row"; li.dataset.type = r.type || "other";
@@ -561,7 +598,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const open = (words.length && shown) || li.dataset.userOpen === "true";
         sub.hidden = !open; li.querySelector(".feed-toggle").setAttribute("aria-expanded", String(!!open)); li.querySelector(".feed-toggle").textContent = open ? "Hide files" : "Show files";
       });
-      list.querySelectorAll(".feed-month").forEach((m) => { m.hidden = !m.querySelector(".feed-row:not([hidden])"); });
+      list.querySelectorAll(".feed-month, .feed-group, .feed-page").forEach((m) => { m.hidden = !m.querySelector(".feed-row:not([hidden])"); });
+      list.dataset.searching = String(words.length > 0);  // a search shows every match, folded or not
       if (status) status.textContent = n === rows.length ? "" : `Showing ${n} of ${rows.length} files.`;
       if (empty) empty.hidden = n > 0;
     }
@@ -571,6 +609,24 @@ document.addEventListener("DOMContentLoaded", () => {
       chipBox.querySelectorAll("button").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.typeFilter === "all")));
       apply(); search?.focus();
     });
+    let view = location.hash === "#newest" ? "newest" : "section";
+    const views = box.querySelector(".feed-views");
+    const render = () => {
+      list.replaceChildren(...(view === "newest" ? byMonth() : bySection()));
+      list.dataset.view = view;
+      views?.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.feedView === view)));
+      apply();
+    };
+    views?.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+      if (view === b.dataset.feedView) return;
+      view = b.dataset.feedView;
+      try { history.replaceState(null, "", view === "newest" ? "#newest" : location.pathname + location.search); } catch {}
+      render();
+    }));
+    if (views) views.hidden = false;
+    // A link to #newest from this page (or the browser's back button) switches the view too.
+    addEventListener("hashchange", () => { const want = location.hash === "#newest" ? "newest" : "section"; if (want !== view) { view = want; render(); } });
+    render();
   }
   // Homepage search box hands over to the full search dialog as you type.
   const hero = $("#heroSearch");
