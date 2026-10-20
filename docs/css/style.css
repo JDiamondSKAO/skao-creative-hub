@@ -1106,6 +1106,27 @@ header.is-pinned {box-shadow:0 12px 28px -20px #07006859;}
 /* Once the brand bar scrolls away, a small logo leads the pinned bar home */
 .nav-home {flex:none;display:flex;align-items:center;width:0;margin-right:-20px;opacity:0;visibility:hidden;overflow:hidden;transition:width var(--t-slow) var(--ease-out),margin var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),visibility 0s linear var(--t-slow);}
 header.is-pinned .nav-home {width:58px;margin-right:6px;opacity:1;visibility:visible;transition-delay:0s;}
+/* Compact header: once the masthead scrolls away, Share feedback slides in beside search */
+body a.nav-feedback {flex:none;display:inline-flex;align-items:center;gap:7px;max-width:0;margin-left:-20px;padding:0;overflow:hidden;opacity:0;visibility:hidden;white-space:nowrap;border-radius:999px;background:linear-gradient(110deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);color:#fff;font-size:.84rem;font-weight:700;line-height:1.2;text-decoration:none;transition:max-width var(--t-slow) var(--ease-out),margin var(--t-slow) var(--ease-out),padding var(--t-slow) var(--ease-out),background-color var(--t) var(--ease-soft),opacity var(--t) var(--ease-soft),visibility 0s linear var(--t-slow);}
+header.is-pinned a.nav-feedback {max-width:150px;margin-left:-6px;padding:9px 15px 9px 12px;opacity:1;visibility:visible;transition-delay:0s;}
+@media(min-width:1241px){header.is-pinned .search-trigger{min-width:0;width:196px;}header.is-pinned .search-trigger kbd{display:none;}} /* room for Feedback beside search */
+.navlinks a.nav-menu-extra {display:none;}
+@media(max-width:1000px){.navlinks a.nav-menu-extra{display:block;text-align:left;color:var(--link);font-weight:700;border-bottom:0;padding-block:11px;}.navlinks a.nav-menu-extra:after{content:none;}.navlinks a.nav-menu-extra:not(.nav-menu-extra + .nav-menu-extra){margin-top:6px;}}
+/* Section row: the Canto library, set apart from the Hub's own sections by a divider and the photos-and-video colour */
+:root {--canto-c:#0e7490;} :root.dark {--canto-c:#67cfe0;}
+body a.nav-canto {position:relative;flex:none;display:inline-flex;align-items:center;gap:7px;margin-left:6px;padding:7px 13px 7px 11px;border-radius:999px;background:color-mix(in srgb,var(--canto-c) 10%,var(--bg));color:color-mix(in srgb,var(--canto-c) 88%,var(--ink));font-size:.86rem;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:background-color var(--t) var(--ease-soft);}
+body a.nav-canto:hover {background:color-mix(in srgb,var(--canto-c) 18%,var(--bg));}
+a.nav-canto:before {content:"";position:absolute;left:-14px;top:50%;width:1px;height:22px;background:var(--line);transform:translateY(-50%);}
+.nav-canto svg {flex:none;width:16px;height:16px;}
+.nav-canto-arr {font-size:.8em;opacity:.8;transition:transform var(--t) var(--ease-out);}
+a.nav-canto:hover .nav-canto-arr {transform:translate(1px,-1px);}
+header.is-pinned a.nav-canto {display:none;} /* the compact bar keeps sections, search and Feedback */
+@media(max-width:1000px){a.nav-canto{display:none;}}
+@media(max-width:560px){header.is-pinned a.nav-feedback{display:none;}} /* phones: Share feedback is in the menu instead */
+body a.nav-feedback:hover {filter:brightness(1.18);}
+body a.nav-feedback:any-link {color:#fff;}
+.nav-feedback svg {flex:none;width:17px;height:17px;}
+@media(max-width:1240px){.nav-feedback-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}header.is-pinned a.nav-feedback{padding:10px;}} /* icon only; the word stays for screen readers */
 .nav-home img {display:block;width:58px;height:auto;filter:brightness(0);opacity:.86;}
 .dark .nav-home img {filter:none;opacity:1;}
 .nav-home:hover img {opacity:1;}
@@ -1454,6 +1475,7 @@ body .content-body a.dl-file:any-link {justify-content:flex-start;min-width:122p
 .show-dots {display:flex;gap:6px;margin:10px 0 0;}
 .show-dots[hidden] {display:none;}
 .show-dots button {position:relative;flex:1;max-width:64px;height:14px;padding:0;border:0;background:none;cursor:pointer;}
+@media(max-width:640px){.show-dots{gap:4px;}}
 .show-dots button:before {content:"";position:absolute;left:0;right:0;top:5px;height:4px;border-radius:2px;background:var(--line);transition:background-color var(--t) var(--ease-soft);}
 .show-dots button:hover:before {background:color-mix(in srgb,var(--link) 35%,var(--line));}
 .show-dots button[aria-current="true"]:before {background:var(--link);}
@@ -1670,6 +1692,11 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .welcome-copy .quick-links a {min-height:32px;padding:0 11px;border-color:color-mix(in srgb,var(--c) 26%,var(--line));background:color-mix(in srgb,var(--c) 9%,var(--bg));color:color-mix(in srgb,var(--c) 80%,var(--ink));font-size:.8rem;font-weight:600;white-space:nowrap;}
 .welcome-copy .quick-links a:hover {border-color:color-mix(in srgb,var(--c) 50%,var(--line));background:color-mix(in srgb,var(--c) 16%,var(--bg));}
 .dark .welcome-copy .quick-links a {background:color-mix(in srgb,var(--c) 14%,var(--bg));color:var(--c);}
+/* Each quick link its own colour, even when two share a section */
+.welcome-copy .quick-links a[data-tone="green"] {--c:#15803d;}
+.welcome-copy .quick-links a[data-tone="violet"] {--c:#7c3aed;}
+.dark .welcome-copy .quick-links a[data-tone="green"] {--c:#4ade80;}
+.dark .welcome-copy .quick-links a[data-tone="violet"] {--c:#b49cff;}
 
 /* Live status: the dashboard as the main button, the slides and overall status as quieter links beside it */
 .live-link-actions {align-items:center;gap:10px 20px;}

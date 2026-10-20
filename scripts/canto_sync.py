@@ -43,7 +43,7 @@ Usage
   python3 scripts/canto_sync.py --dry-run --out build/canto   # fetch from Canto, write files locally
   python3 scripts/canto_sync.py                               # fetch and publish to Confluence
   python3 scripts/canto_sync.py --self-test
-Options: --per-album N (default 12), --width PX (default 2000, sharp in the full-width slideshow), --prune (remove stale canto-* thumbnails),
+Options: --per-album N (default 16), --width PX (default 2000, sharp in the full-width slideshow), --prune (remove stale canto-* thumbnails),
          --env FILE (read KEY=VALUE settings from a local file, e.g. dev/canto.env; values already set in the environment win)
 """
 from __future__ import annotations
@@ -265,9 +265,10 @@ def near_key(asset, album_id):
 
 # Highlights mix subjects: (name, pattern, most allowed). Crops of one composite, or many night skies, read as repeats.
 SUBJECTS = [('composite', re.compile(r'composite|three sites|three continents|generated image', re.I), 1),
-            ('night', re.compile(r'night|milky way|emu in the sky|starry|stars\b', re.I), 2),
-            ('aerial', re.compile(r'aerial|drone', re.I), 3),
-            ('impression', re.compile(r'artist impression|render', re.I), 2)]
+            ('night', re.compile(r'night|milky way|emu in the sky|starry|stars\b', re.I), 3),
+            ('aerial', re.compile(r'aerial|drone', re.I), 5),
+            ('impression', re.compile(r'artist impression|render', re.I), 3)]
+HIGHLIGHTS = 24  # the full-width slideshow cycles through these
 
 def subject_of(asset):
     text = text_of(asset)
@@ -426,7 +427,7 @@ def run(args):
     env = os.environ.get
     domain, folder = env('CANTO_DOMAIN'), env('CANTO_FOLDER_PATH', 'Staff media library')
     if not domain: sys.exit('Set CANTO_DOMAIN and CANTO_API_KEY (or CANTO_APP_ID and CANTO_APP_SECRET).')
-    per_album = int(args.get('--per-album', 12)); width = int(args.get('--width', 2000))
+    per_album = int(args.get('--per-album', 16)); width = int(args.get('--width', 2000))
     page_id = env('CONFLUENCE_PAGE_ID', 'PAGE_ID')
     if not env('CANTO_API_KEY') and not (env('CANTO_APP_ID') and env('CANTO_APP_SECRET')):
         sys.exit('Canto credentials missing: set CANTO_API_KEY (generated access token), or both CANTO_APP_ID and CANTO_APP_SECRET.')
@@ -487,11 +488,12 @@ def run(args):
     for al in manifest['albums']: al.pop('_newest', None)
     album_of = {str(a['id']): al for a, al, _ in showcase}
     images = [(a, grp) for a, al, grp in showcase if str(a.get('scheme')).lower() == 'image']
-    by_collection = pick([c for c in images if not has_people(c[0]) or is_featured(c[0], feature)], 16, feature, per_album=5, mix_subjects=True)
-    if len(by_collection) < 8:  # top up only when the mix is thin: first without it, then people-tagged, ranked below
-        by_collection += [c for c in pick([c for c in images if not has_people(c[0])], 16, feature, per_album=5) if c not in by_collection][:16 - len(by_collection)]
-    if len(by_collection) < 10:
-        by_collection += [c for c in pick(images, 16, feature, per_album=5, people_penalty=40) if c not in by_collection][:16 - len(by_collection)]
+    want = HIGHLIGHTS + 8  # spares for visual de-duplication
+    by_collection = pick([c for c in images if not has_people(c[0]) or is_featured(c[0], feature)], want, feature, per_album=8, mix_subjects=True)
+    if len(by_collection) < HIGHLIGHTS * 2 // 3:  # top up only when the mix is thin: first without it, then people-tagged, ranked below
+        by_collection += [c for c in pick([c for c in images if not has_people(c[0])], want, feature, per_album=8) if c not in by_collection][:want - len(by_collection)]
+    if len(by_collection) < HIGHLIGHTS * 5 // 6:
+        by_collection += [c for c in pick(images, want, feature, per_album=8, people_penalty=40) if c not in by_collection][:want - len(by_collection)]
     highlights = [(a, album_of[str(a['id'])]) for a, _ in by_collection]
     for asset, album_id in highlights: sources[str(asset['id'])] = asset
     manifest['highlights'] = [item(a, al) for a, al in highlights]
@@ -506,7 +508,7 @@ def run(args):
     prints = {name: fingerprint(data) for name, data in files.items()}
     for al in manifest['albums']: al['assets'] = distinct([i for i in al['assets'] if i['thumb'] in files], prints, per_album)
     manifest['albums'] = [al for al in manifest['albums'] if al['assets']]
-    manifest['highlights'] = distinct([i for i in manifest['highlights'] if i['thumb'] in files], prints, 12)
+    manifest['highlights'] = distinct([i for i in manifest['highlights'] if i['thumb'] in files], prints, HIGHLIGHTS)
     used = {i['thumb'] for al in manifest['albums'] for i in al['assets']} | {i['thumb'] for i in manifest['highlights']}
     files = {k: v for k, v in files.items() if k in used}
     body = json.dumps(manifest, indent=1).encode()
@@ -594,9 +596,10 @@ def self_test():
     pa, pal, pf = link_templates('SKAOStaff')
     assert asset_link('skao', {'id': 'x1', 'scheme': 'video'}, 'S980K', pa) == 'https://skao.canto.global/v/SKAOStaff/album/S980K?column=video&id=x1'
     assert pal.format(domain='skao', id='A1') == 'https://skao.canto.global/v/SKAOStaff/album/A1' and link_templates('') == (ASSET_URL, ALBUM_URL, FOLDER_URL)
-    skies = [({**base, 'id': f'n{i}', 'name': f'Night sky {chr(65 + i)}', 'description': 'The Milky Way over the stations at night, a long description.', 'md5': f'n{i}'}, f'N{i}') for i in range(4)]
+    skies = [({**base, 'id': f'n{i}', 'name': f'Night sky {chr(65 + i)}', 'description': 'The Milky Way over the stations at night, a long description.', 'md5': f'n{i}'}, f'N{i}') for i in range(5)]
     mixed = pick(skies + other, 5, 'Hub feature', mix_subjects=True)
-    assert sum(1 for a, _ in mixed if subject_of(a) == 'night') == 2, 'at most two night skies in a mixed pick'
+    night_cap = next(cap for name, _, cap in SUBJECTS if name == 'night')
+    assert sum(1 for a, _ in mixed if subject_of(a) == 'night') == night_cap, f'at most {night_cap} night skies in a mixed pick'
     assert has_people({'description': 'Team installs the third hydrogen maser in South Africa.'}) and not has_people({'description': 'Aerial view of the S8 cluster.'})
     print('canto_sync self-test passed')
 

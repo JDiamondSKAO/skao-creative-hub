@@ -6,11 +6,11 @@ Built on 2.20, from the notes on the review board. The Events pages wait for the
 
 - **Latest files** replaces All resources. It lists the files themselves rather than every page: each new or updated file in the Hub, newest first and grouped by month, with the page it's on, its Hub section and a download button. Search and section filters sit above the list. Several files added to one page on the same day fold into one row ("6 new files"), which opens to list them. The site teams' progress slides are included without needing a label. The footer link, a search answer and the old Hub updates pages now point here.
 - **Approved slide decks** (was Decks to reuse) takes over from Recent talks, which is gone, and the "Shared by staff" group leaves Presentations. The page is now a deck library. Search by title, event or speaker, filter by topic, and sort newest, oldest or A to Z. Each deck is a wide card with:
-  - its cover: a picture attached under the deck's own name (Deck.pptx and Deck.jpg), or else a drawn title slide in the topic's colour;
-  - its topic and month, title and event;
-  - the details from its attachment comment in Confluence (Speaker, Made by, Audience, Slides, Classification);
-  - when it was added or updated, and by whom;
-  - a Download button that gives the format and size, and Preview in Confluence, which opens Confluence's own viewer so nobody downloads a 3 GB deck blind.
+  - its cover: a picture attached under the deck's own name (Deck.pptx and Deck.jpg), or else a drawn title slide in the brand's navy to magenta;
+  - its topic, as a neutral pill with a cool-coloured dot (red, orange or green would read as a status);
+  - its title, then the event, place and month on one line. A title drops the event name when that line says it anyway;
+  - the details from its attachment comment in Confluence, in small capitals over a heavier value, always in the same order (Speaker, Audience, Made by, Classification). The slide count stays off the card;
+  - a strip along the bottom with the format, size and when it was added or updated, then Preview (Confluence's own viewer, so nobody downloads a 3 GB deck blind) and Download.
 
   The reuse advice and the formatting guide follow the list. Tested with eight decks from the public talk bank.
 - **Welcome and feedback:** on a first visit, a short note says the Hub is new for the Observatory and in active development, in both features and content, with Explore the Hub and Share feedback. It shows once per browser. "Beta · Share feedback" sits in the masthead on every page, and "Give feedback" in the footer. Both open the feedback form once its link is in (FEEDBACK_FORM, an Airtable form); until then they open the Comms helpdesk. The form opens with the page the person came from already filled in, so we know what the feedback is about.
@@ -22,6 +22,11 @@ Built on 2.20, from the notes on the review board. The Events pages wait for the
 - **Co-branding with CSIRO** keeps the co-branding guidelines and points to Letterheads for the office letterheads. Letterheads now names each Australian office, including Kensington, Perth (with CSIRO).
 - **Link cards:** the AI policy and AI pages on Using AI image tools, the W3C reference on Accessibility checks, and the logo use request form on Using the SKAO logo (its link is now known). Each card shows what the link is and where it lives.
 - **Apply the brand** drops the "Want a second opinion?" box.
+- **Header:** the Canto library sits after the sections, set apart by a divider and the photos-and-video colour, and in the phone menu. Once the masthead scrolls away, a Feedback button in the masthead's gradient slides in beside search (an icon on narrower screens, in the menu on phones).
+- **Homepage quick links** each have their own colour.
+- **Canto slideshow:** up to 24 images. Photos and video shows the curated highlights first, then photos from the collections. The sync now keeps 24 highlights and up to 16 photos per collection.
+- **Dropdowns** use the Hub's own chevron with room around it.
+- **Google Slides:** the Standard SKAO template links to the Google Slides template gallery, for SKAO Google accounts (GOOGLE_SLIDES).
 - **Test mode:** `scripts/cover_images.py` makes covers with Quick Look. Examples in `dev/brandbank-map.json` can now come from another folder (the talk bank), with labels and covers.
 
 ## 2.20.0 Construction overview (proposal, branch claude/creative-hub-progress)

@@ -1191,9 +1191,10 @@ document.addEventListener("DOMContentLoaded", () => {
     while (parts.every((p) => p.length - shared > 1 && p[shared] === parts[0][shared])) shared++;
     albums.forEach((al, i) => { al.path = parts[i].slice(shared).join(" / ") || al.name; });
     // View-only slideshow: it shows what is in the library; opening Canto is the button beside it.
+    const SHOW_MAX = 24;
     const slideshow = (slot, list) => {
       const stage = slot.querySelector(".show-stage"), ul = slot.querySelector(".show-slides"), dots = slot.querySelector(".show-dots");
-      const play = slot.querySelector(".show-play"), items = list.slice(0, 12);
+      const play = slot.querySelector(".show-play"), items = list.slice(0, SHOW_MAX);
       let at = 0, timer = null, paused = reducedMotion.matches || items.length < 2;
       const slides = items.map((a, i) => {
         const li = document.createElement("li"), img = document.createElement("img"), cap = document.createElement("p");
@@ -1256,12 +1257,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!matches.length) return;
       let list, href;
       if (slot.classList.contains("wide")) {
-        // The best of the library: curated highlights, else photos from the image collections in turn (not events or reels).
+        // The best of the library: curated highlights first, then photos from the image collections in turn
+        // (not events or reels), so there is plenty to cycle through. Videos only fill a thin library.
         const showcase = matches.filter((al) => !/\b(events?|videos?)\b/i.test(al.name));
         const source = showcase.length ? showcase : matches, all = [], seen = new Set();
-        const take = (wantVideo) => { for (let i = 0; all.length < 12 && source.some((al) => al.assets[i]); i++) source.forEach((al) => { const a = al.assets[i]; if (a && a.video === wantVideo && !seen.has(a.src) && all.length < 12) { seen.add(a.src); all.push(a); } }); };
-        if (curated.length >= 4) curated.slice(0, 12).forEach((a) => { if (!seen.has(a.src)) { seen.add(a.src); all.push(a); } });
-        else { take(false); take(true); }
+        const take = (wantVideo) => { for (let i = 0; all.length < SHOW_MAX && source.some((al) => al.assets[i]); i++) source.forEach((al) => { const a = al.assets[i]; if (a && a.video === wantVideo && !seen.has(a.src) && all.length < SHOW_MAX) { seen.add(a.src); all.push(a); } }); };
+        if (curated.length >= 4) curated.slice(0, SHOW_MAX).forEach((a) => { if (!seen.has(a.src)) { seen.add(a.src); all.push(a); } });
+        take(false); if (all.length < 8) take(true);
         list = all; href = folderHref;
       } else {
         const al = matches[0];
