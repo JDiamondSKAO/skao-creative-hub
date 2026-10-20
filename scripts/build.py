@@ -46,6 +46,8 @@ from journeys import revise
 PAGES=revise(PAGES,JIRA,CANTO,LIVE)
 from interiors import revise as revise_interiors, ROUTES, PLANNED
 PAGES, INTERIOR_META=revise_interiors(PAGES,JIRA,CANTO)
+import slidekit
+PAGES=slidekit.apply(PAGES,INTERIOR_META)
 from polish import revise as revise_polish, text, summary, sidebar as section_sidebar, section_of, SECTIONS, EXTRA, members_of, nav as mega_nav, FULL_WIDTH, TOC_RAIL, CHILD_OF
 PAGES,SOURCE_TITLES=revise_polish(PAGES,INTERIOR_META,JIRA,CANTO)
 import gethelp

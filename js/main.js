@@ -752,6 +752,7 @@ document.addEventListener("DOMContentLoaded", () => {
     files.forEach((f) => { const id = String(f.container?.id || ""); if (id) byPage.set(id, [...(byPage.get(id) || []), f]); });
     const mine = pageId ? byPage.get(String(pageId)) : null;
     if (!mine?.length) return;
+    fileButtons(mine, ctx);
     // Cards show a cover: a picture attached to the page under the file's own name.
     const view = $("[data-dl-groups]")?.dataset.dlView || "list";
     const pictures = view === "cards" && pageId ? await attachmentsOf(pageId, ctx).catch(() => []) : [];
@@ -774,6 +775,22 @@ document.addEventListener("DOMContentLoaded", () => {
     panel.after(section);
     beside(section, view);
     arrive();
+  }
+  // A button for one named file, such as the master deck on the Standard SKAO template page
+  // (data-file-button="master deck"): it appears once the file is there, with the file's size beside it.
+  function fileButtons(files, ctx) {
+    $$("[data-file-button]").forEach((a) => {
+      const want = new RegExp(a.dataset.fileButton.replace(/[^a-z0-9 ]/gi, "").replace(/ +/g, "[\\s_-]*"), "i");
+      const f = files.find((x) => want.test(String(x.title || "")) && !/\.(png|jpe?g|webp)$/i.test(String(x.title || "")));
+      const href = f && safeLink(ctx + (f._links?.download || ""));
+      if (!href) return;
+      const card = a.closest(".start-card, .content-body") || document, bytes = size(f.extensions?.fileSize);
+      a.href = href; a.setAttribute("download", ""); a.title = String(f.title); a.hidden = false;
+      a.setAttribute("aria-label", a.textContent.trim() + (bytes ? ", " + bytes : ""));
+      card.querySelector("[data-file-pending]")?.remove();
+      const sz = card.querySelector("[data-file-size]");
+      if (sz && bytes) { sz.textContent = bytes; sz.hidden = false; }
+    });
   }
   // Release details on the main card, read from the approved files: the newest upload date and,
   // when every file agrees on it, the version (from the file names, or Confluence's own count).
@@ -1059,6 +1076,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const partnerPage = /co-branding|partner/i.test($(".page-head h1")?.textContent || "");
     let rules = [];
     try { rules = JSON.parse($("[data-dl-groups]")?.dataset.dlGroups || "[]").map((r) => ({ ...r, re: new RegExp(r.match, "i"), cut: r.strip ? new RegExp(r.strip, "gi") : null })); } catch { rules = []; }
+    // A page can show a file in its own place instead (the master deck has its own card), so the list leaves it out.
+    files = files.filter((f) => !rules.some((r) => r.hide && r.re.test(String(f.title || ""))));
     const pattern = (label) => new RegExp("(^|[\\s_-])" + label.replace(/ /g, "[\\s_-]+") + "($|[\\s_.-])", "i");
     const tidy = (label) => {
       let t = label.replace(/_+/g, " ").replace(/\s+/g, " ").trim();
@@ -1564,7 +1583,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bodyText = $(".content-body");
   if (bodyText && !bodyText.querySelector(".directory")) {
     bodyText.querySelectorAll("h2").forEach((h) => {
-      if (h.closest("[hidden], details, .section-next, .file-feed, .canto-show, .asset-panel, .live-link, .site-photos, .site-card, .kit-card, .events-layout, .attachments-head, .next-step, .downloads-head")) return;
+      if (h.closest("[hidden], details, .section-next, .file-feed, .canto-show, .asset-panel, .live-link, .site-photos, .site-card, .kit-card, .events-layout, .template-page, .deck-banner, .attachments-head, .next-step, .downloads-head")) return;
       if (!h.id) { let id = slugify(h.textContent); while (document.getElementById(id)) id += "-2"; h.id = id; }
       const b = document.createElement("button");
       b.type = "button"; b.className = "heading-link"; b.setAttribute("aria-label", "Copy a link to " + h.textContent.trim());

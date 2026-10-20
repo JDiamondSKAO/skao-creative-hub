@@ -129,7 +129,8 @@ def apply(pages, jira):
 # links in the search dialog, so production rewrites their addresses like any other link.
 ANSWERS = [
  ('logo logos lockup artwork emblem', 'Where do I get the SKAO logo?', 'Logo files are on Logos and icons, in versions for light and dark backgrounds. Anyone outside the SKAO needs permission to use it.', 'logos.html', 'Logos and icons'),
- ('template powerpoint pptx slides slide deck presentation', 'Where’s the slide template?', 'The Standard SKAO template is the 16:9 PowerPoint for any talk. For joint work, use a partner template.', 'standard-template.html', 'Standard SKAO template'),
+ ('template powerpoint pptx potx slides slide presentation', 'Where’s the slide template?', 'Start from the SKAO master deck for ready-made slides, or the blank template for your own content. Both are on Standard SKAO template, and partner templates cover joint work.', 'standard-template.html', 'Standard SKAO template'),
+ ('master deck overview introduce introduction about skao facts slides talk', 'Is there a deck about the SKAO?', 'The SKAO master deck tells the SKAO story in seven sections, with approved facts, photos and layouts. Download it from Standard SKAO template.', 'standard-template.html', 'SKAO master deck'),
  ('colour colours color colors hex rgb cmyk pantone palette', 'What are the SKAO colours?', 'Navy and magenta lead, with accent palettes for science, technology and the sites. Copy hex, RGB, CMYK or Pantone values from Colours and typography.', 'colours-and-type.html', 'Colours and typography'),
  ('font fonts typeface noto verdana typography', 'Which font do we use?', 'Noto Sans, with Verdana as the fallback where Noto isn’t installed.', 'fonts.html', 'Fonts'),
  ('photo photos image images picture pictures canto photography', 'Where are the photos?', 'In the staff media library in Canto. First time? Choose Register Now and use your SKAO email address.', 'media.html', 'Photos and video'),

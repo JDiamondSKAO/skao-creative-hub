@@ -49,6 +49,10 @@ for page, patterns in spec['pages'].items():
 for f in sorted((ROOT / 'build' / 'kit').glob('kit-*.webp')):
     out.append({'page': 'stands.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': [],
                 'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
+# Slide pictures for the Standard SKAO template page from scripts/deck_images.py (no label: the page shows them).
+for f in sorted((ROOT / 'build' / 'deck').glob('deck-*.webp')):
+    out.append({'page': 'standard-template.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': [],
+                'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
 # Print and giveaway files from scripts/event_files.py: each download is approved; its cover (same name,
 # .webp) has no label, so the page shows it on the card rather than as a download.
 for f in sorted((ROOT / 'build' / 'event-files').glob('*')):

@@ -12,12 +12,6 @@ CLASSIFICATIONS = ['Unrestricted', 'Staff Resources', 'SKAO Staff Only', 'For Pr
 
 # Rows added to a resource page's panel: (label, text or list).
 PACK = {
- 'standard-template.html': [
-  ('Format', 'PowerPoint (.pptx), 16:9 widescreen'),
-  ('Versions', CLASSIFICATIONS),
-  ('Choose', 'Use the version whose label matches your content’s information classification.'),
-  ('Google Slides', 'Also in the Google Slides template gallery, when you’re signed in with your SKAO Google account. ' + pending('GOOGLE_SLIDES', 'Open the gallery')),
- ],
  'master-deck.html': [
   ('Planned', ['About the SKAO', 'Science case', 'Construction progress, both sites', 'SRCNet', 'Working with local communities', 'Specialised topics']),
  ],
@@ -76,6 +70,9 @@ DOWNLOAD_GROUPS = {
   {'group': 'SRCNet logo', 'note': 'The full logo, for most uses', 'match': 'srcnet_logo', 'strip': r'\bskao\b|\bsrcnet\b|\brgb\b|\blogo\b|\bmono'},
   {'group': 'SRCNet avatar', 'note': 'The round mark, for small spaces and social media', 'match': 'srcnet_avatar', 'strip': r'\bskao\b|\bsrcnet\b|\brgb\b|\bavatar\b|\bmono'},
   {'group': 'Regional centres', 'note': 'One pack per centre, with every version of its logo in AI, EPS and PNG', 'match': 'src'}],
+ # The template page shows the master deck in its own card (slidekit), so the list keeps to the template versions.
+ 'standard-template.html': [
+  {'group': 'Master deck', 'match': 'master[\\s_-]*deck', 'hide': True}],
  'master-deck.html': [
   {'group': 'About the SKAO', 'match': 'about|master|overview|introduc|briefing|press|media|colloquium|exhibition|samagam'},
   {'group': 'Science', 'match': 'science'},

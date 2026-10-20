@@ -20,6 +20,13 @@ Built on 2.21. Events no longer reads as if Communications plans people's events
   - A short "Before you print" note comes first.
   - It is built from the files on the page. To add more, such as new outreach material, upload a file labelled "approved", with a picture under the same name as its cover.
   - `scripts/event_files.py` builds today's 14 files and covers from the reusable event assets and merchandise folders (read only). One-off builds such as the IAU GA 2024 stand are left out.
+- **Standard SKAO template** is now where every presentation starts, with the new SKAO master deck and template (version 1.0, October 2026):
+  - **Two ways to start**: the master deck (ready-made slides with approved facts, photos and layouts) leads, with its own download button and size; the blank template sits beside it and links to its versions.
+  - **What's in the master deck**: a picture of each part, from Start here and the openers through the seven sections to the closing slides.
+  - **Choose a template version** lists the six classification versions beside **How to use it**, five numbered steps. A **Good to know** band covers fonts, Google Slides, partner templates and the version.
+  - Slide pictures are attachments on the page (`scripts/deck_images.py` makes them from the deck's own renders), so no slide images live in this repo. Until they're uploaded, each part shows as a gradient slide with its section number.
+  - **Approved slide decks** opens with a banner pointing to the master deck, and keeps its library for talk decks. Search answers "Is there a deck about the SKAO?".
+  - The theme can now give one named file its own button (`data-file-button`), and a page can keep a file out of its downloads list (`hide` in brandkit.DOWNLOAD_GROUPS).
 - Download cards that a page names (brandkit.DOWNLOAD_GROUPS) keep the page's order. Each group has an anchor, and group notes always show.
 - Landings can now:
   - put a card level with the intro (`data-landing-beside`);
