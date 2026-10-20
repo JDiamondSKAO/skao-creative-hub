@@ -1112,19 +1112,19 @@ header.is-pinned a.nav-feedback {max-width:150px;margin-left:0;padding:9px 15px 
 @media(min-width:1241px){header.is-pinned .search-trigger{min-width:0;width:180px;}header.is-pinned .search-trigger kbd{display:none;}} /* room for Feedback beside search */
 .navlinks a.nav-menu-extra {display:none;}
 @media(max-width:1000px){.navlinks a.nav-menu-extra{display:block;text-align:left;color:var(--link);font-weight:700;border-bottom:0;padding-block:11px;}.navlinks a.nav-menu-extra:after{content:none;}.navlinks a.nav-menu-extra:not(.nav-menu-extra + .nav-menu-extra){margin-top:6px;}}
-/* The photo library in Canto: an app-style tile with a night-sky gradient and a two-line label.
-   In the compact bar it is the tile alone, between search and Feedback. */
-body a.nav-canto {flex:none;display:inline-flex;align-items:center;gap:10px;min-height:40px;padding:4px 14px 4px 4px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);line-height:1.15;text-decoration:none;white-space:nowrap;transition:border-color var(--t) var(--ease-soft),box-shadow var(--t) var(--ease-soft),padding var(--t-slow) var(--ease-out);}
-body a.nav-canto:hover {border-color:color-mix(in srgb,var(--link) 35%,var(--line));box-shadow:var(--shadow-sm);}
-.canto-tile {flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#070068 0%,#0b3f86 55%,#0e8a9a 100%);color:#fff;box-shadow:inset 0 0 0 1px #ffffff26;transition:filter var(--t) var(--ease-soft);}
-.canto-tile svg {width:17px;height:17px;}
-a.nav-canto:hover .canto-tile {filter:brightness(1.15);}
-.nav-canto-text {display:grid;gap:1px;}
-.nav-canto-text strong {font-size:.84rem;font-weight:700;color:var(--ink);}
-.nav-canto-text small {font-size:.7rem;font-weight:600;color:var(--muted);}
-header.is-pinned a.nav-canto {gap:0;padding:0;border-color:transparent;background:none;box-shadow:none;}
-header.is-pinned .nav-canto-text {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
-header.is-pinned .canto-tile {width:36px;height:36px;border-radius:10px;}
+/* The Canto Media Library: a sibling of the search box (same height, border and radius), with a photo-stack icon
+   in the photos-and-video colour. In the compact bar it is the icon alone, with a small tooltip. */
+body a.nav-canto {position:relative;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 13px 0 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:.86rem;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:border-color var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
+body a.nav-canto:hover {border-color:color-mix(in srgb,var(--link) 30%,var(--line));background:var(--surface);}
+.nav-canto svg {flex:none;width:18px;height:18px;color:var(--canto-c);}
+.nav-canto-arr {font-size:.8em;color:var(--muted);transition:transform var(--t) var(--ease-out),color var(--t) var(--ease-soft);}
+a.nav-canto:hover .nav-canto-arr {transform:translate(1px,-1px);color:var(--ink);}
+a.nav-canto:after {content:attr(data-tip);position:absolute;top:calc(100% + 9px);left:50%;z-index:60;padding:6px 10px;border-radius:7px;background:var(--ink);color:var(--bg);font-size:.74rem;font-weight:600;white-space:nowrap;box-shadow:var(--shadow-md);opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,-3px);transition:opacity .15s ease,transform .15s ease,visibility 0s linear .15s;}
+header.is-pinned a.nav-canto {width:40px;padding:0;justify-content:center;gap:0;}
+header.is-pinned .nav-canto-text,header.is-pinned .nav-canto-arr {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+header.is-pinned a.nav-canto:hover:after,header.is-pinned a.nav-canto:focus-visible:after {opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:.2s,.2s,0s;}
+header.is-pinned a.nav-feedback {min-height:40px;}
+@media(max-width:1199px){.nav-canto-more{display:none;}} /* mid-size screens: "Canto ↗" */
 @media(max-width:1000px){a.nav-canto{display:none;}} /* phones and tablets: it is in the menu */
 @media(max-width:560px){header.is-pinned a.nav-feedback{display:none;}} /* phones: Share feedback is in the menu instead */
 body a.nav-feedback:hover {filter:brightness(1.18);}
