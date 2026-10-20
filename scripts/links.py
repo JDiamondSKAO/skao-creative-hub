@@ -15,7 +15,7 @@ from pathlib import Path
 LOCAL = Path(__file__).resolve().parents[1] / 'dev' / 'links.json'
 
 NAMES = {
- 'GOOGLE_SLIDES': 'SKAO template in Google Slides',
+ 'GOOGLE_SLIDES': 'Google Slides template gallery, where the SKAO template sits (opens with the SKAO Google account)',
  'LOGO_REQUEST_FORM': 'Logo use request form, for people outside the SKAO',
  'AI_POLICY': 'SKAO Artificial Intelligence Policy, the signed PDF in the ISMS policies on the intranet',
  'AI_PAGES': 'SKAO Artificial Intelligence pages on Confluence',

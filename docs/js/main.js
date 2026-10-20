@@ -831,7 +831,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
       const added = Date.parse(f.version?.when || "") || 0;
       const when = dm && +dm[2] >= 1 && +dm[2] <= 12 ? Date.UTC(+dm[1], +dm[2] - 1, 15) : Date.parse(info.date || "") || added;
-      const name = info.title || (dm ? dm[3].trim() : base);
+      let name = info.title || (dm ? dm[3].trim() : base);
+      // "A journey through time, de Laeter Colloquium" reads "A journey through time" when the event line names the colloquium.
+      const eventName = String(info.event || "").split(",")[0].trim();
+      if (eventName) name = name.replace(new RegExp("\\s*[,–—-]\\s*" + escapeRe(eventName) + "\\s*$", "i"), "").trim() || name;
       const topic = info.topic || rules.find((r) => r.re.test(title))?.group || "Other decks";
       const ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase();
       const id = String(f.id || "").replace(/^att/, "");
@@ -845,38 +848,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const KINDS = { pptx: "PowerPoint", ppt: "PowerPoint", potx: "PowerPoint", key: "Keynote", pdf: "PDF" };
     const rows = decks.map((d) => {
       const li = document.createElement("li"); li.className = "deck"; li.dataset.topic = d.topic; li.style.setProperty("--c", toneOf(d.topic));
+      const make = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
       // The cover: the picture attached under the deck's own name, or a title slide in the topic's colour.
-      const cover = document.createElement(d.preview ? "a" : "div"); cover.className = "deck-cover";
+      const cover = make(d.preview ? "a" : "div", "deck-cover");
       if (d.preview) { cover.href = d.preview; cover.setAttribute("aria-label", "Preview " + d.name); }
-      const slide = document.createElement("span"); slide.className = "deck-slide"; slide.setAttribute("aria-hidden", "true");
-      const brand = document.createElement("small"); brand.textContent = "SKA Observatory";
-      slide.append(brand, document.createElement("i"), document.createElement("i")); cover.append(slide);
+      const slide = make("span", "deck-slide"); slide.setAttribute("aria-hidden", "true");
+      slide.append(make("small", "", "SKA Observatory"), make("i"), make("i")); cover.append(slide);
       if (d.cover) { const img = new Image(); img.alt = ""; img.decoding = "async"; img.loading = "lazy"; img.onload = () => cover.classList.add("has-image"); img.src = d.cover; cover.append(img); }
-      if (d.preview) { const peek = document.createElement("span"); peek.className = "deck-peek"; peek.textContent = "Preview"; cover.append(peek); }
-      const body = document.createElement("div"); body.className = "deck-body";
-      const kicker = document.createElement("p"); kicker.className = "deck-kicker";
-      const tp = document.createElement("span"); tp.className = "deck-topic"; tp.textContent = d.topic;
-      const dt = document.createElement("span"); dt.textContent = d.when ? month(d.when) : "";
-      kicker.append(tp, dt);
-      const h = document.createElement("h3"); h.className = "deck-title"; h.textContent = d.name;
-      body.append(kicker, h);
-      if (d.info.event) { const ev = document.createElement("p"); ev.className = "deck-event"; ev.textContent = d.info.event; body.append(ev); }
-      // The details people ask about: who gave it, who it was for, how long it is and who may see it.
-      const facts = document.createElement("dl"); facts.className = "deck-facts";
-      const fact = (label, value, cls) => { if (!value) return; const div = document.createElement("div"); if (cls) div.className = cls; const a = document.createElement("dt"), b = document.createElement("dd"); a.textContent = label; b.textContent = value; div.append(a, b); facts.append(div); };
-      fact("Speaker", d.info.speaker); fact("Made by", d.info.made); fact("Audience", d.info.audience);
+      if (d.preview) cover.append(make("span", "deck-peek", "Preview"));
+      // What the talk is: its topic, its title, then where and when it was given.
+      const body = make("div", "deck-body"), kicker = make("p", "deck-kicker");
+      kicker.append(make("span", "deck-topic", d.topic));
+      if (preview) kicker.append(make("span", "example-tag", "Example"));
+      body.append(kicker, make("h3", "deck-title", d.name));
+      const where = [d.info.event, d.when ? month(d.when) : ""].filter(Boolean).join(" · ");
+      if (where) body.append(make("p", "deck-event", where));
+      // Who gave it, who it was for, who made it, how long it is and who may see it, always in that order.
+      const facts = make("dl", "deck-facts");
+      const fact = (label, value, cls) => { if (!value) return; const div = make("div", cls); div.append(make("dt", "", label), make("dd", "", value)); facts.append(div); };
+      fact("Speaker", d.info.speaker); fact("Audience", d.info.audience); fact("Made by", d.info.made);
       fact("Slides", d.info.slides); fact("Classification", d.classification, "is-class");
-      fact(d.updated ? "Updated" : "Added", [d.added ? fmt(d.added) : "", d.by && "by " + d.by].filter(Boolean).join(" "));
       if (facts.children.length) body.append(facts);
-      const actions = document.createElement("div"); actions.className = "deck-actions";
-      const get = document.createElement("a"); get.className = "button deck-download";
+      // The file and what you can do with it, in a strip along the bottom of every card.
+      const foot = make("div", "deck-foot"), file = make("p", "deck-file"), actions = make("div", "deck-actions");
+      file.append(make("strong", "", [KINDS[d.ext] || d.ext.toUpperCase(), size(d.size)].filter(Boolean).join(" · ")));
+      if (d.added) file.append(make("span", "", (d.updated ? "Updated " : "Added ") + fmt(d.added)));
+      if (d.preview) { const pv = make("a", "button secondary deck-preview", "Preview"); pv.href = d.preview; pv.setAttribute("aria-label", `Preview ${d.name} in Confluence`); actions.append(pv); }
+      const get = make("a", "button deck-download", "Download");
       if (d.href) { get.href = d.href; get.setAttribute("download", ""); get.title = d.title; } else get.setAttribute("aria-disabled", "true");
       get.setAttribute("aria-label", `Download ${d.name}, ${KINDS[d.ext] || d.ext.toUpperCase()}${size(d.size) ? ", " + size(d.size) : ""}`);
-      const gl = document.createElement("span"); gl.textContent = "Download"; const gs = document.createElement("small"); gs.textContent = [KINDS[d.ext] || d.ext.toUpperCase(), size(d.size)].filter(Boolean).join(" · ");
-      get.append(gl, gs); actions.append(get);
-      if (d.preview) { const pv = document.createElement("a"); pv.className = "deck-preview text-link"; pv.href = d.preview; pv.textContent = "Preview in Confluence"; actions.append(pv); }
-      if (preview) { const tag = document.createElement("span"); tag.className = "example-tag"; tag.textContent = "Example"; kicker.append(tag); }
-      li.append(cover, body, actions);
+      actions.append(get); foot.append(file, actions);
+      li.append(cover, body, foot);
       li._deck = d; return li;
     });
     // Topic filters (only when there is more than one), search and sort.

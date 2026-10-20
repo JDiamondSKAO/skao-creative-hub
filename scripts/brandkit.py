@@ -16,7 +16,7 @@ PACK = {
   ('Format', 'PowerPoint (.pptx), 16:9 widescreen'),
   ('Versions', CLASSIFICATIONS),
   ('Choose', 'Use the version whose label matches your content’s information classification.'),
-  ('Google Slides', 'Also available as a Google Slides template. ' + pending('GOOGLE_SLIDES', 'Open in Google Slides')),
+  ('Google Slides', 'Also in the Google Slides template gallery, when you’re signed in with your SKAO Google account. ' + pending('GOOGLE_SLIDES', 'Open the gallery')),
  ],
  'master-deck.html': [
   ('Planned', ['About the SKAO', 'Science case', 'Construction progress, both sites', 'SRCNet', 'Working with local communities', 'Specialised topics']),
