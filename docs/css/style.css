@@ -853,7 +853,7 @@ body .footer a.button:any-link {color:#fff;padding:10px 18px;font-size:.88rem;}
 
 /* ===== Leaner homepage ===== */
 /* One search on the homepage: the hero box. Cmd/Ctrl K still opens search. */
-body:has(.hero-search) .navrow .search-trigger {display:none;}
+body:has(.hero-search) .brandbar .masthead-search {display:none;} /* the homepage has its own big search */
 /* Hero: find on the left, what's new on the right */
 .welcome-band {align-items:start;}
 /* Compact section index */
@@ -1109,11 +1109,28 @@ header.is-pinned .nav-home {width:58px;margin-right:6px;opacity:1;visibility:vis
 /* Compact header: once the masthead scrolls away, Share feedback slides in beside search */
 body a.nav-feedback {flex:none;display:inline-flex;align-items:center;gap:7px;max-width:0;margin-left:-10px;padding:0;overflow:hidden;opacity:0;visibility:hidden;white-space:nowrap;border-radius:999px;background:linear-gradient(110deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);color:#fff;font-size:.84rem;font-weight:700;line-height:1.2;text-decoration:none;transition:max-width var(--t-slow) var(--ease-out),margin var(--t-slow) var(--ease-out),padding var(--t-slow) var(--ease-out),background-color var(--t) var(--ease-soft),opacity var(--t) var(--ease-soft),visibility 0s linear var(--t-slow);}
 header.is-pinned a.nav-feedback {max-width:150px;margin-left:0;padding:9px 15px 9px 12px;opacity:1;visibility:visible;transition-delay:0s;}
-@media(min-width:1241px){header.is-pinned .search-trigger{min-width:0;width:180px;}header.is-pinned .search-trigger kbd{display:none;}} /* room for Feedback beside search */
 .navlinks a.nav-menu-extra {display:none;}
 @media(max-width:1000px){.navlinks a.nav-menu-extra{display:block;text-align:left;color:var(--link);font-weight:700;border-bottom:0;padding-block:11px;}.navlinks a.nav-menu-extra:after{content:none;}.navlinks a.nav-menu-extra:not(.nav-menu-extra + .nav-menu-extra){margin-top:6px;}}
 /* The Canto Media Library: a sibling of the search box (same height and radius), tinted in the photos-and-video
    colour so it stands out a little. In the compact bar it is the icon alone, with a small tooltip. */
+/* Search lives in the masthead: a light field on the navy, so the section row and compact bar have room.
+   Tablets show it as an icon; on phones it moves into the menu row (.nav-search). */
+.brandbar .masthead-search {min-width:280px;min-height:40px;border:1px solid #ffffff38;border-radius:10px;background:#ffffff14;color:#ffffffd6;box-shadow:none;}
+.brandbar .masthead-search:hover {border-color:#ffffff66;background:#ffffff24;color:#fff;box-shadow:none;}
+.brandbar .masthead-search kbd {border-color:#ffffff40;background:transparent;color:#ffffffb8;}
+.brandbar .masthead-search:hover kbd {border-color:#ffffff80;color:#fff;}
+.brandbar .masthead-search:focus-visible {outline:2px solid #fff;outline-offset:2px;}
+@media(min-width:1001px){.brandbar .masthead-search > span{position:static;width:auto;height:auto;overflow:visible;clip:auto;}}
+@media(max-width:1000px){.brandbar .masthead-search{min-width:0;width:40px;padding:0;justify-content:center;}.brandbar .masthead-search > span,.brandbar .masthead-search kbd{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}}
+@media(max-width:560px){.brandbar .masthead-search{display:none;}}
+/* Compact bar: search as an icon beside the Canto Media Library and Feedback; on phones it sits next to Menu */
+.nav-search {position:relative;flex:none;display:inline-grid;place-items:center;width:40px;height:40px;max-width:0;margin-left:-10px;padding:0;overflow:hidden;opacity:0;visibility:hidden;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer;transition:max-width var(--t-slow) var(--ease-out),margin var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),visibility 0s linear var(--t-slow),border-color var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
+header.is-pinned .nav-search {max-width:40px;margin-left:0;overflow:visible;opacity:1;visibility:visible;transition-delay:0s;}
+.nav-search:hover {border-color:color-mix(in srgb,var(--link) 30%,var(--line));background:var(--surface);}
+.nav-search svg {width:18px;height:18px;}
+.nav-search:after {content:attr(data-tip);position:absolute;top:calc(100% + 9px);left:50%;z-index:60;padding:6px 10px;border-radius:7px;background:var(--ink);color:var(--bg);font-size:.74rem;font-weight:600;white-space:nowrap;box-shadow:var(--shadow-md);opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,-3px);transition:opacity .15s ease,transform .15s ease,visibility 0s linear .15s;}
+header.is-pinned .nav-search:hover:after,header.is-pinned .nav-search:focus-visible:after {opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:.2s,.2s,0s;}
+@media(max-width:560px){.nav-search{max-width:40px;margin-left:0;overflow:visible;opacity:1;visibility:visible;}}
 :root {--canto-c:#0e7490;} :root.dark {--canto-c:#67cfe0;}
 body a.nav-canto {position:relative;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 13px 0 11px;border:1px solid color-mix(in srgb,var(--canto-c) 30%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--canto-c) 7%,var(--bg));color:color-mix(in srgb,var(--canto-c) 55%,var(--ink));font-size:.86rem;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:border-color var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
 body a.nav-canto:hover {border-color:color-mix(in srgb,var(--canto-c) 50%,var(--line));background:color-mix(in srgb,var(--canto-c) 13%,var(--bg));}
@@ -1126,7 +1143,7 @@ header.is-pinned .nav-canto-text,header.is-pinned .nav-canto-arr {position:absol
 header.is-pinned a.nav-canto:hover:after,header.is-pinned a.nav-canto:focus-visible:after {opacity:1;visibility:visible;transform:translate(-50%,0);transition-delay:.2s,.2s,0s;}
 header.is-pinned a.nav-feedback {min-height:40px;}
 @media(max-width:1199px){.nav-canto-more{display:none;}} /* mid-size screens: "Canto ↗" */
-@media(max-width:1000px){a.nav-canto{display:none;}} /* phones and tablets: it is in the menu */
+@media(max-width:1000px){body a.nav-canto{display:none;}} /* phones and tablets: it is in the menu */
 @media(max-width:560px){header.is-pinned a.nav-feedback{display:none;}} /* phones: Share feedback is in the menu instead */
 body a.nav-feedback:hover {filter:brightness(1.18);}
 body a.nav-feedback:any-link {color:#fff;}
