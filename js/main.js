@@ -821,7 +821,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return out;
     };
     const CLASSES = ["Strictly Confidential", "Confidential", "For Project Use", "SKAO Staff Only", "Staff Resources", "Unrestricted"];
-    const TONES = ["#c2185b", "#0b7bb5", "#c26a1b", "#2f8a5b", "#7c3aed", "#5b6475"];
+    // Topic colours are cool on purpose: red, orange or green would read as a status (late, at risk, done).
+    const TONES = ["#4150c4", "#0b7bb5", "#0f8580", "#6b4fc8", "#2d6f9e", "#5b6475"];
     const topics = [...new Set(rules.map((r) => r.group))];
     const decks = files.filter((f) => !IMAGE.test(String(f.title || "")) && approved(f)).map((f) => {
       const title = String(f.title || ""), href = preview ? null : safeLink(ctx + (f._links?.download || ""));
@@ -863,11 +864,10 @@ document.addEventListener("DOMContentLoaded", () => {
       body.append(kicker, make("h3", "deck-title", d.name));
       const where = [d.info.event, d.when ? month(d.when) : ""].filter(Boolean).join(" · ");
       if (where) body.append(make("p", "deck-event", where));
-      // Who gave it, who it was for, who made it, how long it is and who may see it, always in that order.
+      // Who gave it, who it was for, who made it and who may see it, always in that order.
       const facts = make("dl", "deck-facts");
       const fact = (label, value, cls) => { if (!value) return; const div = make("div", cls); div.append(make("dt", "", label), make("dd", "", value)); facts.append(div); };
-      fact("Speaker", d.info.speaker); fact("Audience", d.info.audience); fact("Made by", d.info.made);
-      fact("Slides", d.info.slides); fact("Classification", d.classification, "is-class");
+      fact("Speaker", d.info.speaker); fact("Audience", d.info.audience); fact("Made by", d.info.made); fact("Classification", d.classification, "is-class");
       if (facts.children.length) body.append(facts);
       // The file and what you can do with it, in a strip along the bottom of every card.
       const foot = make("div", "deck-foot"), file = make("p", "deck-file"), actions = make("div", "deck-actions");

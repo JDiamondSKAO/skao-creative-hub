@@ -271,7 +271,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   const rowsNow=()=>[...doc.querySelectorAll('.deck:not([hidden])')].map(r=>r.querySelector('.deck-title').textContent);
   assert.deepEqual(rowsNow(),['A journey through time','SKA-Mid construction'],'approved decks only, newest first; drafts, pictures and off-site links left out; a title drops the event its next line names');
   const first=q('.deck'),facts=Object.fromEntries([...first.querySelectorAll('.deck-facts div')].map(x=>[x.querySelector('dt').textContent,x.querySelector('dd').textContent]));
-  assert.deepEqual(facts,{Speaker:'Director-General',Slides:'52'},'details from the attachment comment');
+  assert.deepEqual(facts,{Speaker:'Director-General'},'details from the attachment comment; the slide count stays off the card');
   assert.equal(first.querySelector('.deck-event').textContent,'de Laeter Colloquium, Perth · November 2025');assert.equal(first.querySelector('.deck-kicker').textContent,'About the SKAO');
   assert.equal(first.querySelector('.deck-foot .deck-file').textContent,'PowerPoint · 3.0 GBAdded 20 Nov 2025','the file, its size and when it was added, in the strip along the bottom');
   assert.equal(first.querySelector('a.deck-cover').getAttribute('href'),`/master-deck.html?preview=/${id}/11/`+encodeURIComponent(files[0].title),'the cover opens Confluence\'s preview');assert.equal(first.querySelector('.deck-foot a.deck-preview').getAttribute('href'),first.querySelector('a.deck-cover').getAttribute('href'),'and so does Preview beside Download');
