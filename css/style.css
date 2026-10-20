@@ -1107,21 +1107,25 @@ header.is-pinned {box-shadow:0 12px 28px -20px #07006859;}
 .nav-home {flex:none;display:flex;align-items:center;width:0;margin-right:-20px;opacity:0;visibility:hidden;overflow:hidden;transition:width var(--t-slow) var(--ease-out),margin var(--t-slow) var(--ease-out),opacity var(--t) var(--ease-soft),visibility 0s linear var(--t-slow);}
 header.is-pinned .nav-home {width:58px;margin-right:6px;opacity:1;visibility:visible;transition-delay:0s;}
 /* Compact header: once the masthead scrolls away, Share feedback slides in beside search */
-body a.nav-feedback {flex:none;display:inline-flex;align-items:center;gap:7px;max-width:0;margin-left:-20px;padding:0;overflow:hidden;opacity:0;visibility:hidden;white-space:nowrap;border-radius:999px;background:linear-gradient(110deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);color:#fff;font-size:.84rem;font-weight:700;line-height:1.2;text-decoration:none;transition:max-width var(--t-slow) var(--ease-out),margin var(--t-slow) var(--ease-out),padding var(--t-slow) var(--ease-out),background-color var(--t) var(--ease-soft),opacity var(--t) var(--ease-soft),visibility 0s linear var(--t-slow);}
-header.is-pinned a.nav-feedback {max-width:150px;margin-left:-6px;padding:9px 15px 9px 12px;opacity:1;visibility:visible;transition-delay:0s;}
-@media(min-width:1241px){header.is-pinned .search-trigger{min-width:0;width:196px;}header.is-pinned .search-trigger kbd{display:none;}} /* room for Feedback beside search */
+body a.nav-feedback {flex:none;display:inline-flex;align-items:center;gap:7px;max-width:0;margin-left:-10px;padding:0;overflow:hidden;opacity:0;visibility:hidden;white-space:nowrap;border-radius:999px;background:linear-gradient(110deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);color:#fff;font-size:.84rem;font-weight:700;line-height:1.2;text-decoration:none;transition:max-width var(--t-slow) var(--ease-out),margin var(--t-slow) var(--ease-out),padding var(--t-slow) var(--ease-out),background-color var(--t) var(--ease-soft),opacity var(--t) var(--ease-soft),visibility 0s linear var(--t-slow);}
+header.is-pinned a.nav-feedback {max-width:150px;margin-left:0;padding:9px 15px 9px 12px;opacity:1;visibility:visible;transition-delay:0s;}
+@media(min-width:1241px){header.is-pinned .search-trigger{min-width:0;width:180px;}header.is-pinned .search-trigger kbd{display:none;}} /* room for Feedback beside search */
 .navlinks a.nav-menu-extra {display:none;}
 @media(max-width:1000px){.navlinks a.nav-menu-extra{display:block;text-align:left;color:var(--link);font-weight:700;border-bottom:0;padding-block:11px;}.navlinks a.nav-menu-extra:after{content:none;}.navlinks a.nav-menu-extra:not(.nav-menu-extra + .nav-menu-extra){margin-top:6px;}}
-/* Section row: the Canto library, set apart from the Hub's own sections by a divider and the photos-and-video colour */
-:root {--canto-c:#0e7490;} :root.dark {--canto-c:#67cfe0;}
-body a.nav-canto {position:relative;flex:none;display:inline-flex;align-items:center;gap:7px;margin-left:6px;padding:7px 13px 7px 11px;border-radius:999px;background:color-mix(in srgb,var(--canto-c) 10%,var(--bg));color:color-mix(in srgb,var(--canto-c) 88%,var(--ink));font-size:.86rem;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:background-color var(--t) var(--ease-soft);}
-body a.nav-canto:hover {background:color-mix(in srgb,var(--canto-c) 18%,var(--bg));}
-a.nav-canto:before {content:"";position:absolute;left:-14px;top:50%;width:1px;height:22px;background:var(--line);transform:translateY(-50%);}
-.nav-canto svg {flex:none;width:16px;height:16px;}
-.nav-canto-arr {font-size:.8em;opacity:.8;transition:transform var(--t) var(--ease-out);}
-a.nav-canto:hover .nav-canto-arr {transform:translate(1px,-1px);}
-header.is-pinned a.nav-canto {display:none;} /* the compact bar keeps sections, search and Feedback */
-@media(max-width:1000px){a.nav-canto{display:none;}}
+/* The photo library in Canto: an app-style tile with a night-sky gradient and a two-line label.
+   In the compact bar it is the tile alone, between search and Feedback. */
+body a.nav-canto {flex:none;display:inline-flex;align-items:center;gap:10px;min-height:40px;padding:4px 14px 4px 4px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);line-height:1.15;text-decoration:none;white-space:nowrap;transition:border-color var(--t) var(--ease-soft),box-shadow var(--t) var(--ease-soft),padding var(--t-slow) var(--ease-out);}
+body a.nav-canto:hover {border-color:color-mix(in srgb,var(--link) 35%,var(--line));box-shadow:var(--shadow-sm);}
+.canto-tile {flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#070068 0%,#0b3f86 55%,#0e8a9a 100%);color:#fff;box-shadow:inset 0 0 0 1px #ffffff26;transition:filter var(--t) var(--ease-soft);}
+.canto-tile svg {width:17px;height:17px;}
+a.nav-canto:hover .canto-tile {filter:brightness(1.15);}
+.nav-canto-text {display:grid;gap:1px;}
+.nav-canto-text strong {font-size:.84rem;font-weight:700;color:var(--ink);}
+.nav-canto-text small {font-size:.7rem;font-weight:600;color:var(--muted);}
+header.is-pinned a.nav-canto {gap:0;padding:0;border-color:transparent;background:none;box-shadow:none;}
+header.is-pinned .nav-canto-text {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+header.is-pinned .canto-tile {width:36px;height:36px;border-radius:10px;}
+@media(max-width:1000px){a.nav-canto{display:none;}} /* phones and tablets: it is in the menu */
 @media(max-width:560px){header.is-pinned a.nav-feedback{display:none;}} /* phones: Share feedback is in the menu instead */
 body a.nav-feedback:hover {filter:brightness(1.18);}
 body a.nav-feedback:any-link {color:#fff;}
@@ -1235,7 +1239,7 @@ html:active-view-transition-type(hub-page)::view-transition-new(root) {animation
 }
 /* The row reads left to right: logo (when pinned), sections, then search at the far edge */
 .navrow {justify-content:flex-start;}
-.navrow .search-trigger {margin-left:auto;}
+.nav-tools {display:flex;align-items:center;gap:10px;margin-left:auto;} /* search, the photo library and (when compact) Feedback */
 @media(min-width:1001px) and (max-width:1199px){
  .navlinks {gap:22px;}
  .search-trigger {min-width:0;}

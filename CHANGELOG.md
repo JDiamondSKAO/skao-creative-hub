@@ -22,7 +22,7 @@ Built on 2.20, from the notes on the review board. The Events pages wait for the
 - **Co-branding with CSIRO** keeps the co-branding guidelines and points to Letterheads for the office letterheads. Letterheads now names each Australian office, including Kensington, Perth (with CSIRO).
 - **Link cards:** the AI policy and AI pages on Using AI image tools, the W3C reference on Accessibility checks, and the logo use request form on Using the SKAO logo (its link is now known). Each card shows what the link is and where it lives.
 - **Apply the brand** drops the "Want a second opinion?" box.
-- **Header:** the Canto library sits after the sections, set apart by a divider and the photos-and-video colour, and in the phone menu. Once the masthead scrolls away, a Feedback button in the masthead's gradient slides in beside search (an icon on narrower screens, in the menu on phones).
+- **Header tools:** search, the photo library and Feedback sit together at the right of the section row. The photo library is an app-style tile with a night-sky gradient and a two-line label (Photo library, Canto ↗). When the masthead scrolls away, the tile stays and Feedback slides in beside it in the masthead's gradient (an icon on narrower screens). On phones both are in the menu.
 - **Homepage quick links** each have their own colour.
 - **Canto slideshow:** up to 24 images. Photos and video shows the curated highlights first, then photos from the collections. The sync now keeps 24 highlights and up to 16 photos per collection.
 - **Dropdowns** use the Hub's own chevron with room around it.
