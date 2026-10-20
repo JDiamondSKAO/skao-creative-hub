@@ -54,48 +54,47 @@ def link_cards(cards):
  return '<ul class="link-cards">'+out+'</ul>'
 # The event kit. Each picture is a file attached to the Event kit page under the given name
 # (made by scripts/kit_images.py); until it's there, an outline of the item's shape shows.
-KIT=[('kit-fabrilux-3m','Fabrilux backdrop, 3 m','3 m wide, lit from inside','wide','The main backdrop for a stand or press area. Three designs.'),
- ('kit-fabrilux-2m','Fabrilux backdrop, 2 m','2 m wide, lit from inside','square','On its own or beside the 3 m backdrop. Four designs.'),
- ('kit-pull-up-banners','Pull-up banners','85 × 200 cm','tall','Quick for one person to put up. Science Working Group designs and more, for talks, desks and side stages.'),
- ('kit-kiosk','Kiosk','1 m wide, lit from inside','square','A lit counter for a stand. Two styles, one with a worktop.'),
- ('kit-table-cloths','Table cloths','For a standard exhibition table','cloth','White or gradient, with the SKAO logo.')]
+KIT=[('kit-fabrilux-3m','Fabrilux backdrop, 3 m','Lit from inside · three designs','wide'),
+ ('kit-fabrilux-2m','Fabrilux backdrop, 2 m','Lit from inside · four designs','square'),
+ ('kit-pull-up-banners','Pull-up banners','85 × 200 cm · Science Working Group designs and more','tall'),
+ ('kit-kiosk','Kiosk','1 m wide, lit from inside · two styles','square'),
+ ('kit-table-cloths','Table cloths','White or gradient, for a standard exhibition table','cloth')]
+def tiles(items):
+ """Picture tiles: the picture (or its outline), the name and one line of detail."""
+ return '<ul class="kit-grid">'+''.join(f'<li class="kit-item"><div class="kit-pic" data-kit-image="{f}" data-shape="{shape}"></div><h3>{name}</h3><p class="kit-meta">{meta}</p></li>' for f,name,meta,shape in items)+'</ul>'
 def kit():
- return ('<section class="kit" id="event-kit" data-kit><h2>What you can borrow</h2><p>Say which pieces you’d like, your dates and where they’re needed.</p>'
-  '<ul class="kit-grid">'+''.join(f'<li class="kit-item"><div class="kit-pic" data-kit-image="{f}" data-shape="{shape}"></div><h3>{name}</h3><p class="kit-size">{size}</p><p>{use}</p></li>' for f,name,size,shape,use in KIT)+'</ul></section>'
+ return ('<section class="kit" id="event-kit" data-kit data-summary="Backdrops, banners, a kiosk and table cloths, kept by the Comms teams at all three sites."><h2>What you can borrow</h2>'
+  '<p>Say which pieces you’d like, your dates and where they’re needed.</p>'+tiles(KIT)+'</section>'
   '<section class="reading-section" id="looking-after-it"><h2>Looking after it</h2><p>Each banner travels in its own case with everything needed to put it up, and the Events Production Manual shows every step. Roll the fabric rather than folding it, and plug the lights into an approved power supply.</p>'
   '<p>When it comes back, say if anything is missing or damaged, so it’s ready for the next event.</p></section>'
   '<div data-downloads-slot hidden></div>')
-# Designs to reuse: work from past events, by kind. Pictures work like the kit's, attached to the
-# Designs to reuse page (made by scripts/design_images.py), with an outline until they're there.
+# Designs to reuse: work from past events that can be reprinted or adapted (one-off builds stay out).
+# Pictures work like the kit's, attached to the page (made by scripts/design_images.py).
 DESIGNS=[
- ('Stands','Whole stands we’ve built before. Ask whether the panels and graphics can go to your event.',[
-  ('design-iau-ga-2024','IAU General Assembly 2024','Cape Town','wide','A walk-in pavilion with seating, audio and a big screen.'),
-  ('design-korea-walls','Stand walls for Korea','Two walls, 0.95 × 2.5 m','tall','Radio science on one, SKA-Low at dusk on the other.'),
-  ('design-gazebo','Gazebo','For outdoor events','wide','Made for SKA-Low events in Australia.')]),
  ('Banners and backdrops','SKAO designs in standard sizes, ready to reprint as they are.',[
-  ('design-stretch-walls','Stretch walls','1.5, 3 and 5 m wide','wide','Fabric walls for the back of a stand.'),
-  ('design-roller-banners','Roller banners','85, 100 and 150 cm wide','tall','The night sky over both telescopes.'),
-  ('design-wide-banners','Wide banners','1.5 × 2 m','tall','An SKAO design, or SKA-Mid and SKA-Low side by side.'),
-  ('design-wall-banners','Wall banners','1.2 × 2 m to 2 × 2.25 m','square','SKA-Mid and SKA-Low at a glance, or a simple SKAO design.'),
-  ('design-teardrop-flags','Teardrop flags','95 × 210 cm','tall','To mark an entrance or an outdoor stand.')]),
- ('With partners','Made with partner organisations. Check with the partner before using one again.',[
-  ('design-sarao','With SARAO','3 m wall and roller banner','wide','SKAO and SARAO side by side.'),
-  ('design-cetc','With CETC','1.53 × 2.28 m','tall','An SKA-Mid banner.'),
-  ('design-ngvla','With ngVLA','Banners and a roller banner','wide','From a joint conference in Vancouver in 2023. Easy to update with new dates.')]),
+  ('design-stretch-walls','Stretch walls','1.5, 3 and 5 m wide','wide'),
+  ('design-roller-banners','Roller banners','85, 100 and 150 cm wide','tall'),
+  ('design-wide-banners','Wide banners','1.5 × 2 m','tall'),
+  ('design-wall-banners','Wall banners','1.2 × 2 m to 2 × 2.25 m','square'),
+  ('design-teardrop-flags','Teardrop flags','95 × 210 cm','tall'),
+  ('design-gazebo','Gazebo','For outdoor events','wide')]),
+ ('With partners','Check with the partner before using one again.',[
+  ('design-sarao','SARAO','3 m wall and roller banner','wide'),
+  ('design-cetc','CETC','SKA-Mid banner, 1.53 × 2.28 m','tall'),
+  ('design-ngvla','ngVLA','Banners from a joint conference, 2023','wide')]),
  ('Programmes and logos','Starting points to adapt with your own details.',[
-  ('design-programmes','Conference programmes','From past SKAO meetings','tall','Covers and layouts to reuse with your own sessions.'),
-  ('design-pi-planning','PI planning logos','One for each event','wide','A version for each PI and location.')]),
- ('Giveaways','Pick things people keep and use. Leave the date off, so leftover stock works next time, and avoid single-use plastic.',[
-  ('design-stickers','Stickers','Four designs','square','The logo, the star, and science images.'),
-  ('design-lanyards','Lanyards','20 mm','tall','SKAO and science designs.'),
-  ('design-coasters','Coasters','95 mm','square','‘Building a time machine’ and ‘Science is for everyone’.'),
-  ('design-notepads','Notepads and sticky notes','A5 and A6 pads, A7 notes','tall','With the skyline of both sites.'),
-  ('design-t-shirts','T-shirts','Science is for everyone','wide','There are SRCNet t-shirts and tote bags too.')])]
+  ('design-programmes','Conference programmes','Covers and layouts from past meetings','tall'),
+  ('design-pi-planning','PI planning logos','One for each PI and location','wide')]),
+ ('Giveaways','Choose things people keep and use, leave the date off so leftovers work next time, and avoid single-use plastic.',[
+  ('design-stickers','Stickers','Four designs','square'),
+  ('design-lanyards','Lanyards','20 mm · two designs','tall'),
+  ('design-coasters','Coasters','95 mm · two designs','square'),
+  ('design-notepads','Notepads and sticky notes','A5 and A6 pads, A7 notes','tall'),
+  ('design-t-shirts','T-shirts','Science is for everyone, and SRCNet','wide')])]
 def designs():
- slug=lambda t:''.join(c if c.isalnum() else '-' for c in t.lower()).strip('-')
- return ('<div class="design-library" data-kit>'+''.join(f'<section class="design-group" id="{slug(group)}"><h2>{group}</h2><p>{lede}</p><ul class="kit-grid">'
-  +''.join(f'<li class="kit-item"><div class="kit-pic" data-kit-image="{f}" data-shape="{shape}"></div><h3>{name}</h3><p class="kit-size">{size}</p><p>{use}</p></li>' for f,name,size,shape,use in items)
-  +'</ul></section>' for group,lede,items in DESIGNS)+'</div>')
+ slug=lambda t:'-'.join(''.join(c if c.isalnum() else ' ' for c in t.lower()).split())
+ return ('<div class="design-library" data-kit data-no-toc data-summary="Banners, partner designs, programmes and giveaways from past events, ready to reprint or adapt.">'
+  +''.join(f'<section class="design-group" id="{slug(group)}"><div class="design-head"><h2>{group}</h2><span class="design-count">{len(items)} designs</span></div><p>{lede}</p>'+tiles(items)+'</section>' for group,lede,items in DESIGNS)+'</div>')
 def revise(pages,jira,canto):
  def put(name,title,body):pages[name]=(title,body)
  put('resources.html','Templates and assets',intro('Choose a starting point. Open its source page to see the file, guidance or availability information.',tag='Find and reuse')+cards([
@@ -122,19 +121,14 @@ def revise(pages,jira,canto):
  brand_essentials='<div class="brand-specimens"><div class="colour-spec navy"><strong>Blueshift Navy</strong><div class="copy-row"><button type="button" class="copy-value" data-copy="#070068" aria-label="Copy Blueshift Navy hex #070068"><code>#070068</code><span>Copy</span></button><button type="button" class="copy-value" data-copy="7, 0, 104" aria-label="Copy Blueshift Navy RGB 7, 0, 104"><code>RGB 7, 0, 104</code><span>Copy</span></button></div></div><div class="colour-spec magenta"><strong>Redshift Magenta</strong><div class="copy-row"><button type="button" class="copy-value" data-copy="#E70068" aria-label="Copy Redshift Magenta hex #E70068"><code>#E70068</code><span>Copy</span></button><button type="button" class="copy-value" data-copy="231, 0, 104" aria-label="Copy Redshift Magenta RGB 231, 0, 104"><code>RGB 231, 0, 104</code><span>Copy</span></button></div></div><div class="type-spec"><span class="type-sample" aria-hidden="true">Aa</span><strong>Noto Sans</strong><small>Fallback: Verdana</small></div></div>'
  put('brand.html','Brand guidance',intro('Start from the official artwork and the Brand Book. Use these essentials as a quick reference.',tag='A consistent SKAO identity')+brand_essentials+cards([('Logo artwork','Find the supplied files and choose a suitable version.','logos.html','Find logo files'),('Colours and type','Digital colour values and practical typography guidance.','colours-and-type.html','Check the essentials'),('Brand Book','The source for detailed rules and applications.','brand-book.html','Open the source page')])+detail('Working with partner brands','<p>Use the current guidance for the specific partner and application. Do not assemble a new logo lock-up from memory.</p>'+link('co-branding-csiro.html','CSIRO co-branding')+' · '+link('co-branding-sarao.html','SARAO co-branding'))+nextstep('Need a second pair of eyes?','Include the draft, intended use and partner requirements.',jira,'Ask about the brand ↗'))
  # Events: what we've already made, to borrow and reuse. Planning an event starts at the Comms helpdesk.
- put('events.html','Reuse for events',intro('Backdrops, banners, designs and giveaways we’ve already made for SKAO events. Borrow them, reuse them, and only make something new when nothing fits.',tag='Reuse first')+
+ # The section list shows Event kit and Designs to reuse as picture cards (polish.DIR_CARDS); the reuse steps follow.
+ put('events.html','Reuse for events',intro('Backdrops, banners, designs and giveaways we’ve already made for SKAO events. Borrow them, reuse them, and only make something new when nothing fits.')+
   '<p class="scope-note" data-landing-top>Planning an event? Start with the '+link(jira,'Comms helpdesk ↗')+'.</p>'
-  # A look at what's there: pictures from Event kit and Designs to reuse, each leading to it.
-  '<ul class="reuse-peek" data-kit data-landing-top aria-label="From the library">'+''.join(
-   f'<li><a href="{href}"><span class="kit-pic" data-kit-image="{pic}" data-kit-page="{META[page]["id"]}" data-shape="{shape}"></span><span class="peek-label">{label}</span></a></li>'
-   for pic,page,href,shape,label in [('kit-fabrilux-3m','stands.html','stands.html','wide','Event kit'),('design-iau-ga-2024','merchandise.html','merchandise.html#stands','wide','Stands'),
-    ('design-roller-banners','merchandise.html','merchandise.html#banners-and-backdrops','tall','Banners and backdrops'),('design-coasters','merchandise.html','merchandise.html#giveaways','square','Giveaways')])+'</ul>'+
-  '<section class="reuse-steps" data-landing-top aria-label="Reuse first"><ol>'
+  '<section class="reuse-steps" id="reuse-first" data-landing-main><h2>Reuse first</h2><ol>'
   '<li><strong>Reuse it</strong><span>Borrow the kit and use designs as they are.</span></li>'
   '<li><strong>Adapt it</strong><span>New fabric for an existing frame, or new words on an existing design.</span></li>'
-  '<li><strong>Make it last</strong><span>If nothing fits, we’ll make something new without dates and in standard sizes, so it can be reused too.</span></li></ol></section>'
-  '<section class="reading-section screens" id="screens" data-landing-main><h2>Screens instead of print</h2><p>Video, animation and photos work on any screen at your stand, with nothing to print.</p>'
-  '<div class="resource-links">'+link('media.html','Photos and video')+link(canto,'Canto Media Library ↗')+'</div></section>')
+  '<li><strong>Go digital</strong><span>Show video and photos from the '+link(canto,'Canto Media Library ↗')+' on a screen, with nothing to print.</span></li>'
+  '<li><strong>Make it last</strong><span>If nothing fits, we’ll make something new without dates and in standard sizes, so it can be reused too.</span></li></ol></section>')
  put('help.html','Help with the Hub',intro('Find the right service or recover from a missing file or access problem.',tag='Support and useful tools')+cards([('Find photos or video','Search and download from the staff media library.','canto-access.html','Get to Canto'),('Request creative work','Brief new work or ask for a review.','request.html','Open the request guide'),('A missing or broken resource','Send the exact page link and what happened.',jira,'Report a problem ↗')])+
  detail('Where should I look for presentations?','<p>Start with '+link('presentations.html','presentation resources')+'. Released decks belong in the Hub. A page description is not a file download.</p>')+
  detail('Why can I browse but not upload?','<p>Browsing, downloading and contributing can have different permissions. Ask for the '+link('contribute.html','appropriate contribution route')+' rather than treating a library link as an upload form.</p>')+
@@ -227,8 +221,7 @@ def revise(pages,jira,canto):
    live([(key+'_STATUS',f'{site} status slides','The team’s own status deck, updated as the work moves on.','slides','Google Slides'),dashboard])+'<div data-site-photos></div>')
  put('memos.html','Memo and report templates',intro('Starting points for internal memos and structured reports.',tag='Resource source')+missing('',jira)+block('Before you use the file',['Check that it is the appropriate released template for your use.','Create a separate working copy and use the supplied styles.','Review the finished document before sharing.']))
  put('stands.html','Event kit',intro('Backdrops, banners, a kiosk and table cloths for stands, talks and press areas. The Comms teams look after the kit at all three sites.',jira,'Ask to borrow it ↗','Borrow it')+kit())
- put('merchandise.html','Designs to reuse',intro('Stands, banners and giveaways from past events. Reprinting or adapting one is quicker and cheaper than starting again, and wastes less.',jira,'Ask for the files ↗','Reuse or adapt')+designs()+
-  '<p class="quiet-note design-ask">See something you could use? Ask through the '+link(jira,'Comms helpdesk ↗')+' with its name, and we’ll send the files or help you adapt it.</p>')
+ put('merchandise.html','Designs to reuse',intro('Banners, partner designs, programmes and giveaways from past events. Reprinting or adapting one is quicker and cheaper than starting again, and wastes less. Ask for the files with the design’s name.',jira,'Ask for the files ↗','Reuse or adapt')+designs())
  # Photos and video: one landing with the search tips the topic pages used to hold.
  tips=[('Hero images','search by subject; check the crop, resolution and use restrictions.'),('Telescopes','search by telescope, location and date; tell photography apart from artist impressions.'),
   ('Events','search by event name and date; check the consent information for images of people.'),('B-roll','search by subject and location; check duration, format, audio and usage restrictions.'),

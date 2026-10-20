@@ -3,8 +3,8 @@ const fs=require('fs'),path=require('path'),assert=require('node:assert/strict')
 const {JSDOM}=require('jsdom'),Velocity=require('velocityjs');
 const root=path.resolve(__dirname,'..');let checks=[];
 function pass(name){checks.push(name)}
-function dom(page='index.html',mode='preview'){
- const d=new JSDOM(fs.readFileSync(path.join(root,'docs',page),'utf8'),{url:'http://localhost/'+page,runScripts:'outside-only'}),w=d.window;
+function dom(page='index.html',mode='preview',edit=h=>h){
+ const d=new JSDOM(edit(fs.readFileSync(path.join(root,'docs',page),'utf8')),{url:'http://localhost/'+page,runScripts:'outside-only'}),w=d.window;
  w.matchMedia=()=>({matches:false});w.HTMLElement.prototype.scrollIntoView=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'))};
  w.document.body.dataset.mode=mode;w.fetch=async()=>({ok:true,json:async()=>[{title:'Presentation',href:'presentations.html',excerpt:'Slides',keywords:'presentation'}]});
@@ -156,7 +156,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const twoClicks=new Set([...top,...nw.document.querySelectorAll('.footer a')].map(a=>a.getAttribute('href')));
  for(const a of top){const land=new JSDOM(fs.readFileSync(path.join(root,'docs',a.getAttribute('href')),'utf8')).window.document;
   assert(land.querySelector('.page-grid.full-width'),'landing is full width');assert(!land.querySelector('.sidebar'),'landing has no repeated list');
-  land.querySelectorAll('.dir-row').forEach(c=>twoClicks.add(c.getAttribute('href')));}
+  land.querySelectorAll('.dir-row, .dir-card').forEach(c=>twoClicks.add(c.getAttribute('href')));}
  for(const f of Object.keys(routes).filter(f=>!['canto-guide.html','email-signatures.html','widescreen-template.html','science-slides.html','construction-slides.html','specialised-slides.html','reports.html','hero-images.html','telescope-images.html','event-photos.html','b-roll.html','recordings.html','animations.html','event-safety.html','event-checklist.html','resources.html','request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html','working-with-us.html','contribute.html',
   // The site pages sit one click under Construction overview, whose tiles lead to them.
   'low-slides.html','mid-slides.html'].includes(f)))assert(twoClicks.has(f),'two clicks reach '+f);
@@ -319,19 +319,17 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...progQ('.deck-row .deck-date').children].map(e=>e.textContent),['Sep','2026'],'each earlier deck has a month tile');assert.equal(progQ('[data-file-count]').textContent,'1 deck');assert(progQ('.deck-row a.deck-get[download]').getAttribute('aria-label').startsWith('Download SKA-Low progress, September 2026'));
  assert(progQ('[data-site-photo] img'),'the telescope photo loads into the panel');lw.window.close();
  pass('Construction overview tiles show each telescope and the month of its newest slides; site pages lead with the latest deck, then a dated list of earlier ones');
- // Events is a reuse library: the landing leads with the reuse steps and a note that planning an event starts
- // at the Comms helpdesk; Event kit and Designs to reuse show pictures attached to their pages, or outlines.
+ // Events is a reuse library: the landing has a note that planning an event starts at the Comms helpdesk,
+ // picture cards for Event kit and Designs to reuse, then the reuse steps; both pages show attached pictures.
  const ev=read('events.html');
  assert.equal(ev.querySelector('.page-head h1').textContent,'Reuse for events');
  assert(!ev.querySelector('.lead-table, .request-flow, .landing-rail'),'no lead times, request steps or rail');
- const peek=[...ev.querySelectorAll('.reuse-peek a')];assert.deepEqual(peek.map(a=>a.getAttribute('href')),['stands.html','merchandise.html#stands','merchandise.html#banners-and-backdrops','merchandise.html#giveaways']);
- assert.deepEqual(peek.map(a=>a.querySelector('[data-kit-image]').dataset.kitPage),[routes['stands.html'].id,...Array(3).fill(routes['merchandise.html'].id)],'the strip shows pictures from Event kit and Designs to reuse');
- assert(ev.querySelector('.reuse-peek').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4,'pictures, then the steps');
- assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Reuse it','Adapt it','Make it last']);
- assert(ev.querySelector('.reuse-steps').compareDocumentPosition(ev.querySelector('.directory'))&4,'the steps sit above the section list');
+ const cards=[...ev.querySelectorAll('.dir-cards a.dir-card')];assert.deepEqual(cards.map(a=>a.getAttribute('href')),['stands.html','merchandise.html'],'the two pages as picture cards');
+ assert.deepEqual(cards.map(a=>a.querySelector('[data-kit-image]').dataset.kitPage),[routes['stands.html'].id,routes['merchandise.html'].id],'each card shows a picture attached to its page');
+ assert(!ev.querySelector('.directory, .reuse-peek'),'no second list of the same pages');
+ assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Reuse it','Adapt it','Go digital','Make it last']);
+ assert(ev.querySelector('.dir-cards').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4,'the cards, then the steps');
  assert(/servicedesk/.test(ev.querySelector('.scope-note a').getAttribute('href')),'planning an event starts at the Comms helpdesk');
- assert.deepEqual([...ev.querySelectorAll('.directory a.dir-row')].map(a=>a.getAttribute('href')),['stands.html','merchandise.html']);
- assert(ev.querySelector('.directory').compareDocumentPosition(ev.querySelector('#screens'))&4,'screens come after the list');
  const standsId=routes['stands.html'].id,sk=dom('stands.html','confluence'),skw=sk.window;skw.document.body.dataset.pageId=standsId;
  skw.fetch=async u=>{if(String(u).includes('/child/attachment'))return {ok:true,json:async()=>({results:[
   {title:'kit-fabrilux-3m.webp',_links:{download:`/download/attachments/${standsId}/kit-fabrilux-3m.webp`}},
@@ -347,11 +345,11 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const designsId=routes['merchandise.html'].id,dg=dom('merchandise.html','confluence'),dgw=dg.window;dgw.document.body.dataset.pageId=designsId;
  dgw.fetch=async u=>String(u).includes('/child/attachment')?{ok:true,json:async()=>({results:[{title:'design-gazebo.webp',_links:{download:`/download/attachments/${designsId}/design-gazebo.webp`}}]})}:{ok:true,json:async()=>({results:[]})};
  dgw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
- const slots=[...dgw.document.querySelectorAll('[data-kit-image]')];assert.equal(slots.length,18);assert(slots.every(e=>e.dataset.kitImage.startsWith('design-')));
- assert.deepEqual([...dgw.document.querySelectorAll('.design-group h2')].map(h=>h.textContent),['Stands','Banners and backdrops','With partners','Programmes and logos','Giveaways']);
+ const slots=[...dgw.document.querySelectorAll('[data-kit-image]')];assert.equal(slots.length,16);assert(!slots.some(e=>/iau|korea/.test(e.dataset.kitImage)),'no one-off stands');assert(slots.every(e=>e.dataset.kitImage.startsWith('design-')));
+ assert.deepEqual([...dgw.document.querySelectorAll('.design-group h2')].map(h=>h.textContent),['Banners and backdrops','With partners','Programmes and logos','Giveaways']);
  assert(dgw.document.querySelector('[data-kit-image="design-gazebo"] img').getAttribute('src').endsWith('/design-gazebo.webp'),'a design picture loads by name');
- assert(!dgw.document.querySelector('[data-kit-image="design-sarao"] img'),'the rest keep their outline');dg.window.close();
- pass('Events is a reuse library: reuse steps and a planning note to the Comms helpdesk lead the landing; Event kit and Designs to reuse show pictures attached to their pages, or outlines until then');
+ assert(!dgw.document.querySelector('[data-kit-image="design-sarao"] img'),'the rest keep their outline');assert(dgw.document.querySelector('.toc-rail').hidden,'the gallery keeps its width: no contents list');dg.window.close();
+ pass('Events is a reuse library: a planning note to the Comms helpdesk, picture cards for Event kit and Designs to reuse, then the reuse steps; both pages show pictures attached to them, or outlines until then');
  const mediaId=routes['media.html'].id;
  const cantoManifest={version:1,albums:[
   {id:'a1',name:'Telescopes',path:'Asset library - Staff / Telescopes',count:40,href:'https://skao.canto.global/album/a1',assets:[
@@ -366,7 +364,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   w.fetch=async u=>{const s=String(u);if(s.includes('/rest/api/content/search')){const cql=new URL(s,'http://localhost').searchParams.get('cql');return {ok:true,json:async()=>({results:cql.includes('canto-showcase.json')&&m?[{title:'canto-showcase.json',_links:{download:`/download/attachments/${mediaId}/canto-showcase.json`}}]:[]})};}
    if(s.includes('canto-showcase.json'))return {ok:true,json:async()=>m};return {ok:false,json:async()=>({})};};
   w.document.body.dataset.mode='confluence';w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();return d;};
- {const d=dom('merchandise.html'),w=d.window,doc=w.document,g=doc.querySelector('.page-grid');
+ {const d=dom('stands.html','preview',h=>h.replace('<div data-downloads-slot hidden></div>','<section><h2>Third part</h2></section><section><h2>Fourth part</h2></section><div data-downloads-slot hidden></div>')),w=d.window,doc=w.document,g=doc.querySelector('.page-grid');
   assert(!doc.querySelector('.toc-rail').hidden&&g.classList.contains('has-toc')&&doc.querySelectorAll('.toc-rail #toc a').length>=4,'On this page sits in its own column on the right on long pages');
   const short=dom('low-slides.html');assert(short.window.document.querySelector('.toc-rail').hidden,'pages with three sections or fewer go without');short.window.close();
   assert(!doc.querySelector('.sidebar #toc'),'and no longer under the section menu');

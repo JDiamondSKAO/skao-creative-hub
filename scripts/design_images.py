@@ -26,40 +26,37 @@ def A(src, knock=False, cut=None):
  of it, as (left, top, right, bottom) fractions."""
  return {'src': src, 'knock': knock, 'cut': cut}
 
-# Picture name: how it's made. 'photo' fills the frame from a crop of the source (fractions);
-# 'art' lays print files side by side at the same height, each with a soft shadow.
+# Picture name: print files laid side by side at the same height, each with a soft shadow.
 # Sources starting merch/ are in the merchandise folder; the rest are reusable event assets. A * in
 # the file name takes the first match.
 DESIGNS = {
- # Cropped so the visitor at the left edge is out of the picture.
- 'design-iau-ga-2024': ('photo', 'STANDS/SKAO_PAVILION/MAIN/SKAO_PAV-6.jpg', (0.09, 0.04, 1, 0.94)),
- 'design-korea-walls': ('art', [A('STANDS/SKA_KOREA/FINALS/SKA_KOREA_ARTWORK/SCIENCE_WALL/SKA_SCIENCE_KOREA_STAND_950x2500MM_OL.pdf'),
-                                A('STANDS/SKA_KOREA/FINALS/SKA_KOREA_ARTWORK/DUSK_WALL/SKA_DUSK_KOREA_STAND_950x2500MM_OL.pdf')]),
- 'design-gazebo': ('art', [A('BANNER_SYSTEMS/GAZEBOS/SKA_LOW/FINALS/SKAO_Gazebo_Australia_v1.jpg', knock=True)]),
- 'design-stretch-walls': ('art', [A('BANNER_SYSTEMS/STRETCH_WALLS_FABRILUX/5000mm_x_2250mm/SKAO_GENERIC/FINALS/SKAO_Stretch_walls_5m_v2.pdf')]),
- 'design-roller-banners': ('art', [A('BANNER_SYSTEMS/ROLLER_BANNERS/850mm_x_2110mm/SKAO_GENERIC/FINALS/SKAO_ROLLER_BANNER_850mm_x_2110+300mm_op.pdf'),
-                                   A('BANNER_SYSTEMS/ROLLER_BANNERS/1000mm_x_2290mm/SKAO_GENERIC/FINALS/SKAO_BANNER_1000x2290mm.pdf'),
-                                   A('BANNER_SYSTEMS/ROLLER_BANNERS/1500mm_x_2110mm/SKAO_GENERIC/FINALS/SKAO_ROLLER_BANNER_1500mm_x_2110+300mm.pdf')]),
- 'design-wide-banners': ('art', [A('BANNER_SYSTEMS/CP-26-002_WIDE_BANNER_1500x2010mm/FINALS/CP-26-002_SKAO_WIDE_BANNER_1500x2010mm.pdf'),
-                                 A('BANNER_SYSTEMS/CP-26-002_WIDE_BANNER_1500x2010mm/FINALS/CP-26-002_SKA-MID_LOW_WIDE_BANNER_1500x2010mm.pdf')]),
- 'design-wall-banners': ('art', [A('BANNER_SYSTEMS/WALL_BANNERS/2000mm_x_2250mm/MID_LOW_INFOGRAPHIC/FINALS/SKA_Low_Mid_Infographic_2000mm_x_2250mm.pdf'),
-                                 A('BANNER_SYSTEMS/WALL_BANNERS/1200mm_x_2000mm/SKAO_GENERIC/FINALS/SKAO_Banner_1200x2000mm_OP.pdf')]),
+ 'design-gazebo': [A('BANNER_SYSTEMS/GAZEBOS/SKA_LOW/FINALS/SKAO_Gazebo_Australia_v1.jpg', knock=True)],
+ 'design-stretch-walls': [A('BANNER_SYSTEMS/STRETCH_WALLS_FABRILUX/5000mm_x_2250mm/SKAO_GENERIC/FINALS/SKAO_Stretch_walls_5m_v2.pdf')],
+ 'design-roller-banners': [A('BANNER_SYSTEMS/ROLLER_BANNERS/850mm_x_2110mm/SKAO_GENERIC/FINALS/SKAO_ROLLER_BANNER_850mm_x_2110+300mm_op.pdf'),
+                           A('BANNER_SYSTEMS/ROLLER_BANNERS/1000mm_x_2290mm/SKAO_GENERIC/FINALS/SKAO_BANNER_1000x2290mm.pdf'),
+                           A('BANNER_SYSTEMS/ROLLER_BANNERS/1500mm_x_2110mm/SKAO_GENERIC/FINALS/SKAO_ROLLER_BANNER_1500mm_x_2110+300mm.pdf')],
+ 'design-wide-banners': [A('BANNER_SYSTEMS/CP-26-002_WIDE_BANNER_1500x2010mm/FINALS/CP-26-002_SKAO_WIDE_BANNER_1500x2010mm.pdf'),
+                         A('BANNER_SYSTEMS/CP-26-002_WIDE_BANNER_1500x2010mm/FINALS/CP-26-002_SKA-MID_LOW_WIDE_BANNER_1500x2010mm.pdf')],
+ 'design-wall-banners': [A('BANNER_SYSTEMS/WALL_BANNERS/2000mm_x_2250mm/MID_LOW_INFOGRAPHIC/FINALS/SKA_Low_Mid_Infographic_2000mm_x_2250mm.pdf'),
+                         A('BANNER_SYSTEMS/WALL_BANNERS/1200mm_x_2000mm/SKAO_GENERIC/FINALS/SKAO_Banner_1200x2000mm_OP.pdf')],
  # The flag sizes printed under the flags are left out.
- 'design-teardrop-flags': ('art', [A('BANNER_SYSTEMS/TEARDROP_BANNERS/SKAO_GENERIC/FINALS/SKAO_Teardrop_Banner_nocutter.pdf', knock=True, cut=(0, 0, 1, 0.86))]),
- 'design-sarao': ('art', [A('PARTNER_COBRANDS/SARAO/FINALS/SKAO-SARAO_3000mm_Wall.pdf'), A('PARTNER_COBRANDS/SARAO/FINALS/SKAO-SARAO_850x2050mm.pdf')]),
- 'design-cetc': ('art', [A('PARTNER_COBRANDS/CETC/FINALS/*.pdf')]),
- 'design-ngvla': ('art', [A('PARTNER_COBRANDS/NGVLA/FINALS/SKAO_Vancouver_Banner_2960x2280mm_v3.pdf')]),
+ 'design-teardrop-flags': [A('BANNER_SYSTEMS/TEARDROP_BANNERS/SKAO_GENERIC/FINALS/SKAO_Teardrop_Banner_nocutter.pdf', knock=True, cut=(0, 0, 1, 0.86))],
+ 'design-sarao': [A('PARTNER_COBRANDS/SARAO/FINALS/SKAO-SARAO_3000mm_Wall.pdf'), A('PARTNER_COBRANDS/SARAO/FINALS/SKAO-SARAO_850x2050mm.pdf')],
+ 'design-cetc': [A('PARTNER_COBRANDS/CETC/FINALS/*.pdf')],
+ 'design-ngvla': [A('PARTNER_COBRANDS/NGVLA/FINALS/SKAO_Vancouver_Banner_2960x2280mm_v3.pdf')],
  # The cover only: the schedule beside it names the speakers.
- 'design-programmes': ('art', [A('EVENT_COLLATERAL/PROGRAMME_EXAMPLES/21255_VLBI Conference Programme.jpg', cut=(0, 0, 0.42, 1))]),
- 'design-pi-planning': ('art', [A('PI_PLANNING/PI23/SKAO_LOGO_PI24_CO-LOCATION.png', knock=True)]),
- 'design-stickers': ('art', [A('merch/SKAO/STICKERS/FINALS/SKAO Sticker - pictorial.png'), A('merch/SKAO/STICKERS/FINALS/SKAO Sticker - logo.png')]),
- 'design-lanyards': ('art', [A('merch/SKAO/PROMOTIONAL_ITEMS/LANYARD/DEVELOPMENT/LANYARD_MOCKUP.png', knock=True)]),
- 'design-coasters': ('art', [A('merch/SKAO/PROMOTIONAL_ITEMS/SKAO_COASTERS/FINALS/SKAO_COASTER_OL_TIME.pdf', knock=True),
-                             A('merch/SKAO/PROMOTIONAL_ITEMS/SKAO_COASTERS/FINALS/SKAO_COASTER_OL_SCIENCE.pdf', knock=True)]),
- 'design-notepads': ('art', [A('merch/SKAO/STATIONERY/A5_PAD/FINALS/SKAO_A5_NOTEPAD_BLEED.pdf'), A('merch/SKAO/STATIONERY/A7_POST_ITS/FINALS/SKAO_A7_POSTIT.pdf')]),
+ 'design-programmes': [A('EVENT_COLLATERAL/PROGRAMME_EXAMPLES/21255_VLBI Conference Programme.jpg', cut=(0, 0, 0.42, 1))],
+ 'design-pi-planning': [A('PI_PLANNING/PI23/SKAO_LOGO_PI24_CO-LOCATION.png', knock=True)],
+ 'design-stickers': [A('merch/SKAO/STICKERS/FINALS/SKAO Sticker - pictorial.png'), A('merch/SKAO/STICKERS/FINALS/SKAO Sticker - logo.png')],
+ 'design-lanyards': [A('merch/SKAO/PROMOTIONAL_ITEMS/LANYARD/DEVELOPMENT/LANYARD_MOCKUP.png', knock=True)],
+ 'design-coasters': [A('merch/SKAO/PROMOTIONAL_ITEMS/SKAO_COASTERS/FINALS/SKAO_COASTER_OL_TIME.pdf', knock=True),
+                     A('merch/SKAO/PROMOTIONAL_ITEMS/SKAO_COASTERS/FINALS/SKAO_COASTER_OL_SCIENCE.pdf', knock=True)],
+ 'design-notepads': [A('merch/SKAO/STATIONERY/A5_PAD/FINALS/SKAO_A5_NOTEPAD_BLEED.pdf')],
  # The FRONT and BACK labels under the shirts are left out.
- 'design-t-shirts': ('art', [A('merch/SKAO/APPAREL/SCIENCE_IS_FOR_EVERYONE/25773_SKAO T-shirts_pride2023_mockup_FINAL.pdf', knock=True, cut=(0, 0, 1, 0.88))]),
+ 'design-t-shirts': [A('merch/SKAO/APPAREL/SCIENCE_IS_FOR_EVERYONE/25773_SKAO T-shirts_pride2023_mockup_FINAL.pdf', knock=True, cut=(0, 0, 1, 0.88))],
 }
+# More space around pictures that would otherwise fill the frame, so every tile reads at a similar scale.
+MARGIN = {'design-pi-planning': 130, 'design-stickers': 70, 'design-notepads': 56}
 
 def pdf_page(path, side=1600):
  """Page 1 of a print file, trimmed to its finished size (no bleed or crop marks)."""
@@ -118,16 +115,6 @@ def art(items, margin=40, gap=26):
   x += im.width + gap
  return out
 
-def photo(path, box):
- """A photo cropped to fill the 3:2 frame."""
- im = crop(load(path).convert('RGB'), box)
- ratio = SIZE[0] / SIZE[1]
- if im.width / im.height > ratio:
-  w = round(im.height * ratio); im = im.crop(((im.width - w) // 2, 0, (im.width - w) // 2 + w, im.height))
- else:
-  h = round(im.width / ratio); im = im.crop((0, (im.height - h) // 2, im.width, (im.height - h) // 2 + h))
- return im.resize(SIZE, Image.LANCZOS)
-
 def main():
  spec = json.loads((ROOT / 'dev' / 'brandbank-map.json').read_text())
  events = Path(spec.get('event_assets') or Path(spec['events_guide']).parents[2])
@@ -136,11 +123,8 @@ def main():
   path = merch / src[len('merch/'):] if src.startswith('merch/') else events / src
   return sorted(path.parent.glob(path.name))[0] if '*' in path.name else path
  OUT.mkdir(parents=True, exist_ok=True)
- for name, (kind, *rest) in DESIGNS.items():
-  if kind == 'photo':
-   im = photo(where(rest[0]), rest[1])
-  else:
-   im = art([{**it, 'path': where(it['src'])} for it in rest[0]])
+ for name, items in DESIGNS.items():
+  im = art([{**it, 'path': where(it['src'])} for it in items], MARGIN.get(name, 40))
   im.save(OUT / f'{name}.webp', quality=86, method=6)
   print(name)
 

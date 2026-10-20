@@ -1432,7 +1432,7 @@ document.addEventListener("DOMContentLoaded", () => {
     route.textContent="Ask for the available resource ↗";
     notice.append(title,text,route); article.prepend(notice);
   }
-  if (article && toc && !$("[data-file-feed]") && !article.querySelector(".directory")) {
+  if (article && toc && !$("[data-file-feed]") && !$("[data-no-toc]") && !article.querySelector(".directory")) {
     const pageTitle = document.querySelector(".page-head h1");
     const first = article.querySelector("h1");
     if (

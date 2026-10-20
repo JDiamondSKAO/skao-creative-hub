@@ -1714,10 +1714,11 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .live-link-actions .text-link,.live-link-actions .pending-link {font-size:.86rem;}
 
 /* Event kit on Stands and merchandise: a picture per item, attached to the page, or its outline until then */
+/* Event kit and Designs to reuse: one tile style. The picture on a soft panel, the name, one line of detail */
 .kit > p {max-width:62ch;}
-.kit-grid {list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 20px;}
+.kit-grid {list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px;}
 .kit-item {margin:0;}
-.kit-pic {position:relative;display:grid;place-items:center;aspect-ratio:3/2;border-radius:12px;background:var(--surface);overflow:hidden;}
+.kit-pic {position:relative;display:grid;place-items:center;aspect-ratio:3/2;border-radius:14px;background:var(--surface);overflow:hidden;}
 .kit-pic img {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .4s;}
 .kit-pic.has-image img {opacity:1;}
 .kit-pic:before {content:"";border:1.5px solid color-mix(in srgb,var(--c,var(--link)) 40%,transparent);border-radius:3px;transition:opacity .3s;}
@@ -1726,36 +1727,40 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .kit-pic[data-shape=tall]:before {height:74%;aspect-ratio:85/200;}
 .kit-pic[data-shape=cloth]:before {width:62%;aspect-ratio:1.84;}
 .kit-pic.has-image:before {opacity:0;}
-.content-body .kit-item h3 {margin:14px 0 2px;font-size:1rem;}
-.kit-size {margin:0 0 6px;font-size:.78rem;font-weight:700;color:var(--c,var(--link));}
-.kit-item p:last-child {margin:0;font-size:.85rem;line-height:1.5;color:var(--muted);}
-.kit-care {margin-top:22px;font-size:.85rem;color:var(--muted);max-width:68ch;}
+.content-body .kit-item h3 {margin:14px 0 3px;font-size:1rem;font-weight:650;letter-spacing:-.005em;}
+.content-body .kit-meta {margin:0;font-size:.86rem;line-height:1.45;color:var(--muted);}
 @media(max-width:900px){.kit-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:520px){.kit-grid{grid-template-columns:1fr;}}
-/* Events landing: a quiet note for planning and the three reuse steps above the section list; screens under it */
-.landing-main > [data-landing-main] {margin-top:44px;}
-.content-body .scope-note {margin:-8px 0 30px;font-size:.92rem;color:var(--muted);}
-.reuse-peek {list-style:none;margin:0 0 40px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;}
-.reuse-peek li {margin:0;}
-.reuse-peek a {display:block;color:var(--ink);text-decoration:none;}
-.reuse-peek .kit-pic {transition:transform var(--t) var(--ease-out);}
-.reuse-peek a:hover .kit-pic {transform:translateY(-2px);}
-.reuse-peek .peek-label {display:block;margin-top:10px;font-size:.88rem;font-weight:700;}
-.reuse-peek a:hover .peek-label,.reuse-peek a:focus-visible .peek-label {color:var(--link);text-decoration:underline;text-underline-offset:3px;}
-@media(max-width:720px){.reuse-peek{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}}
-.reuse-steps {margin:0 0 44px;}
-.reuse-steps ol {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;counter-reset:reuse;}
-.reuse-steps li {margin:0;padding-top:14px;border-top:2px solid var(--line);counter-increment:reuse;}
-.reuse-steps li:before {content:counter(reuse,decimal-leading-zero);display:block;margin-bottom:8px;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--muted);}
-.reuse-steps strong {display:block;margin-bottom:4px;font-size:1.02rem;color:var(--ink);}
-.reuse-steps span {display:block;font-size:.88rem;line-height:1.55;color:var(--muted);}
-@media(max-width:720px){.reuse-steps ol{grid-template-columns:1fr;gap:20px;}}
-/* Event kit and Designs to reuse: picture tiles, then care notes and downloads */
-.kit + #looking-after-it,#looking-after-it + #downloads,.kit + #downloads {margin-top:40px;}
-.design-group {margin:0 0 48px;}
-.design-group > p {max-width:62ch;margin:0;color:var(--muted);}
-.design-group .kit-grid {margin-top:18px;}
-.content-body .design-ask {margin-top:0;font-size:.9rem;}
+.kit + #looking-after-it,#looking-after-it + #downloads,.kit + #downloads {margin-top:48px;}
+/* Designs to reuse: each group has a quiet header (name and count) and a one-line note, then the tiles */
+.design-group + .design-group {margin-top:56px;padding-top:32px;border-top:1px solid var(--line);}
+.design-head {display:flex;align-items:baseline;justify-content:space-between;gap:16px;}
+.content-body .design-head h2 {margin:0;font-size:1.3rem;letter-spacing:-.015em;}
+.content-body .kit > h2 {font-size:1.3rem;letter-spacing:-.015em;}
+.design-count {flex:none;font-size:.82rem;color:var(--muted);}
+.content-body .design-group > p {max-width:62ch;margin:6px 0 0;font-size:.92rem;color:var(--muted);}
+/* Events landing: the two pages as picture cards, then the reuse steps on the same grid */
+.content-body .scope-note {margin:-6px 0 34px;font-size:.92rem;color:var(--muted);}
+.dir-cards {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;}
+.dir-cards li {margin:0;}
+body .content-body a.dir-card:any-link {display:block;color:var(--ink);text-decoration:none;}
+.dir-card .kit-pic {aspect-ratio:2/1;border-radius:16px;transition:transform var(--t) var(--ease-out);}
+.dir-card:hover .kit-pic {transform:translateY(-2px);}
+.dir-card-text {display:block;padding:18px 2px 0;}
+.dir-card-text strong {display:block;font-size:1.25rem;letter-spacing:-.015em;color:var(--ink);}
+.dir-card-text > span:not(.dir-card-go) {display:block;margin-top:6px;max-width:52ch;font-size:.95rem;line-height:1.55;color:var(--muted);}
+.dir-card-go {display:inline-flex;gap:6px;margin-top:12px;font-weight:650;color:var(--link);}
+.dir-card:hover .dir-card-go,.dir-card:focus-visible .dir-card-go {text-decoration:underline;text-underline-offset:3px;}
+.reuse-steps {margin:64px 0 8px;padding-top:36px;border-top:1px solid var(--line);}
+.content-body .reuse-steps h2 {margin:0 0 22px;font-size:1.3rem;letter-spacing:-.015em;}
+.reuse-steps ol {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;counter-reset:reuse;}
+.reuse-steps li {margin:0;counter-increment:reuse;}
+.reuse-steps li:before {content:counter(reuse,decimal-leading-zero);display:block;margin-bottom:10px;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--muted);}
+.reuse-steps strong {display:block;margin-bottom:6px;font-size:1rem;color:var(--ink);}
+.reuse-steps li > span {display:block;font-size:.9rem;line-height:1.55;color:var(--muted);}
+@media(max-width:900px){.reuse-steps ol{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:700px){.dir-cards{grid-template-columns:1fr;}}
+@media(max-width:520px){.reuse-steps ol{grid-template-columns:1fr;gap:22px;}}
 /* Side menu: pages under another page sit indented beneath it */
 .section-nav .nav-children {margin:2px 0 4px 14px;padding:0;border-left:1px solid var(--line);}
 .section-nav .nav-children li a {padding:5px 12px;font-size:.84rem;}
