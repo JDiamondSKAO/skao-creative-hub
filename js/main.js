@@ -1548,5 +1548,5 @@ document.addEventListener("DOMContentLoaded", () => {
     b._t = setTimeout(() => { label.textContent = before; }, 2400);
   }));
   $$("[data-shortcut]").forEach((k) => { k.textContent = mac ? "⌘K" : "Ctrl K"; });
-  $$(".brandbar .masthead-search").forEach((b) => { b.title = "Search the Hub (" + (mac ? "⌘K" : "Ctrl K") + " or /)"; });
+  $$(".nav-search").forEach((b) => { b.dataset.tip = "Search the Hub · " + (mac ? "⌘K" : "Ctrl K"); });
 });
