@@ -1318,7 +1318,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const a = document.createElement("a"); a.className = "strip-item"; a.style.setProperty("--i", i);
         const page = example ? null : safeLink(r.pageHref || r.download);
         if (page) a.href = page + (r.pageHref ? "#downloads" : ""); else a.setAttribute("aria-disabled", "true");
-        a.title = files.map((f) => f.title).join("\n");
         const badge = document.createElement("span"); badge.className = "file-badge"; badge.dataset.ext = ext; badge.textContent = ext.toUpperCase().slice(0, 4);
         const text = document.createElement("span"); text.className = "strip-text";
         const name = document.createElement("strong"); name.textContent = r.pageTitle || fileName(r.title);
@@ -1380,10 +1379,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     try {
       const label = cqlLiteral(box.dataset.approvalLabel || "approved");
-      let rows = await query(`type=attachment AND space="CRH" AND label="${label}" ORDER BY created DESC`, 6);
+      // The strip groups files by page, so it reads further back: a big upload to one page still leaves room
+      // for the next two pages (and its count shows every new file on that page).
+      const many = strip ? 50 : 6;
+      let rows = await query(`type=attachment AND space="CRH" AND label="${label}" ORDER BY created DESC`, many);
       if (!rows.length) {
         // Nothing labelled yet: show recent deliverable files, not page images, and say so.
-        rows = (await query('type=attachment AND space="CRH" ORDER BY created DESC', 50)).filter((r) => DELIVERABLE.test(r.title)).slice(0, 6);
+        rows = (await query('type=attachment AND space="CRH" ORDER BY created DESC', 50)).filter((r) => DELIVERABLE.test(r.title)).slice(0, many);
         $("#latestHeading").textContent = "Latest files in the Hub";
         $("#latestLead").textContent = "Recent uploads: check approval on the source page";
       }

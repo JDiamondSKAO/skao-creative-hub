@@ -146,7 +146,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  lv.window.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
  assert(calls.some(c=>c.includes('label="approved"')));assert(calls.some(c=>!c.includes('label=')));
  const items=[...box.querySelectorAll('.strip-item')];assert.equal(items.length,1,'one row per page');assert.equal(items[0].querySelector('strong').textContent,'<b>Letterheads</b>','page titles render as text');
- assert(items[0].querySelector('.strip-meta').textContent.startsWith('2 new files'));assert(items[0].title.includes('Letterhead.dotx')&&!items[0].title.includes('image'),'page images are not listed');
+ assert(items[0].querySelector('.strip-meta').textContent.startsWith('2 new files'));assert(!items[0].hasAttribute('title'),'no browser tooltip; the count above leaves out page images');
  assert(items[0].getAttribute('href').endsWith('/letterheads#downloads'),'opens the page downloads, not the file');
  assert.equal(lv.window.document.querySelector('#latestHeading').textContent,'Latest files in the Hub');assert(!box.querySelector('a[href^="https://evil"]'));assert(!box.querySelector('b'));
  pass('Latest assets prefer the approval label, fall back honestly to deliverable files and render safely');lv.window.close();

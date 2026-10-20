@@ -27,6 +27,10 @@ Built on 2.21. Events no longer reads as if Communications plans people's events
   - show pictures from other pages (`data-kit-page`).
 - Event safety and the event checklist now say why they've gone. Search answers "Can you help plan my event?" and "Do we have exhibition kit, banners or giveaways?".
 - Fixed: on the other landings, "Before you start" sits level with the intro again, and a test guards it.
+- Homepage **Just added**:
+  - Each item keeps to a third of the row, so one or two items don't stretch across the box (or their hover highlight with them).
+  - The browser's plain tooltip with the file list is gone.
+  - The strip reads further back, so a big upload to one page still leaves room for the next two pages, and its count shows every new file on that page.
 
 ## 2.21.0 Review board feedback, round 4 (proposal, branch claude/creative-hub-v2.21)
 

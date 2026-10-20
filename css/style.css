@@ -1334,6 +1334,8 @@ body a.strip-all:any-link {display:inline-flex;align-items:center;gap:6px;paddin
 body a.strip-all:any-link:hover {border-color:color-mix(in srgb,var(--link) 45%,var(--line));background:var(--surface);}
 @media(max-width:900px){body .strip-items a.strip-item:any-link,.strip-items .strip-item{padding:6px 4px;}.strip-label .latest-lead{padding-left:15px;}}
 .strip-meta {display:flex;white-space:pre;}
+/* On one line, each item keeps to a third of the row, so one or two items don't stretch across it */
+@media(min-width:901px){body .strip-items a.strip-item:any-link,.strip-items .strip-item{flex:0 1 calc((100% - 8px) / 3);max-width:calc((100% - 8px) / 3);}}
 .strip-file {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .strip-when {flex:none;}
 /* Item colours stay muted and never borrow the heading's magenta: slate, sage, ochre */
