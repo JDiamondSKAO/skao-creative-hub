@@ -17,7 +17,8 @@ LOCAL = Path(__file__).resolve().parents[1] / 'dev' / 'links.json'
 NAMES = {
  'GOOGLE_SLIDES': 'SKAO template in Google Slides',
  'LOGO_REQUEST_FORM': 'Logo use request form, for people outside the SKAO',
- 'AI_POLICY': 'SKAO AI policy pages',
+ 'AI_POLICY': 'SKAO Artificial Intelligence Policy, the signed PDF in the ISMS policies on the intranet',
+ 'AI_PAGES': 'SKAO Artificial Intelligence pages on Confluence',
  'IT_SERVICE_DESK': 'IT service desk, for email signatures',
  'CONSTRUCTION_DASHBOARD': 'Construction dashboard for SKA-Low and SKA-Mid (Google Apps Script, SKAO sign-in; still being built)',
  'CONSTRUCTION_STATUS': 'Overall construction status for both telescopes (Google Doc)',
