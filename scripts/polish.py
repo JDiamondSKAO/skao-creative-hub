@@ -146,8 +146,7 @@ APPROVER = 'Communications'
 # Links beside the guide link on a resource page's card.
 CARD_LINKS = {'standard-template.html': [('partner-templates.html', 'Partner templates')],
  'logos.html': [('partner-logos.html', 'Partner logos')],
- 'partner-logos.html': [('logos.html', 'SKAO logos')],
- 'master-deck.html': [('site-progress.html', 'Construction overview')]}
+ 'partner-logos.html': [('logos.html', 'SKAO logos')]}
 
 def asset_panel(name, body, jira):
  m = re.search(r'<div class="task-intro"><div>(?:<span class="eyebrow">.*?</span>)?<p>(.*?)</p></div></div>', body, re.S)
@@ -380,6 +379,17 @@ def site_photos():
   '<p>Photos from each site’s weekly all-hands update, in the staff media library.</p></div>'
   + links.pending('ALLHANDS', 'See the all-hands photos', 'button secondary') + '</section>', links.url('ALLHANDS'))
 
+def deck_library():
+ """Approved slide decks: search, topics and sort, then the decks. main.js fills the list."""
+ return ('<section class="deck-library" data-deck-library aria-label="Approved slide decks">'
+  '<div class="catalogue-bar"><label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search the decks</span>'
+  '<input id="deckFilter" type="search" autocomplete="off" placeholder="Search by title, event or speaker"></label>'
+  '<label class="deck-sort"><span>Sort</span><select id="deckSort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="az">A to Z</option></select></label></div>'
+  '<div class="type-chips" role="group" aria-label="Show a topic" hidden></div>'
+  '<p id="deckStatus" class="filter-status" role="status"></p>'
+  '<ol class="deck-list-cards" data-deck-list></ol>'
+  '<div id="deckEmpty" class="catalogue-empty" hidden><p>No decks match that search.</p><button type="button" id="clearDecks" class="button secondary">Show all decks</button></div></section>')
+
 def canto_gallery(canto):
  return canto_show('', 'A look inside the staff media library', wide=True)
 
@@ -409,6 +419,9 @@ def revise(pages, meta, jira, canto=''):
  title, body = pages['media.html']
  at = body.find('<div class="landing-layout">')
  pages['media.html'] = (title, body[:at] + canto_gallery(canto) + site_photos() + body[at:] if at >= 0 else body + canto_gallery(canto) + site_photos())
+ title, body = pages['master-deck.html']
+ assert '<div data-deck-library></div>' in body
+ pages['master-deck.html'] = (title, body.replace('<div data-deck-library></div>', deck_library()))
  # The weekly all-hands photos have their own band on the construction pages too.
  for name in ('site-progress.html', 'low-slides.html', 'mid-slides.html'):
   title, body = pages[name]

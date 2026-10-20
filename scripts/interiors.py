@@ -168,8 +168,12 @@ def revise(pages,jira,canto):
  put('updates.html','Hub updates',intro('Use the resource pages for current files and availability. Older announcements are not evidence that a release is ready.',tag='What has changed')+nextstep('Looking for the latest resource?','Open its source page and check the file and review information.','resources.html','Browse resources')+detail('Older announcements','<p>The existing announcements need review before they can be used as a current release log. '+link('archive.html','Open archive guidance')+'.</p>'))
  put('archive.html','Updates archive',intro('No verified release history is presented in this review build.',tag='Historical reference')+nextstep('Need a previous version?','Include the resource name and the version or date you need.',jira,'Ask for an earlier release ↗'))
  # 2.17: fewer, fuller pages. Pages folded into others keep a stub here; gethelp turns them into notes.
- after_use=['Check its date: figures change as construction moves on.','Save your working copy separately and keep credits and sources.','Some decks come from talks given by staff. Ask the speaker before changing what they say.']
- put('master-deck.html','Approved slide decks',intro('Decks approved by Communications to reuse and adapt: introductions to the SKAO, the science, construction progress across both sites, and talks on specialised topics.',tag='Resource source')+missing('',jira)+block('Before you use the file',after_use))
+ # Approved slide decks: a library of the decks Communications has approved, built by main.js from the
+ # files on the page. Each deck's details (speaker, event, audience...) are in its attachment comment.
+ put('master-deck.html','Approved slide decks',intro('Decks approved by Communications to reuse and adapt. Find one by topic, event or speaker, look inside it, then download it.',tag='Slide decks')+
+  '<div data-deck-library></div>'+
+  '<section class="reading-section deck-reuse"><h2>Before you reuse a deck</h2><ul><li>Check its date: figures change as construction moves on.</li><li>Keep the credits and sources, and save your own copy before you change it.</li><li>Many decks come from talks by staff. Ask the speaker before changing what they say.</li></ul>'
+  '<p>'+link('formatting-slides.html','How to format a presentation')+'</p></section>')
  # Site progress: Construction overview for both telescopes, then a page per site for that team's slides.
  # Telescope photos and the newest slides come from the files on each site page (see main.js).
  sites=[('low-slides.html','SKA-Low','LOW','Australia'),('mid-slides.html','SKA-Mid','MID','South Africa')]

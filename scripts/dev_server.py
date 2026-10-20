@@ -41,7 +41,9 @@ def attachments(approved_only):
         pid = PAGE_ID.get(a['page'])
         if not pid: continue
         rows.append({'id': f'att{i}', 'type': 'attachment', 'title': a['title'], 'container': page_ref(a['page']),
-                     'version': {'number': 1, 'when': a['when']}, 'extensions': {'fileSize': a['size']},
+                     'version': {'number': 1, 'when': a['when'], 'by': {'displayName': 'Communications'}},
+                     'extensions': {'fileSize': a['size'], **({'comment': a['comment']} if a.get('comment') else {})},
+                     'metadata': {'labels': {'results': [{'name': l} for l in a.get('labels', []) if not (l == 'approved' and '--no-approved' in ARGS)]}},
                      '_links': {'download': f'/download/attachments/{pid}/{quote(a["title"])}', 'webui': '/' + a['page']}, '_when': a['when']})
     return rows
 
@@ -127,6 +129,15 @@ class Handler(SimpleHTTPRequestHandler):
                 while chunk := f.read(1 << 20): self.wfile.write(chunk)
             return
         name = url.path.strip('/') or 'index.html'
+        # Confluence opens a file in its own viewer from page?preview=/pageId/attachmentId/name.
+        if name.endswith('.html') and 'preview' in parse_qs(url.query):
+            target = parse_qs(url.query)['preview'][0]
+            title = unquote(target.rsplit('/', 1)[-1])
+            body = ('<!doctype html><meta charset="utf-8"><title>Preview</title><body style="font:16px system-ui;margin:3rem;max-width:44rem">'
+                    f'<h1>File preview</h1><p>Local test mode. In Confluence this opens <strong>{htmllib.escape(title)}</strong> in Confluence\'s own viewer, '
+                    'so staff can page through it before downloading.</p><p><a href="javascript:history.back()">Back</a></p>').encode()
+            self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.end_headers(); self.wfile.write(body)
+            return
         if name.endswith('.html') and (DOCS / name).is_file():
             html = (DOCS / name).read_text()
             html = html.replace('data-mode="preview"', f'data-mode="confluence" data-context="" data-page-id="{PAGE_ID.get(name, "")}"', 1)

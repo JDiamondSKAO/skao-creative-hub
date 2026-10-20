@@ -87,10 +87,11 @@ DOWNLOAD_GROUPS = {
   {'group': 'Memos', 'match': 'memo'},
   {'group': 'Reports', 'match': 'report'}],
 }
-# How a page shows its downloads: a list (the default), cards with a cover (decks and
-# templates), or logo tiles with a preview. A cover is a picture attached to the same page
+# How a page shows its downloads: a list (the default), cards with a cover (templates), or logo
+# tiles with a preview. Approved slide decks has its own library (main.js), which takes its topics
+# from the rules above. A cover is a picture attached to the same page
 # under the file's own name (Template.pptx and Template.jpg); without one, the card shows the title.
-DOWNLOAD_VIEW = {'partner-templates.html': 'cards', 'master-deck.html': 'cards', 'partner-logos.html': 'logos'}
+DOWNLOAD_VIEW = {'partner-templates.html': 'cards', 'partner-logos.html': 'logos'}
 
 # Primary colours from the Brand Book colour pages.
 PRIMARY_EXTRA = {

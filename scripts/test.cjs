@@ -128,9 +128,9 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const rdoc=new JSDOM(resOut).window.document;assert.equal(rdoc.querySelector('.page-band h1').textContent.trim(),'Latest files');
  const feedPages=JSON.parse(rdoc.querySelector('[data-file-feed]').dataset.pages);assert.deepEqual(feedPages['t:poster templates'],['documents','Poster templates'],'files are placed by their Confluence page title');
  assert(feedPages['t:partner templates']&&!Object.keys(feedPages).some(k=>k.startsWith('i:99')),'planned pages are found by title, never by a stand-in ID');
- assert(rdoc.querySelector('.page-band h1'));assert.deepEqual([...rdoc.querySelectorAll('.footer-base nav a')].map(a=>a.textContent.replace(/\s*↗$/,'')),['Latest files','Get help','Canto library'],'footer: latest files, get help, Canto');assert.equal(rdoc.querySelectorAll('.footer-cta-actions a').length,1,'one call to action');assert(rdoc.querySelector('.footer-cta a.button').getAttribute('href').includes('servicedesk'),'it opens the helpdesk');assert(rdoc.querySelector('.footer-brand img').getAttribute('src').startsWith('/theme/'));assert(rdoc.querySelector('#announcement[hidden]'),'banner stays hidden until an announcement loads');assert(rdoc.querySelector('.page-grid.full-width'));assert(!rdoc.querySelector('.sidebar'));
+ assert(rdoc.querySelector('.page-band h1'));assert.deepEqual([...rdoc.querySelectorAll('.footer-base nav a')].map(a=>a.textContent.replace(/\s*↗$/,'')),['Latest files','Get help','Give feedback','Canto library'],'footer: latest files, get help, feedback, Canto');assert(rdoc.querySelector('.brandbar a.beta-pill .beta-tag').textContent==='Beta','Beta · Share feedback in the masthead');assert.equal(rdoc.querySelectorAll('.footer-cta-actions a').length,1,'one call to action');assert(rdoc.querySelector('.footer-cta a.button').getAttribute('href').includes('servicedesk'),'it opens the helpdesk');assert(rdoc.querySelector('.footer-brand img').getAttribute('src').startsWith('/theme/'));assert(rdoc.querySelector('#announcement[hidden]'),'banner stays hidden until an announcement loads');assert(rdoc.querySelector('.page-grid.full-width'));assert(!rdoc.querySelector('.sidebar'));
  pass('Production Latest files, title band and footer render with resolved Confluence links');
- const md=new JSDOM(fs.readFileSync(path.join(root,'docs/master-deck.html'),'utf8')).window.document;
+ const md=new JSDOM(fs.readFileSync(path.join(root,'docs/standard-template.html'),'utf8')).window.document;
  assert(!md.querySelector('.asset-panel .status-pill'),'no status marker');assert(md.querySelector('.asset-panel .how-to-get'));assert(!md.querySelector('.asset-panel .asset-actions .button'),'no request button on the card');assert(md.querySelectorAll('.asset-panel .release-fact[hidden]').length,3);assert(!md.querySelector('.availability-note'));assert(md.querySelector('.section-nav a[href="presentations.html"]'));
  assert.equal(md.querySelectorAll('.section-next .related-card').length,3);assert(!md.querySelector('.related-next'),'More-in cards carry no Next label');assert(md.querySelector('.page-head a.eyebrow-link[href="presentations.html"]')&&!md.querySelector('.breadcrumbs'),'the section label links back; no breadcrumb');
  pass('Resource pages show a status panel, section navigation, a linked section label and next pages');
@@ -183,7 +183,8 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const read=f=>new JSDOM(fs.readFileSync(path.join(root,'docs',f),'utf8')).window.document;
  const st=read('standard-template.html');assert.deepEqual([...st.querySelectorAll('.variant-list li')].map(l=>l.textContent),['Unrestricted','Staff Resources','SKAO Staff Only','For Project Use','Confidential','Strictly Confidential']);
  assert.deepEqual([...read('poster-templates.html').querySelectorAll('.variant-list li')].map(l=>l.textContent),['A0','A1','A2']);
- const decks=read('master-deck.html');assert.equal(decks.querySelector('.page-head h1').textContent,'Approved slide decks');assert.deepEqual([...decks.querySelectorAll('.asset-actions a')].map(a=>a.getAttribute('href')),['formatting-slides.html','site-progress.html']);assert(decks.querySelector('[data-fact="planned"]'));assert.equal(decks.querySelector('[data-dl-view]').dataset.dlView,'cards');
+ const decks=read('master-deck.html');assert.equal(decks.querySelector('.page-head h1').textContent,'Approved slide decks');assert(!decks.querySelector('.asset-panel'),'a library, not a resource card');
+ assert(decks.querySelector('.deck-library #deckFilter')&&decks.querySelector('.deck-library #deckSort')&&decks.querySelector('[data-deck-list]'),'search, sort and the list');assert(decks.querySelector('.deck-reuse a[href="formatting-slides.html"]'),'reuse advice links to the formatting guide');
  assert.equal(read('memos.html').querySelector('.page-head h1').textContent,'Memo and report templates');assert(read('stands.html').body.textContent.includes('Existing designs to reuse'));
  assert(read('standard-template.html').querySelector('[data-fact="google slides"] .pending-link'),'the review build shows what still needs a link');
  const low=read('low-slides.html');assert(!low.querySelector('.live-link, .progress-links, details.guidance-detail'),'no status box, link row or folded team notes on the site pages');
@@ -252,13 +253,46 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   const heads=[...q.querySelectorAll('.dl-group h3')].map(h=>h.textContent);d.window.close();return {cards,tiles,heads};};
  const pt=await runCards('partner-templates.html',['SKAO - SARAO Presentation template v2.pptx','SKAO_RCN_KeynoteTemplate.key','SKAO_RCN_PowerPointTemplate.pptx'],['SKAO - SARAO Presentation template v2.jpg','unrelated.jpg']);
  assert.deepEqual(pt.cards,[{title:'SKAO and SARAO',month:'',files:'PowerPoint',cover:'SKAO%20-%20SARAO%20Presentation%20template%20v2.jpg'},{title:'SRCNet',month:'',files:'PowerPoint/Keynote',cover:''}],'partner templates as cards: plain names, a cover under the file\'s own name, one button per format');assert.deepEqual(pt.heads,[],'one group, no heading');
- const ad=await runCards('master-deck.html',['2022-07 Graphic design workshop.key','2025-05 Metrology at the SKAO, BIPM.pptx','2024-08 SKA-Mid construction, IAU General Assembly.pptx','About the SKAO.pdf','About the SKAO.jpg']);
- assert.deepEqual(ad.heads,['About the SKAO','Construction progress','Specialised topics'],'approved decks by topic');
- assert.deepEqual(ad.cards.map(c=>[c.title,c.month,c.files,c.cover]),[['About the SKAO','','PDF','About%20the%20SKAO.jpg'],['SKA-Mid construction, IAU General Assembly','August 2024','PowerPoint',''],['Metrology at the SKAO, BIPM','May 2025','PowerPoint',''],['Graphic design workshop','July 2022','Keynote','']],'the month from the file name, newest first; a labelled cover is still a cover, not a download');
  const pl=await runCards('partner-logos.html',['SKAO_SRCnet_logo_colour_rgb.png','SKAO_SRCnet_logo_colour_rgb.ai','SKAO_SRCnet_avatar_monowhite_rgb.eps','SKAO_ukSRC_logofiles.zip','SKAO_zaSRC_logofiles.zip']);
  assert.deepEqual(pl.heads,['SRCNet logo','SRCNet avatar','Regional centres']);
  assert.deepEqual(pl.tiles,['Full colour||AI/PNG||true','White||EPS|dark|false','ukSRC|United Kingdom|ZIP||false','zaSRC|South Africa|ZIP||false'],'logo tiles: a preview from the PNG, white versions on navy, regional packs by centre and country');
- pass('Downloads group by classification, office and partner and merge formats; decks and templates show as cards with covers, partner logos as tiles; no video downloads');
+ pass('Downloads group by classification, office and partner and merge formats; templates show as cards with covers, partner logos as tiles; no video downloads');
+ {const id=routes['master-deck.html'].id,dl=(t)=>`/download/attachments/${id}/${encodeURIComponent(t)}`,lab=(...n)=>({labels:{results:n.map(name=>({name}))}});
+  const files=[
+   {id:'att11',title:'2025-11 A journey through time, de Laeter Colloquium.pptx',version:{number:1,when:'2025-11-20T09:00:00Z',by:{displayName:'Communications'}},extensions:{fileSize:3*1073741824,comment:'Speaker: Director-General · Event: de Laeter Colloquium, Perth · Slides: 52'},metadata:lab('approved'),_links:{download:dl('a.pptx')}},
+   {id:'att12',title:'2024-08 SKA-Mid construction, IAU General Assembly.pptx',version:{number:2,when:'2024-09-01T09:00:00Z'},extensions:{fileSize:300*1048576,comment:'Event: IAU General Assembly, Cape Town\nAudience: Media\nClassification: Unrestricted'},metadata:lab('approved'),_links:{download:dl('b.pptx')}},
+   {id:'att13',title:'2024-08 SKA-Mid construction, IAU General Assembly.jpg',metadata:lab(),_links:{download:dl('b.jpg')}},
+   {id:'att14',title:'Draft deck.pptx',metadata:lab(),_links:{download:dl('c.pptx')}},
+   {id:'att15',title:'<img src=x onerror=alert(1)>.pptx',metadata:lab('approved'),_links:{download:'//evil.example/x'}}];
+  const d=dom('master-deck.html','confluence'),w=d.window,doc=w.document,q=s=>doc.querySelector(s);let asked='';
+  w.fetch=async u=>{const s=String(u);if(s.includes('/child/attachment')){asked=s;return {ok:true,json:async()=>({results:files})};}return {ok:true,json:async()=>({results:[]})};};
+  doc.body.dataset.mode='confluence';doc.body.dataset.pageId=id;w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();
+  assert(asked.includes('metadata.labels'),'labels come with the files');
+  const rowsNow=()=>[...doc.querySelectorAll('.deck:not([hidden])')].map(r=>r.querySelector('.deck-title').textContent);
+  assert.deepEqual(rowsNow(),['A journey through time, de Laeter Colloquium','SKA-Mid construction, IAU General Assembly'],'approved decks only, newest first; drafts, pictures and off-site links left out');
+  const first=q('.deck'),facts=Object.fromEntries([...first.querySelectorAll('.deck-facts div')].map(x=>[x.querySelector('dt').textContent,x.querySelector('dd').textContent]));
+  assert.deepEqual(facts,{Speaker:'Director-General',Slides:'52',Added:'20 Nov 2025 by Communications'},'details from the attachment comment, and who added it');
+  assert.equal(first.querySelector('.deck-event').textContent,'de Laeter Colloquium, Perth');assert.equal(first.querySelector('.deck-kicker').textContent,'About the SKAONovember 2025');
+  assert(first.querySelector('.deck-download small').textContent.includes('PowerPoint · 3.0 GB'),'the size before you download');
+  assert.equal(first.querySelector('a.deck-cover').getAttribute('href'),`/master-deck.html?preview=/${id}/11/`+encodeURIComponent(files[0].title),'the cover opens Confluence\'s preview');
+  const second=[...doc.querySelectorAll('.deck')][1];assert(second.querySelector('.deck-cover img').getAttribute('src').endsWith('/b.jpg'),'a picture under the deck\'s own name is its cover');
+  assert.equal(second.querySelector('.is-class dd').textContent,'Unrestricted');assert(second.querySelector('.deck-facts').textContent.includes('Updated'),'a new version says Updated');
+  assert.deepEqual([...doc.querySelectorAll('.type-chips button')].map(b=>b.textContent),['All 2','About the SKAO 1','Construction progress 1']);
+  q('.type-chips [data-topic-filter="Construction progress"]').click();assert.deepEqual(rowsNow(),['SKA-Mid construction, IAU General Assembly']);
+  q('#clearDecks').click();q('#deckSort').value='az';q('#deckSort').dispatchEvent(new w.Event('change'));assert.equal(rowsNow()[0],'A journey through time, de Laeter Colloquium');
+  q('#deckFilter').value='media';q('#deckFilter').dispatchEvent(new w.Event('input'));assert.deepEqual(rowsNow(),['SKA-Mid construction, IAU General Assembly'],'search reads the details too');
+  assert(!q('.deck-list-cards img[onerror]'),'titles render as text');d.window.close();
+  const pv=dom('master-deck.html');assert.equal(pv.window.document.querySelectorAll('.deck').length,2,'the preview shows two examples');pv.window.close();
+  pass('Approved slide decks is a library: approved decks newest first, each with cover, preview, details from its comment and size, with topics, search and sort');}
+ {const d=dom('fonts.html','confluence'),w=d.window,doc=w.document,dlg=doc.querySelector('#welcomeDialog');
+  assert(dlg&&dlg.querySelector('a.button[href*="servicedesk"]'),'Share feedback opens the helpdesk until the form exists');
+  await new Promise(r=>setTimeout(r,800));assert(dlg.open,'the welcome opens on a first visit');
+  dlg.querySelector('[data-welcome-close]').click();assert(!dlg.open);assert.equal(w.localStorage.getItem('crh-welcome-1'),'1','and once only');
+  const again=new JSDOM(fs.readFileSync(path.join(root,'docs/fonts.html'),'utf8'),{url:'http://localhost/fonts.html',runScripts:'outside-only',beforeParse(win){win.localStorage.setItem('crh-welcome-1','1');}}),aw=again.window;
+  aw.matchMedia=()=>({matches:false});aw.HTMLDialogElement.prototype.showModal=function(){this.open=true};aw.document.body.dataset.mode='confluence';aw.fetch=async()=>({ok:true,json:async()=>({results:[]})});aw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await new Promise(r=>setTimeout(r,800));
+  assert(![...aw.document.querySelectorAll('#welcomeDialog')].some(x=>x.open),'not again once seen');again.window.close();d.window.close();
+  const pre=dom('fonts.html');await new Promise(r=>setTimeout(r,800));assert(!pre.window.document.querySelector('#welcomeDialog').open,'never in the design preview');pre.window.close();
+  pass('A first-visit welcome says the Hub is new and in development, links to feedback and shows once');}
  const lowId=routes['low-slides.html'].id,midId=routes['mid-slides.html'].id,deck=(id,t,m)=>({title:t,version:{when:m},extensions:{fileSize:3145728},_links:{download:`/download/attachments/${id}/${encodeURIComponent(t)}`}});
  const lowFiles=[deck(lowId,'2026-09 SKA-Low progress.pptx','2026-09-15T10:00:00Z'),deck(lowId,'2026-10 SKA-Low progress.pptx','2026-10-15T10:00:00Z'),deck(lowId,'site-photo.jpg','2026-10-16T10:00:00Z')];
  const files=u=>{const s=String(u);return s.includes(`/content/${lowId}/child/attachment`)?lowFiles:[];};

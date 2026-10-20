@@ -21,7 +21,8 @@ out, missing = [], []
 # Example files under their own names, for site progress and the approved decks:
 # {"page": "low-slides.html", "title": "2026-10 SKA-Low progress.pptx", "from": "glob of any stand-in file"}.
 # "root" names another folder in the map to look in (the talk bank), "labels" adds labels such as
-# "approved", and "cover" attaches a cover made by scripts/cover_images.py.
+# "approved", "comment" is the attachment comment (the deck's details on Approved slide decks), and
+# "cover" attaches a cover made by scripts/cover_images.py.
 # The date at the start of the title becomes the upload date, so the newest example sorts first.
 for ex in spec.get('examples', []):
     found = sorted(p for p in Path(spec[ex.get('root', 'root')]).glob(ex['from']) if p.is_file())
@@ -29,7 +30,8 @@ for ex in spec.get('examples', []):
     import re as _re
     d = _re.match(r'(\d{4})-(\d{2})', ex['title'])
     when = datetime(int(d[1]), int(d[2]), 15, tzinfo=timezone.utc).isoformat() if d else datetime.now(timezone.utc).isoformat()
-    out.append({'page': ex['page'], 'title': ex['title'], 'path': str(found[0]), 'size': found[0].stat().st_size, 'labels': ex.get('labels', []), 'when': when})
+    out.append({'page': ex['page'], 'title': ex['title'], 'path': str(found[0]), 'size': found[0].stat().st_size, 'labels': ex.get('labels', []), 'when': when,
+                **({'comment': ex['comment']} if ex.get('comment') else {})})
 # Covers from scripts/cover_images.py: a picture under a deck's own name, unlabelled, on the deck's page.
 for folder in sorted((ROOT / 'build' / 'covers').glob('*')):
     for f in sorted(folder.glob('*.jpg')):

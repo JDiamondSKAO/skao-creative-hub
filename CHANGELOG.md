@@ -5,7 +5,15 @@
 Built on 2.20, from the notes on the review board. The Events pages wait for the next round.
 
 - **Latest files** replaces All resources. It lists the files themselves rather than every page: each new or updated file in the Hub, newest first and grouped by month, with the page it's on, its Hub section and a download button. Search and section filters sit above the list. Several files added to one page on the same day fold into one row ("6 new files"), which opens to list them. The site teams' progress slides are included without needing a label. The footer link, a search answer and the old Hub updates pages now point here.
-- **Approved slide decks** (was Decks to reuse) takes over from Recent talks, which is gone, and the "Shared by staff" group leaves Presentations. Decks show as cards in topic groups, newest first. Each card has a cover: a picture attached under the deck's own name (Deck.pptx and Deck.jpg), or else a drawn title slide in the topic's colour. Under the cover are the month from the file name and a button for each format. Tested with eight decks from the public talk bank.
+- **Approved slide decks** (was Decks to reuse) takes over from Recent talks, which is gone, and the "Shared by staff" group leaves Presentations. The page is now a deck library. Search by title, event or speaker, filter by topic, and sort newest, oldest or A to Z. Each deck is a wide card with:
+  - its cover: a picture attached under the deck's own name (Deck.pptx and Deck.jpg), or else a drawn title slide in the topic's colour;
+  - its topic and month, title and event;
+  - the details from its attachment comment in Confluence (Speaker, Made by, Audience, Slides, Classification);
+  - when it was added or updated, and by whom;
+  - a Download button that gives the format and size, and Preview in Confluence, which opens Confluence's own viewer so nobody downloads a 3 GB deck blind.
+
+  The reuse advice and the formatting guide follow the list. Tested with eight decks from the public talk bank.
+- **Welcome and feedback:** on a first visit, a short note says the Hub is new for the Observatory and in active development, in both features and content, with Explore the Hub and Share feedback. It shows once per browser. "Beta · Share feedback" sits in the masthead on every page, and "Give feedback" in the footer. Both open the feedback form once its link is in (FEEDBACK_FORM); until then they open the Comms helpdesk.
 - **Partner templates:** the downloads are two cards, each with a cover and a plain name (SKAO and SARAO; SRCNet), and buttons that say PowerPoint or Keynote.
 - **Partner logos:** each logo is a tile with a preview (white versions on navy) and AI, EPS and PNG buttons, grouped as SRCNet logo, SRCNet avatar and Regional centres. Each regional pack is a compact card naming the centre's country.
 - **Construction overview, SKA-Low and SKA-Mid:** "Status and photos" becomes "Live status", with two larger cards. On the overview these are the dashboard and the overall status; on the site pages, the site's status slides and the dashboard. The weekly all-hands photos get their own band, as on Photos and video. On the site pages, earlier slides now follow the latest deck as a dated list (a month tile, the details and a download button), showing six before a "Show all" button.

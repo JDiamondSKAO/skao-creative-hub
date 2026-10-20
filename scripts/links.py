@@ -25,6 +25,7 @@ NAMES = {
  'LOW_STATUS': 'SKA-Low status slides, kept by the SKA-Low team (Google Slides)',
  'MID_STATUS': 'SKA-Mid status slides, kept by the SKA-Mid team (Google Slides)',
  'ALLHANDS': 'Where the weekly all-hands photos are stored, for all staff (link to follow)',
+ 'FEEDBACK_FORM': 'Feedback form for the Hub. Until it exists, Share feedback opens the Comms helpdesk',
 }
 
 def load():

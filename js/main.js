@@ -645,12 +645,26 @@ document.addEventListener("DOMContentLoaded", () => {
       (document.querySelector("#main-content") || document.body).focus?.({ preventScroll: true });
     });
   }
+  // First visit: a short welcome that says the Hub is new and still growing, with a way to send feedback.
+  // It shows once per browser; Beta · Share feedback in the header stays for later.
+  const welcome = $("#welcomeDialog"), WELCOME = "crh-welcome-1";
+  if (welcome) {
+    const remember = () => { try { localStorage.setItem(WELCOME, "1"); } catch {} };
+    let seen = true;
+    try { seen = localStorage.getItem(WELCOME) === "1"; } catch {}
+    welcome.querySelectorAll("[data-welcome-close]").forEach((b) => b.addEventListener("click", () => welcome.close()));
+    welcome.addEventListener("close", remember);
+    welcome.querySelector("a[href]")?.addEventListener("click", () => { remember(); welcome.close(); });
+    welcome.addEventListener("click", (e) => { if (e.target === welcome) welcome.close(); });
+    if (!seen && document.body.dataset.mode !== "preview" && typeof welcome.showModal === "function")
+      setTimeout(() => { if (!document.querySelector("dialog[open]")) welcome.showModal(); }, 700);
+  }
   // Files uploaded to a Hub page and labelled "approved" become its downloads.
   refreshAvailability();
   async function refreshAvailability() {
     const panel = $(".asset-panel[data-page-id]"), pageId = panel?.dataset.pageId || document.body.dataset.pageId;
     if (!panel && !pageId) return;
-    if ($("[data-attachments]")) return; // these pages list every file themselves
+    if ($("[data-attachments], [data-deck-library]")) return; // these pages list their files themselves
     const slot = panel?.querySelector("[data-downloads]");
     if (document.body.dataset.mode === "preview") {
       if (slot) {
@@ -733,8 +747,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const fmt = (t) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(t)); } catch { return ""; } };
   const size = (n) => !n ? "" : n > 1073741824 ? (n / 1073741824).toFixed(1) + " GB" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
-  async function attachmentsOf(pageId, ctx) {
-    const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200", expand: "version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+  async function attachmentsOf(pageId, ctx, expand = "version") {
+    const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200", expand }), { credentials: "same-origin", headers: { Accept: "application/json" } });
     if (!res.ok) throw new Error(String(res.status));
     return (await res.json()).results || [];
   }
@@ -761,6 +775,137 @@ document.addEventListener("DOMContentLoaded", () => {
   if (fileList) loadSitePage(fileList);
   const feedBox = $("[data-file-feed]");
   if (feedBox) loadFeed(feedBox);
+  const deckBox = $("[data-deck-library]");
+  if (deckBox) loadDecks(deckBox);
+  // Approved slide decks: every approved deck on the page, newest first, each with its cover, its details and
+  // a preview. Communications writes the details in the attachment's comment in Confluence, as
+  // "Speaker: … · Event: … · Audience: … · Slides: … · Classification: …" (one per line works too).
+  async function loadDecks(box) {
+    const list = box.querySelector("[data-deck-list]"), chipBox = box.querySelector(".type-chips"), search = $("#deckFilter"), sort = $("#deckSort");
+    const status = $("#deckStatus"), empty = $("#deckEmpty"), pageId = document.body.dataset.pageId, ctx = document.body.dataset.context || "";
+    const preview = document.body.dataset.mode === "preview";
+    const note = (text) => { const li = document.createElement("li"); li.className = "deck-note"; li.textContent = text; list.replaceChildren(li); };
+    let rules = [];
+    try { rules = JSON.parse($("[data-dl-groups]")?.dataset.dlGroups || "[]").map((r) => ({ ...r, re: new RegExp(r.match, "i") })); } catch {}
+    let files = [];
+    if (preview) {
+      const at = (y, m) => new Date(Date.UTC(y, m - 1, 15)).toISOString();
+      files = [
+        { title: "2026-09 About the SKAO.pptx", version: { when: at(2026, 9), by: { displayName: "Communications" } }, extensions: { fileSize: 48e6, comment: "Speaker: Example speaker · Event: Example conference · Audience: General public · Slides: 24 · Classification: Unrestricted" } },
+        { title: "2026-06 Construction progress, both sites.pptx", version: { when: at(2026, 6), by: { displayName: "Communications" } }, extensions: { fileSize: 120e6, comment: "Event: Example briefing · Slides: 18" } },
+      ];
+    } else {
+      if (!pageId) return;
+      try { files = await attachmentsOf(pageId, ctx, "version,metadata.labels"); } catch { note("The decks could not be loaded."); return; }
+    }
+    const IMAGE = /\.(png|jpe?g|webp)$/i, baseOf = (t) => String(t || "").replace(/\.[a-z0-9]+$/i, "").toLowerCase();
+    const labelled = files.some((f) => Array.isArray(f.metadata?.labels?.results));
+    const approved = (f) => preview || !labelled || (f.metadata?.labels?.results || []).some((l) => l.name === "approved");
+    const covers = new Map();
+    files.forEach((f) => { const href = safeLink(ctx + (f._links?.download || "")); if (href && IMAGE.test(String(f.title || ""))) covers.set(baseOf(f.title), href); });
+    // "Key: value" details from the attachment comment.
+    const KEYS = { speaker: "speaker", speakers: "speaker", presenter: "speaker", by: "speaker", "made by": "made", author: "made", owner: "made", event: "event", audience: "audience", slides: "slides", classification: "classification", topic: "topic", title: "title", date: "date" };
+    const details = (comment) => {
+      const out = {};
+      String(comment || "").split(/\n|\s+[·|]\s+|\s*;\s*/).forEach((part) => { const m = part.match(/^\s*([a-z ]+?)\s*:\s*(.+?)\s*$/i); if (m && KEYS[m[1].toLowerCase()]) out[KEYS[m[1].toLowerCase()]] = m[2]; });
+      return out;
+    };
+    const CLASSES = ["Strictly Confidential", "Confidential", "For Project Use", "SKAO Staff Only", "Staff Resources", "Unrestricted"];
+    const TONES = ["#c2185b", "#0b7bb5", "#c26a1b", "#2f8a5b", "#7c3aed", "#5b6475"];
+    const topics = [...new Set(rules.map((r) => r.group))];
+    const decks = files.filter((f) => !IMAGE.test(String(f.title || "")) && approved(f)).map((f) => {
+      const title = String(f.title || ""), href = preview ? null : safeLink(ctx + (f._links?.download || ""));
+      if (!preview && !href) return null;
+      const info = details(f.extensions?.comment || f.metadata?.comment);
+      const base = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").replace(/\s+/g, " ").trim();
+      const dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
+      const added = Date.parse(f.version?.when || "") || 0;
+      const when = dm && +dm[2] >= 1 && +dm[2] <= 12 ? Date.UTC(+dm[1], +dm[2] - 1, 15) : Date.parse(info.date || "") || added;
+      const name = info.title || (dm ? dm[3].trim() : base);
+      const topic = info.topic || rules.find((r) => r.re.test(title))?.group || "Other decks";
+      const ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase();
+      const id = String(f.id || "").replace(/^att/, "");
+      return { title, href, name, when, added, topic, ext, info, id, size: f.extensions?.fileSize, updated: Number(f.version?.number) > 1, by: f.version?.by?.displayName || "",
+        classification: info.classification || CLASSES.find((c) => new RegExp("(^|[\\s_-])" + c.replace(/ /g, "[\\s_-]+") + "($|[\\s_.-])", "i").test(base)) || "",
+        cover: covers.get(baseOf(title)) || "", preview: !preview && id && pageId ? location.pathname + "?preview=/" + encodeURIComponent(pageId) + "/" + encodeURIComponent(id) + "/" + encodeURIComponent(title) : "" };
+    }).filter(Boolean);
+    if (!decks.length) { note("No approved decks yet. They appear here as soon as Communications approves them."); return; }
+    const toneOf = (topic) => TONES[(topics.indexOf(topic) + TONES.length) % TONES.length] || TONES[TONES.length - 1];
+    const month = (t) => { const d = new Date(t); return MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear(); };
+    const KINDS = { pptx: "PowerPoint", ppt: "PowerPoint", potx: "PowerPoint", key: "Keynote", pdf: "PDF" };
+    const rows = decks.map((d) => {
+      const li = document.createElement("li"); li.className = "deck"; li.dataset.topic = d.topic; li.style.setProperty("--c", toneOf(d.topic));
+      // The cover: the picture attached under the deck's own name, or a title slide in the topic's colour.
+      const cover = document.createElement(d.preview ? "a" : "div"); cover.className = "deck-cover";
+      if (d.preview) { cover.href = d.preview; cover.setAttribute("aria-label", "Preview " + d.name); }
+      const slide = document.createElement("span"); slide.className = "deck-slide"; slide.setAttribute("aria-hidden", "true");
+      const brand = document.createElement("small"); brand.textContent = "SKA Observatory";
+      slide.append(brand, document.createElement("i"), document.createElement("i")); cover.append(slide);
+      if (d.cover) { const img = new Image(); img.alt = ""; img.decoding = "async"; img.loading = "lazy"; img.onload = () => cover.classList.add("has-image"); img.src = d.cover; cover.append(img); }
+      if (d.preview) { const peek = document.createElement("span"); peek.className = "deck-peek"; peek.textContent = "Preview"; cover.append(peek); }
+      const body = document.createElement("div"); body.className = "deck-body";
+      const kicker = document.createElement("p"); kicker.className = "deck-kicker";
+      const tp = document.createElement("span"); tp.className = "deck-topic"; tp.textContent = d.topic;
+      const dt = document.createElement("span"); dt.textContent = d.when ? month(d.when) : "";
+      kicker.append(tp, dt);
+      const h = document.createElement("h3"); h.className = "deck-title"; h.textContent = d.name;
+      body.append(kicker, h);
+      if (d.info.event) { const ev = document.createElement("p"); ev.className = "deck-event"; ev.textContent = d.info.event; body.append(ev); }
+      // The details people ask about: who gave it, who it was for, how long it is and who may see it.
+      const facts = document.createElement("dl"); facts.className = "deck-facts";
+      const fact = (label, value, cls) => { if (!value) return; const div = document.createElement("div"); if (cls) div.className = cls; const a = document.createElement("dt"), b = document.createElement("dd"); a.textContent = label; b.textContent = value; div.append(a, b); facts.append(div); };
+      fact("Speaker", d.info.speaker); fact("Made by", d.info.made); fact("Audience", d.info.audience);
+      fact("Slides", d.info.slides); fact("Classification", d.classification, "is-class");
+      fact(d.updated ? "Updated" : "Added", [d.added ? fmt(d.added) : "", d.by && "by " + d.by].filter(Boolean).join(" "));
+      if (facts.children.length) body.append(facts);
+      const actions = document.createElement("div"); actions.className = "deck-actions";
+      const get = document.createElement("a"); get.className = "button deck-download";
+      if (d.href) { get.href = d.href; get.setAttribute("download", ""); get.title = d.title; } else get.setAttribute("aria-disabled", "true");
+      get.setAttribute("aria-label", `Download ${d.name}, ${KINDS[d.ext] || d.ext.toUpperCase()}${size(d.size) ? ", " + size(d.size) : ""}`);
+      const gl = document.createElement("span"); gl.textContent = "Download"; const gs = document.createElement("small"); gs.textContent = [KINDS[d.ext] || d.ext.toUpperCase(), size(d.size)].filter(Boolean).join(" · ");
+      get.append(gl, gs); actions.append(get);
+      if (d.preview) { const pv = document.createElement("a"); pv.className = "deck-preview text-link"; pv.href = d.preview; pv.textContent = "Preview in Confluence"; actions.append(pv); }
+      if (preview) { const tag = document.createElement("span"); tag.className = "example-tag"; tag.textContent = "Example"; kicker.append(tag); }
+      li.append(cover, body, actions);
+      li._deck = d; return li;
+    });
+    // Topic filters (only when there is more than one), search and sort.
+    let topic = "all";
+    const present = topics.concat(["Other decks"]).filter((t) => decks.some((d) => d.topic === t));
+    if (present.length > 1) {
+      const chip = (key, label, n) => {
+        const b = document.createElement("button"); b.type = "button"; b.dataset.topicFilter = key; b.setAttribute("aria-pressed", String(key === "all"));
+        if (key !== "all") b.style.setProperty("--c", toneOf(key));
+        const c = document.createElement("span"); c.textContent = n; b.append(label + " ", c);
+        b.addEventListener("click", () => { topic = key; chipBox.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); apply(); });
+        return b;
+      };
+      chipBox.replaceChildren(chip("all", "All", decks.length), ...present.map((t) => chip(t, t, decks.filter((d) => d.topic === t).length)));
+      chipBox.hidden = false;
+    }
+    function apply() {
+      const words = terms(search?.value || "");
+      const order = sort?.value || "new";
+      const sorted = [...rows].sort((a, b) => order === "az" ? a._deck.name.localeCompare(b._deck.name) : order === "old" ? a._deck.when - b._deck.when : b._deck.when - a._deck.when);
+      let n = 0;
+      sorted.forEach((li) => {
+        const hay = li.textContent.toLowerCase();
+        const match = (topic === "all" || li.dataset.topic === topic) && words.every((w) => expand(w).some((alt) => hay.includes(alt)));
+        li.hidden = !match; if (match) n++;
+      });
+      list.replaceChildren(...sorted);
+      if (status) status.textContent = n === rows.length ? (rows.length === 1 ? "1 deck" : rows.length + " decks") : `Showing ${n} of ${rows.length} decks`;
+      if (empty) empty.hidden = n > 0;
+    }
+    search?.addEventListener("input", apply);
+    sort?.addEventListener("change", apply);
+    $("#clearDecks")?.addEventListener("click", () => {
+      if (search) search.value = ""; topic = "all";
+      chipBox.querySelectorAll("button").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.topicFilter === "all")));
+      apply(); search?.focus();
+    });
+    apply();
+  }
   // Earlier decks: a month tile, the deck and its details, and a download button. Long lists show the
   // six newest first, with a button for the rest.
   function deckList(rows) {
