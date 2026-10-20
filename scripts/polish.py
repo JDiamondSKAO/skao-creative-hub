@@ -78,15 +78,8 @@ def primary(name, key):
  return bool(sec) and sec[0] == key
 
 # Catalogue filters, in the order staff usually look for things.
-TYPES = [
- ('presentations', 'Presentations', {'Presentations'}),
- ('documents', 'Documents', {'Documents', 'Resources'}),
- ('brand', 'Brand', {'Brand'}),
- ('media', 'Photos and video', {'Media'}),
- ('events', 'Events', {'Events'}),
- ('guides', 'How-to guides', {'Guidance'}),
- ('services', 'Creative services', {'Creative help'}),
-]
+# All resources filters by the Hub's own sections, so a page sits under the same name everywhere.
+TYPES = [(key, label) for key, label, _, _ in SECTIONS]
 SKIP = {'resources.html'} | set(MOVED)
 
 # Side menus fold away to give the page more room: section pages on the left, "On this page" on the right.
@@ -184,22 +177,23 @@ def asset_panel(name, body, jira):
 
 def catalogue(pages, meta, summaries, on_request):
  cards, counts, seen = [], {}, set()
- for key, label, groups in TYPES:
+ for key, label in TYPES:
   for name, m in sorted(meta.items(), key=lambda kv: pages[kv[0]][0].lower()):
-   if m['group'] not in groups or name in SKIP: continue
+   if name in SKIP or (section_of(name) or ('',))[0] != key: continue
    title = pages[name][0]
    if title in seen: continue
    seen.add(title)
-   cards.append(f'<li><a class="resource-row" href="{name}" data-page-id="{STATE["ids"].get(name, "")}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-type">{label}</span></a></li>')
+   cards.append(f'<li><a class="resource-row" href="{name}" data-page-id="{STATE["ids"].get(name, "")}" data-resource data-type="{key}"><span class="dir-text"><strong>{html.escape(title)}</strong><span>{html.escape(summaries[name])}</span></span><span class="resource-meta"><span class="resource-type">{label}</span></span></a></li>')
    counts[key] = counts.get(key, 0) + 1
  chips = f'<button type="button" data-type-filter="all" aria-pressed="true">All <span>{len(cards)}</span></button>' + ''.join(
-  f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label, _ in TYPES if counts.get(key))
+  f'<button type="button" data-type-filter="{key}" aria-pressed="false">{label} <span>{counts[key]}</span></button>' for key, label in TYPES if counts.get(key))
  # Search first, then type, then the list. In Confluence the list is dated and sorted newest first.
  return ('<section class="catalogue" aria-label="All resources">'
-  '<label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search resources</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Search resources, e.g. letterhead or poster"></label>'
-  '<div class="type-chips" role="group" aria-label="Show resource type">' + chips + '</div>'
-  '<div class="catalogue-tools"><p id="filterStatus" class="filter-status" role="status"></p>'
-  '<label class="resource-sort" hidden>Sort <select id="resourceSort"><option value="new">Newest first</option><option value="az">A to Z</option></select></label></div>'
+  # Search and sort share one row; the section filters sit under them, the same width as the list.
+  '<div class="catalogue-bar"><label class="catalogue-search">' + SEARCH_ICON + '<span class="visually-hidden">Search resources</span><input id="resourceFilter" type="search" autocomplete="off" placeholder="Search resources, e.g. letterhead or poster"></label>'
+  '<label class="resource-sort" hidden><span>Sort</span><select id="resourceSort"><option value="new">Newest first</option><option value="az">A to Z</option></select></label></div>'
+  '<div class="type-chips" role="group" aria-label="Show a section">' + chips + '</div>'
+  '<p id="filterStatus" class="filter-status" role="status"></p>'
   '<ul class="resource-list">' + ''.join(cards) + '</ul>'
   '<div id="catalogueEmpty" class="catalogue-empty" hidden><p>Nothing matches that filter.</p><button type="button" id="clearFilters" class="button secondary">Show everything</button></div></section>')
 
@@ -421,7 +415,8 @@ def revise(pages, meta, jira, canto=''):
   m = re.search(r'<div class="media-handoff">.*?</div></div>', body, re.S)
   pages[name] = (title, body[:m.end()] + canto_strip(words, canto) + body[m.end():] if m else body)
  title, body = pages['resources.html']
- body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Everything in the Hub in one list, with the newest first. Search or pick a type, then open a page for its files and guidance.', 1)
+ body = body.replace('Choose a starting point. Open its source page to see the file, guidance or availability information.', 'Everything in the Hub, newest first. Search, or pick a section.', 1)
+ body = re.sub(r'<span class="eyebrow">[^<]*</span>', '', body, count=1)
  body = re.sub(r'<div class="choice-grid">(?:<a class="choice-card".*?</a>)+</div>', '', body, count=1, flags=re.S)
  at = body.find('<aside class="next-step">')
  cat = catalogue(pages, meta, summaries, on_request)

@@ -493,7 +493,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const when = document.createElement("span");
       when.className = "resource-when"; when.dataset.when = String(t);
       when.textContent = (added.has(id) ? "Added " : "Updated ") + day(t);
-      row.querySelector(".resource-type")?.before(when);
+      (row.querySelector(".resource-meta") || row).append(when);
       dated++;
     });
     if (!dated) return;
@@ -1224,7 +1224,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   // When the page was last changed, under its title.
   const head = $(".page-band .page-head"), thisPage = document.body.dataset.pageId;
-  if (head && thisPage && document.body.dataset.mode !== "preview") (async () => {
+  if (head && thisPage && !$(".catalogue") && document.body.dataset.mode !== "preview") (async () => {
     try {
       const ctx = document.body.dataset.context || "";
       const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(thisPage) + "?expand=version", { credentials: "same-origin", headers: { Accept: "application/json" } });

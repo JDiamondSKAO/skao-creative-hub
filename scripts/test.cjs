@@ -303,7 +303,14 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   assert.equal(doc.querySelector('.resource-row[href="fonts.html"] .resource-when').textContent,'Updated 12 Oct 2026','otherwise the page edit does');
   const sel=doc.querySelector('#resourceSort');assert(!doc.querySelector('.resource-sort').hidden);sel.value='az';sel.dispatchEvent(new w.Event('change'));
   const az=[...doc.querySelectorAll('.resource-row strong')].map(s=>s.textContent.toLowerCase());assert.deepEqual(az,[...az].sort((a,b)=>a.localeCompare(b)),'A to Z sorts by title');
-  w.close();pass('All resources is dated and sorted newest first, with an A to Z option');}
+  w.close();pass('All resources is dated and sorted newest first, with an A to Z option');
+ {const rd=new JSDOM(fs.readFileSync(path.join(root,'docs/resources.html'),'utf8')).window.document;
+  assert.deepEqual([...rd.querySelectorAll('.type-chips button')].map(b=>b.dataset.typeFilter),['all','presentations','documents','brand','media','events','guides'],'filters are the six Hub sections');
+  assert(rd.querySelector('.catalogue-bar .catalogue-search')&&rd.querySelector('.catalogue-bar .resource-sort'),'search and sort share one row');
+  assert(!rd.querySelector('.page-head .eyebrow')&&!rd.querySelector('.task-intro .eyebrow'),'no labels above the title or the intro');
+  assert.equal(rd.querySelector('.resource-row[href="print-suppliers.html"]').dataset.type,'guides','pages sit under their Hub section');}
+ pass('All resources filters by the Hub sections, with search and sort on one row');
+}
  {const d=dom('video.html'),w=d.window,doc=w.document,g=doc.querySelector('.page-grid');
   assert(!doc.querySelector('.toc-rail').hidden&&g.classList.contains('has-toc')&&doc.querySelectorAll('.toc-rail #toc a').length>=4,'On this page sits in its own column on the right on long pages');
   const short=dom('low-slides.html');assert(short.window.document.querySelector('.toc-rail').hidden,'pages with three sections or fewer go without');short.window.close();

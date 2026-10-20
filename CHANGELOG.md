@@ -9,6 +9,8 @@ Built on 2.19. The SKA-Low and SKA-Mid pages were hard to follow, so both telesc
 - **Construction overview** uses the same three-card row for the dashboard, the overall status and the all-hands photos.
 - **Photos:** each site page carries its telescope photo as an attachment called `site-photo.jpg`, made by `scripts/site_images.py` from the official images in the image bank. Until it's there, the tile and the panel show the navy gradient on its own.
 - The Presentations list shows Construction overview only; the side menu nests SKA-Low and SKA-Mid under it. The homepage "Site progress" quick link and the search answer for construction figures open Construction overview.
+- **All resources:** filters are the six Hub sections (Work with print suppliers now sits under How-to guides, and the stray "Creative services" filter is gone). Search and sort share one row the width of the list, with the filters under them. Each row shows its section and date in one aligned column, with the full summary. The page drops the extra labels and the "Updated" line.
+- **Homepage quick links** stay on one row at every desktop width: the left column gets more room below 1240px, and the presentations card moves under the search below 1060px.
 - **Links that leave the Hub open in a new tab** (other sites, other Confluence spaces); Hub pages and downloads open in place.
 
 ## 2.19.0 Events from the production manual (proposal, branch claude/creative-hub-events)
