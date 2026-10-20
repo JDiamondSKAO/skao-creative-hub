@@ -708,7 +708,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (at && section.contains(at)) at.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" });
     };
     if (!panel) {
-      const slot = $(".content-body > [data-downloads-slot]"), intro = $(".content-body > .task-intro");
+      const slot = $(".content-body [data-downloads-slot]"), intro = $(".content-body > .task-intro");
       if (slot) slot.replaceWith(section); else if (intro) intro.after(section); else $(".content-body")?.prepend(section);
       arrive();
       return;
@@ -1506,7 +1506,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bodyText = $(".content-body");
   if (bodyText && !bodyText.querySelector(".directory")) {
     bodyText.querySelectorAll("h2").forEach((h) => {
-      if (h.closest("[hidden], details, .section-next, .file-feed, .canto-show, .asset-panel, .live-link, .site-photos, .site-card, .kit-item, .attachments-head, .next-step, .downloads-head")) return;
+      if (h.closest("[hidden], details, .section-next, .file-feed, .canto-show, .asset-panel, .live-link, .site-photos, .site-card, .kit-card, .events-layout, .attachments-head, .next-step, .downloads-head")) return;
       if (!h.id) { let id = slugify(h.textContent); while (document.getElementById(id)) id += "-2"; h.id = id; }
       const b = document.createElement("button");
       b.type = "button"; b.className = "heading-link"; b.setAttribute("aria-label", "Copy a link to " + h.textContent.trim());

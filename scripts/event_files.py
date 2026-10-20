@@ -30,7 +30,8 @@ def A(src, knock=False, cut=None):
  of it, as (left, top, right, bottom) fractions."""
  return {'src': src, 'knock': knock, 'cut': cut}
 
-# Card name: (the files in its download as (name inside, source), its cover's pictures, space around them).
+# Card name: (the files in its download as (name inside, source), its cover's pictures, space around them;
+# MARGINS below sets the space).
 # Sources starting merch/ are in the merchandise folder; the rest are reusable event assets. A * takes
 # every match, under its own name. One file is offered as it is; several go in a ZIP.
 B = 'BANNER_SYSTEMS/'
@@ -76,8 +77,13 @@ EVENT_FILES = {
                      ('SKAO banner 2.48 x 2.29 m.pdf', 'PARTNER_COBRANDS/NGVLA/FINALS/SKAO_Vancouver_Banner_2480x2290mm_SKAO_ONLY.pdf'),
                      ('SKAO roller banner.pdf', 'PARTNER_COBRANDS/NGVLA/FINALS/SKAO_Vancouver_Roller_Banner_SKAO_ONLY.pdf')], [0], 32),
  'PI planning logos': ([(None, 'PI_PLANNING/*/*.png'), (None, 'PI_PLANNING/*/*.pdf'), (None, 'PI_PLANNING/PI23/FOR_PRINT/*.pdf')],
-                       [A('PI_PLANNING/PI23/SKAO_LOGO_PI24_CO-LOCATION.png', knock=True)], 120),
+                       [A('PI_PLANNING/PI23/SKAO_LOGO_PI24_CO-LOCATION.pdf')], 120),  # on its white sheet, so it reads in dark mode too
 }
+
+# Space around each cover's pictures (pixels at 960 x 540): small, so every cover reads at a similar size.
+MARGINS = {'Roller banners': 18, 'Stretch walls': 28, 'Wide banners': 18, 'Wall banners': 18, 'Teardrop flags': 20, 'Gazebo': 20,
+ 'Stickers': 56, 'Lanyards': 16, 'Coasters': 22, 'Notepads and sticky notes': 22, 'SKAO and SARAO': 20, 'SKAO and CETC': 18,
+ 'SKAO and ngVLA': 18, 'PI planning logos': 70}
 
 def pdf_page(path, side=1600):
  """Page 1 of a print file, trimmed to its finished size (no bleed or crop marks)."""
@@ -156,7 +162,7 @@ def main():
     for inner, path in found: z.write(path, inner)
   # The cover: the listed pictures, or the files themselves (all of them, or those at the given places).
   pics = cover if cover and isinstance(cover[0], dict) else [A(files[i][1]) for i in (cover or range(len(files)))]
-  art([{**it, 'path': where(it['src'])[0]} for it in pics], margin).save(OUT / (name + '.webp'), quality=86, method=6)
+  art([{**it, 'path': where(it['src'])[0]} for it in pics], MARGINS.get(name, margin)).save(OUT / (name + '.webp'), quality=86, method=6)
   print(f'{name}: {len(found)} file{"s" if len(found) > 1 else ""}')
 
 if __name__ == '__main__':

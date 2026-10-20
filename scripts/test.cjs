@@ -156,7 +156,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const twoClicks=new Set([...top,...nw.document.querySelectorAll('.footer a')].map(a=>a.getAttribute('href')));
  for(const a of top){const land=new JSDOM(fs.readFileSync(path.join(root,'docs',a.getAttribute('href')),'utf8')).window.document;
   assert(land.querySelector('.page-grid.full-width'),'landing is full width');assert(!land.querySelector('.sidebar'),'landing has no repeated list');
-  land.querySelectorAll('.dir-row, .shelf-item').forEach(c=>twoClicks.add(c.getAttribute('href').split('#')[0]));}
+  land.querySelectorAll('.dir-row, .avail-row').forEach(c=>twoClicks.add(c.getAttribute('href').split('#')[0]));}
  for(const f of Object.keys(routes).filter(f=>!['canto-guide.html','email-signatures.html','widescreen-template.html','science-slides.html','construction-slides.html','specialised-slides.html','reports.html','hero-images.html','telescope-images.html','event-photos.html','b-roll.html','recordings.html','animations.html','event-safety.html','event-checklist.html','resources.html','request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html','working-with-us.html','contribute.html',
   // The site pages sit one click under Construction overview, whose tiles lead to them.
   'low-slides.html','mid-slides.html'].includes(f)))assert(twoClicks.has(f),'two clicks reach '+f);
@@ -325,17 +325,20 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const ev=read('events.html');
  assert.equal(ev.querySelector('.page-head h1').textContent,'Event materials');
  assert(!ev.querySelector('.lead-table, .request-flow, .landing-rail'),'no lead times, request steps or rail');
- const shelf=[...ev.querySelectorAll('.shelf-grid a.shelf-item')];assert.deepEqual(shelf.map(a=>a.getAttribute('href')),['stands.html','merchandise.html#banners-and-signage','merchandise.html#giveaways','merchandise.html#partner-versions','merchandise.html#event-logos'],'a shelf of what is available, in place of the section list');
+ const shelf=[...ev.querySelectorAll('.avail-list a.avail-row')];assert.deepEqual(shelf.map(a=>a.getAttribute('href')),['stands.html','merchandise.html#banners-and-signage','merchandise.html#giveaways','merchandise.html#partner-versions','merchandise.html#event-logos'],'a shelf of what is available, in place of the section list');
  assert.deepEqual(shelf.map(a=>a.querySelector('[data-kit-image]').dataset.kitPage),[routes['stands.html'].id,...Array(4).fill(routes['merchandise.html'].id)],'each with a picture attached to its page');
- assert.deepEqual(shelf.map(a=>a.querySelector('.shelf-meta').textContent),['On request · 5 items','Download · print files','Download · artwork','Download · co-branded files','Download · logo files']);
+ assert.deepEqual(shelf.map(a=>a.querySelector('.avail-meta').textContent),['On request · 5 items','Download · print-ready files','Download · artwork','Download · co-branded files','Download · logo files']);
  assert(!ev.querySelector('.directory'),'no second list of the same pages');
  assert(!/borrow/i.test(ev.querySelector('.content-body').textContent+read('stands.html').querySelector('.content-body').textContent),'the kit is available on request, not borrowed');
  assert(read('presentations.html').querySelector('.landing-layout > .landing-main > .task-intro'),'on other landings, Before you start still sits level with the intro');
- assert.deepEqual([...ev.querySelectorAll('.also-grid a.also-item')].map(a=>a.getAttribute('href').replace(/^https?:.*/,'canto')),['master-deck.html','poster-templates.html','canto'],'slides, posters and photos from elsewhere in the Hub');
- assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Use what exists','Update a design','Choose screens over print','Make new items last']);
- assert(ev.querySelector('.shelf').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4&&ev.querySelector('.reuse-steps').compareDocumentPosition(ev.querySelector('.also'))&4,'the shelf, the steps, then the rest of the Hub');
- assert(/servicedesk/.test(ev.querySelector('.intro-split .plan-card a.button').getAttribute('href')),'planning an event starts at the Comms helpdesk, in a card beside the intro');
- assert.deepEqual([...ev.querySelectorAll('.reuse-steps .reuse-icon')].map(e=>[!!e.querySelector('svg'),e.querySelector('em').textContent]),[[true,'1'],[true,'2'],[true,'3'],[true,'4']],'each step has its icon and number');
+ assert.deepEqual([...ev.querySelectorAll('.also-list a')].map(a=>a.getAttribute('href').replace(/^https?:.*/,'canto')),['master-deck.html','poster-templates.html','canto'],'slides, posters and photos from elsewhere in the Hub');
+ assert.deepEqual([...ev.querySelectorAll('.reuse-list li strong')].map(e=>e.textContent),['Use what exists','Update a design','Choose screens over print','Make new items last']);
+ assert.deepEqual([...ev.querySelectorAll('.events-layout > *')].map(e=>e.className),['avail','events-rail'],'what is available, with the rail beside it');
+ assert.deepEqual([...ev.querySelectorAll('.events-rail > .rail-card')].map(e=>e.classList[1]),['plan-card','reuse-card','also-card'],'planning, reuse first, then related links');
+ assert(!ev.querySelector('.events-layout .heading-link'),'no copy-link buttons on the landing cards');
+ assert(/servicedesk/.test(ev.querySelector('.events-rail .plan-card a.button').getAttribute('href')),'planning an event starts at the Comms helpdesk');
+ assert.deepEqual([...ev.querySelectorAll('.reuse-list .reuse-icon')].map(e=>[!!e.querySelector('svg'),e.querySelector('em').textContent]),[[true,'1'],[true,'2'],[true,'3'],[true,'4']],'each step has its icon and number');
+ const kq=read('stands.html');assert.equal(kq.querySelectorAll('.card-grid > .kit-card').length,6,'five kit cards and how to request it fill a 3 by 2 grid');assert(/servicedesk/.test(kq.querySelector('.request-card a').getAttribute('href')));assert(kq.querySelector('.care-grid [data-downloads-slot]'),'the manual sits beside the care notes');
  const standsId=routes['stands.html'].id,sk=dom('stands.html','confluence'),skw=sk.window;skw.document.body.dataset.pageId=standsId;
  skw.fetch=async u=>{if(String(u).includes('/child/attachment'))return {ok:true,json:async()=>({results:[
   {title:'kit-fabrilux-3m.webp',_links:{download:`/download/attachments/${standsId}/kit-fabrilux-3m.webp`}},

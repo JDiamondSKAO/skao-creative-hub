@@ -4,20 +4,20 @@
 
 Built on 2.21. Events no longer reads as if Communications plans people's events. It shows what already exists for SKAO events: the exhibition kit (on request) and print and giveaway files (to download), with sustainability in mind. Planning an event starts at the Comms helpdesk. Refined over several rounds of Joe's feedback, with plain, professional wording (the kit is available on request, not "borrowed").
 
-- **Event materials** (the Events landing, was Plan event materials):
-  - The intro sits beside a "Planning an event?" card that opens the Comms helpdesk.
-  - **What's available** is a shelf in place of the section list: Exhibition kit (on request), Banners and signage, Giveaways, Partner versions and Event logos (to download). Each tile has a picture and links straight to its place.
-  - **Reuse first** has four steps along a line, each with an icon and its number: Use what exists, Update a design, Choose screens over print, Make new items last.
-  - **Also useful for events** links to slides, posters, and photos and video.
-  - The lead-times table, request steps and "Before you start" panels are gone.
+- **Event materials** (the Events landing, was Plan event materials) has two columns, like the Hub's other landings:
+  - On the left, **What's available** is a picture list in place of the section list: Exhibition kit (on request), then Banners and signage, Giveaways, Partner versions and Event logos (to download). Each row has a thumbnail, a line on what's in it and how you get it, and links straight to its place.
+  - On the right is a "Planning an event?" card that opens the Comms helpdesk.
+  - Below the card, **Reuse first** has four steps along a line, each with an icon and its number: Use what exists, Update a design, Choose screens over print, Make new items last.
+  - Last comes **Also useful for events**: slides, posters, and photos and video.
+  - On tablets the side cards sit below the list. The lead-times table, request steps and "Before you start" panels are gone.
 - **Exhibition kit** (was Stands and merchandise):
   - It covers backdrops, banners, a kiosk and table cloths, available on request from the Communications team at each site.
-  - Three steps explain how to request it.
-  - The kit is a tile grid led by the 3 m backdrop.
-  - "Care and setup" is followed by the Events Production Manual.
+  - The kit is a 3 × 2 grid of cards; the sixth card is "How to request it", with three steps.
+  - "Care and setup" sits beside the Events Production Manual.
 - **Print and giveaway files** (new; it reuses the old Merchandise and Giveaways page) is a download library like the template pages.
   - Each design is a card with its cover, a short description and its download: a print file, or a ZIP of its sizes or versions.
-  - The groups are Banners and signage, Giveaways, Partner versions (with a note to check with the partner) and Event logos, and each can be linked to.
+  - The groups are Banners and signage, Giveaways, Partner versions (with a note to check with the partner) and Event logos. Each has a clear heading and can be linked to.
+  - A short "Before you print" note comes first.
   - It is built from the files on the page. To add more, such as new outreach material, upload a file labelled "approved", with a picture under the same name as its cover.
   - `scripts/event_files.py` builds today's 14 files and covers from the reusable event assets and merchandise folders (read only). One-off builds such as the IAU GA 2024 stand are left out.
 - Download cards that a page names (brandkit.DOWNLOAD_GROUPS) keep the page's order. Each group has an anchor, and group notes always show.

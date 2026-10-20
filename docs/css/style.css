@@ -1714,11 +1714,9 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .live-link-actions .text-link,.live-link-actions .pending-link {font-size:.86rem;}
 
 /* Event kit on Stands and merchandise: a picture per item, attached to the page, or its outline until then */
-/* Event kit and Designs to reuse: one tile style. The picture on a soft panel, the name, one line of detail */
-.kit > p {max-width:62ch;}
-.kit-grid {list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px;}
-.kit-item {margin:0;}
-.kit-pic {position:relative;display:grid;place-items:center;aspect-ratio:3/2;border-radius:14px;background:var(--surface);overflow:hidden;}
+/* Events pages share one look: white cards with a picture panel, quiet meta text, and tinted panels
+   only for guidance. Pictures load from attachments (data-kit-image); until then an outline shows. */
+.kit-pic {position:relative;display:grid;place-items:center;aspect-ratio:3/2;border-radius:12px;background:var(--surface);overflow:hidden;}
 .kit-pic img {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .4s;}
 .kit-pic.has-image img {opacity:1;}
 .kit-pic:before {content:"";border:1.5px solid color-mix(in srgb,var(--c,var(--link)) 40%,transparent);border-radius:3px;transition:opacity .3s;}
@@ -1727,88 +1725,86 @@ body .search-results a.search-answer {display:grid;gap:4px;margin:0 -12px 10px;p
 .kit-pic[data-shape=tall]:before {height:74%;aspect-ratio:85/200;}
 .kit-pic[data-shape=cloth]:before {width:62%;aspect-ratio:1.84;}
 .kit-pic.has-image:before {opacity:0;}
-.content-body .kit-item h3 {margin:14px 0 3px;font-size:1rem;font-weight:650;letter-spacing:-.005em;}
 .content-body .kit-meta {margin:0;font-size:.86rem;line-height:1.45;color:var(--muted);}
-@media(max-width:900px){.kit-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
-@media(max-width:520px){.kit-grid{grid-template-columns:1fr;}}
-.kit + #care-and-setup,#care-and-setup + #downloads,.kit + #downloads {margin-top:44px;}
-/* Event kit: how borrowing works, then the kit with the 3 m backdrop as the lead tile */
-.request-steps {list-style:none;margin:0;padding:18px 22px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;border:1px solid color-mix(in srgb,var(--link) 12%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--link) 3%,var(--bg));}
-.content-body .request-steps li {display:flex;gap:12px;align-items:flex-start;margin:0;}
-.request-steps b {flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#070068,#aa005c);color:#fff;font-size:.8rem;line-height:1;}
-.request-steps span {padding-top:3px;font-size:.92rem;line-height:1.5;color:var(--ink);}
-.request-steps + .kit > h2 {margin-top:40px;}
-.kit-bento {grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 20px;}
-.kit-bento .kit-item:first-child {grid-column:span 2;grid-row:span 2;display:flex;flex-direction:column;}
-.kit-bento .kit-item:first-child .kit-pic {flex:1;aspect-ratio:auto;min-height:240px;}
-.content-body .kit-bento .kit-item:first-child h3 {font-size:1.1rem;}
-@media(max-width:900px){.kit-bento{grid-template-columns:repeat(2,minmax(0,1fr));}.kit-bento .kit-item:first-child{grid-row:auto;}.kit-bento .kit-item:first-child .kit-pic{flex:none;aspect-ratio:3/2;min-height:0;}.request-steps{grid-template-columns:1fr;gap:14px;}}
-@media(max-width:520px){.kit-bento{grid-template-columns:1fr;}.kit-bento .kit-item:first-child{grid-column:auto;}}
-#care-and-setup {max-width:68ch;}
-/* Event materials (landing): the planning card level with the intro, a shelf of what there is,
-   the reuse steps, then links to the rest of the Hub that events need */
-.intro-split {display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,410px);gap:48px;align-items:start;margin:0 0 44px;}
-.task-intro .intro-stats {display:flex;flex-wrap:wrap;gap:12px 40px;margin:24px 0 0;font-size:.86rem;line-height:1.35;color:var(--muted);}
-.intro-stats span {display:flex;flex-direction:column;gap:2px;}
-.intro-stats b {font-size:1.7rem;font-weight:700;letter-spacing:-.03em;line-height:1.1;color:var(--ink);}
-.intro-split > .task-intro {margin:0;}
-.plan-card {display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;padding:20px 22px;border:1px solid color-mix(in srgb,var(--link) 16%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--link) 4%,var(--bg));box-shadow:0 10px 30px -20px rgba(7,0,104,.35);}
-.plan-icon {display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:#fff;background:linear-gradient(135deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);}
-.plan-icon svg {width:22px;height:22px;}
-.content-body .plan-card h2 {margin:1px 0 2px;font-size:1.05rem;letter-spacing:-.01em;}
-.content-body .plan-card p {margin:0 0 14px;font-size:.93rem;line-height:1.5;color:var(--muted);}
+.content-body .kit > h2 {margin-top:8px;font-size:1.3rem;letter-spacing:-.015em;}
+
+/* Event materials (landing): what's available as a picture list, with planning, reuse and links beside it */
+.events-layout {display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,360px);gap:48px;align-items:start;}
+.content-body .avail > h2 {margin:0 0 10px;font-size:1.3rem;letter-spacing:-.015em;}
+.avail-list {list-style:none;margin:0;padding:0;border-top:1px solid var(--line);}
+.content-body .avail-list li {margin:0;border-bottom:1px solid var(--line);}
+body .content-body a.avail-row:any-link {display:grid;grid-template-columns:168px minmax(0,1fr) 18px;gap:20px;align-items:center;margin:0 -12px;padding:14px 12px;border-radius:12px;color:var(--ink);text-decoration:none;transition:background-color var(--t) var(--ease-soft);}
+body .content-body a.avail-row:any-link:hover {background:var(--surface);}
+.avail-row:after {content:"→";color:var(--muted);transition:transform var(--t) var(--ease-out),color var(--t) var(--ease-soft);}
+.avail-row:hover:after {transform:translateX(3px);color:var(--link);}
+.avail-row .kit-pic {border-radius:10px;background:color-mix(in srgb,var(--link) 5%,var(--surface));}
+.avail-text strong {display:block;font-size:1.05rem;line-height:1.3;}
+.avail-row:hover .avail-text strong,.avail-row:focus-visible .avail-text strong {text-decoration:underline;text-underline-offset:3px;}
+.avail-desc {display:block;margin-top:3px;font-size:.92rem;line-height:1.5;color:var(--muted);}
+.avail-meta {display:block;margin-top:6px;font-size:.82rem;color:var(--muted);}
+.avail-meta b {font-weight:650;color:var(--link);}
+.events-rail {display:grid;gap:18px;}
+.rail-card {padding:20px 22px;border:1px solid var(--line);border-radius:16px;background:var(--bg);}
+.content-body .rail-card h2 {margin:0 0 4px;font-size:1.02rem;letter-spacing:-.01em;}
+.content-body .rail-card > p,.content-body .plan-card p {margin:0 0 14px;font-size:.9rem;line-height:1.5;color:var(--muted);}
+.plan-card {display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;border-color:color-mix(in srgb,var(--link) 18%,var(--line));background:color-mix(in srgb,var(--link) 4%,var(--bg));}
+.plan-icon {display:grid;place-items:center;width:40px;height:40px;border-radius:11px;color:#fff;background:linear-gradient(135deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);}
+.plan-icon svg {width:20px;height:20px;}
 .plan-card .button {white-space:nowrap;}
-.content-body .shelf > h2,.content-body .also > h2 {margin:0 0 16px;font-size:1.3rem;letter-spacing:-.015em;}
-.shelf-grid {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;}
-.content-body .shelf-grid li {margin:0;}
-body .content-body a.shelf-item:any-link {display:block;color:var(--ink);text-decoration:none;}
-.shelf-item .kit-pic {border-radius:14px;transition:transform var(--t) var(--ease-out),box-shadow var(--t) var(--ease-soft);}
-.shelf-item:hover .kit-pic {transform:translateY(-3px);box-shadow:0 14px 26px -18px rgba(7,0,104,.5);}
-.shelf-item strong {display:block;margin-top:12px;font-size:.98rem;line-height:1.3;}
-.shelf-item:hover strong,.shelf-item:focus-visible strong {text-decoration:underline;text-underline-offset:3px;}
-.shelf-meta {display:block;margin-top:3px;font-size:.84rem;color:var(--muted);}
-.shelf-meta b {font-weight:650;color:var(--link);}
-.reuse-steps {margin:48px 0 0;padding:30px 34px 32px;border:1px solid color-mix(in srgb,var(--link) 12%,var(--line));border-radius:20px;background:linear-gradient(120deg,color-mix(in srgb,#070068 5%,var(--bg)) 0%,color-mix(in srgb,#aa005c 4%,var(--bg)) 100%);}
-.content-body .reuse-head h2 {margin:0;font-size:1.3rem;letter-spacing:-.015em;}
-.content-body .reuse-head p {margin:4px 0 0;font-size:.95rem;color:var(--muted);}
-.reuse-steps ol {list-style:none;margin:24px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;}
-.content-body .reuse-steps li {position:relative;margin:0;}
-.reuse-steps li:not(:last-child):after {content:"";position:absolute;top:23px;left:62px;right:-14px;height:2px;border-radius:2px;background:linear-gradient(90deg,color-mix(in srgb,var(--link) 40%,transparent),color-mix(in srgb,var(--link) 12%,transparent));}
-.reuse-icon {position:relative;z-index:1;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;color:#fff;background:linear-gradient(135deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);box-shadow:0 8px 18px -8px rgba(7,0,104,.55);}
-.reuse-icon svg {width:22px;height:22px;}
-.reuse-icon em {position:absolute;top:-4px;right:-6px;display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border:2px solid color-mix(in srgb,#070068 5%,var(--bg));border-radius:10px;background:var(--bg);color:var(--ink);font-size:.68rem;font-style:normal;font-weight:700;line-height:1;}
-.reuse-steps strong {display:block;margin:14px 0 4px;font-size:1rem;letter-spacing:-.01em;color:var(--ink);}
-.reuse-text {display:block;max-width:32ch;font-size:.9rem;line-height:1.5;color:var(--muted);}
-.also {margin:48px 0 8px;}
-.also-grid {list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
-.content-body .also-grid li {margin:0;}
-body .content-body a.also-item:any-link {display:flex;gap:14px;align-items:center;height:100%;padding:16px 18px;border:1px solid var(--line);border-radius:14px;color:var(--ink);text-decoration:none;transition:border-color var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
-body .content-body a.also-item:any-link:hover {border-color:color-mix(in srgb,var(--link) 35%,var(--line));background:var(--surface);}
-.also-icon {flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:11px;background:color-mix(in srgb,var(--link) 9%,var(--bg));color:var(--link);}
-.also-icon svg {width:20px;height:20px;}
-.also-text strong {display:block;font-size:.95rem;line-height:1.35;}
-.also-text > span {display:block;margin-top:2px;font-size:.85rem;line-height:1.45;color:var(--muted);}
-.also-item:hover .also-text strong,.also-item:focus-visible .also-text strong {text-decoration:underline;text-underline-offset:3px;}
-@media(max-width:1000px){.intro-split{grid-template-columns:1fr;gap:24px;}.shelf-grid{grid-template-columns:repeat(3,minmax(0,1fr));}.reuse-steps ol{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 32px;}.reuse-steps li:nth-child(2):after{display:none;}}
-@media(max-width:760px){.also-grid{grid-template-columns:1fr;}}
-@media(max-width:640px){.shelf-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
- .reuse-steps{margin-top:40px;padding:24px 20px 26px;border-radius:18px;}
- .reuse-steps ol{grid-template-columns:1fr;gap:24px;}
- .content-body .reuse-steps li{display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:16px;}
- .reuse-icon{grid-row:1 / span 2;}
- .reuse-steps strong{margin:4px 0 4px;}
- .reuse-steps li:not(:last-child):after,.reuse-steps li:nth-child(2):after{display:block;top:56px;bottom:-20px;left:23px;right:auto;width:2px;height:auto;background:linear-gradient(180deg,color-mix(in srgb,var(--link) 40%,transparent),color-mix(in srgb,var(--link) 12%,transparent));}
- .plan-card{grid-template-columns:1fr;gap:12px;padding:18px;}
- .task-intro .intro-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;font-size:.8rem;}
- .intro-stats b{font-size:1.45rem;}}
-/* Print and giveaway files: a short note before the downloads */
-.print-note {margin:4px 0 8px;padding:18px 22px;border:1px solid color-mix(in srgb,var(--link) 14%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--link) 3%,var(--bg));}
-.content-body .print-note h2 {margin:0 0 8px;font-size:1rem;}
-.content-body .print-note ul {margin:0;padding-left:18px;}
-.content-body .print-note li {margin:3px 0;font-size:.92rem;line-height:1.5;color:var(--ink);}
-.print-note + .downloads {margin-top:36px;}
-/* Events landing: the two pages as picture cards, then the reuse steps on the same grid */
-@media(max-width:520px){.reuse-steps ol{grid-template-columns:1fr;gap:22px;}}
+.reuse-list {list-style:none;margin:0;padding:0;display:grid;gap:14px;}
+.content-body .reuse-list li {position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;margin:0;}
+.reuse-list li:not(:last-child):after {content:"";position:absolute;left:17px;top:40px;bottom:-12px;width:2px;border-radius:2px;background:color-mix(in srgb,var(--link) 18%,transparent);}
+.reuse-icon {position:relative;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;color:#fff;background:linear-gradient(135deg,#070068 0%,#3a0a6a 55%,#aa005c 100%);}
+.reuse-icon svg {width:17px;height:17px;}
+.reuse-icon em {position:absolute;top:-5px;right:-6px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border:2px solid var(--bg);border-radius:9px;background:var(--bg);color:var(--ink);font-size:.62rem;font-style:normal;font-weight:700;line-height:1;box-shadow:0 0 0 1px var(--line);}
+.reuse-step strong {display:block;padding-top:1px;font-size:.92rem;line-height:1.3;}
+.reuse-step span {display:block;margin-top:2px;font-size:.84rem;line-height:1.45;color:var(--muted);}
+.also-list {list-style:none;margin:6px 0 0;padding:0;}
+.content-body .also-list li {margin:0;border-top:1px solid var(--line);}
+.content-body .also-list li:first-child {border-top:0;}
+body .content-body .also-list a:any-link {display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;align-items:center;padding:10px 0;color:var(--ink);text-decoration:none;}
+.also-icon {display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:color-mix(in srgb,var(--link) 9%,var(--bg));color:var(--link);}
+.also-icon svg {width:17px;height:17px;}
+.also-text strong {display:block;font-size:.9rem;line-height:1.3;}
+.also-text span {display:block;font-size:.8rem;line-height:1.4;color:var(--muted);}
+.also-list a:hover .also-text strong,.also-list a:focus-visible .also-text strong {text-decoration:underline;text-underline-offset:3px;}
+@media(max-width:1000px){.events-layout{grid-template-columns:1fr;gap:32px;}.events-rail{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;}.events-rail .plan-card{grid-column:1 / -1;}}
+@media(max-width:640px){.events-rail{grid-template-columns:1fr;}}
+@media(max-width:600px){body .content-body a.avail-row:any-link{grid-template-columns:104px minmax(0,1fr);gap:14px;}.avail-row:after{display:none;}.avail-desc{font-size:.86rem;}}
+
+/* Exhibition kit: a 3 x 2 grid of cards (the sixth says how to request the kit), then care beside the manual */
+.card-grid {list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
+.content-body .kit-card {display:flex;flex-direction:column;margin:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--bg);box-shadow:var(--shadow-sm);}
+.kit-card .kit-pic {border-radius:0;border-bottom:1px solid var(--line);}
+.kit-card-body {padding:12px 16px 14px;}
+.content-body .kit-card h3 {margin:0 0 2px;font-size:1rem;line-height:1.3;}
+.content-body .request-card {justify-content:center;padding:20px 22px;border-color:color-mix(in srgb,var(--link) 18%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,#070068 6%,var(--bg)),color-mix(in srgb,#aa005c 5%,var(--bg)));box-shadow:none;}
+.content-body .request-card h3 {margin:0 0 10px;font-size:1.02rem;}
+.content-body .request-list {margin:0 0 14px;padding-left:20px;}
+.content-body .request-list li {margin:0 0 6px;font-size:.9rem;line-height:1.45;}
+.content-body .request-list li::marker {font-weight:700;color:var(--link);}
+body .content-body a.request-link:any-link {align-self:flex-start;font-weight:650;}
+.care-grid {display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:40px;align-items:start;margin-top:40px;}
+.care-grid > .reading-section {margin:0;}
+.content-body .care-grid .reading-section h2,.content-body .care-grid .downloads-head h2 {margin:0;font-size:1.15rem;}
+.content-body .care-grid .reading-section h2 {margin-bottom:10px;}
+.care-grid .dl-label {white-space:normal;overflow:visible;}
+.content-body .care-grid .reading-section p {margin:0;}
+.care-grid > .downloads {margin:0;}
+@media(max-width:900px){.card-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.care-grid{grid-template-columns:1fr;gap:28px;}}
+@media(max-width:520px){.card-grid{grid-template-columns:1fr;}}
+
+/* Print and giveaway files: a short note, then the files under clear group headings */
+.print-note {display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 18px;align-items:baseline;margin:0 0 8px;padding:14px 18px;border:1px solid color-mix(in srgb,var(--link) 14%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--link) 3%,var(--bg));}
+.print-note strong {font-size:.88rem;}
+.content-body .print-note ul {display:flex;flex-wrap:wrap;gap:4px 22px;margin:0;padding:0;list-style:none;}
+.content-body .print-note li {margin:0;font-size:.88rem;line-height:1.5;color:var(--muted);}
+.print-note + .downloads {margin-top:32px;}
+.print-note + .downloads .downloads-head {display:none;}  /* the whole page is downloads: the group headings lead */
+body .content-body .dl-groups.cards .dl-group > h3 {margin:0;padding:0;font-size:1.1rem;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--ink);}
+body .content-body .dl-groups.cards .dl-group .dl-note {margin:3px 0 0;font-size:.88rem;}
+.dl-groups.cards {gap:40px;}
+@media(max-width:700px){.print-note{grid-template-columns:1fr;}}
 /* Side menu: pages under another page sit indented beneath it */
 .section-nav .nav-children {margin:2px 0 4px 14px;padding:0;border-left:1px solid var(--line);}
 .section-nav .nav-children li a {padding:5px 12px;font-size:.84rem;}
