@@ -1,5 +1,14 @@
 # Changes
 
+## 2.20.0 Site progress (proposal, branch claude/creative-hub-progress)
+
+Built on 2.19. The SKA-Low and SKA-Mid pages were hard to follow, so there is now one page for both telescopes above them, and the two site pages are simpler.
+
+- **New Site progress page** (Presentations › Site progress): the construction dashboard first, with the overall status beside it, then a card for each telescope showing that team's newest slides (read from the files on its page, so it never goes stale), its status slides and a link to all its slides. The weekly all-hands photos follow. It needs a Confluence page called "Site progress" in the Creative Hub space; until then the theme matches it by that title.
+- **SKA-Low progress and SKA-Mid progress:** a one-line intro, one row of links (status slides, dashboard, all-hands photos, both telescopes), then the slides with the newest one featured. The "Live status" box is gone, and the notes on adding slides fold away under "Adding slides" for the site teams.
+- The homepage "Site progress" quick link and the search answer for construction figures now open Site progress.
+- **Links that leave the Hub open in a new tab** (other sites, other Confluence spaces); Hub pages and downloads open in place.
+
 ## 2.19.0 Events from the production manual (proposal, branch claude/creative-hub-events)
 
 Built on 2.18. Three things from the Creative Production team's Events Production Manual, so the Events pages say what the team actually offers.

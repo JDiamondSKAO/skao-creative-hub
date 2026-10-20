@@ -647,6 +647,42 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   // Pages people keep current themselves (talks, site progress): every file on the page, newest first.
   // No "approved" label is needed, so adding a file is the whole job.
+  // Files people add to a page themselves, newest first. "2026-10 Name Event.pptx" reads as
+  // "Name Event", given October 2026. Thumbnails, data files and off-site links are left out.
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  function pageFiles(files, ctx) {
+    return files.filter((f) => !/^canto-|\.json$/i.test(String(f.title || ""))).map((f) => {
+      const title = String(f.title || ""), ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase();
+      const href = safeLink(ctx + (f._links?.download || ""));
+      const base = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").trim();
+      const dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
+      const month = dm && +dm[2] >= 1 && +dm[2] <= 12 ? MONTHS[+dm[2] - 1] + " " + dm[1] : "";
+      return { title, ext, href, name: dm ? dm[3].trim() : base, month, when: Date.parse(f.version?.when || "") || 0, size: f.extensions?.fileSize };
+    }).filter((r) => r.href).sort((x, y) => y.when - x.when);
+  }
+  const fmt = (t) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(t)); } catch { return ""; } };
+  const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+  async function attachmentsOf(pageId, ctx) {
+    const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200", expand: "version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
+    if (!res.ok) throw new Error(String(res.status));
+    return (await res.json()).results || [];
+  }
+  // Site progress: each site card shows the newest slides on that site's page.
+  $$("[data-latest-page]").forEach(async (card) => {
+    const slot = card.querySelector("[data-latest]"), ctx = document.body.dataset.context || "";
+    if (!slot || document.body.dataset.mode === "preview") return;
+    const say = (text) => { const p = document.createElement("p"); p.className = "site-latest-note"; p.textContent = text; slot.replaceChildren(p); };
+    let rows = [];
+    try { rows = pageFiles(await attachmentsOf(card.dataset.latestPage, ctx), ctx); } catch { say("The latest slides could not be loaded."); return; }
+    if (!rows.length) { say("No slides yet."); return; }
+    const r = rows[0], a = document.createElement("a");
+    a.className = "site-latest-file"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title;
+    const label = document.createElement("span"); label.className = "site-latest-label"; label.textContent = "Newest slides";
+    const name = document.createElement("strong"); name.textContent = r.name;
+    const meta = document.createElement("span"); meta.className = "file-meta";
+    meta.textContent = [r.month, r.when && "added " + fmt(r.when), r.ext.toUpperCase(), size(r.size)].filter(Boolean).join(" · ").replace(/^added/, "Added");
+    a.append(label, name, meta); slot.replaceChildren(a);
+  });
   const fileList = $("[data-attachments]");
   if (fileList) loadAttachments(fileList);
   async function loadAttachments(box) {
@@ -660,24 +696,9 @@ document.addEventListener("DOMContentLoaded", () => {
       box.querySelector(".attachments-head")?.append(a);
     }
     let files = [];
-    try {
-      const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200", expand: "version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
-      if (!res.ok) { note("The files on this page could not be loaded."); return; }
-      files = ((await res.json()).results || []).filter((f) => !/^canto-|\.json$/i.test(String(f.title || "")));
-    } catch { note("The files on this page could not be loaded."); return; }
-    const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const rows = files.map((f) => {
-      const title = String(f.title || ""), ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase();
-      const href = safeLink(ctx + (f._links?.download || ""));
-      // "2026-10 Name Event.pptx" reads as "Name Event", given October 2026.
-      const base = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").trim();
-      const dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
-      const month = dm && +dm[2] >= 1 && +dm[2] <= 12 ? MONTHS[+dm[2] - 1] + " " + dm[1] : "";
-      return { title, ext, href, name: dm ? dm[3].trim() : base, month, when: Date.parse(f.version?.when || "") || 0, size: f.extensions?.fileSize };
-    }).filter((r) => r.href).sort((x, y) => y.when - x.when);
+    try { files = await attachmentsOf(pageId, ctx); } catch { note("The files on this page could not be loaded."); return; }
+    const rows = pageFiles(files, ctx);
     if (!rows.length) { note(box.dataset.empty || "Nothing here yet."); return; }
-    const fmt = (t) => { try { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(t)); } catch { return ""; } };
-    const size = (n) => !n ? "" : n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
     const group = document.createElement("section"); group.className = "dl-group file-group";
     const ul = document.createElement("ul");
     rows.forEach((r, i) => {
@@ -1159,7 +1180,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bodyText = $(".content-body");
   if (bodyText && !bodyText.querySelector(".directory")) {
     bodyText.querySelectorAll("h2").forEach((h) => {
-      if (h.closest("[hidden], details, .section-next, .catalogue, .canto-show, .asset-panel, .live-link, .site-photos, .attachments-head, .next-step, .downloads-head")) return;
+      if (h.closest("[hidden], details, .section-next, .catalogue, .canto-show, .asset-panel, .live-link, .site-photos, .site-card, .kit-item, .attachments-head, .next-step, .downloads-head")) return;
       if (!h.id) { let id = slugify(h.textContent); while (document.getElementById(id)) id += "-2"; h.id = id; }
       const b = document.createElement("button");
       b.type = "button"; b.className = "heading-link"; b.setAttribute("aria-label", "Copy a link to " + h.textContent.trim());

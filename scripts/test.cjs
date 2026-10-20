@@ -57,7 +57,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  for(const t of ['presentations','documents','brand','media'])assert(rq(`[data-type-filter="${t}"]`),t);rd.window.close();pass('Templates and assets is one full-width catalogue with type filters instead of duplicate cards');
  const pd=new JSDOM(fs.readFileSync(path.join(root,'docs/presentations.html'),'utf8'));
  const pdoc=pd.window.document,destinations=[...pdoc.querySelectorAll('.directory .dir-row')].map(a=>a.getAttribute('href'));
- for(const f of ['standard-template.html','partner-templates.html','master-deck.html','low-slides.html','mid-slides.html','recent-talks.html','formatting-slides.html'])assert(destinations.includes(f),f);
+ for(const f of ['standard-template.html','partner-templates.html','master-deck.html','site-progress.html','low-slides.html','mid-slides.html','recent-talks.html','formatting-slides.html'])assert(destinations.includes(f),f);
  assert.deepEqual([...pdoc.querySelectorAll('.directory .dir-group h2')].map(h=>h.firstChild.textContent.trim()),['Templates','Decks to reuse','Site progress','Shared by staff','How to']);assert(!pdoc.querySelector('.dir-add'),'no separate share row: Recent talks covers it');
  assert.equal(new Set(destinations).size,destinations.length);assert(!pdoc.querySelector('details .dir-row'),'page links are never collapsed');const railItems=[...pdoc.querySelectorAll('.landing-rail details.rail-item')];assert.equal(railItems.length,3);assert(railItems.every(d=>!d.open),'several pieces of advice start closed, each one click away');assert(pdoc.querySelector('.landing-main > .task-intro'),'the intro sits beside Before you start');assert(!pdoc.querySelector('.landing-rail a.button'),'no on-request box: help lives in the footer');assert(!pdoc.querySelector('.dir-meta.req,.dir-legend'),'no status dots or legend');assert(pdoc.querySelector('.landing-rail .source-check'));assert(pdoc.querySelector('.landing-rail .reuse-decision'));
  pass('Presentations landing shows every presentation page, grouped and visible, with freshness/reuse guidance');
@@ -66,7 +66,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   assert.equal(doc.querySelector('.asset-panel').dataset.pageId,'555001',title+' reads its own attachments');assert.equal(doc.querySelector('.sidebar .section-nav h2').textContent,section);assert(!out.includes('99000000'),'no stand-in IDs in production');}
  pass('New partner pages render in production by title, before their page IDs are known');
  const routes=JSON.parse(fs.readFileSync(path.join(root,'evidence/interior-route-map.json')));
- assert.equal(Object.keys(routes).length,63);
+ assert.equal(Object.keys(routes).length,64);
  for(const [file,route] of Object.entries(routes)){
   const out=Velocity.render(tpl,{page:page(route.id,route.source_title),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,title)=>'/crh/'+encodeURIComponent(title)}});
   const doc=new JSDOM(out).window.document;
@@ -161,10 +161,15 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  const read=f=>new JSDOM(fs.readFileSync(path.join(root,'docs',f),'utf8')).window.document;
  const st=read('standard-template.html');assert.deepEqual([...st.querySelectorAll('.variant-list li')].map(l=>l.textContent),['Unrestricted','Staff Resources','SKAO Staff Only','For Project Use','Confidential','Strictly Confidential']);
  assert.deepEqual([...read('poster-templates.html').querySelectorAll('.variant-list li')].map(l=>l.textContent),['A0','A1','A2']);
- const decks=read('master-deck.html');assert.deepEqual([...decks.querySelectorAll('.asset-actions a')].map(a=>a.getAttribute('href')),['formatting-slides.html','low-slides.html','mid-slides.html','recent-talks.html']);assert(decks.querySelector('[data-fact="planned"]'));
+ const decks=read('master-deck.html');assert.deepEqual([...decks.querySelectorAll('.asset-actions a')].map(a=>a.getAttribute('href')),['formatting-slides.html','site-progress.html','recent-talks.html']);assert(decks.querySelector('[data-fact="planned"]'));
  assert.equal(read('memos.html').querySelector('.page-head h1').textContent,'Memo and report templates');assert(read('stands.html').body.textContent.includes('Existing designs to reuse'));
  assert(read('standard-template.html').querySelector('[data-fact="google slides"] .pending-link'),'the review build shows what still needs a link');
- const low=read('low-slides.html');assert(low.querySelector('.live-link [data-link="CONSTRUCTION_DASHBOARD"][data-class="button"]')&&low.querySelector('.live-link [data-link="LOW_STATUS"]')&&low.querySelector('.live-link [data-link="CONSTRUCTION_STATUS"]'),'progress pages lead with the dashboard, then the site status slides and the overall status');
+ const low=read('low-slides.html');assert(!low.querySelector('.live-link'),'no status box on the site pages');
+ assert.deepEqual([...low.querySelectorAll('.progress-links [data-link]')].map(e=>e.dataset.link),['LOW_STATUS','CONSTRUCTION_DASHBOARD','ALLHANDS'],'one row of links: status slides, dashboard, all-hands photos');
+ assert(low.querySelector('.progress-links a[href="site-progress.html"]'),'and back to both telescopes');assert(low.querySelector('details.guidance-detail summary').textContent.startsWith('Adding slides'),'contributor notes fold away');
+ const sp=read('site-progress.html');assert(sp.querySelector('.task-intro [data-link="CONSTRUCTION_DASHBOARD"][data-class="button"]'),'Site progress leads with the dashboard');
+ assert.deepEqual([...sp.querySelectorAll('.site-card h2')].map(h=>h.textContent),['SKA-Low','SKA-Mid']);assert.deepEqual([...sp.querySelectorAll('.site-card [data-link]')].map(e=>e.dataset.link),['LOW_STATUS','MID_STATUS']);
+ assert(sp.querySelector('.site-photos'),'with the all-hands photos');assert.equal(read('index.html').querySelector('.quick-links a[href="site-progress.html"]').textContent,'Site progress');
  const nt=dom('fonts.html'),ntd=nt.window.document;ntd.addEventListener('click',e=>e.preventDefault());
  const gf=ntd.querySelector('a[href^="https://fonts.google.com"]');assert.equal(gf.target,'_blank','another site opens in a new tab');assert(gf.rel.includes('noopener'));assert.equal(gf.getAttribute('aria-describedby'),'newTabHint');
  assert(![...ntd.querySelectorAll('a[href$=".html"], a[href^="#"]')].some(a=>a.target),'Hub pages open in place');
@@ -231,6 +236,16 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(talkQ('.attachments-add').href.includes('/pages/viewpageattachments.action?pageId='+talksId));assert.equal(talkQ('.attachments-add').textContent,'Add your talk');tk.window.close();
  const tp=dom('recent-talks.html');assert(tp.window.document.querySelector('.attachments-note').textContent.startsWith('Preview'));tp.window.close();
  pass('Recent talks and site progress list every file on their page, newest first, with an add link for the people who keep them current');
+ const lowId=routes['low-slides.html'].id,midId=routes['mid-slides.html'].id,spg=dom('site-progress.html','confluence'),spw=spg.window;
+ spw.fetch=async u=>{const s=String(u);if(s.includes(`/content/${lowId}/child/attachment`))return {ok:true,json:async()=>({results:[
+  {title:'2026-09 SKA-Low progress.pptx',version:{when:'2026-09-15T10:00:00Z'},extensions:{fileSize:3145728},_links:{download:`/download/attachments/${lowId}/a.pptx`}},
+  {title:'2026-10 SKA-Low progress.pptx',version:{when:'2026-10-15T10:00:00Z'},extensions:{fileSize:3145728},_links:{download:`/download/attachments/${lowId}/b.pptx`}}]})};
+  if(s.includes(`/content/${midId}/child/attachment`))return {ok:true,json:async()=>({results:[]})};return {ok:true,json:async()=>({results:[]})};};
+ spw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
+ const cards=[...spw.document.querySelectorAll('.site-card')];
+ assert.equal(cards[0].querySelector('.site-latest-file strong').textContent,'SKA-Low progress','the newest SKA-Low slides');assert(cards[0].querySelector('.site-latest-file').getAttribute('href').endsWith('/b.pptx'));
+ assert(cards[0].querySelector('.file-meta').textContent.startsWith('October 2026'));assert.equal(cards[1].querySelector('.site-latest-note').textContent,'No slides yet.');spg.window.close();
+ pass('Site progress shows each site team’s newest slides, read from that site’s page');
  // Events: lead times and request steps on the landing; the kit on Stands and merchandise.
  const ev=read('events.html');
  assert.equal(ev.querySelectorAll('.landing-main .lead-table tbody tr').length,6,'lead times sit in the main column');

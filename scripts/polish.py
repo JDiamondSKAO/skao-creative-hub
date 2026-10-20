@@ -27,7 +27,7 @@ SECTIONS = [
  ('presentations', 'Presentations', 'presentations.html', [
   ('Templates', ['standard-template.html', 'partner-templates.html']),
   ('Decks to reuse', ['master-deck.html']),
-  ('Site progress', ['low-slides.html', 'mid-slides.html']),
+  ('Site progress', ['site-progress.html', 'low-slides.html', 'mid-slides.html']),
   ('Shared by staff', ['recent-talks.html']),
   ('How to', ['formatting-slides.html'])]),
  ('documents', 'Documents', 'documents.html', [
@@ -149,7 +149,7 @@ APPROVER = 'Communications'
 CARD_LINKS = {'standard-template.html': [('partner-templates.html', 'Partner templates')],
  'logos.html': [('partner-logos.html', 'Partner logos')],
  'partner-logos.html': [('logos.html', 'SKAO logos')],
- 'master-deck.html': [('low-slides.html', 'SKA-Low progress'), ('mid-slides.html', 'SKA-Mid progress'), ('recent-talks.html', 'Recent talks')]}
+ 'master-deck.html': [('site-progress.html', 'Site progress'), ('recent-talks.html', 'Recent talks')]}
 
 def asset_panel(name, body, jira):
  m = re.search(r'<div class="task-intro"><div>(?:<span class="eyebrow">.*?</span>)?<p>(.*?)</p></div></div>', body, re.S)
@@ -405,6 +405,8 @@ def revise(pages, meta, jira, canto=''):
  title, body = pages['media.html']
  at = body.find('<div class="landing-layout">')
  pages['media.html'] = (title, body[:at] + canto_gallery(canto) + site_photos() + body[at:] if at >= 0 else body + canto_gallery(canto) + site_photos())
+ title, body = pages['site-progress.html']
+ pages['site-progress.html'] = (title, body.replace('<div data-site-photos></div>', site_photos()))
  for name, words in CANTO_STRIPS.items():
   title, body = pages[name]
   m = re.search(r'<div class="media-handoff">.*?</div></div>', body, re.S)
