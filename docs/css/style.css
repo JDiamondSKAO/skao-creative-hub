@@ -1112,13 +1112,14 @@ header.is-pinned a.nav-feedback {max-width:150px;margin-left:0;padding:9px 15px 
 @media(min-width:1241px){header.is-pinned .search-trigger{min-width:0;width:180px;}header.is-pinned .search-trigger kbd{display:none;}} /* room for Feedback beside search */
 .navlinks a.nav-menu-extra {display:none;}
 @media(max-width:1000px){.navlinks a.nav-menu-extra{display:block;text-align:left;color:var(--link);font-weight:700;border-bottom:0;padding-block:11px;}.navlinks a.nav-menu-extra:after{content:none;}.navlinks a.nav-menu-extra:not(.nav-menu-extra + .nav-menu-extra){margin-top:6px;}}
-/* The Canto Media Library: a sibling of the search box (same height, border and radius), with a photo-stack icon
-   in the photos-and-video colour. In the compact bar it is the icon alone, with a small tooltip. */
-body a.nav-canto {position:relative;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 13px 0 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:.86rem;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:border-color var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
-body a.nav-canto:hover {border-color:color-mix(in srgb,var(--link) 30%,var(--line));background:var(--surface);}
+/* The Canto Media Library: a sibling of the search box (same height and radius), tinted in the photos-and-video
+   colour so it stands out a little. In the compact bar it is the icon alone, with a small tooltip. */
+:root {--canto-c:#0e7490;} :root.dark {--canto-c:#67cfe0;}
+body a.nav-canto {position:relative;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 13px 0 11px;border:1px solid color-mix(in srgb,var(--canto-c) 30%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--canto-c) 7%,var(--bg));color:color-mix(in srgb,var(--canto-c) 55%,var(--ink));font-size:.86rem;font-weight:600;line-height:1.2;text-decoration:none;white-space:nowrap;transition:border-color var(--t) var(--ease-soft),background-color var(--t) var(--ease-soft);}
+body a.nav-canto:hover {border-color:color-mix(in srgb,var(--canto-c) 50%,var(--line));background:color-mix(in srgb,var(--canto-c) 13%,var(--bg));}
 .nav-canto svg {flex:none;width:18px;height:18px;color:var(--canto-c);}
-.nav-canto-arr {font-size:.8em;color:var(--muted);transition:transform var(--t) var(--ease-out),color var(--t) var(--ease-soft);}
-a.nav-canto:hover .nav-canto-arr {transform:translate(1px,-1px);color:var(--ink);}
+.nav-canto-arr {font-size:.8em;color:color-mix(in srgb,var(--canto-c) 60%,var(--muted));transition:transform var(--t) var(--ease-out),color var(--t) var(--ease-soft);}
+a.nav-canto:hover .nav-canto-arr {transform:translate(1px,-1px);color:var(--canto-c);}
 a.nav-canto:after {content:attr(data-tip);position:absolute;top:calc(100% + 9px);left:50%;z-index:60;padding:6px 10px;border-radius:7px;background:var(--ink);color:var(--bg);font-size:.74rem;font-weight:600;white-space:nowrap;box-shadow:var(--shadow-md);opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,-3px);transition:opacity .15s ease,transform .15s ease,visibility 0s linear .15s;}
 header.is-pinned a.nav-canto {width:40px;padding:0;justify-content:center;gap:0;}
 header.is-pinned .nav-canto-text,header.is-pinned .nav-canto-arr {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
