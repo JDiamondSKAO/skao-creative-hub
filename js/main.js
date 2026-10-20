@@ -3,6 +3,26 @@ document.documentElement.classList.add("js");
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (s) => document.querySelector(s),
     $$ = (s) => [...document.querySelectorAll(s)];
+  // Links that leave the Hub (another site, another Confluence space, Confluence's own screens) open in a
+  // new tab, so the Hub stays open behind them. Hub pages and downloads open in place, so Back still works.
+  const leavesHub = (a) => {
+    if (a.hasAttribute("download") || a.hasAttribute("target")) return false;
+    let u; try { u = new URL(a.getAttribute("href") || "", location.href); } catch { return false; }
+    if (!/^https?:$/.test(u.protocol)) return false;
+    if (u.origin !== location.origin) return true;
+    if (u.pathname.includes("/download/")) return false;
+    const space = u.pathname.match(/\/(?:display|spaces)\/([^/]+)/);
+    return (space && space[1].toUpperCase() !== "CRH") || /\/pages\/viewpageattachments\.action$/.test(u.pathname);
+  };
+  const newTab = (a) => {
+    a.target = "_blank"; a.rel = (a.rel + " noopener").trim();
+    a.setAttribute("aria-describedby", ((a.getAttribute("aria-describedby") || "") + " newTabHint").trim());
+  };
+  const tabHint = document.createElement("span"); tabHint.id = "newTabHint"; tabHint.hidden = true; tabHint.textContent = "Opens in a new tab";
+  document.body.append(tabHint);
+  $$("a[href]").forEach((a) => { if (leavesHub(a)) newTab(a); });
+  // Links added later (search results, downloads, the slideshow) are caught as they are used.
+  document.addEventListener("click", (e) => { const a = e.target.closest?.("a[href]"); if (a && leavesHub(a)) newTab(a); }, true);
   const motion = $("#motionToggle");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (motion) {
