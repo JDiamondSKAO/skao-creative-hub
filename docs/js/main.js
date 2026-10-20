@@ -460,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (preview) {
       const day = 864e5, now = Date.now();
       rows = [
-        { title: "SKAO_PPT_Unrestricted.pptx", container: { title: "Standard SKAO template" }, version: { when: new Date(now - 2 * day).toISOString() }, extensions: { fileSize: 3.4 * 1048576 } },
+        { title: "SKAO_PPT_Unrestricted.pptx", container: { title: "Slide deck and template" }, version: { when: new Date(now - 2 * day).toISOString() }, extensions: { fileSize: 3.4 * 1048576 } },
         { title: "2026-10 SKA-Low progress.pptx", container: { title: "SKA-Low progress" }, version: { when: new Date(now - 5 * day).toISOString() }, extensions: { fileSize: 12.6 * 1048576 } },
         { title: "SKAO_Letterhead_UNRESTRICTED.docx", container: { title: "Letterheads" }, version: { when: new Date(now - 9 * day).toISOString(), number: 2 }, extensions: { fileSize: 143 * 1024 } },
         { title: "SKAO_SRCnet_logo_colour_rgb.png", container: { title: "Partner logos" }, version: { when: new Date(now - 41 * day).toISOString() }, extensions: { fileSize: 62 * 1024 } },
@@ -776,8 +776,8 @@ document.addEventListener("DOMContentLoaded", () => {
     beside(section, view);
     arrive();
   }
-  // A button for one named file, such as the master deck on the Standard SKAO template page
-  // (data-file-button="master deck"): it appears once the file is there, with the file's size beside it.
+  // A button for one named file, such as the SKAO slide deck on Slide deck and template
+  // (data-file-button="slide deck"): it appears once the file is there, with the file's size beside it.
   function fileButtons(files, ctx) {
     $$("[data-file-button]").forEach((a) => {
       const want = new RegExp(a.dataset.fileButton.replace(/[^a-z0-9 ]/gi, "").replace(/ +/g, "[\\s_-]*"), "i");
@@ -1076,7 +1076,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const partnerPage = /co-branding|partner/i.test($(".page-head h1")?.textContent || "");
     let rules = [];
     try { rules = JSON.parse($("[data-dl-groups]")?.dataset.dlGroups || "[]").map((r) => ({ ...r, re: new RegExp(r.match, "i"), cut: r.strip ? new RegExp(r.strip, "gi") : null })); } catch { rules = []; }
-    // A page can show a file in its own place instead (the master deck has its own card), so the list leaves it out.
+    // A page can show a file in its own place instead (the slide deck has its own card), so the list leaves it out.
     files = files.filter((f) => !rules.some((r) => r.hide && r.re.test(String(f.title || ""))));
     const pattern = (label) => new RegExp("(^|[\\s_-])" + label.replace(/ /g, "[\\s_-]+") + "($|[\\s_.-])", "i");
     const tidy = (label) => {
@@ -1432,7 +1432,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.body.dataset.mode === "preview") {
       $("#latestLead").textContent = "Examples in this preview";
       const examples = [
-        { title: "Presentation-template.potx", when: Date.now() - 2 * 864e5, size: 4.2 * 1048576, pageTitle: "Standard SKAO template" },
+        { title: "Presentation-template.potx", when: Date.now() - 2 * 864e5, size: 4.2 * 1048576, pageTitle: "Slide deck and template" },
         { title: "Letterhead-A4.dotx", when: Date.now() - 6 * 864e5, size: 310 * 1024, pageTitle: "Letterheads" },
         { title: "Poster-A0-portrait.pdf", when: Date.now() - 11 * 864e5, size: 2.8 * 1048576, pageTitle: "Poster templates" },
       ];

@@ -1,13 +1,13 @@
-"""Slide pictures for the Standard SKAO template page, from the master deck's own renders.
+"""Slide pictures for the Slide deck and template page, from the SKAO slide deck's own renders.
 
-Reads the slide PNGs the master deck repository renders from PowerPoint (read only) and writes a small
+Reads the slide PNGs the slide deck repository renders from PowerPoint (read only) and writes a small
 WebP for each picture the page asks for (slidekit.PICTURES: deck-cover.webp and so on) to build/deck/.
-They go on the Standard SKAO Template page in Confluence without a label, so the page shows them as
+They go on that page in Confluence (titled Standard SKAO Template there) without a label, so the page shows them as
 pictures rather than listing them as downloads. The renders carry approved photos with their credits,
 so they stay out of this public repository.
 
 Usage: python3 scripts/deck_images.py [folder of slide-NN.png renders]
-       (default: "master_deck_renders" in dev/brandbank-map.json)
+       (default: "deck_renders" in dev/brandbank-map.json)
 """
 import json
 import sys
@@ -28,7 +28,7 @@ def main(argv):
         src = Path(argv[0])
     else:
         spec = json.loads((ROOT / 'dev' / 'brandbank-map.json').read_text())
-        src = Path(spec['master_deck_renders'])
+        src = Path(spec['deck_renders'])
     OUT.mkdir(parents=True, exist_ok=True)
     for old in OUT.glob('deck-*.webp'):
         old.unlink()

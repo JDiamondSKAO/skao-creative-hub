@@ -70,9 +70,9 @@ DOWNLOAD_GROUPS = {
   {'group': 'SRCNet logo', 'note': 'The full logo, for most uses', 'match': 'srcnet_logo', 'strip': r'\bskao\b|\bsrcnet\b|\brgb\b|\blogo\b|\bmono'},
   {'group': 'SRCNet avatar', 'note': 'The round mark, for small spaces and social media', 'match': 'srcnet_avatar', 'strip': r'\bskao\b|\bsrcnet\b|\brgb\b|\bavatar\b|\bmono'},
   {'group': 'Regional centres', 'note': 'One pack per centre, with every version of its logo in AI, EPS and PNG', 'match': 'src'}],
- # The template page shows the master deck in its own card (slidekit), so the list keeps to the template versions.
+ # The template page shows the slide deck in its own card (slidekit), so the list keeps to the template versions.
  'standard-template.html': [
-  {'group': 'Master deck', 'match': 'master[\\s_-]*deck', 'hide': True}],
+  {'group': 'Slide deck', 'match': 'slide[\\s_-]*deck', 'hide': True}],
  'master-deck.html': [
   {'group': 'About the SKAO', 'match': 'about|master|overview|introduc|briefing|press|media|colloquium|exhibition|samagam'},
   {'group': 'Science', 'match': 'science'},

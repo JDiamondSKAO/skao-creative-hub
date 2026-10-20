@@ -27,7 +27,7 @@ MOVED = {
  'email-signatures.html': ('documents.html', 'Documents'),
  'canto-guide.html': ('canto-access.html', 'Using the Canto library'),
  # 2.17: pages folded into fuller ones.
- 'widescreen-template.html': ('standard-template.html', 'Standard SKAO template'),
+ 'widescreen-template.html': ('standard-template.html', 'Slide deck and template'),
  'science-slides.html': ('master-deck.html', 'Approved slide decks'),
  'construction-slides.html': ('master-deck.html', 'Approved slide decks'),
  'specialised-slides.html': ('master-deck.html', 'Approved slide decks'),
@@ -47,7 +47,7 @@ MOVED = {
 RETIRED = {
  'email-signatures.html': ('Now looked after by IT', 'Email signatures are now managed by IT. For a new or updated signature, contact the IT service desk.', True),
  'canto-guide.html': ('This page has moved', 'All the Canto guidance is now on one page: Using the Canto library.', False),
- 'widescreen-template.html': ('This page has moved', 'All SKAO presentation templates are 16:9, so the Standard SKAO template is the widescreen one.', False),
+ 'widescreen-template.html': ('This page has moved', 'All SKAO presentation templates are 16:9, so the SKAO template on Slide deck and template is the widescreen one.', False),
  'event-safety.html': ('Part of planning an event', 'Safety is planned with the event, so the Hub doesn’t cover it. Planning an event? Start with the Comms helpdesk. For the exhibition kit and print files, see Event materials.', False),
  'event-checklist.html': ('This page has gone', 'Planning an event? Start with the Comms helpdesk. For the exhibition kit and print files, see Event materials.', False),
 }
@@ -129,8 +129,8 @@ def apply(pages, jira):
 # links in the search dialog, so production rewrites their addresses like any other link.
 ANSWERS = [
  ('logo logos lockup artwork emblem', 'Where do I get the SKAO logo?', 'Logo files are on Logos and icons, in versions for light and dark backgrounds. Anyone outside the SKAO needs permission to use it.', 'logos.html', 'Logos and icons'),
- ('template powerpoint pptx potx slides slide presentation', 'Where’s the slide template?', 'Start from the SKAO master deck for ready-made slides, or the blank template for your own content. Both are on Standard SKAO template, and partner templates cover joint work.', 'standard-template.html', 'Standard SKAO template'),
- ('master deck overview introduce introduction about skao facts slides talk', 'Is there a deck about the SKAO?', 'The SKAO master deck tells the SKAO story in seven sections, with approved facts, photos and layouts. Download it from Standard SKAO template.', 'standard-template.html', 'SKAO master deck'),
+ ('template powerpoint pptx potx slides slide presentation', 'Where’s the slide template?', 'Start from the SKAO slide deck for ready-made slides, or the blank template for your own content. Both are on Slide deck and template, and partner templates cover joint work.', 'standard-template.html', 'Slide deck and template'),
+ ('slide deck overview introduce introduction about skao facts slides talk', 'Is there a deck about the SKAO?', 'The SKAO slide deck tells the SKAO story in seven sections, with approved facts, photos and layouts. Download it from Slide deck and template.', 'standard-template.html', 'SKAO slide deck'),
  ('colour colours color colors hex rgb cmyk pantone palette', 'What are the SKAO colours?', 'Navy and magenta lead, with accent palettes for science, technology and the sites. Copy hex, RGB, CMYK or Pantone values from Colours and typography.', 'colours-and-type.html', 'Colours and typography'),
  ('font fonts typeface noto verdana typography', 'Which font do we use?', 'Noto Sans, with Verdana as the fallback where Noto isn’t installed.', 'fonts.html', 'Fonts'),
  ('photo photos image images picture pictures canto photography', 'Where are the photos?', 'In the staff media library in Canto. First time? Choose Register Now and use your SKAO email address.', 'media.html', 'Photos and video'),
