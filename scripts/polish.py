@@ -14,6 +14,9 @@ def text(fragment):
  return re.sub(r'\s+([,.;:!?])', r'\1', re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', fragment)))).strip()
 
 def summary(body):
+ # A page can name its own one-line summary when its first paragraph isn't one.
+ own = re.search(r'data-summary="([^"]*)"', body)
+ if own: return html.unescape(own.group(1))
  m = re.search(r'<div class="task-intro[^"]*">.*?<p[^>]*>(.*?)</p>', body, re.S) or re.search(r'<p[^>]*>(.*?)</p>', body, re.S)
  return text(m.group(1)) if m else ''
 

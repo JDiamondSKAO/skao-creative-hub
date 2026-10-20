@@ -34,6 +34,12 @@ def missing(label,jira):
  detail={'Logo pack link needs completing':'The logo pack download is still being set up.','Brand Book download needs completing':'The Brand Book download is still being set up.'}.get(label,'This page does not have a download link yet.')
  return '<aside class="availability-note" role="note"><span class="availability-icon" aria-hidden="true"></span><p><strong>Not yet available.</strong> '+detail+'</p></aside>'
 HSSE='https://jira.skatelescope.org/servicedesk/customer/portal/298'
+# Small line icons for the Status and photos cards.
+_svg=lambda d:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'
+SOURCE_ICONS={'slides':_svg('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/>'),
+ 'dashboard':_svg('<path d="M3 20h18"/><rect x="5" y="11" width="3" height="6" rx="1"/><rect x="10.5" y="7" width="3" height="10" rx="1"/><rect x="16" y="4" width="3" height="13" rx="1"/>'),
+ 'doc':_svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>'),
+ 'photos':_svg('<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5-5 4 4 2-2 5 5"/>')}
 # Minimum lead times from the Events Production Manual (2025), counted back from the day it's needed.
 LEAD_TIMES=[('Standard print: flyers, posters and banners','2–3 weeks'),('Event photography or video','3–4 weeks'),('Merchandise and giveaways','4–6 weeks'),
  ('Bespoke gifts or branded clothing','6–8 weeks'),('Animation and video production','6–8 weeks, depending on complexity'),('Bespoke production, such as an exhibition stand','8–10 weeks or more')]
@@ -152,28 +158,30 @@ def revise(pages,jira,canto):
  # 2.17: fewer, fuller pages. Pages folded into others keep a stub here; gethelp turns them into notes.
  after_use=['Check its version and date: figures change as construction moves on.','Save your working copy separately and keep credits and sources.','Specialised decks are shared by staff and approved by Communications. Ask the owner before changing what they say.']
  put('master-deck.html','Decks to reuse',intro('Approved decks to reuse and adapt: an introduction to the SKAO, the science case, construction progress across both sites, and decks on specialised topics.',tag='Resource source')+missing('',jira)+block('Before you use the file',after_use))
- # Site progress: one page for both telescopes, then a page per site for that team's slides.
- # The telescope photos and the newest slides come from the files on each site page (see main.js).
+ # Site progress: Construction overview for both telescopes, then a page per site for that team's slides.
+ # Telescope photos and the newest slides come from the files on each site page (see main.js).
  sites=[('low-slides.html','SKA-Low','LOW','Australia'),('mid-slides.html','SKA-Mid','MID','South Africa')]
- def row(name,label,desc):
-  return needs('<li>'+pending(name,label)+'<span>'+desc+'</span></li>',url(name))
- def status_list(rows):
-  return needs('<section class="status-links"><h2>Status and photos</h2><ul class="link-list">'+''.join(row(*r) for r in rows)+'</ul></section>',any(url(r[0]) for r in rows))
- dashboard=('CONSTRUCTION_DASHBOARD','Construction dashboard','Live figures for both telescopes. It’s still being built and needs your SKAO Google sign-in.')
- photos=('ALLHANDS','Weekly all-hands photos','Photos from each site’s weekly all-hands, in the staff media library.')
+ def sources(cards):
+  # Status and photos: compact cards for the live sources that sit outside the Hub.
+  items=''.join(needs(f'<li class="source-card"><span class="source-icon" aria-hidden="true">{SOURCE_ICONS[icon]}</span>'+pending(name,title,'source-link')+f'<span class="source-desc">{desc}</span></li>',url(name)) for name,title,desc,icon in cards)
+  return needs('<section class="sources"><h2 class="sources-title">Status and photos</h2><ul class="source-cards">'+items+'</ul></section>',any(url(c[0]) for c in cards))
+ dashboard=('CONSTRUCTION_DASHBOARD','Construction dashboard','Live figures for both telescopes. Still being built.','dashboard')
+ photos=('ALLHANDS','All-hands photos','From each site’s weekly all-hands, in the staff media library.','photos')
  put('site-progress.html','Construction overview',intro('Where construction of the two telescopes stands. Choose a telescope for its team’s progress slides.')+
   '<div class="scope-tiles">'+''.join(
    f'<a class="scope-tile" href="{name}" data-site-page="{META[name]["id"]}"><span class="scope-photo" aria-hidden="true"></span>'
    f'<span class="scope-text"><span class="scope-place">{place}</span><strong>{site}</strong><span class="scope-latest" data-latest-line>Progress slides</span></span></a>'
    for name,site,key,place in sites)+'</div>'+
-  status_list([dashboard,('CONSTRUCTION_STATUS','Overall status','The written summary for both telescopes, drawn from the site teams’ status slides.'),photos]))
+  sources([dashboard,('CONSTRUCTION_STATUS','Overall status','The written summary for both telescopes.','doc'),photos]))
  for name,site,key,place in sites:
-  put(name,site+' progress','<div class="scope-banner" data-site-photo hidden></div>'+
-   intro(f'The {site} team’s progress slides, newest first. Check the date before you use any figures.')+
-   '<section class="attachments progress-files" data-attachments="all" data-feature-latest data-add-label="add slides to this page" data-empty="No slides yet. The '+site+' team adds them here.">'
-   '<div data-latest-feature></div><div class="attachments-head" hidden><h2>Earlier slides</h2></div><div data-attachment-list></div></section>'+
-   status_list([(key+'_STATUS',f'{site} status slides','The team’s own status deck, kept up to date as work moves on.'),dashboard,photos])+
-   f'<p class="team-note" data-add-note hidden>For the {site} team: <span data-add-slot></span>. Start each file name with the year and month, for example 2026-10.</p>')
+  put(name,site+' progress',
+   # The newest deck leads, in a panel with the telescope photo; main.js fills it from the page's files.
+   f'<section class="site-hero" data-site-hero data-empty="The {site} team adds them here." data-summary="The {site} team’s progress slides, newest first.">'
+   '<div class="site-hero-photo" data-site-photo aria-hidden="true"></div>'
+   '<div class="site-hero-text"><p class="site-hero-kicker">Latest progress slides</p><p class="site-hero-title" data-hero-title>Newest deck</p>'
+   f'<p class="site-hero-meta" data-hero-meta>In Confluence, the {site} team’s newest slides show here, ready to download.</p><p class="site-hero-actions" data-hero-actions></p></div></section>'+
+   sources([(key+'_STATUS',f'{site} status slides','The team’s live status deck.','slides'),dashboard,photos])+
+   '<section class="attachments progress-files" data-attachments="all" data-site-files hidden><div class="attachments-head"><h2>Earlier slides</h2></div><div data-attachment-list></div></section>')
  put('recent-talks.html','Recent talks',intro('Slides from talks given by SKAO staff, newest first. They are shared as presented and not reviewed by Communications, so check facts and figures with the speaker before reusing them.',tag='Shared by staff')+
   '<section class="attachments" data-attachments="all" data-add-label="Add your talk" data-empty="No talks yet. Add the first one."><div class="attachments-head"><h2>Talks</h2></div><div data-attachment-list></div></section>'+
   block('Add your talk',['Start the file name with the year and month, then your name and the event, for example 2026-10 Name Event.','Only add slides cleared for all staff: Unrestricted or Staff Resources.','Add the file to this page in Confluence. It appears here straight away.'],True)+

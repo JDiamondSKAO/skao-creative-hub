@@ -687,56 +687,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (newest && line) line.textContent = "Latest slides: " + (newest.month || fmt(newest.when));
   });
   const fileList = $("[data-attachments]");
-  if (fileList) loadAttachments(fileList);
+  if (fileList) (fileList.hasAttribute("data-site-files") ? loadSitePage : loadAttachments)(fileList);
   async function loadAttachments(box) {
     const list = box.querySelector("[data-attachment-list]"), pageId = document.body.dataset.pageId;
     const note = (text) => { const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = text; list.replaceChildren(p); };
-    if (document.body.dataset.mode === "preview" || !pageId) {
-      const slot = box.querySelector("[data-latest-feature]");
-      if (slot) { const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = "Preview: in Confluence, the newest slides on this page show here, then the earlier ones."; slot.replaceChildren(p); return; }
-      note("Preview: in Confluence, every file added to this page is listed here, newest first."); return;
-    }
+    if (document.body.dataset.mode === "preview" || !pageId) { note("Preview: in Confluence, every file added to this page is listed here, newest first."); return; }
     const ctx = document.body.dataset.context || "";
     const add = safeLink(ctx + "/pages/viewpageattachments.action?pageId=" + encodeURIComponent(pageId));
     if (add) {
       const a = document.createElement("a"); a.className = "text-link attachments-add"; a.href = add; a.textContent = box.dataset.addLabel || "Add a file";
-      // Site pages keep the team's add link in a note at the foot; other pages put it beside the heading.
-      const addNote = $("[data-add-note]");
-      if (addNote) { addNote.querySelector("[data-add-slot]")?.replaceWith(a); addNote.hidden = false; }
-      else box.querySelector(".attachments-head")?.append(a);
+      box.querySelector(".attachments-head")?.append(a);
     }
     let files = [];
     try { files = await attachmentsOf(pageId, ctx); } catch { note("The files on this page could not be loaded."); return; }
-    showPhoto($("[data-site-photo]"), files, ctx);
-    let rows = pageFiles(files, ctx);
-    const feature = box.hasAttribute("data-feature-latest") && box.querySelector("[data-latest-feature]");
-    if (!rows.length) {
-      if (!feature) { note(box.dataset.empty || "Nothing here yet."); return; }
-      const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = box.dataset.empty || "Nothing here yet."; feature.replaceChildren(p); list.replaceChildren(); return;
-    }
-    if (feature) {
-      // The newest deck is the one most people want: it leads, with a clear download.
-      const r = rows[0], card = document.createElement("div"); card.className = "latest-deck";
-      const text = document.createElement("div"); text.className = "latest-text";
-      const label = document.createElement("span"); label.className = "latest-label"; label.textContent = "Latest" + (r.month ? " · " + r.month : "");
-      const name = document.createElement("strong"); name.textContent = r.name;
-      const meta = document.createElement("span"); meta.className = "file-meta";
-      meta.textContent = [r.when && "Added " + fmt(r.when), r.ext.toUpperCase(), size(r.size)].filter(Boolean).join(" · ");
-      text.append(label, name, meta);
-      const a = document.createElement("a"); a.className = "button"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title; a.textContent = "Download slides";
-      card.append(text, a); feature.replaceChildren(card);
-      rows = rows.slice(1);
-      const head = box.querySelector(".attachments-head");
-      if (head) head.hidden = !rows.length;
-      if (!rows.length) { list.replaceChildren(); return; }
-    }
+    const rows = pageFiles(files, ctx);
+    if (!rows.length) { note(box.dataset.empty || "Nothing here yet."); return; }
+    list.replaceChildren(fileGroup(rows, true));
+  }
+  // A list of files with a download chip each; the newest can carry a "Latest" tag.
+  function fileGroup(rows, tagLatest) {
     const group = document.createElement("section"); group.className = "dl-group file-group";
     const ul = document.createElement("ul");
     rows.forEach((r, i) => {
       const li = document.createElement("li"); li.className = "dl-row file-row";
       const text = document.createElement("span"); text.className = "file-text";
       const name = document.createElement("strong"); name.textContent = r.name;
-      if (i === 0 && !feature) { const tag = document.createElement("span"); tag.className = "file-latest"; tag.textContent = "Latest"; name.append(tag); }
+      if (i === 0 && tagLatest) { const tag = document.createElement("span"); tag.className = "file-latest"; tag.textContent = "Latest"; name.append(tag); }
       const meta = document.createElement("span"); meta.className = "file-meta";
       meta.textContent = [r.month, r.when && "added " + fmt(r.when)].filter(Boolean).join(", ").replace(/^added/, "Added");
       text.append(name, meta);
@@ -747,7 +723,28 @@ document.addEventListener("DOMContentLoaded", () => {
       a.append(b, small);
       li.append(text, a); ul.append(li);
     });
-    group.append(ul); list.replaceChildren(group);
+    group.append(ul);
+    return group;
+  }
+  // SKA-Low and SKA-Mid progress: the newest deck leads in the telescope panel, earlier decks follow.
+  async function loadSitePage(box) {
+    const hero = $("[data-site-hero]"), pageId = document.body.dataset.pageId, ctx = document.body.dataset.context || "";
+    if (!hero || !pageId || document.body.dataset.mode === "preview") return;
+    let files = [];
+    try { files = await attachmentsOf(pageId, ctx); } catch { return; }
+    showPhoto(hero.querySelector("[data-site-photo]"), files, ctx);
+    const rows = pageFiles(files, ctx), title = hero.querySelector("[data-hero-title]"), meta = hero.querySelector("[data-hero-meta]");
+    if (!rows.length) { title.textContent = "No slides yet"; meta.textContent = hero.dataset.empty || ""; return; }
+    const r = rows[0], a = document.createElement("a");
+    title.textContent = r.month || fmt(r.when);
+    const file = document.createElement("span"); file.className = "site-hero-file"; file.textContent = r.name;
+    const details = document.createElement("span"); details.textContent = [r.ext.toUpperCase(), size(r.size), r.when && "added " + fmt(r.when)].filter(Boolean).join(" · ");
+    meta.replaceChildren(file, details);
+    a.className = "button on-dark"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title; a.textContent = "Download slides";
+    hero.querySelector("[data-hero-actions]").replaceChildren(a);
+    if (rows.length < 2) return;
+    box.querySelector("[data-attachment-list]").replaceChildren(fileGroup(rows.slice(1), false));
+    box.hidden = false;
   }
   // The event kit: each item's picture is a file attached to the page under a fixed name
   // (kit-fabrilux-3m.webp and so on). Until it's there, an outline of the item shows instead.
