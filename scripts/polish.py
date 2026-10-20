@@ -48,6 +48,9 @@ SECTIONS = [
 ]
 # Pages that belong to a section without being listed (duplicate source titles).
 EXTRA = {}
+# Pages that sit under another page in their group: listed beneath it, indented, by a short name.
+CHILDREN = {'site-progress.html': [('low-slides.html', 'SKA-Low'), ('mid-slides.html', 'SKA-Mid')]}
+CHILD_OF = {c: parent for parent, kids in CHILDREN.items() for c, _ in kids}
 
 def members_of(section):
  key, label, landing, groups = section
@@ -102,7 +105,9 @@ def sidebar(current, titles):
    f'<ul class="nav-overview"><li><a class="section-home" href="{landing}" title="{html.escape(titles[landing])}">Overview</a></li></ul>')
   for g, pages in groups:
    out += (f'<div class="nav-group"><h3>{g}</h3><ul>'
-    + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a></li>' for m in pages) + '</ul></div>')
+    + ''.join(f'<li><a href="{m}">{html.escape(titles[m])}</a>' + (
+      '<ul class="nav-children">' + ''.join(f'<li><a href="{c}" title="{html.escape(titles[c])}">{short}</a></li>' for c, short in CHILDREN[m]) + '</ul>'
+      if m in CHILDREN else '') + '</li>' for m in pages if m not in CHILD_OF) + '</ul></div>')
   out += '</nav>'
  else:
   out += '<nav class="section-nav" id="sectionNav" aria-label="Hub sections"><h2>Sections</h2><ul>' + ''.join(
@@ -149,7 +154,7 @@ APPROVER = 'Communications'
 CARD_LINKS = {'standard-template.html': [('partner-templates.html', 'Partner templates')],
  'logos.html': [('partner-logos.html', 'Partner logos')],
  'partner-logos.html': [('logos.html', 'SKAO logos')],
- 'master-deck.html': [('site-progress.html', 'Site progress'), ('recent-talks.html', 'Recent talks')]}
+ 'master-deck.html': [('site-progress.html', 'Construction overview'), ('recent-talks.html', 'Recent talks')]}
 
 def asset_panel(name, body, jira):
  m = re.search(r'<div class="task-intro"><div>(?:<span class="eyebrow">.*?</span>)?<p>(.*?)</p></div></div>', body, re.S)
@@ -218,6 +223,7 @@ def directory(name, pages, summaries):
   # Each group can be linked to, e.g. presentations.html#site-progress.
   out += f'<section class="dir-group" id="{re.sub(r"[^a-z0-9]+", "-", g.lower()).strip("-")}"><h2>{g}</h2><ul class="dir-list">'
   for m in items:
+   if m in CHILD_OF: continue  # the parent page leads to its children
    out += (f'<li><a class="dir-row" href="{m}" data-page-id="{STATE["ids"].get(m, "")}"><span class="dir-text"><strong>{html.escape(pages[m][0])}</strong>'
     f'<span>{html.escape(summaries[m])}</span></span>{row_meta(m, key)}</a></li>')
   out += '</ul></section>'

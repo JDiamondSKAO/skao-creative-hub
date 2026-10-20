@@ -45,6 +45,11 @@ if spec.get('events_guide'):
     for f in sorted(Path(spec['events_guide']).glob('FINALS/BROCHURE/*.pdf')):
         out.append({'page': 'stands.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': ['approved'],
                     'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
+# Telescope photos from scripts/site_images.py, attached to each site page as site-photo.jpg.
+for site, page in [('low', 'low-slides.html'), ('mid', 'mid-slides.html')]:
+    f = ROOT / 'build' / 'site' / site / 'site-photo.jpg'
+    if f.exists():
+        out.append({'page': page, 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': [], 'when': '2026-01-01T00:00:00+00:00'})
 # Canto showcase: real dry-run output from scripts/canto_sync.py if present, otherwise stand-ins.
 real = ROOT / 'build' / 'canto' / 'canto-showcase.json'
 stand = spec.get('canto_standin')

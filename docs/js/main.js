@@ -651,7 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // "Name Event", given October 2026. Thumbnails, data files and off-site links are left out.
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   function pageFiles(files, ctx) {
-    return files.filter((f) => !/^canto-|\.json$/i.test(String(f.title || ""))).map((f) => {
+    return files.filter((f) => !/^canto-|^site-photo\.|\.json$/i.test(String(f.title || ""))).map((f) => {
       const title = String(f.title || ""), ext = (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase();
       const href = safeLink(ctx + (f._links?.download || ""));
       const base = title.replace(/\.[a-z0-9]+$/i, "").replace(/_+/g, " ").trim();
@@ -667,45 +667,76 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!res.ok) throw new Error(String(res.status));
     return (await res.json()).results || [];
   }
-  // Site progress: each site card shows the newest slides on that site's page.
-  $$("[data-latest-page]").forEach(async (card) => {
-    const slot = card.querySelector("[data-latest]"), ctx = document.body.dataset.context || "";
-    if (!slot || document.body.dataset.mode === "preview") return;
-    const say = (text) => { const p = document.createElement("p"); p.className = "site-latest-note"; p.textContent = text; slot.replaceChildren(p); };
-    let rows = [];
-    try { rows = pageFiles(await attachmentsOf(card.dataset.latestPage, ctx), ctx); } catch { say("The latest slides could not be loaded."); return; }
-    if (!rows.length) { say("No slides yet."); return; }
-    const r = rows[0], a = document.createElement("a");
-    a.className = "site-latest-file"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title;
-    const label = document.createElement("span"); label.className = "site-latest-label"; label.textContent = "Newest slides";
-    const name = document.createElement("strong"); name.textContent = r.name;
-    const meta = document.createElement("span"); meta.className = "file-meta";
-    meta.textContent = [r.month, r.when && "added " + fmt(r.when), r.ext.toUpperCase(), size(r.size)].filter(Boolean).join(" · ").replace(/^added/, "Added");
-    a.append(label, name, meta); slot.replaceChildren(a);
+  // Each site page carries its telescope photo as site-photo.jpg. Construction overview shows it on
+  // that telescope's tile with the month of the newest slides; the site page shows it as a banner.
+  const isPhoto = (f) => /^site-photo\.(jpe?g|png|webp)$/i.test(String(f.title || ""));
+  function showPhoto(slot, files, ctx) {
+    const f = files.find(isPhoto), href = f && safeLink(ctx + (f._links?.download || ""));
+    if (!slot || !href) return;
+    const img = new Image(); img.alt = ""; img.decoding = "async";
+    img.onload = () => { slot.hidden = false; slot.classList.add("has-photo"); };
+    img.src = href; slot.append(img);
+  }
+  $$("[data-site-page]").forEach(async (tile) => {
+    if (document.body.dataset.mode === "preview") return;
+    const ctx = document.body.dataset.context || "";
+    let files = [];
+    try { files = await attachmentsOf(tile.dataset.sitePage, ctx); } catch { return; }
+    showPhoto(tile.querySelector(".scope-photo"), files, ctx);
+    const newest = pageFiles(files, ctx)[0], line = tile.querySelector("[data-latest-line]");
+    if (newest && line) line.textContent = "Latest slides: " + (newest.month || fmt(newest.when));
   });
   const fileList = $("[data-attachments]");
   if (fileList) loadAttachments(fileList);
   async function loadAttachments(box) {
     const list = box.querySelector("[data-attachment-list]"), pageId = document.body.dataset.pageId;
     const note = (text) => { const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = text; list.replaceChildren(p); };
-    if (document.body.dataset.mode === "preview" || !pageId) { note("Preview: in Confluence, every file added to this page is listed here, newest first."); return; }
+    if (document.body.dataset.mode === "preview" || !pageId) {
+      const slot = box.querySelector("[data-latest-feature]");
+      if (slot) { const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = "Preview: in Confluence, the newest slides on this page show here, then the earlier ones."; slot.replaceChildren(p); return; }
+      note("Preview: in Confluence, every file added to this page is listed here, newest first."); return;
+    }
     const ctx = document.body.dataset.context || "";
     const add = safeLink(ctx + "/pages/viewpageattachments.action?pageId=" + encodeURIComponent(pageId));
     if (add) {
       const a = document.createElement("a"); a.className = "text-link attachments-add"; a.href = add; a.textContent = box.dataset.addLabel || "Add a file";
-      box.querySelector(".attachments-head")?.append(a);
+      // Site pages keep the team's add link in a note at the foot; other pages put it beside the heading.
+      const addNote = $("[data-add-note]");
+      if (addNote) { addNote.querySelector("[data-add-slot]")?.replaceWith(a); addNote.hidden = false; }
+      else box.querySelector(".attachments-head")?.append(a);
     }
     let files = [];
     try { files = await attachmentsOf(pageId, ctx); } catch { note("The files on this page could not be loaded."); return; }
-    const rows = pageFiles(files, ctx);
-    if (!rows.length) { note(box.dataset.empty || "Nothing here yet."); return; }
+    showPhoto($("[data-site-photo]"), files, ctx);
+    let rows = pageFiles(files, ctx);
+    const feature = box.hasAttribute("data-feature-latest") && box.querySelector("[data-latest-feature]");
+    if (!rows.length) {
+      if (!feature) { note(box.dataset.empty || "Nothing here yet."); return; }
+      const p = document.createElement("p"); p.className = "attachments-note"; p.textContent = box.dataset.empty || "Nothing here yet."; feature.replaceChildren(p); list.replaceChildren(); return;
+    }
+    if (feature) {
+      // The newest deck is the one most people want: it leads, with a clear download.
+      const r = rows[0], card = document.createElement("div"); card.className = "latest-deck";
+      const text = document.createElement("div"); text.className = "latest-text";
+      const label = document.createElement("span"); label.className = "latest-label"; label.textContent = "Latest" + (r.month ? " · " + r.month : "");
+      const name = document.createElement("strong"); name.textContent = r.name;
+      const meta = document.createElement("span"); meta.className = "file-meta";
+      meta.textContent = [r.when && "Added " + fmt(r.when), r.ext.toUpperCase(), size(r.size)].filter(Boolean).join(" · ");
+      text.append(label, name, meta);
+      const a = document.createElement("a"); a.className = "button"; a.href = r.href; a.setAttribute("download", ""); a.title = r.title; a.textContent = "Download slides";
+      card.append(text, a); feature.replaceChildren(card);
+      rows = rows.slice(1);
+      const head = box.querySelector(".attachments-head");
+      if (head) head.hidden = !rows.length;
+      if (!rows.length) { list.replaceChildren(); return; }
+    }
     const group = document.createElement("section"); group.className = "dl-group file-group";
     const ul = document.createElement("ul");
     rows.forEach((r, i) => {
       const li = document.createElement("li"); li.className = "dl-row file-row";
       const text = document.createElement("span"); text.className = "file-text";
       const name = document.createElement("strong"); name.textContent = r.name;
-      if (i === 0) { const tag = document.createElement("span"); tag.className = "file-latest"; tag.textContent = "Latest"; name.append(tag); }
+      if (i === 0 && !feature) { const tag = document.createElement("span"); tag.className = "file-latest"; tag.textContent = "Latest"; name.append(tag); }
       const meta = document.createElement("span"); meta.className = "file-meta";
       meta.textContent = [r.month, r.when && "added " + fmt(r.when)].filter(Boolean).join(", ").replace(/^added/, "Added");
       text.append(name, meta);

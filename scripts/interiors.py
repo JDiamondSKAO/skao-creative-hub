@@ -12,10 +12,10 @@ ROUTES=[
 ('381891854','Video & Animation','video.html','Media'),('381891857','B-Roll Library','b-roll.html','Media'),('381891860','Event Recordings','recordings.html','Media'),('381891863','Explainer Animations','animations.html','Media'),('381891866','Requesting New Video Content','video-request.html','Creative help'),
 ('381891637','Events Support','events.html','Events'),('381891643','Event Planning Checklist','event-checklist.html','Events'),('381891640','Health and Safety','event-safety.html','Events'),('381891646','Merchandise and Giveaways','merchandise.html','Events'),('381891649','Stand Design and Materials','stands.html','Events'),
 ('381891870','Tools & Resources','help.html','Support'),('381891873','Accessibility Guidelines','accessibility.html','Guidance'),('381891876','Adobe Firefly','firefly.html','Guidance'),('381891879','Canto DAM Access','canto-access.html','Media'),('381891882','Font Downloads','fonts.html','Brand'),('381891885','Print Supplier Contacts','print-suppliers.html','Creative help'),
-('990000001','Partner templates','partner-templates.html','Presentations'),('990000002','Partner logos','partner-logos.html','Brand'),('990000003','Recent talks','recent-talks.html','Presentations'),('990000004','Site progress','site-progress.html','Presentations')]
+('990000001','Partner templates','partner-templates.html','Presentations'),('990000002','Partner logos','partner-logos.html','Brand'),('990000003','Recent talks','recent-talks.html','Presentations'),('990000004','Construction overview','site-progress.html','Presentations')]
 # Pages proposed for Confluence but not created yet: stand-in IDs until the real ones are known.
 # Production matches them by title instead; replace an ID here once its page exists.
-PLANNED={'990000001':'Partner templates','990000002':'Partner logos','990000003':'Recent talks','990000004':'Site progress'}
+PLANNED={'990000001':'Partner templates','990000002':'Partner logos','990000003':'Recent talks','990000004':'Construction overview'}
 META={filename:{'id':id,'source_title':title,'group':group} for id,title,filename,group in ROUTES}
 def link(url,label,cls=''):return f'<a href="{escape(url,quote=True)}" class="{cls}">{label}</a>'
 def intro(text,url='',label='',tag=''):
@@ -152,24 +152,28 @@ def revise(pages,jira,canto):
  # 2.17: fewer, fuller pages. Pages folded into others keep a stub here; gethelp turns them into notes.
  after_use=['Check its version and date: figures change as construction moves on.','Save your working copy separately and keep credits and sources.','Specialised decks are shared by staff and approved by Communications. Ask the owner before changing what they say.']
  put('master-deck.html','Decks to reuse',intro('Approved decks to reuse and adapt: an introduction to the SKAO, the science case, construction progress across both sites, and decks on specialised topics.',tag='Resource source')+missing('',jira)+block('Before you use the file',after_use))
- # Site progress: both telescopes at a glance, then one page per site for that team's slides.
+ # Site progress: one page for both telescopes, then a page per site for that team's slides.
+ # The telescope photos and the newest slides come from the files on each site page (see main.js).
  sites=[('low-slides.html','SKA-Low','LOW','Australia'),('mid-slides.html','SKA-Mid','MID','South Africa')]
- put('site-progress.html','Site progress','<div class="task-intro"><div><span class="eyebrow">Construction</span><p>Where SKA-Low and SKA-Mid construction stands, with the newest slides from each site team.</p></div>'+pending('CONSTRUCTION_DASHBOARD','Open the construction dashboard','button')+'</div>'+
-  needs('<p class="progress-sources">'+pending('CONSTRUCTION_STATUS','Overall status for both telescopes')+'<span>The dashboard is still being built and needs your SKAO Google sign-in.</span></p>',url('CONSTRUCTION_DASHBOARD') or url('CONSTRUCTION_STATUS'))+
-  '<div class="site-cards">'+''.join(
-   # The newest slides come from the files on each site's page (see main.js), so the card never goes stale.
-   f'<section class="site-card" data-latest-page="{META[name]["id"]}"><p class="eyebrow">{place}</p><h2>{site}</h2>'
-   f'<div class="site-latest" data-latest><p class="site-latest-note">Preview: in Confluence, the newest {site} slides show here.</p></div>'
-   '<p class="site-card-links">'+pending(key+'_STATUS','Status slides')+link(name,f'All {site} slides →','text-link')+'</p></section>'
-   for name,site,key,place in sites)+'</div>'
-  '<div data-site-photos></div>'
-  '<p class="quiet-note progress-note">Figures change as construction moves on, so check the date on a slide before you use it. Approved overview decks are in '+link('master-deck.html','Decks to reuse')+'.</p>')
+ def row(name,label,desc):
+  return needs('<li>'+pending(name,label)+'<span>'+desc+'</span></li>',url(name))
+ def status_list(rows):
+  return needs('<section class="status-links"><h2>Status and photos</h2><ul class="link-list">'+''.join(row(*r) for r in rows)+'</ul></section>',any(url(r[0]) for r in rows))
+ dashboard=('CONSTRUCTION_DASHBOARD','Construction dashboard','Live figures for both telescopes. It’s still being built and needs your SKAO Google sign-in.')
+ photos=('ALLHANDS','Weekly all-hands photos','Photos from each site’s weekly all-hands, in the staff media library.')
+ put('site-progress.html','Construction overview',intro('Where construction of the two telescopes stands. Choose a telescope for its team’s progress slides.')+
+  '<div class="scope-tiles">'+''.join(
+   f'<a class="scope-tile" href="{name}" data-site-page="{META[name]["id"]}"><span class="scope-photo" aria-hidden="true"></span>'
+   f'<span class="scope-text"><span class="scope-place">{place}</span><strong>{site}</strong><span class="scope-latest" data-latest-line>Progress slides</span></span></a>'
+   for name,site,key,place in sites)+'</div>'+
+  status_list([dashboard,('CONSTRUCTION_STATUS','Overall status','The written summary for both telescopes, drawn from the site teams’ status slides.'),photos]))
  for name,site,key,place in sites:
-  put(name,site+' progress',intro(f'Progress slides from the {site} team, newest first.',tag='Site progress')+
-   '<p class="progress-links">'+pending(key+'_STATUS','Status slides')+pending('CONSTRUCTION_DASHBOARD','Dashboard')+pending('ALLHANDS','All-hands photos')+link('site-progress.html','Both telescopes →','text-link')+'</p>'+
-   '<section class="attachments progress-files" data-attachments="all" data-add-label="Add slides" data-empty="No slides yet. The '+site+' team adds them here."><div class="attachments-head"><h2>Slides</h2></div><div data-attachment-list></div></section>'+
-   detail(f'Adding slides (for the {site} team)','<ul><li>Add the file to this page in Confluence with “Add slides”. It shows here straight away, newest first.</li>'
-    f'<li>Start the file name with the year and month, for example 2026-10 {site} progress.</li><li>Only add slides cleared for all staff: Unrestricted or Staff Resources.</li></ul>'))
+  put(name,site+' progress','<div class="scope-banner" data-site-photo hidden></div>'+
+   intro(f'The {site} team’s progress slides, newest first. Check the date before you use any figures.')+
+   '<section class="attachments progress-files" data-attachments="all" data-feature-latest data-add-label="add slides to this page" data-empty="No slides yet. The '+site+' team adds them here.">'
+   '<div data-latest-feature></div><div class="attachments-head" hidden><h2>Earlier slides</h2></div><div data-attachment-list></div></section>'+
+   status_list([(key+'_STATUS',f'{site} status slides','The team’s own status deck, kept up to date as work moves on.'),dashboard,photos])+
+   f'<p class="team-note" data-add-note hidden>For the {site} team: <span data-add-slot></span>. Start each file name with the year and month, for example 2026-10.</p>')
  put('recent-talks.html','Recent talks',intro('Slides from talks given by SKAO staff, newest first. They are shared as presented and not reviewed by Communications, so check facts and figures with the speaker before reusing them.',tag='Shared by staff')+
   '<section class="attachments" data-attachments="all" data-add-label="Add your talk" data-empty="No talks yet. Add the first one."><div class="attachments-head"><h2>Talks</h2></div><div data-attachment-list></div></section>'+
   block('Add your talk',['Start the file name with the year and month, then your name and the event, for example 2026-10 Name Event.','Only add slides cleared for all staff: Unrestricted or Staff Resources.','Add the file to this page in Confluence. It appears here straight away.'],True)+
