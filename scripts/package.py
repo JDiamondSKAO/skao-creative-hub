@@ -1,5 +1,5 @@
 from pathlib import Path
-import zipfile,hashlib,json,xml.etree.ElementTree as ET,shutil,subprocess,sys,os
+import zipfile,hashlib,json,xml.etree.ElementTree as ET,shutil,subprocess,sys,os,html
 R=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(R/'scripts'));import links
 (R/'release').mkdir(exist_ok=True)
@@ -10,6 +10,8 @@ def build(with_links):
  if with_links:env['HUB_LOCAL_LINKS']='1'
  subprocess.run([sys.executable,str(R/'scripts/build.py')],check=True,capture_output=True,env=env)
 addresses=list(links.load().values())
+# Pages carry each address HTML-escaped, so an & in it reads &amp; there.
+found=lambda a,text:a in text or html.escape(a,quote=True) in text
 build(True)
 try:
  files=[R/'page.vm']+[p for d in ['css','js','images','fonts'] for p in (R/d).rglob('*') if p.is_file()]
@@ -37,8 +39,8 @@ try:
    if p.is_file():z.write(p,p.name)
  flat=zipfile.ZipFile(R/f'release/skao-creative-hub-v{version}-flat-upload.zip').read('page.vm').decode()
  assert '${theme.baseUrl}/css/' not in flat and '${theme.baseUrl}/style.css' in flat, 'flat page.vm must point at root files'
- assert all(a in flat for a in addresses),'release page.vm is missing a link from dev/links.json'
+ assert all(found(a,flat) for a in addresses),'release page.vm is missing a link from dev/links.json'
  print(f'Packaged theme JAR/ZIP, preview ZIP and v{version} flat upload with {len(addresses)} local links')
 finally:
  build(False)
-assert not any(a in (R/'page.vm').read_text() for a in addresses),'committed page.vm must not carry internal links'
+assert not any(found(a,(R/'page.vm').read_text()) for a in addresses),'committed page.vm must not carry internal links'
