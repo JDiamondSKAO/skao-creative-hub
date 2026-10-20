@@ -1,5 +1,29 @@
 # Changes
 
+## 2.22.0 Events: reuse what we've made (proposal, branch claude/creative-hub-v2.22)
+
+Built on 2.21. Events no longer reads as if Communications plans people's events. It now shows what we've already made, so staff can borrow it, reuse it or adapt it, with sustainability in mind. Planning an event starts at the Comms helpdesk.
+
+- **Reuse for events** (was Plan event materials). The landing now has:
+  - a short intro and a line pointing anyone planning an event to the Comms helpdesk;
+  - a strip of four pictures: Event kit, Stands, Banners and backdrops, and Giveaways;
+  - three steps: Reuse it, Adapt it, Make it last;
+  - links to the two pages;
+  - a short note on using screens instead of print.
+
+  The lead-times table, the five request steps and the "Before you start" panels are gone. The "Planning something bigger?" band at the foot of every page still covers bigger work.
+- **Event kit** (was Stands and merchandise). It covers the backdrops, banners, kiosk and table cloths, which the Comms teams look after at all three sites, with an "Ask to borrow it" button. "Looking after it" covers care and returns, followed by the Events Production Manual. The two "include in the brief" lists are gone.
+- **Designs to reuse** (new; it reuses the old Merchandise and Giveaways page). It has 18 previews from past event work in five groups:
+  - Stands: IAU General Assembly 2024 in Cape Town, the Korea stand walls and the SKA-Low gazebo;
+  - Banners and backdrops;
+  - With partners: SARAO, CETC and ngVLA;
+  - Programmes and logos;
+  - Giveaways, with a short note on choosing them well.
+
+  Staff ask for the files through the Comms helpdesk. Each picture is attached to the page as `design-*.webp`, made by `scripts/design_images.py` from the reusable event assets and merchandise folders (read only), with an outline until it's uploaded.
+- Pictures can now come from another page (`data-kit-page`), so the landing shows the kit's and the designs' pictures.
+- Event safety and the event checklist now say why they've gone, and point to Reuse for events. Search answers "Can you help plan my event?" and "Do we have a stand, banners or giveaways?".
+
 ## 2.21.0 Review board feedback, round 4 (proposal, branch claude/creative-hub-v2.21)
 
 Built on 2.20, from the notes on the review board. The Events pages wait for the next round.

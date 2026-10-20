@@ -31,7 +31,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert([...hdr.querySelectorAll('.footer a')].some(a=>a.getAttribute('href')==='faq.html'&&a.textContent==='Get help'),'Get help in the footer');
  for(const [old,to] of [['working-with-us.html','faq.html'],['contribute.html','faq.html#share']]){const mv=dom(old).window.document;assert.equal(mv.querySelector('.moved-note a.button').getAttribute('href'),to,old+' now points to Common questions');}
  pass('Get help is one Common questions page in the footer, with sharing folded in');
- for(const [old,to] of [['request.html','faq.html'],['video-request.html','faq.html'],['timing.html','faq.html'],['help.html','faq.html'],['creative-services.html','faq.html'],['canto-guide.html','canto-access.html'],['email-signatures.html','documents.html'],['widescreen-template.html','standard-template.html'],['science-slides.html','master-deck.html'],['reports.html','memos.html'],['hero-images.html','media.html'],['event-safety.html','events.html'],['merchandise.html','stands.html'],['event-checklist.html','events.html#lead-times']]){
+ for(const [old,to] of [['request.html','faq.html'],['video-request.html','faq.html'],['timing.html','faq.html'],['help.html','faq.html'],['creative-services.html','faq.html'],['canto-guide.html','canto-access.html'],['email-signatures.html','documents.html'],['widescreen-template.html','standard-template.html'],['science-slides.html','master-deck.html'],['reports.html','memos.html'],['hero-images.html','media.html'],['event-safety.html','events.html'],['event-checklist.html','events.html']]){
   const mv=dom(old).window.document;assert.equal(mv.querySelector('.moved-note a.button').getAttribute('href'),to,old+' points to its new home');}
  assert(dom('email-signatures.html').window.document.querySelector('.moved-note').textContent.includes('managed by IT'),'retired signatures page says why');
  assert(!fs.readdirSync(path.join(root,'docs')).filter(f=>f.endsWith('.html')&&!['request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html','canto-guide.html','email-signatures.html','working-with-us.html','contribute.html'].includes(f)).some(f=>/href="(request|creative-services|timing|video-request|print|business-cards|help|updates|archive|canto-guide|email-signatures|working-with-us|contribute)\.html["#]/.test(fs.readFileSync(path.join(root,'docs',f),'utf8'))),'no links to moved pages');
@@ -157,7 +157,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  for(const a of top){const land=new JSDOM(fs.readFileSync(path.join(root,'docs',a.getAttribute('href')),'utf8')).window.document;
   assert(land.querySelector('.page-grid.full-width'),'landing is full width');assert(!land.querySelector('.sidebar'),'landing has no repeated list');
   land.querySelectorAll('.dir-row').forEach(c=>twoClicks.add(c.getAttribute('href')));}
- for(const f of Object.keys(routes).filter(f=>!['canto-guide.html','email-signatures.html','widescreen-template.html','science-slides.html','construction-slides.html','specialised-slides.html','reports.html','hero-images.html','telescope-images.html','event-photos.html','b-roll.html','recordings.html','animations.html','event-safety.html','merchandise.html','event-checklist.html','resources.html','request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html','working-with-us.html','contribute.html',
+ for(const f of Object.keys(routes).filter(f=>!['canto-guide.html','email-signatures.html','widescreen-template.html','science-slides.html','construction-slides.html','specialised-slides.html','reports.html','hero-images.html','telescope-images.html','event-photos.html','b-roll.html','recordings.html','animations.html','event-safety.html','event-checklist.html','resources.html','request.html','creative-services.html','timing.html','video-request.html','print.html','business-cards.html','help.html','updates.html','archive.html','working-with-us.html','contribute.html',
   // The site pages sit one click under Construction overview, whose tiles lead to them.
   'low-slides.html','mid-slides.html'].includes(f)))assert(twoClicks.has(f),'two clicks reach '+f);
  const navGroups=[...nw.document.querySelectorAll('.section-nav .nav-group')];assert.equal(navGroups.map(g=>g.querySelector('h3').textContent).join('|'),'Artwork and files|Using the brand|Partner brands');
@@ -185,7 +185,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...read('poster-templates.html').querySelectorAll('.variant-list li')].map(l=>l.textContent),['A0','A1','A2']);
  const decks=read('master-deck.html');assert.equal(decks.querySelector('.page-head h1').textContent,'Approved slide decks');assert(!decks.querySelector('.asset-panel'),'a library, not a resource card');
  assert(decks.querySelector('.deck-library #deckFilter')&&decks.querySelector('.deck-library #deckSort')&&decks.querySelector('[data-deck-list]'),'search, sort and the list');assert(decks.querySelector('.deck-reuse a[href="formatting-slides.html"]'),'reuse advice links to the formatting guide');
- assert.equal(read('memos.html').querySelector('.page-head h1').textContent,'Memo and report templates');assert(read('stands.html').body.textContent.includes('Existing designs to reuse'));
+ assert.equal(read('memos.html').querySelector('.page-head h1').textContent,'Memo and report templates');assert.equal(read('stands.html').querySelector('.page-head h1').textContent,'Event kit');assert.equal(read('merchandise.html').querySelector('.page-head h1').textContent,'Designs to reuse');
  assert(read('standard-template.html').querySelector('[data-fact="google slides"] .pending-link'),'the review build shows what still needs a link');
  const low=read('low-slides.html');assert(!low.querySelector('.live-link, .progress-links, details.guidance-detail'),'no status box, link row or folded team notes on the site pages');
  assert.deepEqual([...low.querySelectorAll('.live-status .link-card [data-link]')].map(e=>e.dataset.link),['LOW_STATUS','CONSTRUCTION_DASHBOARD'],'live status: the site status slides and the dashboard');
@@ -319,12 +319,19 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...progQ('.deck-row .deck-date').children].map(e=>e.textContent),['Sep','2026'],'each earlier deck has a month tile');assert.equal(progQ('[data-file-count]').textContent,'1 deck');assert(progQ('.deck-row a.deck-get[download]').getAttribute('aria-label').startsWith('Download SKA-Low progress, September 2026'));
  assert(progQ('[data-site-photo] img'),'the telescope photo loads into the panel');lw.window.close();
  pass('Construction overview tiles show each telescope and the month of its newest slides; site pages lead with the latest deck, then a dated list of earlier ones');
- // Events: lead times and request steps on the landing; the kit on Stands and merchandise.
+ // Events is a reuse library: the landing leads with the reuse steps and a note that planning an event starts
+ // at the Comms helpdesk; Event kit and Designs to reuse show pictures attached to their pages, or outlines.
  const ev=read('events.html');
- assert.equal(ev.querySelectorAll('.landing-main .lead-table tbody tr').length,6,'lead times sit in the main column');
- assert.equal(ev.querySelectorAll('.landing-main .request-flow .guide-steps li').length,5,'then how a request runs');
- assert(!ev.querySelector('.landing-rail .lead-table, .landing-rail .guide-steps'),'neither moves into the rail');assert.equal(ev.querySelectorAll('.landing-rail details.rail-item').length,3,'the rail keeps its three items');
- assert(!ev.querySelector('a.dir-row[href="event-checklist.html"]')&&!ev.querySelector('.check-list'),'no tick-list checklist');
+ assert.equal(ev.querySelector('.page-head h1').textContent,'Reuse for events');
+ assert(!ev.querySelector('.lead-table, .request-flow, .landing-rail'),'no lead times, request steps or rail');
+ const peek=[...ev.querySelectorAll('.reuse-peek a')];assert.deepEqual(peek.map(a=>a.getAttribute('href')),['stands.html','merchandise.html#stands','merchandise.html#banners-and-backdrops','merchandise.html#giveaways']);
+ assert.deepEqual(peek.map(a=>a.querySelector('[data-kit-image]').dataset.kitPage),[routes['stands.html'].id,...Array(3).fill(routes['merchandise.html'].id)],'the strip shows pictures from Event kit and Designs to reuse');
+ assert(ev.querySelector('.reuse-peek').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4,'pictures, then the steps');
+ assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Reuse it','Adapt it','Make it last']);
+ assert(ev.querySelector('.reuse-steps').compareDocumentPosition(ev.querySelector('.directory'))&4,'the steps sit above the section list');
+ assert(/servicedesk/.test(ev.querySelector('.scope-note a').getAttribute('href')),'planning an event starts at the Comms helpdesk');
+ assert.deepEqual([...ev.querySelectorAll('.directory a.dir-row')].map(a=>a.getAttribute('href')),['stands.html','merchandise.html']);
+ assert(ev.querySelector('.directory').compareDocumentPosition(ev.querySelector('#screens'))&4,'screens come after the list');
  const standsId=routes['stands.html'].id,sk=dom('stands.html','confluence'),skw=sk.window;skw.document.body.dataset.pageId=standsId;
  skw.fetch=async u=>{if(String(u).includes('/child/attachment'))return {ok:true,json:async()=>({results:[
   {title:'kit-fabrilux-3m.webp',_links:{download:`/download/attachments/${standsId}/kit-fabrilux-3m.webp`}},
@@ -337,7 +344,14 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(pics['kit-fabrilux-3m'].endsWith('/kit-fabrilux-3m.webp')&&pics['kit-kiosk'].endsWith('/KIT-KIOSK.PNG'),'pictures are matched by file name');
  assert.equal(pics['kit-pull-up-banners'],'','off-site links are dropped');assert.equal(pics['kit-table-cloths'],'','only image files count');assert.equal(pics['kit-fabrilux-2m'],'','a missing picture keeps the outline');sk.window.close();
  const skp=dom('stands.html');assert(!skp.window.document.querySelector('.kit-pic img'),'the preview shows outlines');skp.window.close();
- pass('Events: lead times and request steps under the section list; the kit shows pictures attached to Stands and merchandise, or outlines until then');
+ const designsId=routes['merchandise.html'].id,dg=dom('merchandise.html','confluence'),dgw=dg.window;dgw.document.body.dataset.pageId=designsId;
+ dgw.fetch=async u=>String(u).includes('/child/attachment')?{ok:true,json:async()=>({results:[{title:'design-gazebo.webp',_links:{download:`/download/attachments/${designsId}/design-gazebo.webp`}}]})}:{ok:true,json:async()=>({results:[]})};
+ dgw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
+ const slots=[...dgw.document.querySelectorAll('[data-kit-image]')];assert.equal(slots.length,18);assert(slots.every(e=>e.dataset.kitImage.startsWith('design-')));
+ assert.deepEqual([...dgw.document.querySelectorAll('.design-group h2')].map(h=>h.textContent),['Stands','Banners and backdrops','With partners','Programmes and logos','Giveaways']);
+ assert(dgw.document.querySelector('[data-kit-image="design-gazebo"] img').getAttribute('src').endsWith('/design-gazebo.webp'),'a design picture loads by name');
+ assert(!dgw.document.querySelector('[data-kit-image="design-sarao"] img'),'the rest keep their outline');dg.window.close();
+ pass('Events is a reuse library: reuse steps and a planning note to the Comms helpdesk lead the landing; Event kit and Designs to reuse show pictures attached to their pages, or outlines until then');
  const mediaId=routes['media.html'].id;
  const cantoManifest={version:1,albums:[
   {id:'a1',name:'Telescopes',path:'Asset library - Staff / Telescopes',count:40,href:'https://skao.canto.global/album/a1',assets:[
@@ -352,7 +366,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   w.fetch=async u=>{const s=String(u);if(s.includes('/rest/api/content/search')){const cql=new URL(s,'http://localhost').searchParams.get('cql');return {ok:true,json:async()=>({results:cql.includes('canto-showcase.json')&&m?[{title:'canto-showcase.json',_links:{download:`/download/attachments/${mediaId}/canto-showcase.json`}}]:[]})};}
    if(s.includes('canto-showcase.json'))return {ok:true,json:async()=>m};return {ok:false,json:async()=>({})};};
   w.document.body.dataset.mode='confluence';w.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();return d;};
- {const d=dom('stands.html'),w=d.window,doc=w.document,g=doc.querySelector('.page-grid');
+ {const d=dom('merchandise.html'),w=d.window,doc=w.document,g=doc.querySelector('.page-grid');
   assert(!doc.querySelector('.toc-rail').hidden&&g.classList.contains('has-toc')&&doc.querySelectorAll('.toc-rail #toc a').length>=4,'On this page sits in its own column on the right on long pages');
   const short=dom('low-slides.html');assert(short.window.document.querySelector('.toc-rail').hidden,'pages with three sections or fewer go without');short.window.close();
   assert(!doc.querySelector('.sidebar #toc'),'and no longer under the section menu');

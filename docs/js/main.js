@@ -965,22 +965,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const count = box.querySelector("[data-file-count]"); if (count) count.textContent = rows.length - 1 + (rows.length === 2 ? " deck" : " decks");
     box.hidden = false;
   }
-  // The event kit: each item's picture is a file attached to the page under a fixed name
-  // (kit-fabrilux-3m.webp and so on). Until it's there, an outline of the item shows instead.
+  // Pictures attached to a page under a fixed name: the event kit (kit-fabrilux-3m.webp and so on) and
+  // Designs to reuse (design-*.webp). A picture can come from another page (data-kit-page), as on the
+  // Events landing. Until it's there, an outline of the item shows instead.
   const kitBox = $("[data-kit]");
   if (kitBox && document.body.dataset.mode !== "preview") loadKit(kitBox);
   async function loadKit(box) {
-    const pageId = document.body.dataset.pageId, ctx = document.body.dataset.context || "";
-    if (!pageId) return;
-    let files = [];
-    try {
-      const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(pageId) + "/child/attachment?" + new URLSearchParams({ limit: "200" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
-      if (!res.ok) return;
-      files = (await res.json()).results || [];
-    } catch { return; }
-    box.querySelectorAll("[data-kit-image]").forEach((slot) => {
+    const ctx = document.body.dataset.context || "", own = document.body.dataset.pageId;
+    const slots = [...box.querySelectorAll("[data-kit-image]")], pageOf = (slot) => slot.dataset.kitPage || own;
+    const filesOf = {};
+    await Promise.all([...new Set(slots.map(pageOf).filter(Boolean))].map(async (id) => {
+      try { filesOf[id] = await attachmentsOf(id, ctx); } catch { filesOf[id] = []; }
+    }));
+    slots.forEach((slot) => {
       const name = slot.dataset.kitImage.toLowerCase();
-      const file = files.find((f) => String(f.title || "").toLowerCase().replace(/\.(webp|png|jpe?g)$/, "") === name && /\.(webp|png|jpe?g)$/i.test(f.title));
+      const file = (filesOf[pageOf(slot)] || []).find((f) => String(f.title || "").toLowerCase().replace(/\.(webp|png|jpe?g)$/, "") === name && /\.(webp|png|jpe?g)$/i.test(f.title));
       const href = file && safeLink(ctx + (file._links?.download || ""));
       if (!href) return;
       const img = new Image(); img.alt = ""; img.decoding = "async";

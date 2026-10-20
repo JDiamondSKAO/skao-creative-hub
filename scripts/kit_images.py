@@ -1,6 +1,6 @@
-"""Pictures of the event kit for Stands and merchandise, from the Events Production Manual's files.
+"""Pictures of the event kit for the Event kit page, from the Events Production Manual's files.
 
-The theme shows each kit item with a picture attached to the Stands and merchandise page
+The theme shows each kit item with a picture attached to the Event kit page
 under a fixed name (kit-pull-up-banners.webp and so on, see KIT). This script makes those
 files from the manual's product renders, so they can be uploaded as they are. They go to
 build/kit/, which stays out of Git; local test mode serves them from there.

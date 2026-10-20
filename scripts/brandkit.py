@@ -174,11 +174,4 @@ def apply(pages):
   return re.sub(r'<p class="quiet-note">The quick reference in this review build uses the retained SKAO Brand Book v2, March 2022\..*?</p>', '', body, count=1, flags=re.S)
  edit('brand-book.html', brand_book)
 
- def merch(name, body):
-  reuse = ('<section class="reading-section"><h2>Existing designs to reuse</h2><ul>'
-   '<li>SKAO apparel, promotional items, stationery and stickers.</li><li>SRCNet apparel.</li></ul>'
-   '<p>Ask for the artwork before briefing something new.</p></section>')
-  at = body.find('<section class="reading-section">')
-  return body[:at] + reuse + body[at:]
- edit('stands.html', merch)
  return pages

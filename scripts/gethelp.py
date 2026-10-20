@@ -38,10 +38,9 @@ MOVED = {
  'b-roll.html': ('media.html', 'Photos and video'),
  'recordings.html': ('media.html', 'Photos and video'),
  'animations.html': ('media.html', 'Photos and video'),
- 'event-safety.html': ('events.html', 'Plan event materials'),
- 'merchandise.html': ('stands.html', 'Stands and merchandise'),
- # 2.19: the lead times and request steps cover what the checklist asked.
- 'event-checklist.html': ('events.html#lead-times', 'Plan event materials'),
+ # 2.22: Events covers what we've made to reuse; planning an event starts at the Comms helpdesk.
+ 'event-safety.html': ('events.html', 'Reuse for events'),
+ 'event-checklist.html': ('events.html', 'Reuse for events'),
 }
 
 # Retired pages say why, rather than only where to go: (eyebrow, message, searchable).
@@ -49,6 +48,8 @@ RETIRED = {
  'email-signatures.html': ('Now looked after by IT', 'Email signatures are now managed by IT. For a new or updated signature, contact the IT service desk.', True),
  'canto-guide.html': ('This page has moved', 'All the Canto guidance is now on one page: Using the Canto library.', False),
  'widescreen-template.html': ('This page has moved', 'All SKAO presentation templates are 16:9, so the Standard SKAO template is the widescreen one.', False),
+ 'event-safety.html': ('Part of planning an event', 'Safety is planned with the event, so the Hub doesn’t cover it. Planning an event? Start with the Comms helpdesk. For banners, backdrops and designs you can reuse, see Reuse for events.', False),
+ 'event-checklist.html': ('This page has gone', 'Planning an event? Start with the Comms helpdesk. For banners, backdrops and designs you can reuse, see Reuse for events.', False),
 }
 
 def link(url, label, cls=''):
@@ -140,7 +141,8 @@ ANSWERS = [
  ('help request brief commission design designer helpdesk project', 'Can someone design something for me?', 'Contact the Comms helpdesk. Say what you need, who it’s for and when, and attach anything you already have.', HOME, 'Common questions'),
  ('ai firefly generative midjourney chatgpt', 'Can I use AI to make images?', 'Check the SKAO AI policy and use only approved tools. Never upload confidential or personal material.', 'firefly.html', 'Using AI image tools'),
  ('supplier suppliers printer printers printing', 'Who should print it?', 'Communications can recommend trusted print suppliers for your location and the kind of job you have.', 'print-suppliers.html', 'Work with print suppliers'),
- ('stand stands booth exhibition merchandise merch swag giveaway giveaways', 'Do we have a stand or merchandise?', 'Check the existing stand kit, designs and stock on Stands and merchandise before briefing anything new.', 'stands.html', 'Stands and merchandise'),
+ ('stand stands booth exhibition backdrop backdrops banner banners pull-up merchandise merch swag giveaway giveaways kit', 'Do we have a stand, banners or giveaways?', 'Yes. The Comms teams lend the event kit at all three sites, and Designs to reuse has stands, banners and giveaways we’ve made before.', 'events.html', 'Reuse for events'),
+ ('event events plan planning organise organize organising organizing conference venue', 'Can you help plan my event?', 'Start with the Comms helpdesk. For backdrops, banners and designs you can reuse, see Reuse for events.', 'events.html', 'Reuse for events'),
  ('talk talks speaker speakers deck decks reuse', 'Where are slides I can reuse?', 'Approved slide decks has decks Communications has approved for reuse, including talks given by staff.', 'master-deck.html', 'Approved slide decks'),
  ('new latest recent added update updates whats', 'What’s new in the Hub?', 'Latest files lists every new and updated file, newest first.', 'resources.html', 'Latest files'),
 ]

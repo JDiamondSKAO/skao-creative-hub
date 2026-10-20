@@ -43,7 +43,7 @@ SECTIONS = [
  ('media', 'Photos and video', 'media.html', [
   ('Find and use media', ['canto-access.html', 'video.html', 'image-usage.html'])]),
  ('events', 'Events', 'events.html', [
-  ('Materials', ['stands.html'])]),
+  ('Materials', ['stands.html', 'merchandise.html'])]),
  ('guides', 'How-to guides', 'self-service.html', [
   ('Print and posters', ['making-a-poster.html', 'print-preparation.html', 'print-suppliers.html']),
   ('Good practice', ['accessibility.html', 'firefly.html'])]),
@@ -292,9 +292,12 @@ def landing(name, body, pages, summaries):
  d = directory(name, pages, summaries)
  # Quick answers (brand swatches, the Canto hand-off) stay first; the directory follows.
  def after(head, rest, beside=False):
-  # Sections marked data-landing-main (the Events lead times, say) stay under the list, not in the rail.
+  # Sections marked data-landing-top (the Events reuse steps, say) sit under the intro, above the list;
+  # data-landing-main ones stay under the list. Neither goes into the rail.
+  top = [el for el in top_level(rest) if 'data-landing-top' in el[:200]]
   keep = [el for el in top_level(rest) if 'data-landing-main' in el[:200]]
-  for el in keep: rest = rest.replace(el, '', 1)
+  for el in top + keep: rest = rest.replace(el, '', 1)
+  head += ''.join(top)
   main = d + ''.join(keep)
   side = rail(rest.strip())
   if side and beside:
@@ -326,7 +329,7 @@ TILES = [
  ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'memos.html', 'poster-templates.html']),
  ('brand', 'brand', 'Logos, colours, fonts and partner rules.', ['logos.html', 'colours-and-type.html', 'fonts.html']),
  ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'video.html', 'image-usage.html']),
- ('events', 'events', 'Stands, print and merchandise for events.', ['stands.html']),
+ ('events', 'events', 'Kit, designs and giveaways to reuse at your event.', ['stands.html', 'merchandise.html']),
  ('guides', 'guides', 'Do-it-yourself checks for common jobs.', ['making-a-poster.html', 'print-preparation.html', 'accessibility.html']),
 ]
 TILE_ART = {**ART,
