@@ -319,7 +319,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...progQ('.deck-row .deck-date').children].map(e=>e.textContent),['Sep','2026'],'each earlier deck has a month tile');assert.equal(progQ('[data-file-count]').textContent,'1 deck');assert(progQ('.deck-row a.deck-get[download]').getAttribute('aria-label').startsWith('Download SKA-Low progress, September 2026'));
  assert(progQ('[data-site-photo] img'),'the telescope photo loads into the panel');lw.window.close();
  pass('Construction overview tiles show each telescope and the month of its newest slides; site pages lead with the latest deck, then a dated list of earlier ones');
- // Events is a reuse library: the landing has a note that planning an event starts at the Comms helpdesk,
+ // Events is a reuse library: the landing has a card saying planning an event starts at the Comms helpdesk,
  // picture cards for Event kit and Designs to reuse, then the reuse steps; both pages show attached pictures.
  const ev=read('events.html');
  assert.equal(ev.querySelector('.page-head h1').textContent,'Reuse for events');
@@ -329,7 +329,8 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(!ev.querySelector('.directory, .reuse-peek'),'no second list of the same pages');
  assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Reuse it','Adapt it','Go digital','Make it last']);
  assert(ev.querySelector('.dir-cards').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4,'the cards, then the steps');
- assert(/servicedesk/.test(ev.querySelector('.scope-note a').getAttribute('href')),'planning an event starts at the Comms helpdesk');
+ assert(/servicedesk/.test(ev.querySelector('.intro-split .plan-card a.button').getAttribute('href')),'planning an event starts at the Comms helpdesk, in a card beside the intro');
+ assert.deepEqual([...ev.querySelectorAll('.reuse-steps .reuse-icon')].map(e=>[!!e.querySelector('svg'),e.querySelector('em').textContent]),[[true,'1'],[true,'2'],[true,'3'],[true,'4']],'each step has its icon and number');
  const standsId=routes['stands.html'].id,sk=dom('stands.html','confluence'),skw=sk.window;skw.document.body.dataset.pageId=standsId;
  skw.fetch=async u=>{if(String(u).includes('/child/attachment'))return {ok:true,json:async()=>({results:[
   {title:'kit-fabrilux-3m.webp',_links:{download:`/download/attachments/${standsId}/kit-fabrilux-3m.webp`}},

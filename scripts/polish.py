@@ -310,9 +310,12 @@ def landing(name, body, pages, summaries):
  def after(head, rest, beside=False):
   # Sections marked data-landing-top (the Events planning note, say) sit under the intro, above the list;
   # data-landing-main ones (the Events reuse steps) stay under the list. Neither goes into the rail.
+  # data-landing-beside (the Events planning card) sits level with the intro, on its right.
   top = [el for el in top_level(rest) if 'data-landing-top' in el[:200]]
   keep = [el for el in top_level(rest) if 'data-landing-main' in el[:200]]
-  for el in top + keep: rest = rest.replace(el, '', 1)
+  beside = [el for el in top_level(rest) if 'data-landing-beside' in el[:200]]
+  for el in top + keep + beside: rest = rest.replace(el, '', 1)
+  if beside: head = f'<div class="intro-split">{head}{"".join(beside)}</div>'
   head += ''.join(top)
   main = d + ''.join(keep)
   side = rail(rest.strip())

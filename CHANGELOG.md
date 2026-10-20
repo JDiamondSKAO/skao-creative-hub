@@ -5,9 +5,9 @@
 Built on 2.21. Events no longer reads as if Communications plans people's events. It now shows what we've already made, so staff can borrow it, reuse it or adapt it, with sustainability in mind. Planning an event starts at the Comms helpdesk. After Joe's first look ("all over the shop"), all three pages share one calm layout.
 
 - **Reuse for events** (was Plan event materials). The landing has:
-  - a short intro and a line pointing anyone planning an event to the Comms helpdesk;
+  - a short intro, with a "Planning an event?" card beside it that leads to the Comms helpdesk;
   - two picture cards, Event kit and Designs to reuse, in place of the section list;
-  - "Reuse first" in four steps on the same grid: Reuse it, Adapt it, Go digital (screens instead of print), Make it last.
+  - a "Reuse first" panel with four steps along a line, each with an icon and its number: Reuse it, Adapt it, Go digital (screens instead of print), Make it last. On phones it becomes a vertical stepper.
 
   The lead-times table, the request steps and the "Before you start" panels are gone. The "Planning something bigger?" band at the foot of every page still covers bigger work.
 - **Event kit** (was Stands and merchandise). It covers the backdrops, banners, kiosk and table cloths, which the Comms teams look after at all three sites, with an "Ask to borrow it" button. Tiles show a picture, the name and one line of detail. "Looking after it" covers care and returns, followed by the Events Production Manual. The brief lists are gone.
