@@ -25,7 +25,7 @@ NAMES = {
  'LOW_STATUS': 'SKA-Low status slides, kept by the SKA-Low team (Google Slides)',
  'MID_STATUS': 'SKA-Mid status slides, kept by the SKA-Mid team (Google Slides)',
  'ALLHANDS': 'Where the weekly all-hands photos are stored, for all staff (link to follow)',
- 'FEEDBACK_FORM': 'Feedback form for the Hub. Until it exists, Share feedback opens the Comms helpdesk',
+ 'FEEDBACK_FORM': 'Creative Hub feedback form (Airtable form on the Creative Hub feedback base). Until it is set, Share feedback opens the Comms helpdesk',
 }
 
 def load():
@@ -56,6 +56,9 @@ def fill(page, urls):
  def swap(m):
   href = urls.get(m.group(1))
   return anchor(href, m.group(3), m.group(2)) if href else m.group(0)
+ # Share feedback links point at the helpdesk until the form's address is known.
+ if urls.get('FEEDBACK_FORM'):
+  page = re.sub(r'<a href="[^"]*"(?=[^>]*data-feedback)', lambda m: f'<a href="{html.escape(urls["FEEDBACK_FORM"], quote=True)}"', page)
  return re.sub(r'<span class="pending-link" data-link="(\w+)" data-class="([^"]*)" title="Link to follow">(.*?) <small>link to follow</small></span>', swap, page, flags=re.S)
 
 def needs(fragment, *ready):

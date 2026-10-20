@@ -659,6 +659,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!seen && document.body.dataset.mode !== "preview" && typeof welcome.showModal === "function")
       setTimeout(() => { if (!document.querySelector("dialog[open]")) welcome.showModal(); }, 700);
   }
+  // The feedback form (Airtable) opens with this page filled in, so we know where feedback came from.
+  // While Share feedback still points at the helpdesk, the links stay as they are.
+  if (pageTitle) $$("a[data-feedback]").forEach((l) => {
+    try {
+      const u = new URL(l.href);
+      if (u.hostname !== "airtable.com") return;
+      u.searchParams.set("prefill_Page", pageTitle);
+      l.href = u.href;
+    } catch {}
+  });
   // Files uploaded to a Hub page and labelled "approved" become its downloads.
   refreshAvailability();
   async function refreshAvailability() {

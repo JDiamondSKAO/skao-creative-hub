@@ -293,6 +293,14 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   assert(![...aw.document.querySelectorAll('#welcomeDialog')].some(x=>x.open),'not again once seen');again.window.close();d.window.close();
   const pre=dom('fonts.html');await new Promise(r=>setTimeout(r,800));assert(!pre.window.document.querySelector('#welcomeDialog').open,'never in the design preview');pre.window.close();
   pass('A first-visit welcome says the Hub is new and in development, links to feedback and shows once');}
+ {const page=fs.readFileSync(path.join(root,'docs/fonts.html'),'utf8'),form='https://airtable.com/appTest/shrTest';
+  const f=new JSDOM(page.replace(/<a href="[^"]*"(?=[^>]*data-feedback)/g,`<a href="${form}"`),{url:'http://localhost/fonts.html',runScripts:'outside-only',beforeParse(win){win.localStorage.setItem('crh-welcome-1','1');}}),fw=f.window;
+  fw.matchMedia=()=>({matches:false});fw.HTMLDialogElement.prototype.showModal=function(){this.open=true};fw.document.body.dataset.mode='confluence';fw.fetch=async()=>({ok:true,json:async()=>({results:[]})});fw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));
+  const ls=[...fw.document.querySelectorAll('a[data-feedback]')],title=fw.document.querySelector('.page-head h1').textContent.trim();
+  assert.equal(ls.length,3,'header, welcome and footer');assert(title);
+  ls.forEach(l=>{const u=new URL(l.href);assert.equal(u.origin+u.pathname,form);assert.equal(u.searchParams.get('prefill_Page'),title,'the form opens with the page filled in');});f.window.close();
+  const h=dom('fonts.html','confluence');[...h.window.document.querySelectorAll('a[data-feedback]')].forEach(l=>{assert(l.href.includes('servicedesk'));assert(!l.href.includes('prefill'),'the helpdesk fallback stays as it is');});h.window.close();
+  pass('Share feedback opens the feedback form with the page it came from filled in; until the form is set, the helpdesk');}
  const lowId=routes['low-slides.html'].id,midId=routes['mid-slides.html'].id,deck=(id,t,m)=>({title:t,version:{when:m},extensions:{fileSize:3145728},_links:{download:`/download/attachments/${id}/${encodeURIComponent(t)}`}});
  const lowFiles=[deck(lowId,'2026-09 SKA-Low progress.pptx','2026-09-15T10:00:00Z'),deck(lowId,'2026-10 SKA-Low progress.pptx','2026-10-15T10:00:00Z'),deck(lowId,'site-photo.jpg','2026-10-16T10:00:00Z')];
  const files=u=>{const s=String(u);return s.includes(`/content/${lowId}/child/attachment`)?lowFiles:[];};
