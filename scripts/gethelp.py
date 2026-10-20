@@ -48,8 +48,8 @@ RETIRED = {
  'email-signatures.html': ('Now looked after by IT', 'Email signatures are now managed by IT. For a new or updated signature, contact the IT service desk.', True),
  'canto-guide.html': ('This page has moved', 'All the Canto guidance is now on one page: Using the Canto library.', False),
  'widescreen-template.html': ('This page has moved', 'All SKAO presentation templates are 16:9, so the Standard SKAO template is the widescreen one.', False),
- 'event-safety.html': ('Part of planning an event', 'Safety is planned with the event, so the Hub doesn’t cover it. Planning an event? Start with the Comms helpdesk. For banners, backdrops and designs you can reuse, see Event materials.', False),
- 'event-checklist.html': ('This page has gone', 'Planning an event? Start with the Comms helpdesk. For banners, backdrops and designs you can reuse, see Event materials.', False),
+ 'event-safety.html': ('Part of planning an event', 'Safety is planned with the event, so the Hub doesn’t cover it. Planning an event? Start with the Comms helpdesk. For the exhibition kit and print files, see Event materials.', False),
+ 'event-checklist.html': ('This page has gone', 'Planning an event? Start with the Comms helpdesk. For the exhibition kit and print files, see Event materials.', False),
 }
 
 def link(url, label, cls=''):
@@ -141,8 +141,8 @@ ANSWERS = [
  ('help request brief commission design designer helpdesk project', 'Can someone design something for me?', 'Contact the Comms helpdesk. Say what you need, who it’s for and when, and attach anything you already have.', HOME, 'Common questions'),
  ('ai firefly generative midjourney chatgpt', 'Can I use AI to make images?', 'Check the SKAO AI policy and use only approved tools. Never upload confidential or personal material.', 'firefly.html', 'Using AI image tools'),
  ('supplier suppliers printer printers printing', 'Who should print it?', 'Communications can recommend trusted print suppliers for your location and the kind of job you have.', 'print-suppliers.html', 'Work with print suppliers'),
- ('stand stands booth exhibition backdrop backdrops banner banners pull-up merchandise merch swag giveaway giveaways kit', 'Do we have a stand, banners or giveaways?', 'Yes. The Comms teams lend the event kit at all three sites, and Designs to reuse has stands, banners and giveaways we’ve made before.', 'events.html', 'Event materials'),
- ('event events plan planning organise organize organising organizing conference venue', 'Can you help plan my event?', 'Start with the Comms helpdesk. For backdrops, banners and designs you can reuse, see Event materials.', 'events.html', 'Event materials'),
+ ('stand stands booth exhibition backdrop backdrops banner banners pull-up merchandise merch swag giveaway giveaways kit print', 'Do we have exhibition kit, banners or giveaways?', 'Yes. The exhibition kit is available on request from the Communications team at each site, and print and giveaway files are ready to download.', 'events.html', 'Event materials'),
+ ('event events plan planning organise organize organising organizing conference venue', 'Can you help plan my event?', 'Contact the Communications team through the Comms helpdesk. For the exhibition kit and print files, see Event materials.', 'events.html', 'Event materials'),
  ('talk talks speaker speakers deck decks reuse', 'Where are slides I can reuse?', 'Approved slide decks has decks Communications has approved for reuse, including talks given by staff.', 'master-deck.html', 'Approved slide decks'),
  ('new latest recent added update updates whats', 'What’s new in the Hub?', 'Latest files lists every new and updated file, newest first.', 'resources.html', 'Latest files'),
 ]

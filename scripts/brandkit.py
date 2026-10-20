@@ -86,12 +86,29 @@ DOWNLOAD_GROUPS = {
  'memos.html': [
   {'group': 'Memos', 'match': 'memo'},
   {'group': 'Reports', 'match': 'report'}],
+ # Print and giveaway files: one card per design (a print file, or a ZIP of its sizes), made by
+ # scripts/event_files.py. Cards follow this order; a group's note sits under its heading.
+ 'merchandise.html': [
+  {'group': 'Banners and signage', 'match': '^roller banners', 'label': 'Roller banners', 'desc': '85, 100 and 150 cm wide.'},
+  {'group': 'Banners and signage', 'match': '^stretch walls', 'label': 'Stretch walls', 'desc': 'Fabric walls, 1.5 and 5 m wide.'},
+  {'group': 'Banners and signage', 'match': '^wide banners', 'label': 'Wide banners', 'desc': '1.5 × 2 m, for SKAO or for SKA-Mid and SKA-Low.'},
+  {'group': 'Banners and signage', 'match': '^wall banners', 'label': 'Wall banners', 'desc': 'From 1.2 × 2 m to 2 × 2.25 m.'},
+  {'group': 'Banners and signage', 'match': '^teardrop', 'label': 'Teardrop flags', 'desc': '95 × 210 cm, with a cutter guide for the printer.'},
+  {'group': 'Banners and signage', 'match': '^gazebo', 'label': 'Gazebo', 'desc': 'Canopy and walls for outdoor events, made for SKA-Low.'},
+  {'group': 'Giveaways', 'match': '^stickers', 'label': 'Stickers', 'desc': 'Four designs.', 'note': 'Choose items people keep and use, and leave the date off so any stock left over can be used next time.'},
+  {'group': 'Giveaways', 'match': '^lanyards', 'label': 'Lanyards', 'desc': '20 mm wide, in two designs.'},
+  {'group': 'Giveaways', 'match': '^coasters', 'label': 'Coasters', 'desc': '95 mm, in three designs.'},
+  {'group': 'Giveaways', 'match': '^notepads', 'label': 'Notepads and sticky notes', 'desc': 'A5 notepad and A7 sticky notes.'},
+  {'group': 'Partner versions', 'match': 'sarao', 'label': 'SKAO and SARAO', 'desc': 'A 3 m wall, a roller banner and a small sign.', 'note': 'Check with the partner before using one of these again.'},
+  {'group': 'Partner versions', 'match': 'cetc', 'label': 'SKAO and CETC', 'desc': 'An SKA-Mid banner, 1.53 × 2.28 m.'},
+  {'group': 'Partner versions', 'match': 'ngvla', 'label': 'SKAO and ngVLA', 'desc': 'Banners from a joint conference, with SKAO-only versions.'},
+  {'group': 'Event logos', 'match': 'pi planning', 'label': 'PI planning logos', 'desc': 'One for each PI planning event and location.'}],
 }
 # How a page shows its downloads: a list (the default), cards with a cover (templates), or logo
 # tiles with a preview. Approved slide decks has its own library (main.js), which takes its topics
 # from the rules above. A cover is a picture attached to the same page
 # under the file's own name (Template.pptx and Template.jpg); without one, the card shows the title.
-DOWNLOAD_VIEW = {'partner-templates.html': 'cards', 'partner-logos.html': 'logos'}
+DOWNLOAD_VIEW = {'partner-templates.html': 'cards', 'partner-logos.html': 'logos', 'merchandise.html': 'cards'}
 
 # Primary colours from the Brand Book colour pages.
 PRIMARY_EXTRA = {

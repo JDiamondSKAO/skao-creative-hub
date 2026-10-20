@@ -185,7 +185,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...read('poster-templates.html').querySelectorAll('.variant-list li')].map(l=>l.textContent),['A0','A1','A2']);
  const decks=read('master-deck.html');assert.equal(decks.querySelector('.page-head h1').textContent,'Approved slide decks');assert(!decks.querySelector('.asset-panel'),'a library, not a resource card');
  assert(decks.querySelector('.deck-library #deckFilter')&&decks.querySelector('.deck-library #deckSort')&&decks.querySelector('[data-deck-list]'),'search, sort and the list');assert(decks.querySelector('.deck-reuse a[href="formatting-slides.html"]'),'reuse advice links to the formatting guide');
- assert.equal(read('memos.html').querySelector('.page-head h1').textContent,'Memo and report templates');assert.equal(read('stands.html').querySelector('.page-head h1').textContent,'Event kit');assert.equal(read('merchandise.html').querySelector('.page-head h1').textContent,'Designs to reuse');
+ assert.equal(read('memos.html').querySelector('.page-head h1').textContent,'Memo and report templates');assert.equal(read('stands.html').querySelector('.page-head h1').textContent,'Exhibition kit');assert.equal(read('merchandise.html').querySelector('.page-head h1').textContent,'Print and giveaway files');
  assert(read('standard-template.html').querySelector('[data-fact="google slides"] .pending-link'),'the review build shows what still needs a link');
  const low=read('low-slides.html');assert(!low.querySelector('.live-link, .progress-links, details.guidance-detail'),'no status box, link row or folded team notes on the site pages');
  assert.deepEqual([...low.querySelectorAll('.live-status .link-card [data-link]')].map(e=>e.dataset.link),['LOW_STATUS','CONSTRUCTION_DASHBOARD'],'live status: the site status slides and the dashboard');
@@ -319,18 +319,20 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...progQ('.deck-row .deck-date').children].map(e=>e.textContent),['Sep','2026'],'each earlier deck has a month tile');assert.equal(progQ('[data-file-count]').textContent,'1 deck');assert(progQ('.deck-row a.deck-get[download]').getAttribute('aria-label').startsWith('Download SKA-Low progress, September 2026'));
  assert(progQ('[data-site-photo] img'),'the telescope photo loads into the panel');lw.window.close();
  pass('Construction overview tiles show each telescope and the month of its newest slides; site pages lead with the latest deck, then a dated list of earlier ones');
- // Event materials: a card saying planning an event starts at the Comms helpdesk, a shelf of what there is,
- // the reuse steps and links elsewhere; Event kit and Designs to reuse show the pictures attached to them.
+ // Event materials: a card saying planning an event starts at the Comms helpdesk, a shelf of what's available,
+ // the reuse steps and links elsewhere. Exhibition kit shows the kit's pictures; Print and giveaway files lists
+ // its downloads as cards with covers, grouped and in the page's own order.
  const ev=read('events.html');
  assert.equal(ev.querySelector('.page-head h1').textContent,'Event materials');
  assert(!ev.querySelector('.lead-table, .request-flow, .landing-rail'),'no lead times, request steps or rail');
- const shelf=[...ev.querySelectorAll('.shelf-grid a.shelf-item')];assert.deepEqual(shelf.map(a=>a.getAttribute('href')),['stands.html','merchandise.html#banners-and-backdrops','merchandise.html#giveaways','merchandise.html#with-partners','merchandise.html#programmes-and-logos'],'a shelf of what there is, in place of the section list');
+ const shelf=[...ev.querySelectorAll('.shelf-grid a.shelf-item')];assert.deepEqual(shelf.map(a=>a.getAttribute('href')),['stands.html','merchandise.html#banners-and-signage','merchandise.html#giveaways','merchandise.html#partner-versions','merchandise.html#event-logos'],'a shelf of what is available, in place of the section list');
  assert.deepEqual(shelf.map(a=>a.querySelector('[data-kit-image]').dataset.kitPage),[routes['stands.html'].id,...Array(4).fill(routes['merchandise.html'].id)],'each with a picture attached to its page');
- assert.deepEqual(shelf.map(a=>a.querySelector('.shelf-meta').textContent),['Borrow · 5 pieces','Reprint · 6 designs','Reprint · 5 designs','Adapt · 3 designs','Adapt · 2 designs']);
+ assert.deepEqual(shelf.map(a=>a.querySelector('.shelf-meta').textContent),['On request · 5 items','Download · print files','Download · artwork','Download · co-branded files','Download · logo files']);
  assert(!ev.querySelector('.directory'),'no second list of the same pages');
+ assert(!/borrow/i.test(ev.querySelector('.content-body').textContent+read('stands.html').querySelector('.content-body').textContent),'the kit is available on request, not borrowed');
  assert(read('presentations.html').querySelector('.landing-layout > .landing-main > .task-intro'),'on other landings, Before you start still sits level with the intro');
  assert.deepEqual([...ev.querySelectorAll('.also-grid a.also-item')].map(a=>a.getAttribute('href').replace(/^https?:.*/,'canto')),['master-deck.html','poster-templates.html','canto'],'slides, posters and photos from elsewhere in the Hub');
- assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Reuse it','Adapt it','Go digital','Make it last']);
+ assert.deepEqual([...ev.querySelectorAll('.reuse-steps li strong')].map(e=>e.textContent),['Use what exists','Update a design','Choose screens over print','Make new items last']);
  assert(ev.querySelector('.shelf').compareDocumentPosition(ev.querySelector('.reuse-steps'))&4&&ev.querySelector('.reuse-steps').compareDocumentPosition(ev.querySelector('.also'))&4,'the shelf, the steps, then the rest of the Hub');
  assert(/servicedesk/.test(ev.querySelector('.intro-split .plan-card a.button').getAttribute('href')),'planning an event starts at the Comms helpdesk, in a card beside the intro');
  assert.deepEqual([...ev.querySelectorAll('.reuse-steps .reuse-icon')].map(e=>[!!e.querySelector('svg'),e.querySelector('em').textContent]),[[true,'1'],[true,'2'],[true,'3'],[true,'4']],'each step has its icon and number');
@@ -346,14 +348,19 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(pics['kit-fabrilux-3m'].endsWith('/kit-fabrilux-3m.webp')&&pics['kit-kiosk'].endsWith('/KIT-KIOSK.PNG'),'pictures are matched by file name');
  assert.equal(pics['kit-pull-up-banners'],'','off-site links are dropped');assert.equal(pics['kit-table-cloths'],'','only image files count');assert.equal(pics['kit-fabrilux-2m'],'','a missing picture keeps the outline');sk.window.close();
  const skp=dom('stands.html');assert(!skp.window.document.querySelector('.kit-pic img'),'the preview shows outlines');skp.window.close();
- const designsId=routes['merchandise.html'].id,dg=dom('merchandise.html','confluence'),dgw=dg.window;dgw.document.body.dataset.pageId=designsId;
- dgw.fetch=async u=>String(u).includes('/child/attachment')?{ok:true,json:async()=>({results:[{title:'design-gazebo.webp',_links:{download:`/download/attachments/${designsId}/design-gazebo.webp`}}]})}:{ok:true,json:async()=>({results:[]})};
- dgw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
- const slots=[...dgw.document.querySelectorAll('[data-kit-image]')];assert.equal(slots.length,16);assert(!slots.some(e=>/iau|korea/.test(e.dataset.kitImage)),'no one-off stands');assert(slots.every(e=>e.dataset.kitImage.startsWith('design-')));
- assert.deepEqual([...dgw.document.querySelectorAll('.design-group h2')].map(h=>h.textContent),['Banners and backdrops','With partners','Programmes and logos','Giveaways']);
- assert(dgw.document.querySelector('[data-kit-image="design-gazebo"] img').getAttribute('src').endsWith('/design-gazebo.webp'),'a design picture loads by name');
- assert(!dgw.document.querySelector('[data-kit-image="design-sarao"] img'),'the rest keep their outline');assert(dgw.document.querySelector('.toc-rail').hidden,'the gallery keeps its width: no contents list');dg.window.close();
- pass('Event materials: a planning card for the Comms helpdesk, a shelf of what there is, the reuse steps and links to slides, posters and photos; Event kit and Designs to reuse show pictures attached to them, or outlines until then');
+ const filesId=routes['merchandise.html'].id,pf=dom('merchandise.html','confluence'),pfw=pf.window;pfw.document.body.dataset.pageId=filesId;
+ const pfFiles=[['Stickers.zip',1480638],['Roller banners.zip',25733745],['SKAO and SARAO.zip',28630267],['Gazebo.pdf',70463717],['PI planning logos.zip',5701132]].map(([title,size])=>({title,container:{id:filesId},extensions:{fileSize:size},version:{when:'2026-10-20T10:00:00Z'},_links:{download:`/download/attachments/${filesId}/${encodeURIComponent(title)}`}}));
+ pfw.fetch=async u=>{const t=String(u);if(t.includes('/rest/api/content/search'))return {ok:true,json:async()=>({results:new URL(t,'http://localhost').searchParams.get('cql').includes('approved')?pfFiles:[]})};
+  if(t.includes('/child/attachment'))return {ok:true,json:async()=>({results:[{title:'Roller banners.webp',_links:{download:`/download/attachments/${filesId}/Roller%20banners.webp`}}]})};return {ok:true,json:async()=>({results:[]})};};
+ pfw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();await wait();
+ const pfq=s=>pfw.document.querySelector(s),pfqa=s=>[...pfw.document.querySelectorAll(s)];
+ assert.equal(pfq('.page-head h1').textContent,'Print and giveaway files');assert(pfq('.print-note'),'a note before printing');
+ assert.deepEqual(pfqa('#downloads .dl-group').map(g=>[g.id,g.querySelector('h3').textContent]),[['banners-and-signage','Banners and signage'],['giveaways','Giveaways'],['partner-versions','Partner versions'],['event-logos','Event logos']],'groups the landing can link to');
+ assert.deepEqual(pfqa('#downloads .file-card-title').map(e=>e.textContent),['Roller banners','Gazebo','Stickers','SKAO and SARAO','PI planning logos'],'cards in the page’s own order, named by it');
+ assert(pfq('#partner-versions .dl-note').textContent.startsWith('Check with the partner'),'partner files carry their note');
+ assert(pfqa('#downloads .file-card')[0].querySelector('.file-cover img').getAttribute('src').endsWith('/Roller%20banners.webp'),'a cover is the picture under the file’s own name');
+ assert(!pfqa('#downloads .file-card-files a').some(a=>/\.webp$/.test(a.getAttribute('href'))),'covers are not downloads');pf.window.close();
+ pass('Event materials: a planning card for the Comms helpdesk, a shelf of what is available, the reuse steps and links elsewhere; Exhibition kit shows its pictures, and Print and giveaway files lists its downloads as grouped cards with covers');
  const mediaId=routes['media.html'].id;
  const cantoManifest={version:1,albums:[
   {id:'a1',name:'Telescopes',path:'Asset library - Staff / Telescopes',count:40,href:'https://skao.canto.global/album/a1',assets:[

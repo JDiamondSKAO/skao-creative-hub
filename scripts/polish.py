@@ -333,7 +333,7 @@ TILES = [
  ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'memos.html', 'poster-templates.html']),
  ('brand', 'brand', 'Logos, colours, fonts and partner rules.', ['logos.html', 'colours-and-type.html', 'fonts.html']),
  ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'video.html', 'image-usage.html']),
- ('events', 'events', 'Kit, designs and giveaways to reuse at your event.', ['stands.html', 'merchandise.html']),
+ ('events', 'events', 'Exhibition kit, print files and giveaway artwork.', ['stands.html', 'merchandise.html']),
  ('guides', 'guides', 'Do-it-yourself checks for common jobs.', ['making-a-poster.html', 'print-preparation.html', 'accessibility.html']),
 ]
 TILE_ART = {**ART,

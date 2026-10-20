@@ -702,7 +702,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const section = renderDownloads(mine, ctx, pictures);
     if (!section) return;
     // Links from "Just added" point at #downloads, which only exists once the files have loaded.
-    const arrive = () => { if (location.hash === "#downloads") section.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" }); };
+    // Links can also point at a group of files (merchandise.html#giveaways).
+    const arrive = () => {
+      const at = location.hash === "#downloads" ? section : location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+      if (at && section.contains(at)) at.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" });
+    };
     if (!panel) {
       const slot = $(".content-body > [data-downloads-slot]"), intro = $(".content-body > .task-intro");
       if (slot) slot.replaceWith(section); else if (intro) intro.after(section); else $(".content-body")?.prepend(section);
@@ -965,9 +969,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const count = box.querySelector("[data-file-count]"); if (count) count.textContent = rows.length - 1 + (rows.length === 2 ? " deck" : " decks");
     box.hidden = false;
   }
-  // Pictures attached to a page under a fixed name: the event kit (kit-fabrilux-3m.webp and so on) and
-  // Designs to reuse (design-*.webp). A picture can come from another page (data-kit-page), as on the
-  // Events landing. Until it's there, an outline of the item shows instead.
+  // Pictures attached to a page under a fixed name: the exhibition kit (kit-fabrilux-3m.webp and so on)
+  // and the covers of the print and giveaway files. A picture can come from another page (data-kit-page),
+  // as on the Event materials landing. Until it's there, an outline of the item shows instead.
   const kitBox = $("[data-kit]");
   if (kitBox && document.body.dataset.mode !== "preview") loadKit(kitBox);
   async function loadKit(box) {
@@ -1035,6 +1039,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const kinds = [...new Set(v.files.map((i) => KINDS.find(([, re]) => re.test(i.ext))?.[0] || "Other files"))];
       v.group = kinds.length > 1 ? "Files" : kinds[0];
       v.rule = v.cls ? null : rules.find((r) => v.files.some((i) => r.re.test(i.title)));
+      v.order = v.rule ? rules.indexOf(v.rule) : -1;
       if (v.cls) v.group = "By information classification";
       else if (v.rule) v.group = v.rule.group;
       else if (!partnerPage && /\b(sarao|csiro|srcnet|rcn)\b|[a-z]src\b/i.test(v.words.join(" "))) v.group = "Partner versions";
@@ -1067,7 +1072,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const ul = document.createElement("ul"); ul.className = "file-cards";
       // Newest first: by the month in the file name, else by when it was added.
       const dated = (row) => { const m = row.base.match(/^(\d{4})[-. ]?(\d{2})/); return m ? Date.UTC(+m[1], +m[2] - 1, 28) : Math.max(...row.files.map((i) => i.when)); };
-      [...list].sort((x, y) => dated(y) - dated(x)).forEach((row) => {
+      // Cards a page names (brandkit.DOWNLOAD_GROUPS) keep its order; others go newest first.
+      [...list].sort((x, y) => (x.order >= 0 && y.order >= 0 ? x.order - y.order : dated(y) - dated(x))).forEach((row) => {
         const base = row.base.replace(/_+/g, " ").replace(/\s+/g, " ").trim(), dm = base.match(/^(\d{4})[-. ]?(\d{2})(?:[-. ]?\d{2})?[\s-]+(.+)$/);
         const month = dm && +dm[2] >= 1 && +dm[2] <= 12 ? MONTHS[+dm[2] - 1] + " " + dm[1] : "";
         row.label = row.rule?.label || (dm ? dm[3].trim() : base);
@@ -1126,10 +1132,11 @@ document.addEventListener("DOMContentLoaded", () => {
         v.rank = v.cls ? CLASSES.indexOf(v.cls) : n;
       });
       const g = document.createElement("section"); g.className = "dl-group";
+      if (!document.getElementById(slugify(name))) g.id = slugify(name);  // so a link can open at a group
       if (list[0].rule?.site) g.dataset.site = list[0].rule.site;
       if (groups.length > 1) {
         const h3 = document.createElement("h3"); h3.textContent = name; g.append(h3);
-        const note = list[0].rule?.note;
+        const note = rules.find((r) => r.group === name && r.note)?.note;
         if (note) { const n = document.createElement("p"); n.className = "dl-note"; n.textContent = note; g.append(n); }
       }
       list.sort((x, y) => x.rank - y.rank);

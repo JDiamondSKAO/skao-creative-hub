@@ -45,14 +45,15 @@ for page, patterns in spec['pages'].items():
             out.append({'page': page, 'title': p.name, 'path': str(p), 'size': st.st_size, 'labels': ['approved'],
                         'when': datetime.fromtimestamp(st.st_mtime, timezone.utc).isoformat()})
 # Event kit pictures from scripts/kit_images.py (no label: the theme shows them, not the downloads),
-# and the Events Production Manual as an approved download, both on Event kit.
+# and the Events Production Manual as an approved download, both on Exhibition kit.
 for f in sorted((ROOT / 'build' / 'kit').glob('kit-*.webp')):
     out.append({'page': 'stands.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': [],
                 'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
-# Pictures for Designs to reuse from scripts/design_images.py, unlabelled in the same way.
-for f in sorted((ROOT / 'build' / 'designs').glob('design-*.webp')):
-    out.append({'page': 'merchandise.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': [],
-                'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
+# Print and giveaway files from scripts/event_files.py: each download is approved; its cover (same name,
+# .webp) has no label, so the page shows it on the card rather than as a download.
+for f in sorted((ROOT / 'build' / 'event-files').glob('*')):
+    out.append({'page': 'merchandise.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size,
+                'labels': [] if f.suffix == '.webp' else ['approved'], 'when': datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat()})
 if spec.get('events_guide'):
     for f in sorted(Path(spec['events_guide']).glob('FINALS/BROCHURE/*.pdf')):
         out.append({'page': 'stands.html', 'title': f.name, 'path': str(f), 'size': f.stat().st_size, 'labels': ['approved'],
