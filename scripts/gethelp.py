@@ -40,6 +40,8 @@ MOVED = {
  'animations.html': ('media.html', 'Photos and video'),
  'event-safety.html': ('events.html', 'Plan event materials'),
  'merchandise.html': ('stands.html', 'Stands and merchandise'),
+ # 2.19: the lead times and request steps cover what the checklist asked.
+ 'event-checklist.html': ('events.html#lead-times', 'Plan event materials'),
 }
 
 # Retired pages say why, rather than only where to go: (eyebrow, message, searchable).

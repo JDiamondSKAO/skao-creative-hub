@@ -41,7 +41,6 @@ SECTIONS = [
   ('Find and use media', ['canto-access.html', 'image-usage.html']),
   ('Downloads', ['video.html'])]),
  ('events', 'Events', 'events.html', [
-  ('Plan', ['event-checklist.html']),
   ('Materials', ['stands.html'])]),
  ('guides', 'How-to guides', 'self-service.html', [
   ('Print and posters', ['making-a-poster.html', 'print-preparation.html', 'print-suppliers.html']),
@@ -83,7 +82,6 @@ TYPES = [
  ('services', 'Creative services', {'Creative help'}),
 ]
 SKIP = {'resources.html'} | set(MOVED)
-CHECKLISTS = {'event-checklist.html'}  # How-to guides read as described steps, not tick lists
 
 # Side menus fold away to give the page more room: section pages on the left, "On this page" on the right.
 PANEL_LEFT = ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>')
@@ -175,21 +173,6 @@ def asset_panel(name, body, jira):
   '<div class="asset-downloads" data-downloads hidden></div></div></div>')
  body = body.replace(m.group(0), panel).replace(n.group(0), '')
  return re.sub(r'<aside class="next-step"><div><h2>Choose a different starting point</h2>.*?</aside>', '', body, flags=re.S)
-
-def checklist(name, body):
- total = 0
- def convert(m):
-  nonlocal total
-  items = re.findall(r'<li>(.*?)</li>', m.group(3), re.S)
-  total += len(items)
-  lis = ''.join(f'<li><label><input type="checkbox"><span>{it}</span></label></li>' for it in items)
-  return f'<section class="reading-section checklist"><h2>{m.group(1)}</h2><ul class="check-list">{lis}</ul></section>'
- body = re.sub(r'<section class="reading-section"><h2>(.*?)</h2><(ul|ol)>(.*?)</\2></section>', convert, body, flags=re.S)
- if not total: return body
- bar = (f'<div class="checklist-bar" data-checklist="{name}"><span class="checklist-progress" role="status" aria-live="polite">0 of {total} done</span>'
-  '<span class="checklist-meter" aria-hidden="true"><i></i></span><button type="button" data-checklist-reset>Clear ticks</button><button type="button" data-print>Print</button></div>')
- at = body.find('<section class="reading-section checklist">')
- return body[:at] + bar + body[at:]
 
 def catalogue(pages, meta, summaries, on_request):
  cards, counts, seen = [], {}, set()
@@ -341,7 +324,7 @@ TILES = [
  ('documents', 'document', 'Letterheads, memos, reports and posters.', ['letterheads.html', 'memos.html', 'poster-templates.html']),
  ('brand', 'brand', 'Logos, colours, fonts and partner rules.', ['logos.html', 'colours-and-type.html', 'fonts.html']),
  ('media', 'media', 'Photography and footage in Canto.', ['canto-access.html', 'video.html', 'image-usage.html']),
- ('events', 'events', 'Stands, print and merchandise for events.', ['event-checklist.html', 'stands.html']),
+ ('events', 'events', 'Stands, print and merchandise for events.', ['stands.html']),
  ('guides', 'guides', 'Do-it-yourself checks for common jobs.', ['making-a-poster.html', 'print-preparation.html', 'accessibility.html']),
 ]
 TILE_ART = {**ART,
@@ -409,7 +392,6 @@ def revise(pages, meta, jira, canto=''):
  for name in meta:
   title, body = pages[name]
   if name in on_request: body = asset_panel(name, body, jira)
-  if name in CHECKLISTS: body = checklist(name, body)
   if name == 'request.html': body = request_routes(body, jira)
   if name in brandkit.DOWNLOAD_GROUPS:
    body = f'<div hidden data-dl-groups="{html.escape(json.dumps(brandkit.DOWNLOAD_GROUPS[name]), quote=True)}"></div>' + body

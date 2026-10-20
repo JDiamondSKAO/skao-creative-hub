@@ -509,26 +509,6 @@ document.addEventListener("DOMContentLoaded", () => {
     label();
     questions[0].before(toggle);
   }
-  // Checklists: ticks stay in this browser only.
-  $$("[data-checklist]").forEach((bar) => {
-    const key = "crh-check:" + bar.dataset.checklist;
-    const boxes = $$(".check-list input[type=checkbox]");
-    const progress = bar.querySelector(".checklist-progress"), meter = bar.querySelector(".checklist-meter i");
-    let saved = [];
-    try { saved = JSON.parse(localStorage.getItem(key) || "[]"); } catch {}
-    boxes.forEach((b, i) => { b.checked = saved.includes(i); });
-    const update = () => {
-      const done = boxes.filter((b) => b.checked).length;
-      progress.textContent = `${done} of ${boxes.length} done`;
-      if (meter) meter.style.width = (boxes.length ? (100 * done) / boxes.length : 0) + "%";
-      bar.classList.toggle("is-complete", done === boxes.length);
-      try { localStorage.setItem(key, JSON.stringify(boxes.map((b, i) => (b.checked ? i : -1)).filter((i) => i >= 0))); } catch {}
-    };
-    boxes.forEach((b) => b.addEventListener("change", update));
-    bar.querySelector("[data-checklist-reset]")?.addEventListener("click", () => { boxes.forEach((b) => { b.checked = false; }); update(); });
-    update();
-  });
-  $$("[data-print]").forEach((b) => b.addEventListener("click", () => print()));
   // Links to a collapsed section open it.
   const openTarget = (id) => { const d = id && document.getElementById(id); if (d && d.tagName === "DETAILS") { d.open = true; return d; } };
   $$("[data-open-details]").forEach((a) => a.addEventListener("click", (e) => {

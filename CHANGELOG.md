@@ -5,7 +5,8 @@
 Built on 2.18. Three things from the Creative Production team's Events Production Manual, so the Events pages say what the team actually offers.
 
 - **The event kit** on Stands and merchandise: the 3 m and 2 m Fabrilux backdrops, pull-up banners (85 × 200 cm), the kiosk and the table cloths, each with a picture, its size and what it's for. Ask for it through the Comms helpdesk; the Events and Logistics teams deliver it. The page's button now opens the Comms helpdesk.
-- **How much notice we need** on Plan event materials: the manual's minimum lead times, from 2–3 weeks for standard print to 8–10 weeks or more for bespoke production. The checklist points to them.
+- **How much notice we need** on Plan event materials: the manual's minimum lead times, from 2–3 weeks for standard print to 8–10 weeks or more for bespoke production.
+- **No Event materials checklist.** The lead times and request steps cover what it asked, so it is folded into Plan event materials and its old page points to the lead times. The tick-list feature it used is gone with it.
 - **How a request runs** on Plan event materials: helpdesk, a short chat, drafts with one or two rounds of changes, final approval by Communications, then production and delivery.
 - **Pictures:** each kit picture is a file attached to Stands and merchandise under a fixed name (kit-fabrilux-3m.webp and so on), made by `scripts/kit_images.py` from the manual's own renders. Until a picture is there, an outline of the item shows. They are not in this repository.
 - **The manual itself** is an approved download on Stands and merchandise once it is attached there.
