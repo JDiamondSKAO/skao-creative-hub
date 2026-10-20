@@ -1795,3 +1795,4 @@ body .content-body a.resource-row:any-link {align-items:flex-start;gap:24px;padd
 /* Homepage quick links stay on one row: more room for the left column, then the feature card moves under it */
 @media(max-width:1240px){.welcome-band{grid-template-columns:1.3fr 1fr;gap:48px;}.welcome-copy .quick-links{gap:5px;}.welcome-copy .quick-links a{padding:0 10px;font-size:.78rem;}}
 @media(max-width:1060px){.welcome-band{grid-template-columns:1fr;gap:32px;}.welcome-band .presentation-feature{max-width:640px;}}
+.policy-links {display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 24px;}
