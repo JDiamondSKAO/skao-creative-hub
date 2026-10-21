@@ -1,5 +1,9 @@
 # Changes
 
+## 2.24.3 The Hub starts in light mode
+
+- The Hub starts in light mode for everyone, whatever their computer is set to. The moon button still switches to dark, and the choice is remembered in that browser.
+
 ## 2.24.2 Even quick links, and newer pages matched whatever their capitals
 
 - **Quick links** sit in two even rows of three, each chip the same width and lined up with the search box (two columns on phones). Before, five fitted on one line and "Colours and fonts" sat alone on the next.

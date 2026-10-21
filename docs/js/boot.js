@@ -1,12 +1,4 @@
+// The Hub starts in light mode. The moon button switches to dark, and the choice is remembered in this browser.
 try {
-  const p = localStorage.getItem("crh-theme");
-  document.documentElement.classList.toggle(
-    "dark",
-    p === "dark" || (!p && matchMedia("(prefers-color-scheme: dark)").matches),
-  );
-} catch (e) {
-  document.documentElement.classList.toggle(
-    "dark",
-    matchMedia("(prefers-color-scheme: dark)").matches,
-  );
-}
+  document.documentElement.classList.toggle("dark", localStorage.getItem("crh-theme") === "dark");
+} catch (e) {}
