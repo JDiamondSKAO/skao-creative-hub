@@ -53,6 +53,26 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
   - The Brand Book file is called v2 but its cover says v1.2.
   - On the colour sheet, `#9B6017` has the wrong RGB values (they should be 155, 96, 23).
 
+## Idea for next: a short guided tour for new staff (owner's request, 21 October)
+
+The welcome note gets a second button, **Show me around**, beside "Explore the Hub". The tour is never forced.
+
+- **Steps.** It's a five-step spotlight tour, each step one plain sentence:
+  1. Search: ask in your own words.
+  2. Quick links.
+  3. The section menu.
+  4. Staff Resources Portal: photos and video in Canto.
+  5. Share feedback.
+- **Look and controls.**
+  - The page dims, with a cut-out around the item being explained and a small card beside it.
+  - Next, Back and Skip, plus step dots.
+  - Esc closes it.
+  - Focus stays in the card.
+  - With reduced motion, there's no animation.
+- **Remembering.** It's stored per browser like the welcome note (a `crh-tour-1` key in localStorage). A "Take the tour" link in the footer or Common questions replays it. `?fresh` in local test mode resets it.
+- **Phones.** The same steps run as a simple card sequence inside the dialog.
+- **Build.** Write it in the theme's own code, with no library. The pattern matches Atlassian's own spotlight onboarding. Add tests, and check it in local test mode before packaging.
+
 ## How to work on it
 
 - **Edit the sources only:** `scripts/*.py`, `js/main.js` and `css/style.css`. `docs/` and `page.vm` are generated, so never edit them by hand.
