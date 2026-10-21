@@ -1,5 +1,11 @@
 # Changes
 
+## 2.24.8 Side menu: proof against the live site's own styles
+
+- On the live site, Confluence's own styles also reach headings and boxes on the page. They pushed the menu title about 8 px down, so the round toggle looked high, and the menu box clipped the top of the toggle.
+- The menu box, its title and the toggle now have their spacing pinned with `!important`. The box no longer clips: only the list inside scrolls when it's long.
+- Tested with deliberately injected heading and box styles: the title and the toggle didn't move.
+
 ## 2.24.7 Side menu toggle: never clipped, level when folded
 
 - The menu box starts 6 px higher, with 6 px of padding. The title stays level with the page, and the round toggle, its shadow and its focus ring sit fully inside the menu's scroll area, so the top of the circle is no longer cut off.
