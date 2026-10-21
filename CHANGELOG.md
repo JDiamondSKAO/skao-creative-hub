@@ -1,5 +1,9 @@
 # Changes
 
+## 2.24.5 Share your presentation opens its form
+
+- The Share your presentation button now opens the Airtable form on the Shared presentations base. The address is `SHARE_DECK_FORM` in the local `dev/links.json`, kept out of Git like the other links.
+
 ## 2.24.4 Share your presentation, tightened
 
 - The page is now one panel with a brand gradient bar. The ask and the button sit on the left, with "How it works" beside them on the right, and Good to know follows directly.
