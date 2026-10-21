@@ -4,9 +4,10 @@
   python3 scripts/confluence_cleanup.py --apply   # move them to the trash (asks for your Confluence token)
 
 Run scripts/confluence_text.py --apply first, since it moves the Hub's pages out from under old parents. A page that
-still has a Hub page or an Events page beneath it is kept. Pages go to the trash children first, and only pages that
-are current: a space admin can restore any of them from Space tools > Content Tools > Trash until the trash is
-purged. This script never purges the trash. Events pages (hidden while the section is reworked) are kept.
+still has a Hub page beneath it is kept. Pages go to the trash children first, and only pages that are current: a
+space admin can restore any of them from Space tools > Content Tools > Trash until the trash is purged. This script
+never purges the trash. The Events pages go too while the section is hidden on the Hub (21 October 2026: not approved
+yet); to bring Events back, restore them from the trash first, so they keep the IDs the theme knows.
 """
 from pathlib import Path
 from urllib.error import HTTPError
@@ -20,15 +21,15 @@ def old_pages():
     from gethelp import MOVED, RETIRED
     routes = json.loads((ROOT / 'evidence' / 'interior-route-map.json').read_text())
     for name, kind in classify().items():
-        if kind != 'old': continue
-        now = f'now part of {MOVED[name][1]}' if name in MOVED else 'retired'
+        if kind not in ('old', 'hidden'): continue
+        now = 'Events, hidden on the Hub for now' if kind == 'hidden' else f'now part of {MOVED[name][1]}' if name in MOVED else 'retired'
         yield routes[name]['id'], routes[name]['source_title'], now
 
 def show():
     rows = list(old_pages())
-    print(f'{len(rows)} pages the Hub no longer uses would go to the trash:')
+    print(f'{len(rows)} pages not on the Hub would go to the trash:')
     for _, title, now in rows: print(f'  {title} ({now})')
-    print('Kept: every page the Hub uses, the space home page and the Events pages. Run with --apply to go ahead.')
+    print('Kept: every page the Hub uses and the space home page. Run with --apply to go ahead.')
 
 def apply():
     from canto_sync import http

@@ -37,7 +37,7 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
     - replaces the March placeholder text on the Hub's 35 pages, home page included, with the Hub's text and Attachments lists;
     - makes the 16 page-tree moves.
   - Review first with `python3 scripts/confluence_text.py`.
-  - Then `python3 scripts/confluence_cleanup.py --apply` moves the 24 old pages (their content is on other Hub pages) to the space trash, children first. It keeps any page that still has a Hub or Events page under it, and never purges the trash. The owner asked for this clean-up on 21 October: only what's on the Hub is approved.
+  - Then `python3 scripts/confluence_cleanup.py --apply` moves 29 pages to the space trash, children first: the 24 old pages, whose content is on other Hub pages, and the 5 Events pages. It keeps any page that still has a Hub page under it, and never purges the trash. The owner asked for this on 21 October: only what's on the Hub is approved.
   - Then run `python3 scripts/upload_kit.py --upload "Partner templates" "Partner logos"`. Reruns skip files that are already up.
   - Optional: set `HUB_SITE` in `dev/links.json` to the Hub's address, so each page opens with a note pointing to the Hub.
 
@@ -47,8 +47,8 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
   - Talk decks need lighter copies under 100 MB, named `YYYY-MM Title.pptx`, labelled `approved`.
   - Put the details in the attachment comment: `Speaker: … · Event: …`.
   - A JPG with the same name becomes the deck's cover.
-- **Events pages in Confluence** still have the March placeholder text, because the script leaves hidden sections alone. Consider restricting Events Support to Comms while it's being reworked.
-- **Events.** Review it, then bring it back: take `'Events'` out of `HIDDEN_SECTIONS` and upload its files (`build/kit`, `build/event-files`).
+- **Events pages in Confluence** go to the trash with the clean-up. When Events comes back, restore them first (Space tools → Content Tools → Trash), so they keep the page IDs in `scripts/interiors.py`. If they were purged, create them again and update those IDs.
+- **Events.** Review it, then bring it back. Restore its 5 Confluence pages from the trash, take `'Events'` out of `HIDDEN_SECTIONS`, and upload its files (`build/kit`, `build/event-files`).
 - **Brand bank flags.**
   - The Brand Book file is called v2 but its cover says v1.2.
   - On the colour sheet, `#9B6017` has the wrong RGB values (they should be 155, 96, 23).
