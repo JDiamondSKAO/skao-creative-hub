@@ -4,7 +4,7 @@ For whoever picks this up next, whether a person or another AI. **This repositor
 
 ## Where things stand
 
-- **Live.** Theme **2.23.0** is uploaded (the newest, **2.23.3**, is packaged in `release/go-live/theme/`. It adds even homepage cards, Hub names in Just added, the Canto slideshow reading Photography Media directly (working on the live site since 2.23.2), side-menu links to the newer pages found through the site tree, and drawn slideshow icons. Upload its 9 files over the old ones.) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
+- **Live.** Theme **2.23.0** is uploaded (the newest, **2.24.0**, adds the guided tour, Share your presentation and the new quick links, and is packaged in `release/go-live/theme/`. Before that, 2.23.3 It adds even homepage cards, Hub names in Just added, the Canto slideshow reading Photography Media directly (working on the live site since 2.23.2), side-menu links to the newer pages found through the site tree, and drawn slideshow icons. Upload its 9 files over the old ones.) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
   - Its code is on branch `claude/creative-hub-v2.23`.
   - Each release from 2.17 to 2.23 sits on its own branch, built on the one before.
   - None is merged into `main`, which is still at 2.16. Merge 2.23 into `main` once the owner is happy with the live site.
@@ -53,25 +53,14 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
   - The Brand Book file is called v2 but its cover says v1.2.
   - On the colour sheet, `#9B6017` has the wrong RGB values (they should be 155, 96, 23).
 
-## Idea for next: a short guided tour for new staff (owner's request, 21 October)
+## Share your presentation form (to finish)
 
-The welcome note gets a second button, **Show me around**, beside "Explore the Hub". The tour is never forced.
+The page (2.24.0) is ready, and its button opens the Comms helpdesk until the form exists.
 
-- **Steps.** It's a five-step spotlight tour, each step one plain sentence:
-  1. Search: ask in your own words.
-  2. Quick links.
-  3. The section menu.
-  4. Staff Resources Portal: photos and video in Canto.
-  5. Share feedback.
-- **Look and controls.**
-  - The page dims, with a cut-out around the item being explained and a small card beside it.
-  - Next, Back and Skip, plus step dots.
-  - Esc closes it.
-  - Focus stays in the card.
-  - With reduced motion, there's no animation.
-- **Remembering.** It's stored per browser like the welcome note (a `crh-tour-1` key in localStorage). A "Take the tour" link in the footer or Common questions replays it. `?fresh` in local test mode resets it.
-- **Phones.** The same steps run as a simple card sequence inside the dialog.
-- **Build.** Write it in the theme's own code, with no library. The pattern matches Atlassian's own spotlight onboarding. Add tests, and check it in local test mode before packaging.
+1. In Airtable, open the **Creative Hub feedback** base, table **Shared presentations** (already set up).
+2. Make a form for it, an interface form like the feedback one. Include every field except Status and Review notes.
+3. Copy the form's share link into the local `dev/links.json` as `"SHARE_DECK_FORM"`.
+4. Run `python3 scripts/package.py` and upload the theme again.
 
 ## How to work on it
 

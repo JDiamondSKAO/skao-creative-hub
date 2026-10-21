@@ -1,5 +1,21 @@
 # Changes
 
+## 2.24.0 Guided tour, Share your presentation, and quick links (branch claude/creative-hub-v2.23)
+
+- **A short guided tour for new staff.**
+  - The welcome note now offers **Show me around** or **Explore on my own**. Share feedback is a link in its note.
+  - The tour shows one feature at a time, with the rest of the page dimmed and a small card beside it: search, quick links, the sections, the Staff Resources Portal, then Share feedback.
+  - Features a page doesn't have, or that are hidden at that screen size, are skipped.
+  - Next, Back and Skip, plus the arrow keys. Esc closes it, focus stays in the card, and there's no animation with reduced motion. On phones the card sits at the bottom.
+  - It's remembered per browser (`crh-tour-1`). **Take the tour** in the footer starts it again.
+- **Share your presentation** (new page in Presentations, under Slide decks; `scripts/sharekit.py`).
+  - Staff share a talk they've given for review by Communications, and some are chosen to become approved slide decks.
+  - It has three steps (Share it, We take a look, We let you know), a Good to know band (not every talk is chosen, large files, your file stays yours), and a link on to Approved slide decks.
+  - The button opens the form named `SHARE_DECK_FORM` in `dev/links.json` (an Airtable form on the "Shared presentations" table), and the Comms helpdesk until that exists.
+  - Approved slide decks ends with an invitation to share. The old "How To Submit Your Deck" page now points here, and search answers "Can I share my presentation?".
+  - `confluence_text.py --apply` creates the page under Slide Decks & Presentations.
+- **Homepage quick links.** "Share a presentation" is new, and "Site progress" is now **Construction overview**.
+
 ## 2.23.3 Side menu fix for the newer pages, and cleaner slideshow buttons
 
 - **Partner templates, Partner logos and Construction overview** link by title, because they were created after the first release. On the live site those links came out empty, so they pointed at the page you were on and lit up in the side menu on every page.

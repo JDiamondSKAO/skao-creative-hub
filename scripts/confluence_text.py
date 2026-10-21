@@ -30,7 +30,8 @@ OUT = ROOT / 'release' / 'go-live' / 'page-text'
 SPACE, HOME = 'CRH', 'SKAO Creative Hub Home'
 BASE = 'https://confluence.skatelescope.org'
 # Pages the Hub added after the space was set up, and their parents.
-NEW = {'Partner templates': 'Slide Decks & Presentations', 'Construction overview': 'Slide Decks & Presentations', 'Partner logos': 'Brand Guidelines'}
+NEW = {'Partner templates': 'Slide Decks & Presentations', 'Construction overview': 'Slide Decks & Presentations', 'Partner logos': 'Brand Guidelines',
+       'Share your presentation': 'Slide Decks & Presentations'}
 # Moves that make the page tree follow the Hub's sections (moving keeps a page's ID and address).
 MOVES = {'Logos & Icons': 'Brand Guidelines', 'Slide Decks & Presentations': HOME, 'Video & Animation': 'Photography Media',
          'Accessibility Guidelines': 'Self-Service Guides', 'Adobe Firefly': 'Self-Service Guides', 'Canto DAM Access': 'Photography Media',

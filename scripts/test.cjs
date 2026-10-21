@@ -29,7 +29,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(!ghq('.brief-card')&&!ghq('.gh-steps')&&!ghq('.copy-template'),'no brief checklist or steps');gh.window.close();
  const hdr=dom('index.html').window.document;assert.deepEqual([...hdr.querySelectorAll('#mainNav a:not(.nav-menu-extra)')].map(a=>a.textContent),['Presentations','Documents','Brand','Photos and video','How-to guides'],'five sections in the header (Events is hidden for now); help lives in the footer');assert(hdr.querySelector('#mainNav a.nav-menu-feedback[data-feedback]')&&hdr.querySelector('.navrow a.nav-feedback[data-feedback]'),'Share feedback in the phone menu and beside search in the compact header');assert(hdr.querySelector('.navrow .nav-tools a.nav-canto[href*="canto.global"]')&&hdr.querySelector('#mainNav a.nav-menu-extra[href*="canto.global"]'),'the Canto library in the section row, and in the phone menu');
  assert([...hdr.querySelectorAll('.footer a')].some(a=>a.getAttribute('href')==='faq.html'&&a.textContent==='Get help'),'Get help in the footer');
- for(const [old,to] of [['working-with-us.html','faq.html'],['contribute.html','faq.html#share']]){const mv=dom(old).window.document;assert.equal(mv.querySelector('.moved-note a.button').getAttribute('href'),to,old+' now points to Common questions');}
+ for(const [old,to] of [['working-with-us.html','faq.html'],['contribute.html','share-presentation.html']]){const mv=dom(old).window.document;assert.equal(mv.querySelector('.moved-note a.button').getAttribute('href'),to,old+' now points to its new home');}
  pass('Get help is one Common questions page in the footer, with sharing folded in');
  for(const [old,to] of [['request.html','faq.html'],['video-request.html','faq.html'],['timing.html','faq.html'],['help.html','faq.html'],['creative-services.html','faq.html'],['canto-guide.html','canto-access.html'],['email-signatures.html','documents.html'],['widescreen-template.html','standard-template.html'],['science-slides.html','master-deck.html'],['reports.html','memos.html'],['hero-images.html','media.html'],['event-safety.html','events.html'],['event-checklist.html','events.html']]){
   const mv=dom(old).window.document;assert.equal(mv.querySelector('.moved-note a.button').getAttribute('href'),to,old+' points to its new home');}
@@ -78,7 +78,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   pass('Pages added later link through the site tree and never light up another page');}
  pass('New partner pages render in production by title, before their page IDs are known');
  const routes=JSON.parse(fs.readFileSync(path.join(root,'evidence/interior-route-map.json')));
- assert.equal(Object.keys(routes).length,63);
+ assert.equal(Object.keys(routes).length,64);
  for(const [file,route] of Object.entries(routes)){
   const out=Velocity.render(tpl,{page:page(route.id,route.source_title),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,title)=>'/crh/'+encodeURIComponent(title)}});
   const doc=new JSDOM(out).window.document;
@@ -215,7 +215,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert.deepEqual([...sp.querySelectorAll('.live-status [data-link]')].map(e=>e.dataset.link),['CONSTRUCTION_DASHBOARD','CONSTRUCTION_STATUS']);assert(sp.querySelector('.live-status + .site-photos'),'the all-hands photos have their own band');
  const pres=read('presentations.html');assert(pres.querySelector('.dir-row[href="site-progress.html"]')&&!pres.querySelector('.dir-row[href="low-slides.html"]'),'the section list shows the overview, which leads to the sites');
  assert.deepEqual([...low.querySelectorAll('.nav-children a')].map(a=>a.textContent),['SKA-Low','SKA-Mid'],'the side menu nests the sites under it');
- assert.equal(read('index.html').querySelector('.quick-links a[href="site-progress.html"]').textContent,'Site progress');
+ assert.equal(read('index.html').querySelector('.quick-links a[href="site-progress.html"]').textContent,'Construction overview');assert.equal(read('index.html').querySelector('.quick-links a[href="share-presentation.html"]').textContent,'Share a presentation','a quick link to share a presentation');
  const nt=dom('fonts.html'),ntd=nt.window.document;ntd.addEventListener('click',e=>e.preventDefault());
  const gf=ntd.querySelector('a[href^="https://fonts.google.com"]');assert.equal(gf.target,'_blank','another site opens in a new tab');assert(gf.rel.includes('noopener'));assert.equal(gf.getAttribute('aria-describedby'),'newTabHint');
  assert(![...ntd.querySelectorAll('a[href$=".html"], a[href^="#"]')].some(a=>a.target),'Hub pages open in place');
@@ -328,7 +328,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   const pv=dom('master-deck.html');assert.equal(pv.window.document.querySelectorAll('.deck').length,2,'the preview shows two examples');pv.window.close();
   pass('Approved slide decks is a library: approved decks newest first, each with cover, preview, details from its comment and size, with topics, search and sort');}
  {const d=dom('fonts.html','confluence'),w=d.window,doc=w.document,dlg=doc.querySelector('#welcomeDialog');
-  assert(dlg&&dlg.querySelector('a.button[href*="servicedesk"]'),'Share feedback opens the helpdesk until the form exists');
+  assert(dlg&&dlg.querySelector('a[data-feedback][href*="servicedesk"]'),'Share feedback opens the helpdesk until the form exists');assert.equal(dlg.querySelector('[data-tour-start]').textContent,'Show me around');assert.equal(dlg.querySelector('.welcome-actions [data-welcome-close]').textContent,'Explore on my own');
   await new Promise(r=>setTimeout(r,800));assert(dlg.open,'the welcome opens on a first visit');
   dlg.querySelector('[data-welcome-close]').click();assert(!dlg.open);assert.equal(w.localStorage.getItem('crh-welcome-1'),'1','and once only');
   const again=new JSDOM(fs.readFileSync(path.join(root,'docs/fonts.html'),'utf8'),{url:'http://localhost/fonts.html',runScripts:'outside-only',beforeParse(win){win.localStorage.setItem('crh-welcome-1','1');}}),aw=again.window;
@@ -336,6 +336,23 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   assert(![...aw.document.querySelectorAll('#welcomeDialog')].some(x=>x.open),'not again once seen');again.window.close();d.window.close();
   const pre=dom('fonts.html');await new Promise(r=>setTimeout(r,800));assert(!pre.window.document.querySelector('#welcomeDialog').open,'never in the design preview');pre.window.close();
   pass('A first-visit welcome says the Hub is new and in development, links to feedback and shows once');}
+ {const box=()=>({top:10,left:10,right:110,bottom:40,width:100,height:30});
+  const d=dom('index.html','confluence'),w=d.window,doc=w.document;w.HTMLElement.prototype.getBoundingClientRect=box;w.scrollTo=()=>{};
+  doc.querySelector('#welcomeDialog [data-tour-start]').click();assert(doc.querySelector('.tour-card'),'Show me around starts the tour');
+  const titles=[];for(let i=0;i<6&&doc.querySelector('.tour-card');i++){titles.push(doc.querySelector('#tourTitle').textContent);doc.querySelector('.tour-next').click();}
+  assert.deepEqual(titles,['Search or ask','Quick links','The sections','Staff Resources Portal','Share feedback'],'five steps on the homepage');
+  assert(!doc.querySelector('.tour-layer')&&w.localStorage.getItem('crh-tour-1')==='1','Done ends the tour and remembers it');
+  doc.querySelector('.footer [data-tour-start]').click();assert(doc.querySelector('.tour-card'),'Take the tour starts it again');
+  doc.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert(!doc.querySelector('.tour-layer'),'Esc closes it');
+  const f=dom('fonts.html','confluence'),fw=f.window;fw.HTMLElement.prototype.getBoundingClientRect=box;fw.scrollTo=()=>{};
+  fw.document.querySelector('.footer [data-tour-start]').click();assert.equal(fw.document.querySelectorAll('.tour-dots i').length,4,'a page without quick links skips that step');
+  d.window.close();f.window.close();pass('A short guided tour starts from the welcome note or the footer, skips what a page lacks and closes with Esc');}
+ {const sh=read('share-presentation.html');assert.equal(sh.querySelector('.page-head h1').textContent,'Share your presentation');
+  assert(sh.querySelector('a.button[data-share-deck][href*="servicedesk"]'),'the button opens the helpdesk until the form exists');assert.equal(sh.querySelectorAll('.use-steps li').length,3);
+  assert(/approved slide decks/i.test(sh.querySelector('.task-intro').textContent),'it says some talks become approved slide decks');
+  assert(read('master-deck.html').querySelector('.next-step a[href="share-presentation.html"]'),'Approved slide decks invites people to share');
+  assert([...read('standard-template.html').querySelectorAll('.section-nav a')].some(a=>a.getAttribute('href')==='share-presentation.html'),'it sits in the Presentations menu');
+  pass('Share your presentation explains the review and links to the form');}
  {const page=fs.readFileSync(path.join(root,'docs/fonts.html'),'utf8'),form='https://airtable.com/appTest/shrTest';
   const f=new JSDOM(page.replace(/<a href="[^"]*"(?=[^>]*data-feedback)/g,`<a href="${form}"`),{url:'http://localhost/fonts.html',runScripts:'outside-only',beforeParse(win){win.localStorage.setItem('crh-welcome-1','1');}}),fw=f.window;
   fw.matchMedia=()=>({matches:false});fw.HTMLDialogElement.prototype.showModal=function(){this.open=true};fw.document.body.dataset.mode='confluence';fw.fetch=async()=>({ok:true,json:async()=>({results:[]})});fw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));

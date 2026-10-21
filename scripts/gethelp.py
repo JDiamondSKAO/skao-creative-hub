@@ -14,7 +14,7 @@ HOME = 'faq.html'
 # Old page -> where its content lives now, and what that part is called.
 MOVED = {
  'working-with-us.html': (HOME, 'Common questions'),
- 'contribute.html': (HOME + '#share', 'Sharing your work'),
+ 'contribute.html': ('share-presentation.html', 'Share your presentation'),
  'request.html': (HOME, 'Common questions'),
  'creative-services.html': (HOME, 'Common questions'),
  'timing.html': (HOME, 'Common questions'),
@@ -73,8 +73,8 @@ def faq(jira):
   + '</section>')
  sharing = ('<section class="help-share" id="share"><h2>Sharing your work</h2>'
   '<p class="help-lead">Sharing starts a review: nothing is published until its owner has checked it.</p>'
-  + q('How do I share a deck for others to reuse?', 'Send the editable deck, or a link to it, through the ' + link(jira, 'Comms helpdesk ↗') + ', with its audience, event date, content owner and any limits on reuse. '
-     'Once Communications has approved it, it can join ' + link('master-deck.html', 'Approved slide decks') + '.', 'share-a-deck')
+  + q('How do I share a deck for others to reuse?', 'Use ' + link('share-presentation.html', 'Share your presentation') + ', with the event, the audience and when you gave the talk. '
+     'Communications reviews each one, and some are chosen to join ' + link('master-deck.html', 'Approved slide decks') + '.', 'share-a-deck')
   + q('How do I share photos or video?', 'Ask the ' + link(jira, 'Comms helpdesk ↗') + ' for an upload link; the Canto library is for browsing, not uploading. '
      'Include a title, who took it, where, and any rights or consent information.', 'share-photos')
   + '<p class="quiet-note">Keep working files where they are, so a new copy doesn’t become a competing version.</p></section>')
@@ -144,6 +144,7 @@ ANSWERS = [
  ('supplier suppliers printer printers printing', 'Who should print it?', 'Communications can recommend trusted print suppliers for your location and the kind of job you have.', 'print-suppliers.html', 'Work with print suppliers'),
  ('stand stands booth exhibition backdrop backdrops banner banners pull-up merchandise merch swag giveaway giveaways kit print', 'Do we have exhibition kit, banners or giveaways?', 'Yes. The exhibition kit is available on request from the Communications team at each site, and print and giveaway files are ready to download.', 'events.html', 'Event materials'),
  ('event events plan planning organise organize organising organizing conference venue', 'Can you help plan my event?', 'Contact the Communications team through the Comms helpdesk. For the exhibition kit and print files, see Event materials.', 'events.html', 'Event materials'),
+ ('share sharing submit upload send my presentation slides talk', 'Can I share my presentation?', 'Yes. Share it on Share your presentation and Communications will take a look. Some become approved slide decks.', 'share-presentation.html', 'Share your presentation'),
  ('talk talks speaker speakers deck decks reuse', 'Where are slides I can reuse?', 'Approved slide decks has decks Communications has approved for reuse, including talks given by staff.', 'master-deck.html', 'Approved slide decks'),
  ('new latest recent added update updates whats', 'What’s new in the Hub?', 'All files lists every file in the Hub. Choose Newest first to see the latest.', 'resources.html#newest', 'All files'),
 ]

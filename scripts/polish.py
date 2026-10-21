@@ -30,7 +30,7 @@ SEARCH_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" strok
 SECTIONS = [
  ('presentations', 'Presentations', 'presentations.html', [
   ('Templates', ['standard-template.html', 'partner-templates.html']),
-  ('Slide decks', ['master-deck.html']),
+  ('Slide decks', ['master-deck.html', 'share-presentation.html']),
   ('Site progress', ['site-progress.html', 'low-slides.html', 'mid-slides.html']),
   ('How to', ['formatting-slides.html'])]),
  ('documents', 'Documents', 'documents.html', [

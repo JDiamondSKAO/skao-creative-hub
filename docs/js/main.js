@@ -723,6 +723,83 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!seen && document.body.dataset.mode !== "preview" && typeof welcome.showModal === "function")
       setTimeout(() => { if (!document.querySelector("dialog[open]")) welcome.showModal(); }, 700);
   }
+  // A short guided tour, one feature at a time with the rest of the page dimmed. It starts only when someone asks,
+  // from "Show me around" in the welcome note or "Take the tour" in the footer. Features not on this page, or hidden
+  // at this screen size, are left out.
+  const TOUR = "crh-tour-1";
+  const shown = (el) => {
+    if (!el || el.closest("[hidden]")) return false;
+    const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+    return cs.display !== "none" && cs.visibility !== "hidden" && r.width > 0 && r.height > 0;
+  };
+  const tourSteps = () => {
+    const sections = $$("#mainNav > a:not(.nav-menu-extra)").length;
+    return [
+      { el: [$(".hero-search"), ...$$("[data-search]")].find(shown), title: "Search or ask", text: "Search the Hub, or ask in your own words, like “where’s the logo?”" },
+      { el: $(".welcome-copy .quick-links"), title: "Quick links", text: "The things people need most often, one click away." },
+      { el: [$("#mainNav"), $(".mobile-menu")].find(shown), title: "The sections", text: `Everything sits in ${["a few", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"][sections] || sections} sections. Each one opens with an overview of what’s inside.` },
+      { el: $("a.nav-canto"), title: "Staff Resources Portal", text: "Photos and video live in the Staff Resources Portal. Register once with your SKAO email address." },
+      { el: $(".brandbar a.beta-pill"), title: "Share feedback", text: "The Hub is new and still growing. Tell us what’s missing or could work better." },
+    ].filter((s) => shown(s.el));
+  };
+  function startTour() {
+    scrollTo(0, 0);  // the header's features sit in their usual place
+    const steps = tourSteps();
+    if (!steps.length) return;
+    const back = document.activeElement, layer = document.createElement("div");
+    layer.className = "tour-layer";
+    layer.innerHTML = '<div class="tour-spot" aria-hidden="true"></div><div class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText" tabindex="-1">'
+      + '<p class="tour-count"></p><h2 id="tourTitle"></h2><p id="tourText"></p><div class="tour-actions"><button type="button" class="tour-skip">Skip tour</button>'
+      + '<span class="tour-dots" aria-hidden="true">' + steps.map(() => "<i></i>").join("") + '</span>'
+      + '<button type="button" class="button secondary tour-back">Back</button><button type="button" class="button tour-next">Next</button></div></div>';
+    document.body.append(layer);
+    const spot = layer.querySelector(".tour-spot"), card = layer.querySelector(".tour-card"), next = layer.querySelector(".tour-next"), prev = layer.querySelector(".tour-back");
+    let at = 0;
+    const place = () => {
+      const r = steps[at].el.getBoundingClientRect(), pad = 8, gap = 14;
+      Object.assign(spot.style, { top: r.top - pad + "px", left: r.left - pad + "px", width: r.width + pad * 2 + "px", height: r.height + pad * 2 + "px" });
+      if (innerWidth <= 600) { card.style.top = card.style.left = ""; return; }  // phones: the card sits at the bottom
+      const cw = card.offsetWidth || 340, ch = card.offsetHeight || 190;
+      let top = r.bottom + pad + gap;
+      if (top + ch > innerHeight - 12) top = Math.max(12, r.top - pad - gap - ch);
+      card.style.top = top + "px";
+      card.style.left = Math.min(Math.max(12, r.left + r.width / 2 - cw / 2), innerWidth - cw - 12) + "px";
+    };
+    const show = (n) => {
+      at = n;
+      layer.querySelector(".tour-count").textContent = `${at + 1} of ${steps.length}`;
+      layer.querySelector("#tourTitle").textContent = steps[at].title;
+      layer.querySelector("#tourText").textContent = steps[at].text;
+      prev.hidden = at === 0;
+      next.textContent = at === steps.length - 1 ? "Done" : "Next";
+      layer.querySelectorAll(".tour-dots i").forEach((d, i) => d.classList.toggle("on", i === at));
+      place();
+      card.focus({ preventScroll: true });
+    };
+    const forward = () => (at < steps.length - 1 ? show(at + 1) : end());
+    const keys = (e) => {
+      if (e.key === "Escape") { e.preventDefault(); end(); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); forward(); }
+      else if (e.key === "ArrowLeft" && at > 0) { e.preventDefault(); show(at - 1); }
+      else if (e.key === "Tab") {  // focus stays in the card
+        const f = [...card.querySelectorAll("button:not([hidden])")], i = f.indexOf(document.activeElement);
+        if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+        else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+      }
+    };
+    function end() {
+      try { localStorage.setItem(TOUR, "1"); } catch {}
+      layer.remove();
+      removeEventListener("resize", place); removeEventListener("scroll", place, true); document.removeEventListener("keydown", keys, true);
+      back?.focus?.({ preventScroll: true });
+    }
+    next.addEventListener("click", forward);
+    prev.addEventListener("click", () => at > 0 && show(at - 1));
+    layer.querySelector(".tour-skip").addEventListener("click", end);
+    addEventListener("resize", place); addEventListener("scroll", place, true); document.addEventListener("keydown", keys, true);
+    show(0);
+  }
+  $$("[data-tour-start]").forEach((b) => b.addEventListener("click", () => { if (welcome?.open) welcome.close(); startTour(); }));
   // The feedback form (Airtable) opens with this page filled in, so we know where feedback came from.
   // While Share feedback still points at the helpdesk, the links stay as they are.
   if (pageTitle) $$("a[data-feedback]").forEach((l) => {
