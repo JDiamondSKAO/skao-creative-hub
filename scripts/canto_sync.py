@@ -53,7 +53,7 @@ from urllib.parse import quote, urlencode
 from urllib.request import Request, HTTPRedirectHandler, HTTPSHandler, build_opener
 from urllib.parse import urlsplit
 from urllib.error import HTTPError, URLError
-import io, json, os, re, ssl, sys, time, uuid
+import getpass, io, json, os, re, ssl, sys, time, uuid
 
 MANIFEST = 'canto-showcase.json'
 THUMB_PREFIX = 'canto-'
@@ -526,6 +526,29 @@ def run(args):
             if name.startswith(THUMB_PREFIX) and name.endswith('.jpg') and name not in files: conf.delete(att)
     log(f'Published {len(files)} thumbnails and {MANIFEST} to page {page_id}')
 
+def publish(args):
+    """Publish a dry run's output (its images, then the manifest last) to the Hub page it was made for, without
+    asking Canto again. For the first publish, or when the Canto credentials aren't to hand; the next full sync
+    replaces it. The Confluence token is asked for here, so it never sits in the shell history."""
+    if args.get('--env'): load_env(args['--env'])
+    folder = Path(args['--publish'] if isinstance(args['--publish'], str) else 'build/canto')
+    body = (folder / MANIFEST).read_bytes(); manifest = json.loads(body)
+    items = [a for al in manifest.get('albums', []) for a in al['assets']] + manifest.get('highlights', [])
+    pages = {a['src'].split('/')[3] for a in items}  # /download/attachments/<page>/<name>
+    if len(pages) != 1: sys.exit(f'The manifest points at {len(pages)} pages, not one.')
+    page_id, names = pages.pop(), sorted({a['thumb'] for a in items})
+    missing = [n for n in names if not (folder / n).exists()]
+    if missing: sys.exit(f'{len(missing)} images are missing from {folder}, for example {missing[0]}.')
+    base = os.environ.get('CONFLUENCE_BASE') or 'https://confluence.skatelescope.org'
+    token = os.environ.get('CONFLUENCE_TOKEN') or getpass.getpass('Confluence personal access token (it will not show): ').strip() or sys.exit('No token given.')
+    conf = Confluence(base, token, page_id)
+    existing = conf.attachments()
+    for i, name in enumerate(names, 1):
+        conf.upload(name, (folder / name).read_bytes(), 'image/jpeg', existing)
+        if i % 15 == 0: log(f'  {i} of {len(names)} images')
+    conf.upload(MANIFEST, body, 'application/json', existing)  # last, so it never points at missing images
+    log(f'Published {len(names)} images and {MANIFEST} (made {str(manifest.get("generated", ""))[:10]}) to page {page_id}')
+
 def self_test():
     albums = [{'id': 'a1', 'name': 'Telescopes', 'namePath': 'Library/Staff media library/Asset library - Staff/Telescopes', 'assetCount': 3},
               {'id': 'a2', 'name': 'Press', 'namePath': 'Library/Media Kits/Press', 'assetCount': 9},
@@ -609,4 +632,4 @@ if __name__ == '__main__':
     opts = {}
     for i, a in enumerate(argv):
         if a.startswith('--'): opts[a] = argv[i + 1] if i + 1 < len(argv) and not argv[i + 1].startswith('--') else True
-    run(opts)
+    publish(opts) if '--publish' in opts else run(opts)

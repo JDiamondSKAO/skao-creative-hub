@@ -55,6 +55,7 @@ python3 scripts/canto_sync.py --dry-run --out build/canto   # check what would b
 python3 scripts/canto_sync.py --dry-run --env dev/canto.env   # same, reading settings from a local file (dev/ is not in Git)
 export CONFLUENCE_BASE=https://confluence.skatelescope.org CONFLUENCE_TOKEN=... CONFLUENCE_PAGE_ID=381891718
 python3 scripts/canto_sync.py                               # publish to the Photos and video page
+python3 scripts/canto_sync.py --publish                     # publish the last dry run (build/canto) as it is, without Canto; asks for the Confluence token
 ```
 
 - Run it on a schedule (for example daily) or from a Canto webhook. Keep credentials in the scheduler's secrets, never in this repository.
