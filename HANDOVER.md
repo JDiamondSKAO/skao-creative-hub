@@ -34,9 +34,10 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
 - **Set up the Confluence side** (for staff who use "View in Confluence"). Not done as of 21 October.
   - `python3 scripts/confluence_text.py --apply` covers all of it:
     - creates the 3 newer pages (Partner templates, Construction overview, Partner logos), which don't exist yet; until they do, theme 2.23.3 hides links to them;
-    - replaces the March placeholder text on 59 pages, home page included, with the Hub's text and Attachments lists;
+    - replaces the March placeholder text on the Hub's 35 pages, home page included, with the Hub's text and Attachments lists;
     - makes the 16 page-tree moves.
   - Review first with `python3 scripts/confluence_text.py`.
+  - Then `python3 scripts/confluence_cleanup.py --apply` moves the 24 old pages (their content is on other Hub pages) to the space trash, children first. It keeps any page that still has a Hub or Events page under it, and never purges the trash. The owner asked for this clean-up on 21 October: only what's on the Hub is approved.
   - Then run `python3 scripts/upload_kit.py --upload "Partner templates" "Partner logos"`. Reruns skip files that are already up.
   - Optional: set `HUB_SITE` in `dev/links.json` to the Hub's address, so each page opens with a note pointing to the Hub.
 
@@ -47,7 +48,6 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
   - Put the details in the attachment comment: `Speaker: … · Event: …`.
   - A JPG with the same name becomes the deck's cover.
 - **Events pages in Confluence** still have the March placeholder text, because the script leaves hidden sections alone. Consider restricting Events Support to Comms while it's being reworked.
-- **Old pages.** Retire the old pages the Hub has folded into others, one to three months after launch. The list is in the local `UPLOAD-PLAN.md`.
 - **Events.** Review it, then bring it back: take `'Events'` out of `HIDDEN_SECTIONS` and upload its files (`build/kit`, `build/event-files`).
 - **Brand bank flags.**
   - The Brand Book file is called v2 but its cover says v1.2.

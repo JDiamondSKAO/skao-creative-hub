@@ -6,7 +6,7 @@
 
 The plan:
 - create the pages the Hub added later (Partner templates, Construction overview, Partner logos) where they belong;
-- give every page the Hub's own text in place of the March placeholders, with Confluence's Attachments list where
+- give every page the Hub uses its own text in place of the March placeholders, with Confluence's Attachments list where
   the Hub lists files, so the page works on its own;
 - move pages so the page tree follows the Hub's sections;
 - give the space home page a directory of the sections.
@@ -169,16 +169,25 @@ def home_text(routes, note):
                f'<li><a href="{esc(page_link(by_file["resources.html"]), True)}">All files</a></li></ul>')
     return well_formed(''.join(out))
 
-def pages():
-    """(Confluence title, page id or '' for a page still to create, storage text), home page last."""
+def classify():
+    """Each route page as 'hub' (on the Hub), 'hidden' (a hidden section, kept) or 'old' (folded into another page)."""
+    from polish import SECTIONS, HIDDEN, members_of
+    from gethelp import MOVED, RETIRED
     routes = json.loads((ROOT / 'evidence' / 'interior-route-map.json').read_text())
-    from polish import HIDDEN
+    live = {'resources.html', 'faq.html'}.union(*(members_of(sec) for sec in SECTIONS))
+    return {name: 'hidden' if name in HIDDEN else 'hub' if name in live else 'old' if name in MOVED or name in RETIRED else 'other'
+            for name in routes}
+
+def pages():
+    """(Confluence title, page id or '' for a page still to create, storage text) for the Hub's pages, home page last.
+    Old pages are left out: scripts/confluence_cleanup.py moves them to the trash."""
+    routes = json.loads((ROOT / 'evidence' / 'interior-route-map.json').read_text())
     from interiors import PLANNED
-    found = links.load()
+    found, kinds = links.load(), classify()
     note = hub_note(found['HUB_SITE']) if found.get('HUB_SITE') else ''
     for name, meta in routes.items():
         src = ROOT / 'content' / name.replace('.html', '-confluence.html')
-        if name in HIDDEN or not src.exists(): continue
+        if kinds[name] != 'hub' or not src.exists(): continue
         parser = Storage(); parser.feed(links.strip_pending(links.fill(src.read_text(), found)))
         yield meta['source_title'], ('' if meta['id'] in PLANNED else meta['id']), well_formed(note + parser.result())
     yield HOME, '', home_text(routes, note)
