@@ -85,7 +85,7 @@ Built on 2.22, as the release for going live on the Confluence site.
 
 ## 2.22.0 Events: what we've made, on request or to download (proposal, branch claude/creative-hub-v2.22)
 
-Built on 2.21. Events no longer reads as if Communications plans people's events. It shows what already exists for SKAO events: the exhibition kit (on request) and print and giveaway files (to download), with sustainability in mind. Planning an event starts at the Comms helpdesk. Refined over several rounds of Joe's feedback, with plain, professional wording (the kit is available on request, not "borrowed").
+Built on 2.21. Events no longer reads as if Communications plans people's events. It shows what already exists for SKAO events: the exhibition kit (on request) and print and giveaway files (to download), with sustainability in mind. Planning an event starts at the Comms helpdesk. Refined over several rounds of review feedback, with plain, professional wording (the kit is available on request, not "borrowed").
 
 - **Event materials** (the Events landing, was Plan event materials) has two columns, like the Hub's other landings:
   - On the left, **What's available** is a picture list in place of the section list: Exhibition kit (on request), then Banners and signage, Giveaways, Partner versions and Event logos (to download). Each row has a thumbnail, a line on what's in it and how you get it, and links straight to its place.
