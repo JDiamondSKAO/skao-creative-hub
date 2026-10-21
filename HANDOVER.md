@@ -4,7 +4,7 @@ For whoever picks this up next, whether a person or another AI. **This repositor
 
 ## Where things stand
 
-- **Live.** Theme **2.23.0** is uploaded (the newest, **2.23.2**, is packaged in `release/go-live/theme/`: even homepage cards, Hub names in Just added, and the Canto slideshow reading Photography Media directly; upload its 9 files over the old ones) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
+- **Live.** Theme **2.23.0** is uploaded (the newest, **2.23.3**, is packaged in `release/go-live/theme/`. It adds even homepage cards, Hub names in Just added, the Canto slideshow reading Photography Media directly (working on the live site since 2.23.2), side-menu links to the newer pages found through the site tree, and drawn slideshow icons. Upload its 9 files over the old ones.) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
   - Its code is on branch `claude/creative-hub-v2.23`.
   - Each release from 2.17 to 2.23 sits on its own branch, built on the one before.
   - None is merged into `main`, which is still at 2.16. Merge 2.23 into `main` once the owner is happy with the live site.
@@ -30,6 +30,8 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
 4. **Keep it fresh with the scheduled sync.** `python3 scripts/canto_sync.py` with Canto credentials and a Confluence token (see the README) fetches the newest pictures and replaces the snapshot. Run it daily from a scheduler that keeps both as secrets. Rotate the Canto App Secret before setting this up.
 
 ## Still to do
+
+- **Construction overview** must exist with exactly that title, under Slide Decks & Presentations. Until it does, theme 2.23.3 hides links to it. The same applies to Partner templates and Partner logos.
 
 - **The page buttons.** "Open the Canto library" buttons on the media pages could become "Open the Staff Resources Portal". This is waiting for the owner's decision.
 - **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK` in `scripts/links.py`). Add its address to the local `dev/links.json`, then package and upload the theme again.

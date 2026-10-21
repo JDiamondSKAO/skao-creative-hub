@@ -1487,8 +1487,9 @@ body .content-body a.dl-file:any-link {justify-content:flex-start;min-width:122p
 .show-controls button:active {transform:scale(.94);}
 .show-controls button:focus-visible {outline:2px solid #fff;outline-offset:2px;}
 .show-controls button[hidden] {display:none;}
-.show-play span {display:block;width:10px;height:12px;border-left:3px solid #fff;border-right:3px solid #fff;}
-.show-play[aria-pressed="true"] span {width:0;height:0;border:0;border-left:11px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;margin-left:3px;}
+.show-controls svg {display:block;}
+.show-play .i-play,.show-play[aria-pressed="true"] .i-pause {display:none;}
+.show-play[aria-pressed="true"] .i-play {display:block;margin-left:2px;}
 .show-dots {display:flex;gap:6px;margin:10px 0 0;}
 .show-dots[hidden] {display:none;}
 .show-dots button {position:relative;flex:1;max-width:64px;height:14px;padding:0;border:0;background:none;cursor:pointer;}

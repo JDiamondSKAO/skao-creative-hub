@@ -1,5 +1,13 @@
 # Changes
 
+## 2.23.3 Side menu fix for the newer pages, and cleaner slideshow buttons
+
+- **Partner templates, Partner logos and Construction overview** link by title, because they were created after the first release. On the live site those links came out empty, so they pointed at the page you were on and lit up in the side menu on every page.
+  - The theme now finds them in the site's own page tree (`#hubRoutes`), case-insensitively, and uses their real address and ID.
+  - A link to one that isn't in the tree is hidden.
+  - A new test covers this.
+- **Slideshow buttons** use drawn icons (chevrons, pause and play) instead of text characters, so they sit centred and crisp in every font.
+
 ## 2.23.2 The Canto slideshow reads its page directly
 
 - On the live site the Canto pictures were on Photography Media, but the slideshow stayed hidden. It found its manifest through Confluence search, which can lag behind a new upload or miss a file name.

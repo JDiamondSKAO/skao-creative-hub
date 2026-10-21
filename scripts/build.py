@@ -184,7 +184,10 @@ prod=links.strip_pending(prod)
 assert 'pending-link' not in prod and '<!--pending' not in prod
 # Pages not yet in Confluence are matched by title until their IDs are known.
 for page_id,title in PLANNED.items():
- prod=prod.replace(f'$page.id.toString() == "{page_id}"',f'$page.title == "{title}"').replace(f'data-page-id="{page_id}"','data-page-id="$page.id"')
+ # Its own page knows its ID; elsewhere main.js looks the title up in the site's page tree (#hubRoutes), because a
+ # title link that Confluence can't resolve comes out empty and would point at (and light up) the page you are on.
+ prod=prod.replace(f'$page.id.toString() == "{page_id}"',f'$page.title == "{title}"').replace(f'data-page-id="{page_id}"',f'data-page-id="#if($page.title == "{title}")$page.id#end" data-page-title="{title}"')
+ prod=prod.replace(f"href=\"$link.page('CRH', '{title}')\"",f"href=\"$link.page('CRH', '{title}')\" data-hub-title=\"{title}\"")
  assert page_id not in prod, f'stand-in page ID {page_id} left in page.vm'
 (R/'page.vm').write_text(prod)
 for id,title,filename,group in ROUTES: LIVE_LINKS[filename]=('https://confluence.skatelescope.org/display/CRH/'+title.replace(' ','+')) if id in PLANNED else 'https://confluence.skatelescope.org/pages/viewpage.action?pageId='+id

@@ -68,6 +68,14 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  for(const id of ['381891696','381891810']){const out=Velocity.render(tpl,{page:page(id,'Test'),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,title)=>'/crh/'+encodeURIComponent(title)}});const doc=new JSDOM(out).window.document;assert(doc.querySelector(id==='381891696'?'.page-grid.full-width .file-feed':'.content-body .moved-note a.button'));assert(![...doc.querySelectorAll('a')].some(a=>a.getAttribute('href').includes('$link')));}pass('Latest files and the contribution landing page render in the production template');
  for(const [title,section] of [['Partner templates','Presentations'],['Partner logos','Brand']]){const out=Velocity.render(tpl,{page:page('555001',title),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,t)=>'/crh/'+encodeURIComponent(t)}});const doc=new JSDOM(out).window.document;
   assert.equal(doc.querySelector('.asset-panel').dataset.pageId,'555001',title+' reads its own attachments');assert.equal(doc.querySelector('.sidebar .section-nav h2').textContent,section);assert(!out.includes('99000000'),'no stand-in IDs in production');}
+ {const h2=page('381887066','Home'),slides=page('381891843','Standard SKAO Template');h2.children=[slides,page('555001','Partner templates')];
+  const out=Velocity.render(tpl,{page:slides,pages:{home:h2},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:()=>''}});
+  const lw=new JSDOM(out,{url:'http://localhost/crh/381891843',runScripts:'outside-only'}).window;lw.matchMedia=()=>({matches:false});lw.HTMLElement.prototype.scrollIntoView=()=>{};lw.HTMLDialogElement.prototype.showModal=function(){this.open=true};lw.fetch=async()=>({ok:false,json:async()=>({})});
+  lw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));
+  const side=t=>[...lw.document.querySelectorAll('.sidebar a')].find(a=>a.textContent.trim()===t);
+  assert.equal(new URL(side('Partner templates').href).pathname,'/crh/555001','a later page links through the site tree');assert(!side('Partner templates').hasAttribute('aria-current'),'and is not marked current on another page');
+  assert(side('Construction overview').hidden&&!side('Construction overview').hasAttribute('aria-current'),'a page missing from the tree is hidden, not linked to the page you are on');
+  pass('Pages added later link through the site tree and never light up another page');}
  pass('New partner pages render in production by title, before their page IDs are known');
  const routes=JSON.parse(fs.readFileSync(path.join(root,'evidence/interior-route-map.json')));
  assert.equal(Object.keys(routes).length,63);

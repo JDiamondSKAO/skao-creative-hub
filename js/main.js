@@ -35,9 +35,15 @@ document.addEventListener("DOMContentLoaded", () => {
       motion.title = paused ? "Resume header animation" : "Pause header animation";
     });
   }
+  // Pages added after the first release (Partner templates, Partner logos, Construction overview) are linked by title.
+  // The site's own page tree gives their real address and ID; a link to one that isn't in the tree is hidden, rather
+  // than left pointing at (and lighting up) the page you are on.
+  const treeByTitle = new Map($$("#hubRoutes a[data-page-id]").map((a) => [a.textContent.trim().toLowerCase(), a]));
+  $$("[data-page-title]").forEach((el) => { if (!el.dataset.pageId) el.dataset.pageId = treeByTitle.get(el.dataset.pageTitle.toLowerCase())?.dataset.pageId || ""; });
+  $$("a[data-hub-title]").forEach((a) => { const node = treeByTitle.get(a.dataset.hubTitle.toLowerCase()); if (node) a.href = node.href; else a.hidden = true; });
   const navItems = $$("#mainNav a");
   const currentPath = location.pathname.replace(/\/$/, "");
-  [...navItems, ...$$(".sidebar a:not(#toc a)")].forEach(a => {
+  [...navItems, ...$$(".sidebar a:not(#toc a)")].filter((a) => !a.hidden).forEach(a => {
     if (new URL(a.href).pathname.replace(/\/$/, "") === currentPath) a.setAttribute("aria-current", "page");
   });
   if ($(".start-hero")) navItems[0]?.setAttribute("aria-current", "page");
