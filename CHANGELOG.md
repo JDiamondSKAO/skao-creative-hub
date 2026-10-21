@@ -1,5 +1,10 @@
 # Changes
 
+## 2.24.7 Side menu toggle: never clipped, level when folded
+
+- The menu box starts 6 px higher, with 6 px of padding. The title stays level with the page, and the round toggle, its shadow and its focus ring sit fully inside the menu's scroll area, so the top of the circle is no longer cut off.
+- The toggle is placed exactly in both states, so it lines up with the page's first line when the menu is folded too, whatever other styles the live site adds.
+
 ## 2.24.6 Side menu lined up, with round chevron toggles
 
 - The side menu's title now starts level with the first line of the page. It no longer sits in a 32 px box beside the toggle.
