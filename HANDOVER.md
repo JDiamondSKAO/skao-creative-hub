@@ -31,8 +31,14 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
 
 ## Still to do
 
-- **The 3 newer pages haven't been created yet** (as of 21 October): Partner templates and Construction overview go under Slide Decks & Presentations, and Partner logos under Brand Guidelines, with exactly those titles. Until they exist, theme 2.23.3 hides links to them.
+- **Set up the Confluence side** (for staff who use "View in Confluence"). Not done as of 21 October.
+  - `python3 scripts/confluence_text.py --apply` covers all of it:
+    - creates the 3 newer pages (Partner templates, Construction overview, Partner logos), which don't exist yet; until they do, theme 2.23.3 hides links to them;
+    - replaces the March placeholder text on 59 pages, home page included, with the Hub's text and Attachments lists;
+    - makes the 16 page-tree moves.
+  - Review first with `python3 scripts/confluence_text.py`.
   - Then run `python3 scripts/upload_kit.py --upload "Partner templates" "Partner logos"`. Reruns skip files that are already up.
+  - Optional: set `HUB_SITE` in `dev/links.json` to the Hub's address, so each page opens with a note pointing to the Hub.
 
 - **The page buttons.** "Open the Canto library" buttons on the media pages could become "Open the Staff Resources Portal". This is waiting for the owner's decision.
 - **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK` in `scripts/links.py`). Add its address to the local `dev/links.json`, then package and upload the theme again.
@@ -40,9 +46,7 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
   - Talk decks need lighter copies under 100 MB, named `YYYY-MM Title.pptx`, labelled `approved`.
   - Put the details in the attachment comment: `Speaker: … · Event: …`.
   - A JPG with the same name becomes the deck's cover.
-- **Page text.** The Confluence pages still hold the March placeholder text. The theme shows its own text, but Confluence search and anyone opening a page in Confluence see the old text.
-  - `python3 scripts/confluence_text.py` writes the Hub's text for 58 pages (all except the hidden Events pages) in storage format to `release/go-live/page-text/` for review.
-  - `--apply` puts it on the pages as new versions, so page history keeps the old text. Run `scripts/build.py` first.
+- **Events pages in Confluence** still have the March placeholder text, because the script leaves hidden sections alone. Consider restricting Events Support to Comms while it's being reworked.
 - **Old pages.** Retire the old pages the Hub has folded into others, one to three months after launch. The list is in the local `UPLOAD-PLAN.md`.
 - **Events.** Review it, then bring it back: take `'Events'` out of `HIDDEN_SECTIONS` and upload its files (`build/kit`, `build/event-files`).
 - **Brand bank flags.**
