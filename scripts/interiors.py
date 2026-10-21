@@ -105,7 +105,7 @@ def revise(pages,jira,canto):
   ('Make new items last','New designs are made without dates, in standard sizes.','<path d="M6 3h12M6 21h12"/><path d="M7 3v2a5 5 0 0 0 10 0V3M7 21v-2a5 5 0 0 1 10 0v2"/>')]
  also=[('Slides for your talk','Approved decks and the SKAO template.','master-deck.html','<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M7 21h10M12 17v4M7 9h6M7 12h10"/>'),
   ('A poster','Templates, and how to prepare one.','poster-templates.html','<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7h8M8 10h5"/><circle cx="12" cy="15" r="2.5"/>'),
-  ('Photos and video','From the Canto Media Library.',canto,'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/>')]
+  ('Photos and video','From the Staff Resources Portal.',canto,'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/>')]
  put('events.html','Event materials',intro('Exhibition kit, print files and giveaway artwork for SKAO events. Use what already exists before ordering anything new.',tag='Exhibitions, talks and visits')+
   '<div class="events-layout" data-landing-directory><section class="avail" id="whats-available"><h2>What’s available</h2><ul class="avail-list" data-kit>'
   +''.join(f'<li><a class="avail-row" href="{href}"><span class="kit-pic" data-kit-image="{pic}" data-kit-page="{META[page]["id"]}" data-shape="wide"></span>'

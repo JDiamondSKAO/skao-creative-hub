@@ -6,7 +6,7 @@ it never invents files or availability.
 """
 import html, json, re
 from gethelp import MOVED
-from interiors import PLANNED
+from interiors import PLANNED, ROUTES
 import brandkit, links
 
 def text(fragment):
@@ -48,6 +48,13 @@ SECTIONS = [
   ('Print and posters', ['making-a-poster.html', 'print-preparation.html', 'print-suppliers.html']),
   ('Good practice', ['accessibility.html', 'firefly.html'])]),
 ]
+# Sections kept out of the Hub for now: their pages and content stay in the build, but no menu, landing,
+# link or search result leads to them, and their old pages stay out of search too. Events waits for another
+# review (21 Oct 2026). Take a label out of this set to bring the section back.
+HIDDEN_SECTIONS = {'Events'}
+HIDDEN = {f for _, _, f, group in ROUTES if group in HIDDEN_SECTIONS} | {
+ p for _, label, landing, groups in SECTIONS if label in HIDDEN_SECTIONS for p in [landing] + [q for _, qs in groups for q in qs]}
+SECTIONS = [sec for sec in SECTIONS if sec[1] not in HIDDEN_SECTIONS]
 # Pages that belong to a section without being listed (duplicate source titles).
 EXTRA = {}
 # Pages that sit under another page in their group: listed beneath it, indented, by a short name.
@@ -347,7 +354,8 @@ def home_tiles(home, titles):
  art = TILE_ART
  out = '<ul class="section-index">'
  for key, kind, desc, links in TILES:
-  sec = next(x for x in SECTIONS if x[0] == key)
+  sec = next((x for x in SECTIONS if x[0] == key), None)
+  if not sec: continue  # a hidden section
   out += (f'<li><a class="index-item kind-{kind}" href="{sec[2]}"><span class="index-art" aria-hidden="true">{art[kind]}</span>'
    f'<span class="index-text"><strong>{sec[1]}</strong><span>{desc}</span></span></a></li>')
  return out + '</ul>'

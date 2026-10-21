@@ -1,5 +1,14 @@
 # Changes
 
+## 2.23.0 Go-live: Events hidden for now, and the Staff Resources Portal (branch claude/creative-hub-v2.23)
+
+Built on 2.22, as the release for going live on the Confluence site.
+
+- **Events is hidden for now**, while it gets more work and review. Its pages, content and code stay in the build, but nothing leads to them. The menus, the homepage, All files, the related links and search all leave them out, along with the old pages folded into them. That covers the Hub's own search and Confluence's results. Search answers about the exhibition kit and event planning now point to the Comms helpdesk. To bring Events back, take `'Events'` out of `HIDDEN_SECTIONS` in `scripts/polish.py`.
+- With five sections, the homepage's last two section tiles share the second row, so no cell sits empty.
+- The link to the Canto staff portal is now called **Staff Resources Portal** in the header, the phone menu, the footer and search. The full name shows at every width.
+- `scripts/upload_kit.py` gathers every file to attach into one folder per Confluence page, in `approved` and `no label`. With `--upload`, it attaches them and labels the downloads, using the uploader's own personal access token. It never deletes. The talk bank, stand-in examples, the Canto showcase and the Events files are left out.
+
 ## 2.22.0 Events: what we've made, on request or to download (proposal, branch claude/creative-hub-v2.22)
 
 Built on 2.21. Events no longer reads as if Communications plans people's events. It shows what already exists for SKAO events: the exhibition kit (on request) and print and giveaway files (to download), with sustainability in mind. Planning an event starts at the Comms helpdesk. Refined over several rounds of Joe's feedback, with plain, professional wording (the kit is available on request, not "borrowed").

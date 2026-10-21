@@ -148,7 +148,17 @@ ANSWERS = [
  ('new latest recent added update updates whats', 'What’s new in the Hub?', 'All files lists every file in the Hub. Choose Newest first to see the latest.', 'resources.html#newest', 'All files'),
 ]
 
-def answers_html():
- return ('<div id="hubAnswers" hidden>' + ''.join(
-  f'<a href="{href}" data-keys="{keys}" data-question="{html.escape(q, quote=True)}" data-answer="{html.escape(a, quote=True)}">{html.escape(label)}</a>'
-  for keys, q, a, href, label in ANSWERS) + '</div>')
+# While a section is hidden (polish.HIDDEN_SECTIONS), its answers send people to the Comms helpdesk instead.
+INSTEAD = {
+ 'Do we have exhibition kit, banners or giveaways?': 'Yes. The exhibition kit and print files from past events are available on request from the Communications team. Ask through the Comms helpdesk.',
+ 'Can you help plan my event?': 'Contact the Communications team through the Comms helpdesk.',
+}
+
+def answers_html(hidden=(), helpdesk=''):
+ rows = []
+ for keys, q, a, href, label in ANSWERS:
+  if href.split('#')[0] in hidden:
+   if q not in INSTEAD or not helpdesk: continue
+   a, href, label = INSTEAD[q], helpdesk, 'Comms helpdesk'
+  rows.append(f'<a href="{href}" data-keys="{keys}" data-question="{html.escape(q, quote=True)}" data-answer="{html.escape(a, quote=True)}">{html.escape(label)}</a>')
+ return '<div id="hubAnswers" hidden>' + ''.join(rows) + '</div>'

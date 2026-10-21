@@ -45,7 +45,7 @@ STEPS = [
  ('Copy slides across', 'Paste them into another deck with Use Destination Theme, so they match it.'),
  ('Check the facts', 'Each fact slide’s notes say where its numbers come from and when they were checked. '
                      'For this month’s construction figures, use the <a href="site-progress.html">site progress slides</a>.'),
- ('Credit every photo', 'Keep the credit on the photo, as the Canto Media Library gives it.'),
+ ('Credit every photo', 'Keep the credit on the photo, as the Staff Resources Portal gives it.'),
 ]
 
 

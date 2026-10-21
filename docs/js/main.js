@@ -346,7 +346,9 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         const data = await res.json();
         const routes = new Map($$("#hubRoutes a[data-page-id]").map(a => [a.dataset.pageId, a]));
-        const remote = (data.results || []).map((r) => ({
+        // Sections hidden for now (polish.HIDDEN_SECTIONS) stay out of results, with their old pages.
+        const hiddenPages = new Set((document.body.dataset.hiddenPages || "").split(",").filter(Boolean));
+        const remote = (data.results || []).filter((r) => !hiddenPages.has(String(r.id))).map((r) => ({
           title: labels[String(r.id)] || r.title,
           excerpt: (r.ancestors || []).map((a) => a.title).join(" / "),
           href: routes.get(String(r.id))?.href || ctx + (r._links?.webui || "/pages/viewpage.action?pageId=" + encodeURIComponent(r.id)),
@@ -358,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
         remote.forEach((r, i) => { r.order = i; });
         remote.sort((a, b) => titleScore(b) - titleScore(a) || a.order - b.order);
         const seen = new Set(local.map((r) => r.href));
-        const files = ((await filesFound).results || []).filter((f) => !/^canto-|\.json$/i.test(f.title || "")).slice(0, 4).map((f) => {
+        const files = ((await filesFound).results || []).filter((f) => !/^canto-|\.json$/i.test(f.title || "") && !hiddenPages.has(String(f.container?.id || ""))).slice(0, 4).map((f) => {
           const page = String(f.container?.id || ""), ext = ((f.title || "").match(/\.([a-z0-9]+)$/i) || [])[1];
           return {
             title: String(f.title || "").replace(/\.[a-z0-9]+$/i, "").replace(/[_]+/g, " ").trim(),
