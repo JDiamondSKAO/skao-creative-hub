@@ -20,3 +20,4 @@ evidence/*
 
 # Canto sync dry-run output
 /build/
+!/HANDOVER.md

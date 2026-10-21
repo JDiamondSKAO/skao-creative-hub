@@ -1,0 +1,74 @@
+# Creative Hub handover (21 October 2026)
+
+For whoever picks this up next, whether a person or another AI. **This repository is public.** Nothing internal goes in Git: no internal document links, credentials, personal names or staff photos. Those live in local files on the owner's Mac, listed at the end.
+
+## Where things stand
+
+- **Live.** Theme **2.23.0** is uploaded to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
+  - Its code is on branch `claude/creative-hub-v2.23`.
+  - Each release from 2.17 to 2.23 sits on its own branch, built on the one before.
+  - None is merged into `main`, which is still at 2.16. Merge 2.23 into `main` once the owner is happy with the live site.
+- **Files.** The brand files are attached to their pages (75 files) by `scripts/upload_kit.py --upload`.
+- **Events is hidden for now.** `HIDDEN_SECTIONS` in `scripts/polish.py` keeps it out of the menus, homepage, All files and search. Its pages and code are kept for a later review.
+- **The Canto staff portal link** is called **Staff Resources Portal** across the Hub. That's the owner's choice, so keep it.
+- `CHANGELOG.md` has the detail of every release.
+
+## Open now: the Photos and video slideshow isn't showing
+
+The slideshow on Photos and video, and the video strips on Video and animation, are built from attachments on the **Photography Media** page (ID 381891718): `canto-showcase.json` plus about 75 `canto-*.jpg` images. Nothing appears until they're there, which is by design.
+
+1. **Publish the saved snapshot.** Run `python3 scripts/canto_sync.py --publish` from the repo folder.
+   - It uploads `build/canto`, a snapshot from 20 October: 75 images in 8 collections.
+   - It asks for a Confluence personal access token (Profile → Settings → Personal Access Tokens). The token is typed into the terminal and never stored.
+   - It prints progress every 15 images and ends with "Published 75 images and canto-showcase.json … to page 381891718".
+2. **If it finished but nothing shows**, work through these in order:
+   - Open Photography Media → ••• → Attachments in Confluence. The json and the images should be there.
+   - Wait a minute. The theme finds the json through Confluence search (`loadCanto` in `js/main.js`, which searches for `title="canto-showcase.json"` in space CRH), so search has to index it first.
+   - Check that another live feature that uses the same REST search works. For example, Letterheads should list 10 files. If it doesn't, the problem is REST from the site, not Canto.
+   - Open the browser's developer tools on Photos and video and look at the Network tab. Check the `/rest/api/content/search` request for the json, then the json download. Look for errors in the Console.
+3. **Keep it fresh with the scheduled sync.** `python3 scripts/canto_sync.py` with Canto credentials and a Confluence token (see the README) fetches the newest pictures and replaces the snapshot. Run it daily from a scheduler that keeps both as secrets. Rotate the Canto App Secret before setting this up.
+
+## Still to do
+
+- **The page buttons.** "Open the Canto library" buttons on the media pages could become "Open the Staff Resources Portal". This is waiting for the owner's decision.
+- **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK` in `scripts/links.py`). Add its address to the local `dev/links.json`, then package and upload the theme again.
+- **Approved slide decks.**
+  - Talk decks need lighter copies under 100 MB, named `YYYY-MM Title.pptx`, labelled `approved`.
+  - Put the details in the attachment comment: `Speaker: … · Event: …`.
+  - A JPG with the same name becomes the deck's cover.
+- **Page text.** Replace the March placeholder text on the live Confluence pages. The theme shows its own text, but Confluence search reads the page text.
+- **Old pages.** Retire the old pages the Hub has folded into others, one to three months after launch. The list is in the local `UPLOAD-PLAN.md`.
+- **Events.** Review it, then bring it back: take `'Events'` out of `HIDDEN_SECTIONS` and upload its files (`build/kit`, `build/event-files`).
+- **Brand bank flags.**
+  - The Brand Book file is called v2 but its cover says v1.2.
+  - On the colour sheet, `#9B6017` has the wrong RGB values (they should be 155, 96, 23).
+
+## How to work on it
+
+- **Edit the sources only:** `scripts/*.py`, `js/main.js` and `css/style.css`. `docs/` and `page.vm` are generated, so never edit them by hand.
+- **Build:** `python3 scripts/build.py`.
+- **Test:** `node scripts/test.cjs`. It must exit 0, so check the exit code rather than the last line of output.
+- **Package:**
+  1. Bump the version in `scripts/package.py`, then run `python3 scripts/package.py`.
+  2. Upload the 9 files from `release/skao-creative-hub-v<version>-flat-upload.zip` in the Scroll Viewport theme editor, replacing the files there.
+  3. The zip carries the internal links from `dev/links.json`. The committed files never do, and the build checks this.
+- **Test locally:**
+  - Run `python3 scripts/dev_fixtures.py`, then `python3 scripts/dev_server.py`, and open http://127.0.0.1:8767.
+  - Add `?fresh` to see the Hub as a first-time visitor would.
+- **Attach files:** `python3 scripts/upload_kit.py` gathers them into `release/go-live/files/<page>/`, and `--upload` attaches and labels them. Neither ever deletes anything.
+- **House rules:**
+  - Staff never see placeholders.
+  - Use plain described steps, not tick-list checklists.
+  - Don't leave empty gaps in grids.
+  - Use the house style: no "master deck" (it's the SKAO slide deck) and "Square Kilometre Array Observatory" in full where it fits.
+  - Brand source folders in Dropbox are read only.
+
+## Local-only files on the owner's Mac (not in Git, on purpose)
+
+- `GO-LIVE.md`: the step-by-step go-live guide (pages, moves, files, theme, checks).
+- `UPLOAD-PLAN.md`: the fuller Confluence plan, including the list of old pages.
+- `dev/links.json`: internal document links that `package.py` builds into the release.
+- `dev/brandbank-map.json`: where the brand files sit on the Mac.
+- `dev/canto.env`: Canto and Confluence credentials. Never print, copy or commit them.
+- `build/`: generated pictures and the Canto snapshot (`build/canto`).
+- `release/`: the packaged themes, and `release/go-live/`, which holds the theme files and the files per page.
