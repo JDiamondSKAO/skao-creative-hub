@@ -11,6 +11,9 @@ Links to internal documents are filled in from dev/links.json as each page is se
 --no-approved     no attachment carries the "approved" label (tests fallbacks)
 --no-announcement no page carries the "announcement" label
 --show-note       show a "Local test mode" line under the header
+
+Add ?fresh to any page address (http://127.0.0.1:8767/?fresh) to see it as a first-time visitor:
+the welcome note and the announcement bar show again, the side menus open and Recently viewed is empty.
 """
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -147,6 +150,9 @@ class Handler(SimpleHTTPRequestHandler):
             note = '<div class="wrap preview-note">Local test mode · Confluence is simulated; downloads come from your local brand bank.</div>' if '--show-note' in ARGS else ''
             html = re.sub(r'<div class="wrap preview-note">.*?</div>', note, html, count=1)
             html = links.fill(html, links.load())  # internal addresses from the gitignored dev/links.json
+            # ?fresh forgets everything the Hub remembers in this browser (every crh- key), before main.js reads it.
+            if 'fresh' in parse_qs(url.query, keep_blank_values=True):
+                html = html.replace('<head>', '<head><script>try{Object.keys(localStorage).forEach(function(k){if(k.indexOf("crh-")===0)localStorage.removeItem(k)})}catch(e){}</script>', 1)
             body = html.encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.send_header('Cache-Control', 'no-store'); self.end_headers(); self.wfile.write(body)
             return

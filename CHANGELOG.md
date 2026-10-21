@@ -44,6 +44,7 @@ Built on 2.21. Events no longer reads as if Communications plans people's events
   - Each item keeps to a third of the row, so one or two items don't stretch across the box (or their hover highlight with them).
   - The browser's plain tooltip with the file list is gone.
   - The strip reads further back, so a big upload to one page still leaves room for the next two pages, and its count shows every new file on that page.
+- Local test mode: add `?fresh` to any page address to see the Hub as a first-time visitor, with the welcome note, the announcement and the side menus open, and nothing in Recently viewed.
 
 ## 2.21.0 Review board feedback, round 4 (proposal, branch claude/creative-hub-v2.21)
 
