@@ -4,7 +4,7 @@ For whoever picks this up next, whether a person or another AI. **This repositor
 
 ## Where things stand
 
-- **Live.** Theme **2.23.0** is uploaded to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
+- **Live.** Theme **2.23.0** is uploaded (**2.23.1** is packaged in `release/go-live/theme/`, with even homepage cards and Hub names in Just added; upload its 9 files over 2.23.0) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
   - Its code is on branch `claude/creative-hub-v2.23`.
   - Each release from 2.17 to 2.23 sits on its own branch, built on the one before.
   - None is merged into `main`, which is still at 2.16. Merge 2.23 into `main` once the owner is happy with the live site.

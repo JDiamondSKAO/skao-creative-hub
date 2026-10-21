@@ -347,17 +347,23 @@ TILES = [
 TILE_ART = {**ART,
  'events': '<span class="art-events"><i></i><b>SKAO</b><em></em></span>',
  'guides': '<span class="art-guides"><i></i><i></i><i></i></span>',
+ 'files': '<span class="art-files"><i>PDF</i><i>PPTX</i><i>ZIP</i></span>',
  'media': '<span class="art-media"><i></i><b></b><em></em></span>'}
 
 def home_tiles(home, titles):
  """A compact index of the sections: small picture, name and what is inside."""
  art = TILE_ART
- out = '<ul class="section-index">'
+ out, shown = '<ul class="section-index">', 0
  for key, kind, desc, links in TILES:
   sec = next((x for x in SECTIONS if x[0] == key), None)
   if not sec: continue  # a hidden section
+  shown += 1
   out += (f'<li><a class="index-item kind-{kind}" href="{sec[2]}"><span class="index-art" aria-hidden="true">{art[kind]}</span>'
    f'<span class="index-text"><strong>{sec[1]}</strong><span>{desc}</span></span></a></li>')
+ # With a section hidden the rows would come up short, so All files takes the last place and every card keeps one size.
+ if shown % 3:
+  out += (f'<li><a class="index-item kind-files" href="resources.html"><span class="index-art" aria-hidden="true">{art["files"]}</span>'
+   '<span class="index-text"><strong>All files</strong><span>Every download in the Hub, by section.</span></span></a></li>')
  return out + '</ul>'
 
 

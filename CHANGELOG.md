@@ -1,5 +1,10 @@
 # Changes
 
+## 2.23.1 Even homepage cards, and Hub names in Just added
+
+- **Browse the Hub** keeps every card the same size. With Events hidden, an **All files** card takes the sixth place, so there are two even rows of three. The card only appears when a hidden section leaves a row short.
+- **Just added** names each page as the Hub does (for example "Slide deck and template"), not by its Confluence title.
+
 ## 2.23.0 Go-live: Events hidden for now, and the Staff Resources Portal (branch claude/creative-hub-v2.23)
 
 Built on 2.22, as the release for going live on the Confluence site.

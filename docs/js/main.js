@@ -1442,6 +1442,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     const ctx = document.body.dataset.context || "";
+    // Pages go by their Hub names (Slide deck and template), not their Confluence titles.
+    let hubTitles = {};
+    try { hubTitles = JSON.parse($("#hubTitles")?.textContent || "{}"); } catch {}
     const query = async (cql, limit) => {
       const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: String(limit), expand: "container,version" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
       if (!res.ok) throw Error(String(res.status));
@@ -1450,7 +1453,7 @@ document.addEventListener("DOMContentLoaded", () => {
         when: r.version?.when,
         size: r.extensions?.fileSize,
         download: r._links?.download ? ctx + r._links.download : "",
-        pageTitle: r.container?.title ? String(r.container.title) : "",
+        pageTitle: hubTitles[String(r.container?.id || "")] || (r.container?.title ? String(r.container.title) : ""),
         pageHref: r.container?._links?.webui ? ctx + r.container._links.webui : "",
       }));
     };
