@@ -1,7 +1,7 @@
 """Every file to attach in Confluence for go-live, in one folder per page, with an optional upload.
 
   python3 scripts/upload_kit.py            # gather the files into release/go-live/files/<Confluence page title>/
-  python3 scripts/upload_kit.py --upload   # attach them to the CRH pages (needs CONFLUENCE_TOKEN)
+  python3 scripts/upload_kit.py --upload   # attach them to the CRH pages (asks for your Confluence token)
 
 Each page folder has "approved" (downloads, which get the approved label) and "no label" (pictures the
 theme shows on the page). The files come from the local map that local test mode uses
@@ -12,7 +12,7 @@ Gathering replaces the files folder. Uploading never deletes: a file already on 
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.error import HTTPError
-import json, os, shutil, sys, uuid
+import getpass, json, os, shutil, sys, uuid
 
 ROOT = Path(__file__).resolve().parents[1]
 KIT = ROOT / 'release' / 'go-live' / 'files'
@@ -58,7 +58,8 @@ def upload():
     from canto_sync import http
     if not KIT.exists(): sys.exit('Run python3 scripts/upload_kit.py first, to gather the files.')
     base = os.environ.get('CONFLUENCE_BASE', 'https://confluence.skatelescope.org').rstrip('/')
-    token = os.environ.get('CONFLUENCE_TOKEN') or sys.exit('Set CONFLUENCE_TOKEN to your Confluence personal access token first.')
+    # Asked for here, so the token never sits in the shell history (CONFLUENCE_TOKEN works too).
+    token = os.environ.get('CONFLUENCE_TOKEN') or getpass.getpass('Confluence personal access token (it will not show): ').strip() or sys.exit('No token given.')
     head = {'Authorization': f'Bearer {token}', 'X-Atlassian-Token': 'nocheck', 'Accept': 'application/json'}
     get = lambda path: json.loads(http('GET', base + path, head)[1])
     done = failed = 0
