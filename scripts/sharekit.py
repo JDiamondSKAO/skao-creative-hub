@@ -11,10 +11,9 @@ INTRO = ('Share a presentation you’ve given and the Communications team will t
          'approved slide decks, so colleagues can reuse and adapt your work.')
 STEPS = [
     ('Share it', 'Add your slides, or a link to them, with the event, the audience and when you gave the talk.'),
-    ('We take a look', 'Communications reviews each presentation: its facts, its images and their credits, and how well it '
-                       'would work for other speakers.'),
-    ('We let you know', 'If yours is chosen, we’ll agree any updates with you, then add it to the approved slide decks with '
-                        'your name on it.'),
+    ('We take a look', 'We check the facts, the images and their credits, and how well it would work for other speakers.'),
+    ('We let you know', 'If yours is chosen, we’ll agree any updates with you and add it to the approved slide decks, '
+                        'with your name on it.'),
 ]
 KNOW = [
     ('Not every talk is chosen', 'Many talks are written for one audience or moment, and that’s fine. Everything shared helps '
@@ -24,17 +23,21 @@ KNOW = [
 ]
 
 def body(jira):
+    """One panel with the ask and how it works side by side, then Good to know: no loose sections, no gaps."""
     href = escape(links.url('SHARE_DECK_FORM') or jira, quote=True)
+    steps = ''.join(f'<li><b>{t}</b><span>{d}</span></li>' for t, d in STEPS)
+    know = ''.join(f'<div><dt>{t}</dt><dd>{d}</dd></div>' for t, d in KNOW)
     return (
-        '<div class="template-page share-page" data-no-toc>'
-        f'<div class="task-intro"><div><span class="eyebrow">For your talks</span><p>{INTRO}</p></div>'
-        f'<a class="button" href="{href}" data-share-deck>Share your presentation ↗</a></div>'
-        '<section aria-labelledby="share-how"><h2 id="share-how">How it works</h2>'
-        '<ol class="use-steps">' + ''.join(f'<li><b>{t}</b><span>{d}</span></li>' for t, d in STEPS) + '</ol></section>'
+        f'<div class="template-page share-page" data-no-toc data-summary="{escape(INTRO, quote=True)}">'
+        '<section class="share-hero" aria-label="Share your presentation">'
+        '<div class="share-hero-main"><p class="share-kicker">For your talks</p>'
+        f'<p class="share-lead">{INTRO}</p>'
+        f'<a class="button" href="{href}" data-share-deck>Share your presentation ↗</a>'
+        '<p class="share-note">Looking for slides to reuse? See <a href="master-deck.html">Approved slide decks</a>.</p></div>'
+        '<div class="share-hero-steps"><h2 id="share-how" class="share-label">How it works</h2>'
+        f'<ol class="use-steps">{steps}</ol></div></section>'
         '<section class="know-band" aria-labelledby="share-know"><h2 id="share-know" class="rail-title">Good to know</h2>'
-        '<dl class="know-grid">' + ''.join(f'<div><dt>{t}</dt><dd>{d}</dd></div>' for t, d in KNOW) + '</dl></section>'
-        '<div class="next-step"><div><h2>Looking for slides to reuse?</h2><p>Approved slide decks has talks Communications '
-        'has approved for reuse.</p></div><a class="button secondary" href="master-deck.html">Approved slide decks</a></div>'
+        f'<dl class="know-grid">{know}</dl></section>'
         '</div>')
 
 def apply(pages, jira):

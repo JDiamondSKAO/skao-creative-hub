@@ -44,7 +44,7 @@ RENAME = {'b': 'strong', 'i': 'em', 'summary': 'h3', 'dt': 'h4', 'h1': 'h2'}
 BLOCK = {'h2', 'h3', 'h4', 'p', 'ul', 'ol', 'li', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td'}
 DROP = {'svg', 'script', 'style', 'button', 'form', 'input', 'select', 'textarea', 'img', 'picture', 'video', 'iframe', 'dialog'}
 VOID = {'br', 'img', 'input', 'hr', 'meta', 'link', 'source'}
-FURNITURE = ('eyebrow', 'arr', 'kicker', 'start-kicker', 'chip', 'badge', 'visually-hidden', 'sr-only', 'file-pending')
+FURNITURE = ('eyebrow', 'arr', 'kicker', 'start-kicker', 'share-kicker', 'chip', 'badge', 'visually-hidden', 'sr-only', 'file-pending')
 
 def esc(text, quote=False):
     text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')

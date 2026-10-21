@@ -2213,3 +2213,15 @@ body .footer .footer-base nav .footer-tour:hover {text-decoration:underline;}
 .welcome-copy .quick-links > span {grid-column:1/-1;}
 .welcome-copy .quick-links a {display:flex;align-items:center;justify-content:center;text-align:center;}
 @media(max-width:600px){.welcome-copy .quick-links{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+/* Share your presentation: one panel with the ask and how it works side by side, then Good to know. */
+.template-page.share-page {gap:24px;}
+.share-hero {position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px;padding:30px 32px 28px;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--link) 6%,var(--bg)),var(--bg) 62%);}
+.share-hero:before {content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#070068,#3a0a6a 55%,#aa005c);}
+.content-body .share-kicker,.content-body .template-page h2.share-label {margin:0;line-height:1.4;color:var(--magenta);font-size:.72rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;}
+.dark .content-body .share-kicker,.dark .content-body .template-page h2.share-label {color:#ff85bc;}
+.content-body .share-lead {margin:10px 0 20px;color:var(--ink);font-size:1.05rem;line-height:1.6;}
+.content-body .share-note {margin:16px 0 0;color:var(--muted);font-size:.86rem;}
+.share-hero-steps {padding-left:32px;border-left:1px solid var(--line);}
+.share-hero-steps .use-steps {margin-top:14px;gap:14px;}
+@media(max-width:900px){.share-hero{grid-template-columns:1fr;gap:22px;padding:26px 22px 22px;}.share-hero-steps{padding:22px 0 0;border-left:0;border-top:1px solid var(--line);}}

@@ -1,5 +1,11 @@
 # Changes
 
+## 2.24.4 Share your presentation, tightened
+
+- The page is now one panel with a brand gradient bar. The ask and the button sit on the left, with "How it works" beside them on the right, and Good to know follows directly.
+- The separate "Looking for slides to reuse?" block is now a line in the panel. The page is about 300 px shorter, without the large gaps.
+- The section overview takes the page's summary from its own `data-summary`, not the "For your talks" label.
+
 ## 2.24.3 The Hub starts in light mode
 
 - The Hub starts in light mode for everyone, whatever their computer is set to. The moon button still switches to dark, and the choice is remembered in that browser.

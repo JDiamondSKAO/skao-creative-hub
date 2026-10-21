@@ -88,7 +88,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   const doc=new JSDOM(out).window.document;
   assert.equal(doc.querySelectorAll('h1').length,1,file);
   assert.equal(doc.querySelector('h1').textContent.trim(),route.display_title,file);
-  assert(doc.querySelector('.task-intro, .site-hero'),file);
+  assert(doc.querySelector('.task-intro, .site-hero, .share-hero'),file);
   assert(!doc.querySelector('.content-body').textContent.includes('Confluence content'),file);
   assert(![...doc.querySelectorAll('a')].some(a=>(a.getAttribute('href')||'').includes('$link')),file);
   assert(!/ASSET TO ADD|jira\.skao\.int|#003366|#00A4A6/.test(out),file);
@@ -353,7 +353,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   d.window.close();f.window.close();pass('A short guided tour starts from the welcome note or the footer, skips what a page lacks and closes with Esc');}
  {const sh=read('share-presentation.html');assert.equal(sh.querySelector('.page-head h1').textContent,'Share your presentation');
   assert(sh.querySelector('a.button[data-share-deck][href*="servicedesk"]'),'the button opens the helpdesk until the form exists');assert.equal(sh.querySelectorAll('.use-steps li').length,3);
-  assert(/approved slide decks/i.test(sh.querySelector('.task-intro').textContent),'it says some talks become approved slide decks');
+  assert(/approved slide decks/i.test(sh.querySelector('.share-hero').textContent),'it says some talks become approved slide decks');assert(!sh.querySelector('.share-page .next-step'),'no separate block at the foot');
   assert(read('master-deck.html').querySelector('.next-step a[href="share-presentation.html"]'),'Approved slide decks invites people to share');
   assert([...read('standard-template.html').querySelectorAll('.section-nav a')].some(a=>a.getAttribute('href')==='share-presentation.html'),'it sits in the Presentations menu');
   pass('Share your presentation explains the review and links to the form');}
