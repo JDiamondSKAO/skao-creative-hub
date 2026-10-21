@@ -1244,16 +1244,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const CANTO = /^https:\/\/[a-z0-9-]+\.canto\.global\//i;
     let manifest;
     try {
-      const cql = 'type=attachment AND space="CRH" AND title="canto-showcase.json"';
-      const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: "1" }), { credentials: "same-origin", headers: { Accept: "application/json" } });
-      if (!res.ok) return;
-      const hit = ((await res.json()).results || [])[0];
+      const json = { credentials: "same-origin", headers: { Accept: "application/json" } }, MANIFEST = "canto-showcase.json";
+      // The sync attaches its manifest to one Hub page (data-canto-page). Reading that page's attachments needs no
+      // search index; Confluence search is the fallback, as it can lag behind a new upload.
+      const page = slots.map((s) => s.dataset.cantoPage).find(Boolean);
+      let hit = null;
+      if (page) {
+        const res = await fetch(ctx + "/rest/api/content/" + encodeURIComponent(page) + "/child/attachment?" + new URLSearchParams({ filename: MANIFEST }), json);
+        if (res.ok) hit = ((await res.json()).results || []).find((r) => r.title === MANIFEST) || null;
+      }
+      if (!hit) {
+        const cql = 'type=attachment AND space="CRH" AND title="' + MANIFEST + '"';
+        const res = await fetch(ctx + "/rest/api/content/search?" + new URLSearchParams({ cql, limit: "1" }), json);
+        if (res.ok) hit = ((await res.json()).results || [])[0] || null;
+      }
       const url = hit && safeLink(ctx + (hit._links?.download || ""));
-      if (!url) return;
+      if (!url) { console.warn("Creative Hub: no " + MANIFEST + " found" + (page ? " on page " + page : "") + ", so the Canto slideshow stays hidden."); return; }
       const m = await fetch(url, { credentials: "same-origin" });
-      if (!m.ok) return;
+      if (!m.ok) { console.warn("Creative Hub: " + MANIFEST + " did not download (" + m.status + ")."); return; }
       manifest = await m.json();
-    } catch { return; }
+    } catch (e) { console.warn("Creative Hub: the Canto slideshow could not load.", e); return; }
     const asset = (a) => {
       const src = typeof a?.src === "string" && a.src.startsWith("/download/attachments/") ? safeLink(ctx + a.src) : null;
       const href = typeof a?.href === "string" && CANTO.test(a.href) ? a.href : null;

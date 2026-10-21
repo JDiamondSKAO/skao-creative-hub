@@ -4,7 +4,7 @@ For whoever picks this up next, whether a person or another AI. **This repositor
 
 ## Where things stand
 
-- **Live.** Theme **2.23.0** is uploaded (**2.23.1** is packaged in `release/go-live/theme/`, with even homepage cards and Hub names in Just added; upload its 9 files over 2.23.0) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
+- **Live.** Theme **2.23.0** is uploaded (the newest, **2.23.2**, is packaged in `release/go-live/theme/`: even homepage cards, Hub names in Just added, and the Canto slideshow reading Photography Media directly; upload its 9 files over the old ones) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
   - Its code is on branch `claude/creative-hub-v2.23`.
   - Each release from 2.17 to 2.23 sits on its own branch, built on the one before.
   - None is merged into `main`, which is still at 2.16. Merge 2.23 into `main` once the owner is happy with the live site.
@@ -21,12 +21,13 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
    - It uploads `build/canto`, a snapshot from 20 October: 75 images in 8 collections.
    - It asks for a Confluence personal access token (Profile → Settings → Personal Access Tokens). The token is typed into the terminal and never stored.
    - It prints progress every 15 images and ends with "Published 75 images and canto-showcase.json … to page 381891718".
-2. **If it finished but nothing shows**, work through these in order:
+2. **Status, 21 October.** The publish succeeded (75 images), but theme 2.23.1 still showed nothing, because it found the manifest only through Confluence search. Theme 2.23.2 reads the page's attachments directly and should fix it.
+3. **If 2.23.2 still shows nothing**, open the browser console on Photos and video and look for a message starting "Creative Hub:". Then work through these in order:
    - Open Photography Media → ••• → Attachments in Confluence. The json and the images should be there.
    - Wait a minute. The theme finds the json through Confluence search (`loadCanto` in `js/main.js`, which searches for `title="canto-showcase.json"` in space CRH), so search has to index it first.
    - Check that another live feature that uses the same REST search works. For example, Letterheads should list 10 files. If it doesn't, the problem is REST from the site, not Canto.
    - Open the browser's developer tools on Photos and video and look at the Network tab. Check the `/rest/api/content/search` request for the json, then the json download. Look for errors in the Console.
-3. **Keep it fresh with the scheduled sync.** `python3 scripts/canto_sync.py` with Canto credentials and a Confluence token (see the README) fetches the newest pictures and replaces the snapshot. Run it daily from a scheduler that keeps both as secrets. Rotate the Canto App Secret before setting this up.
+4. **Keep it fresh with the scheduled sync.** `python3 scripts/canto_sync.py` with Canto credentials and a Confluence token (see the README) fetches the newest pictures and replaces the snapshot. Run it daily from a scheduler that keeps both as secrets. Rotate the Canto App Secret before setting this up.
 
 ## Still to do
 

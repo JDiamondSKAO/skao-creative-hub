@@ -1,5 +1,11 @@
 # Changes
 
+## 2.23.2 The Canto slideshow reads its page directly
+
+- On the live site the Canto pictures were on Photography Media, but the slideshow stayed hidden. It found its manifest through Confluence search, which can lag behind a new upload or miss a file name.
+- The slideshow slots now name the page (`data-canto-page`), and the theme reads that page's attachments directly, falling back to search.
+- If it still can't load, it leaves a "Creative Hub:" note in the browser console saying why.
+
 ## 2.23.1 Even homepage cards, and Hub names in Just added
 
 - **Browse the Hub** keeps every card the same size. With Events hidden, an **All files** card takes the sixth place, so there are two even rows of three. The card only appears when a hidden section leaves a row short.

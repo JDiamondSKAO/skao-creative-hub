@@ -377,10 +377,12 @@ def latest_strip():
 # Canto showcase slots: the gallery on Photos and video, and strips on topic pages
 # matched to album names. They stay hidden until the synced manifest has matching albums.
 CANTO_STRIPS = {'video.html': 'video videos'}
+# The page the Canto sync attaches its manifest and images to (Photography Media).
+CANTO_PAGE = next(i for i, _, f, _ in ROUTES if f == 'media.html')
 
 def canto_show(words, heading, eyebrow='', wide=False):
  """A view-only slideshow: it shows what is in Canto; the button beside it opens the library."""
- return (f'<section class="canto-show{" wide" if wide else ""}" data-canto="{words}" hidden aria-labelledby="show-{words.split()[0] if words else "all"}">'
+ return (f'<section class="canto-show{" wide" if wide else ""}" data-canto="{words}" data-canto-page="{CANTO_PAGE}" hidden aria-labelledby="show-{words.split()[0] if words else "all"}">'
   f'<div class="canto-head"><div>' + (f'<p class="eyebrow">{eyebrow}</p>' if eyebrow else '') + f'<h2 id="show-{words.split()[0] if words else "all"}">{heading}</h2></div></div>'
   '<div class="show-stage" aria-roledescription="carousel"><ul class="show-slides" aria-live="off"></ul>'
   '<div class="show-controls"><button type="button" class="show-prev" aria-label="Previous image"><span aria-hidden="true">‹</span></button>'
