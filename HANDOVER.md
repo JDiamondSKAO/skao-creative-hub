@@ -4,7 +4,7 @@ For whoever picks this up next, whether a person or another AI. **This repositor
 
 ## Where things stand
 
-- **Live.** Theme **2.23.0** is uploaded (the newest, **2.24.0**, adds the guided tour, Share your presentation and the new quick links, and is packaged in `release/go-live/theme/`. Before that, 2.23.3 It adds even homepage cards, Hub names in Just added, the Canto slideshow reading Photography Media directly (working on the live site since 2.23.2), side-menu links to the newer pages found through the site tree, and drawn slideshow icons. Upload its 9 files over the old ones.) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
+- **Live.** Theme **2.23.0** is uploaded (the newest, **2.24.4**, adds the guided tour, Share your presentation, even quick links and a light-mode default, and is packaged in `release/go-live/theme/`. Before that, 2.23.3 It adds even homepage cards, Hub names in Just added, the Canto slideshow reading Photography Media directly (working on the live site since 2.23.2), side-menu links to the newer pages found through the site tree, and drawn slideshow icons. Upload its 9 files over the old ones.) to the Scroll Viewport site for the Confluence space `CRH` (21 October 2026).
   - Its code is on branch `claude/creative-hub-v2.23`.
   - Each release from 2.17 to 2.23 sits on its own branch, built on the one before.
   - None is merged into `main`, which is still at 2.16. Merge 2.23 into `main` once the owner is happy with the live site.
@@ -57,7 +57,7 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
 
 The page (2.24.0) is ready, and its button opens the Comms helpdesk until the form exists.
 
-1. In Airtable, open the **Creative Hub feedback** base, table **Shared presentations** (already set up).
+1. In Airtable, open the base **Shared presentations** (SKA Communications workspace), table **Presentations**. It's already set up, with help text on every field. The form wording, review steps and reply templates are in the local `SHARE-YOUR-PRESENTATION.md`.
 2. Make a form for it, an interface form like the feedback one. Include every field except Status and Review notes.
 3. Copy the form's share link into the local `dev/links.json` as `"SHARE_DECK_FORM"`.
 4. Run `python3 scripts/package.py` and upload the theme again.

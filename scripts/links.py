@@ -26,7 +26,7 @@ NAMES = {
  'MID_STATUS': 'SKA-Mid status slides, kept by the SKA-Mid team (Google Slides)',
  'ALLHANDS': 'Where the weekly all-hands photos are stored, for all staff (link to follow)',
  'FEEDBACK_FORM': 'Creative Hub feedback form (Airtable form on the Creative Hub feedback base). Until it is set, Share feedback opens the Comms helpdesk',
- 'SHARE_DECK_FORM': 'Share your presentation form (Airtable form on the Creative Hub feedback base). Until it is set, the button opens the Comms helpdesk',
+ 'SHARE_DECK_FORM': 'Share your presentation form (Airtable form on the Shared presentations base). Until it is set, the button opens the Comms helpdesk',
 }
 
 def load():
