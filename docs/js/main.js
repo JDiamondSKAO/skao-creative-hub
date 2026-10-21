@@ -1546,7 +1546,7 @@ document.addEventListener("DOMContentLoaded", () => {
         when: r.version?.when,
         size: r.extensions?.fileSize,
         download: r._links?.download ? ctx + r._links.download : "",
-        pageTitle: hubTitles[String(r.container?.id || "")] || (r.container?.title ? String(r.container.title) : ""),
+        pageTitle: hubTitles[String(r.container?.id || "")] || hubTitles["t:" + String(r.container?.title || "").toLowerCase()] || (r.container?.title ? String(r.container.title) : ""),
         pageHref: r.container?._links?.webui ? ctx + r.container._links.webui : "",
       }));
     };

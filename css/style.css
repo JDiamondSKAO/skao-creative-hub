@@ -2207,3 +2207,9 @@ body .brandbar a.beta-pill:focus-visible {outline:2px solid #fff;outline-offset:
 body .footer .footer-base nav .footer-tour {padding:2px 0;border:0;background:none;color:#d9d6f0;font:inherit;font-size:.82rem;cursor:pointer;}
 body .footer .footer-base nav .footer-tour:hover {text-decoration:underline;}
 .welcome-note .welcome-link {font-weight:600;}
+
+/* Quick links: two even rows of three, each chip the same width, lined up with the search box. */
+.welcome-copy .quick-links {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:540px;}
+.welcome-copy .quick-links > span {grid-column:1/-1;}
+.welcome-copy .quick-links a {display:flex;align-items:center;justify-content:center;text-align:center;}
+@media(max-width:600px){.welcome-copy .quick-links{grid-template-columns:repeat(2,minmax(0,1fr));}}

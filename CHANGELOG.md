@@ -1,5 +1,10 @@
 # Changes
 
+## 2.24.2 Even quick links, and newer pages matched whatever their capitals
+
+- **Quick links** sit in two even rows of three, each chip the same width and lined up with the search box (two columns on phones). Before, five fitted on one line and "Colours and fonts" sat alone on the next.
+- **Newer pages** (Partner templates, Partner logos, Construction overview, Share your presentation) are matched by title whatever the capitals. A page created as "Partner Logos" still gets its Hub design, and Just added gives it the Hub's name.
+
 ## 2.24.1 The tour card stays light in dark mode
 
 - In dark mode the tour's card was dark on the dimmed dark page and hard to read. It now keeps light colours in both modes: a white card, dark text, a navy Next and a white Back.
