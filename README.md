@@ -1,88 +1,94 @@
-# SKAO Creative Hub v2
+# SKAO Creative Hub
 
-Staging redesign for the Creative Hub Scroll Sites theme, with a static preview of the homepage and 60 interior pages.
+The theme behind the **SKAO Creative Hub**: the Communications team's site on Confluence, built with Scroll Viewport, where staff of the Square Kilometre Array Observatory find templates, brand files, slide decks, photos and practical guidance.
 
-## Local preview
+This repository holds the theme, the scripts that generate it, a static preview, the test suite and the tools used to set up the Confluence space behind it.
 
-Requires Python 3. From the repository root:
+**Status:** live, theme 2.24.8 (October 2026). See [CHANGELOG.md](CHANGELOG.md) for every release and [HANDOVER.md](HANDOVER.md) for where things stand.
 
-```sh
-python3 scripts/build.py
-python3 -m http.server 8766 --directory docs
-```
+## What the Hub does
 
-Open http://127.0.0.1:8766/. The preview includes proposed guidance and links to staff services. Resource availability notices do not represent released files.
+- **Five sections:** Presentations, Documents, Brand, Photos and video, and How-to guides. An Events section is built but hidden for now.
+- **Downloads straight from Confluence.** Files attached to a page and labelled `approved` appear as downloads. All files and Just added list them across the Hub.
+- **Search** across pages, files and quick answers to common questions.
+- **Photos and video** from the Canto staff media library, shown as a slideshow and linked to the Staff Resources Portal.
+- **Share your presentation:** staff send a talk for review, and some become approved slide decks.
+- **For new staff:** a first-visit welcome note and a short guided tour.
+- **Feedback** from every page, through a form that records the page it came from.
+- Light and dark modes, keyboard support and reduced motion throughout.
 
-## Checks
+## How it works
 
-Requires Node.js compatible with jsdom 29:
+Scroll Viewport renders each Confluence page through one Velocity template, `page.vm`. The template carries the Hub's design and content for every page it knows. Confluence supplies the page IDs, titles, attachments and search.
+
+- `scripts/build.py` and its layer modules generate `page.vm` and a static preview in `docs/`. Both are generated, so edit the scripts, `js/` and `css/`, never the output.
+- Pages are known by their Confluence IDs. Pages added later are matched by title (`scripts/interiors.py`, `PLANNED`).
+- Links to internal documents are kept out of this public repository. They live in a local `dev/links.json` and are filled in only when a release is packaged.
+
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| `scripts/` | Build layers, tests, packaging and Confluence tools |
+| `js/`, `css/`, `fonts/`, `images/` | Theme scripts, styles and assets |
+| `page.vm` | The generated Scroll Viewport template |
+| `docs/` | The generated static preview |
+| `evidence/interior-route-map.json` | Every page: Confluence ID, Confluence title and Hub title |
+| `CHANGELOG.md` | Release notes |
+| `HANDOVER.md` | Current state, next steps and local-only files |
+| `AGENTS.md` | Working rules for AI coding assistants |
+
+## Getting started
+
+Requires Python 3.11+ (with Pillow for the picture scripts) and Node.js 20+.
 
 ```sh
 npm install
-npm test
-```
-
-Checks cover every interior template route, local links, search behaviour, request draft handling and theme switching. Browser testing is also required for visual changes.
-
-## Local test mode (simulated Confluence)
-
-The static preview can't show features that depend on Confluence: downloads from approved attachments, the Just added strip, the announcement banner and Confluence search. Local test mode serves the built Hub in its Confluence mode with a small stand-in for the Confluence REST API.
-
-```sh
 python3 scripts/build.py
-python3 scripts/dev_fixtures.py        # reads dev/brandbank-map.json, writes dev/fixtures.json
-python3 scripts/dev_server.py          # http://127.0.0.1:8767
-python3 scripts/dev_server.py --no-approved      # nothing labelled "approved": fallbacks
-python3 scripts/dev_server.py --no-announcement  # no announcement banner
+npm test                                        # must exit 0
+python3 -m http.server 8766 --directory docs    # static preview at http://127.0.0.1:8766
 ```
 
-`dev/` is excluded from Git. The map points at local files, which are streamed on download and never copied into the repository.
-
-## Files on a page
-
-- **Resource pages** (templates, logos, the Brand Book and similar) list the files attached to their Confluence page and labelled `approved`, grouped by the rules in `brandkit.DOWNLOAD_GROUPS`.
-- **Pages people keep current themselves** (Recent talks, SKA-Low progress, SKA-Mid progress) list every file attached to the page, newest first, with no label needed. A file name starting with the year and month (`2026-10 Name Event.pptx`) shows that month. Staff need permission to add attachments to those pages.
-- **Links to internal documents** (status slides, forms, policies) are named in `scripts/links.py`, but their addresses live in `dev/links.json`, which is not in Git: this repo is public and some of those documents open for anyone with the link. `scripts/package.py` builds the release with them and then rebuilds the committed files without them; local test mode fills them in as it serves each page. A name with no address shows as "link to follow" in the preview, and the production theme leaves the content that depends on it out.
-
-## Canto showcase
-
-Photos and video shows a slideshow of the Canto **Staff media library** folder, and Video and animation shows matching video albums. Staff browsers never talk to Canto: `scripts/canto_sync.py` copies web-sized previews and a manifest (`canto-showcase.json`) into attachments on one Hub page, and the theme reads them from Confluence.
+**Local test mode** serves the built Hub as Confluence would, with a small stand-in for the Confluence REST API. Downloads, Just added, search, the slideshow and the announcement bar all work there.
 
 ```sh
-export CANTO_DOMAIN=skao CANTO_APP_ID=... CANTO_APP_SECRET=...   # or CANTO_API_KEY (a generated token)
-export CANTO_FOLDER_PATH="Staff media library"
-python3 scripts/canto_sync.py --dry-run --out build/canto   # check what would be published
-python3 scripts/canto_sync.py --dry-run --env dev/canto.env   # same, reading settings from a local file (dev/ is not in Git)
-export CONFLUENCE_BASE=https://confluence.skatelescope.org CONFLUENCE_TOKEN=... CONFLUENCE_PAGE_ID=381891718
-python3 scripts/canto_sync.py                               # publish to the Photos and video page
-python3 scripts/canto_sync.py --publish                     # publish the last dry run (build/canto) as it is, without Canto; asks for the Confluence token
+python3 scripts/dev_fixtures.py    # builds dev/fixtures.json from the local file map
+python3 scripts/dev_server.py      # http://127.0.0.1:8767
 ```
 
-- Run it on a schedule (for example daily) or from a Canto webhook. Keep credentials in the scheduler's secrets, never in this repository.
-- **What is shown.** Only approved, credited assets of at least 2,000 px (videos only in video collections), and never anything whose description or tags say it is not cleared (for example "heritage review", "pending", "embargo", "draft"). Collections come from the folder structure (SKA-Low, SKA-Mid, Hero shots, Events 2026…); collections with fewer than 3 suitable assets are left out.
-- **How it is chosen.** Assets are scored on description quality, tags, landscape shape, resolution, recency and strong subjects (aerials, dishes, stations, night sky), with weak subjects (vehicles, offices, screenshots) lower. No more than a few per album, one per numbered frame sequence, one per title, identical files and visually near-identical images once. People-tagged assets rank lower outside Events.
-- **Highlights.** The Photos and video slideshow is a separate pick across the image collections: images without people, at most 1 composite, 2 night skies, 3 aerials and 2 artist impressions.
-- **Editorial control in Canto.** Tag an asset **Hub feature** to pin it to Highlights. Add the **People** keyword where people are the subject (canto-metadata-assistant's people detection can apply it). Keep titles and descriptions meaningful; file-like names fall back to the first sentence of the description.
-- **View only.** The Hub shows the images as a slideshow (autoplay, pause, previous and next; still for reduced motion) so staff can see what is in Canto; the "Open the Canto library" button under it opens the library, or the album on a topic page. Images come from Canto's large preview, resized to 2000 px so they stay sharp at full width, and stripped of embedded metadata (including location). The slideshow loads each image just before it shows.
-- The manifest still records each asset's link in the private **SKAO Staff** portal (`/v/SKAOStaff/album/{album}?column=image&id=…`), and every general Canto link on the Hub opens the portal. Staff sign in as Consumers with access to that portal only (self-registration with their SKAO email, or SSO later). `CANTO_PORTAL=library` switches tiles to the main Canto library over the asset's album (`/album/{album}?column=image&id=…`), and album links open `/album/{id}`. Override with `CANTO_ASSET_URL`, `CANTO_ALBUM_URL` and `CANTO_FOLDER_URL`. Portal links (`/v/SKAOLibrary/…`) don't work here because the staff folder isn't shared to that portal.
-- Albums appear on topic pages when their name contains the page's keywords (`CANTO_STRIPS` in `scripts/polish.py`).
-- Local test mode uses the real dry-run output in `build/canto` when it exists (rerun `scripts/dev_fixtures.py` after a dry run), otherwise stand-in albums from local images (`canto_standin` in `dev/brandbank-map.json`).
+Add `?fresh` to any address to see the Hub as a first-time visitor. `dev/` is local only and never committed.
 
-## Build packages
+## Releasing
 
-```sh
-python3 scripts/package.py
-python3 scripts/staging_files.py
-```
+1. Update the version in `scripts/package.py` and add an entry to `CHANGELOG.md`.
+2. Run `python3 scripts/package.py`. It builds `release/skao-creative-hub-v<version>-flat-upload.zip` with the internal links filled in, then rebuilds the committed files without them.
+3. In the Scroll Viewport theme editor, upload the nine files from the zip, replacing the old ones.
 
-Generated archives and flat staging upload files are written under `release/` and excluded from Git. Building or pushing this branch does not assign the theme to a live Confluence site.
+The release zip contains internal links. Never publish it or attach it to a GitHub release.
 
-## Working conventions
+## Confluence tools
 
-- Make changes on the redesign branch and commit coherent reviewed batches.
-- Rebuild previews and run the checks before pushing.
-- Keep private research, project ledgers, transcripts and deployment evidence outside the public repository.
-- Theme-rendered review copy must be reconciled with canonical Confluence content before rollout, so search and displayed text agree.
-- Staff access and resource release readiness require separate verification.
+Each tool asks for a Confluence personal access token. Tokens are typed into the terminal and never stored. None of the tools deletes anything permanently.
 
-The request helper prepares local text only; users submit requests through the linked helpdesk. Media browsing and contribution routes are distinct. Presentations remain in the Hub and media remains in Canto.
+| Script | What it does |
+|---|---|
+| `upload_kit.py` | Gathers every file to attach into one folder per page. With `--upload`, attaches them and labels downloads `approved`. |
+| `confluence_text.py` | Writes the Hub's own text into its Confluence pages, creates pages the Hub added later and arranges the page tree. Run it without `--apply` to review first. |
+| `confluence_cleanup.py` | Moves pages the Hub no longer uses to the space trash, children first. |
+| `canto_sync.py` | Publishes the Canto slideshow (images and a manifest) to the Photography Media page. With `--publish`, sends the last snapshot without Canto. |
+
+## Canto slideshow
+
+`scripts/canto_sync.py` picks approved, credited images of at least 2,000 px from the Canto **Staff media library** folder, and leaves out anything marked as not cleared. It publishes web-sized previews and a manifest as attachments, so staff browsers never talk to Canto.
+
+Editors can pin an image to the slideshow with the Canto tag **Hub feature**. See the script's own notes for how images are chosen and how to run it on a schedule.
+
+## Conventions
+
+- **This repository is public.** Never commit internal links, credentials, personal names or staff photos.
+- Write in plain English and follow the SKAO house style. It's the "SKAO slide deck", never "master deck".
+- Tests must pass before a release is packaged.
+
+## Licence
+
+The code is MIT licensed. SKAO brand assets (logos, marks, photography and the SKAO name) are © SKA Observatory and are not licensed for reuse. See [LICENSE](LICENSE).

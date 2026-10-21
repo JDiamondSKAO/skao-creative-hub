@@ -21,3 +21,5 @@ evidence/*
 # Canto sync dry-run output
 /build/
 !/HANDOVER.md
+!/AGENTS.md
+!/CLAUDE.md
