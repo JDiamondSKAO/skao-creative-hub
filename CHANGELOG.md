@@ -1,5 +1,10 @@
 # Changes
 
+## 2.24.6 Side menu lined up, with round chevron toggles
+
+- The side menu's title now starts level with the first line of the page. It no longer sits in a 32 px box beside the toggle.
+- The fold buttons for the side menu and "On this page" are small round chevrons, like Confluence's own sidebar. They point the way the menu will move and turn round when it's folded.
+
 ## 2.24.5 Share your presentation opens its form
 
 - The Share your presentation button now opens the Airtable form on the Shared presentations base. The address is `SHARE_DECK_FORM` in the local `dev/links.json`, kept out of Git like the other links.

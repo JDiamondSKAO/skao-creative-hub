@@ -87,8 +87,9 @@ def primary(name, key):
 TYPES = [(key, label) for key, label, _, _ in SECTIONS]
 
 # Side menus fold away to give the page more room: section pages on the left, "On this page" on the right.
-PANEL_LEFT = ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>')
-PANEL_RIGHT = ('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg>')
+# Chevrons point the way the menu will move; CSS turns them round when it is folded.
+PANEL_LEFT = ('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m14.5 6-6 6 6 6"/></svg>')
+PANEL_RIGHT = ('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9.5 6 6 6-6 6"/></svg>')
 TOC_RAIL = ('<aside class="toc-rail" hidden><div class="toc-head"><strong id="tocHeading">On this page</strong>'
  '<button type="button" class="rail-toggle" data-rail="toc" aria-controls="toc" aria-expanded="true" aria-label="Hide On this page" title="Hide On this page">' + PANEL_RIGHT + '</button></div>'
  '<nav id="toc" class="toc" aria-labelledby="tocHeading"></nav></aside>')

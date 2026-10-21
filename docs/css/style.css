@@ -2225,3 +2225,14 @@ body .footer .footer-base nav .footer-tour:hover {text-decoration:underline;}
 .share-hero-steps {padding-left:32px;border-left:1px solid var(--line);}
 .share-hero-steps .use-steps {margin-top:14px;gap:14px;}
 @media(max-width:900px){.share-hero{grid-template-columns:1fr;gap:22px;padding:26px 22px 22px;}.share-hero-steps{padding:22px 0 0;border-left:0;border-top:1px solid var(--line);}}
+
+/* Side menu toggles: a small round chevron, like Confluence's own sidebar. It points the way the menu will move. */
+.rail-toggle {width:26px;height:26px;border:1px solid var(--line);border-radius:50%;background:var(--bg);color:var(--muted);box-shadow:var(--shadow-sm);transition:color .15s,border-color .15s,background-color .15s;}
+.rail-toggle:hover {border-color:color-mix(in srgb,var(--link) 45%,var(--line));background:color-mix(in srgb,var(--link) 8%,var(--bg));color:var(--link);}
+.rail-toggle svg {transition:transform .28s var(--ease-out,ease);}
+.nav-closed .sidebar > .rail-toggle svg,.toc-closed .toc-head .rail-toggle svg {transform:rotate(180deg);}
+@media(prefers-reduced-motion:reduce){.rail-toggle svg{transition:none;}}
+/* The menu's title starts level with the first line of the page, with the toggle beside it in the corner. */
+body .sidebar .section-nav > h2 {display:block;min-height:0;margin:0 0 14px;padding-right:36px;line-height:1.3;}
+.sidebar > .rail-toggle {top:-2px;right:4px;}
+.nav-closed .sidebar > .rail-toggle {position:static;margin-top:-2px;}
