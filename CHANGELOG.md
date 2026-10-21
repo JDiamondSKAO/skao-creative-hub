@@ -1,5 +1,9 @@
 # Changes
 
+## 2.24.1 The tour card stays light in dark mode
+
+- In dark mode the tour's card was dark on the dimmed dark page and hard to read. It now keeps light colours in both modes: a white card, dark text, a navy Next and a white Back.
+
 ## 2.24.0 Guided tour, Share your presentation, and quick links (branch claude/creative-hub-v2.23)
 
 - **A short guided tour for new staff.**

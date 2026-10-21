@@ -2197,6 +2197,12 @@ body .brandbar a.beta-pill:focus-visible {outline:2px solid #fff;outline-offset:
 .tour-actions .button {min-height:36px;padding:0 14px;font-size:.85rem;}
 .tour-actions .button[hidden] {display:none;}
 @media(max-width:600px){.tour-card{top:auto!important;left:12px!important;right:12px;bottom:12px;width:auto;}}
+/* The card stays light in dark mode too, so it stands out on the dimmed page. */
+.tour-layer .tour-card {--bg:#fff;--ink:#20233b;--muted:#5c6073;--line:#dcdde8;--link:#070068;background:#fff;color:#20233b;box-shadow:0 18px 50px rgba(7,6,40,.5),0 0 0 1px rgba(255,255,255,.12);}
+.tour-layer .tour-card .button {background:#070068;border-color:#070068;color:#fff;}
+.tour-layer .tour-card .button:hover {background:#1d1690;border-color:#1d1690;}
+.tour-layer .tour-card .button.secondary {background:#fff;border-color:#dcdde8;color:#070068;}
+.tour-layer .tour-card .button.secondary:hover {background:#f0effa;}
 @media(prefers-reduced-motion:reduce){.tour-spot,.tour-card{transition:none;}}
 body .footer .footer-base nav .footer-tour {padding:2px 0;border:0;background:none;color:#d9d6f0;font:inherit;font-size:.82rem;cursor:pointer;}
 body .footer .footer-base nav .footer-tour:hover {text-decoration:underline;}
