@@ -2,12 +2,14 @@
 
   python3 scripts/upload_kit.py            # gather the files into release/go-live/files/<Confluence page title>/
   python3 scripts/upload_kit.py --upload   # attach them to the CRH pages (asks for your Confluence token)
+  python3 scripts/upload_kit.py --upload "Partner templates" "Partner logos"   # only those pages' folders
 
 Each page folder has "approved" (downloads, which get the approved label) and "no label" (pictures the
 theme shows on the page). The files come from the local map that local test mode uses
 (dev/brandbank-map.json, not in Git) and from the pictures made in build/. Stand-in examples, the talk
 bank, the Canto showcase (canto_sync.py publishes that) and the Events files (hidden for now) are left out.
-Gathering replaces the files folder. Uploading never deletes: a file already on a page gets a new version.
+Gathering replaces the files folder. Uploading never deletes, and skips a file already on its page at the same
+size, so it is safe to run again; a changed file goes up as a new version.
 """
 from pathlib import Path
 from urllib.parse import urlencode
@@ -62,21 +64,23 @@ def upload():
     token = os.environ.get('CONFLUENCE_TOKEN') or getpass.getpass('Confluence personal access token (it will not show): ').strip() or sys.exit('No token given.')
     head = {'Authorization': f'Bearer {token}', 'X-Atlassian-Token': 'nocheck', 'Accept': 'application/json'}
     get = lambda path: json.loads(http('GET', base + path, head)[1])
-    done = failed = 0
-    for folder in sorted(p for p in KIT.iterdir() if p.is_dir()):
+    only = [a for a in sys.argv[1:] if not a.startswith('--')]
+    done = failed = skipped = 0
+    for folder in sorted(p for p in KIT.iterdir() if p.is_dir() and (not only or p.name in only)):
         found = get('/rest/api/content?' + urlencode({'spaceKey': SPACE, 'title': folder.name, 'type': 'page'})).get('results', [])
         if not found:
             print(f'No page called "{folder.name}" in {SPACE} yet. Create it, then run this again.'); continue
         page = found[0]['id']
-        existing = {r['title']: r['id'] for r in get(f'/rest/api/content/{page}/child/attachment?limit=500').get('results', [])}
+        existing = {r['title']: r for r in get(f'/rest/api/content/{page}/child/attachment?limit=500').get('results', [])}
         for label in ('approved', 'no label'):
             for f in sorted((folder / label).glob('*')) if (folder / label).is_dir() else []:
                 if not f.is_file() or f.name.startswith('.'): continue
+                if (existing.get(f.name) or {}).get('extensions', {}).get('fileSize') == f.stat().st_size: skipped += 1; continue
                 boundary = uuid.uuid4().hex
                 body = b''.join([f'--{boundary}\r\nContent-Disposition: form-data; name="minorEdit"\r\n\r\ntrue\r\n'.encode(),
                                  f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{f.name}"\r\n'
                                  f'Content-Type: application/octet-stream\r\n\r\n'.encode(), f.read_bytes(), f'\r\n--{boundary}--\r\n'.encode()])
-                path = f'/rest/api/content/{page}/child/attachment' + (f'/{existing[f.name]}/data' if f.name in existing else '')
+                path = f'/rest/api/content/{page}/child/attachment' + (f"/{existing[f.name]['id']}/data" if f.name in existing else '')
                 try:
                     reply = json.loads(http('POST', base + path, {**head, 'Content-Type': f'multipart/form-data; boundary={boundary}'}, body)[1])
                     att = (reply.get('results') or [reply])[0]['id']
@@ -86,7 +90,7 @@ def upload():
                     done += 1; print(f'{folder.name}: {f.name}' + (' (approved)' if label == 'approved' else ''))
                 except HTTPError as e:
                     failed += 1; print(f'{folder.name}: {f.name} FAILED ({e.code} {e.reason})')
-    print(f'Uploaded {done} files' + (f', {failed} failed' if failed else ''))
+    print(f'Uploaded {done} files' + (f', skipped {skipped} already there' if skipped else '') + (f', {failed} failed' if failed else ''))
 
 if __name__ == '__main__':
     upload() if '--upload' in sys.argv else gather()

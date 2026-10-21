@@ -31,7 +31,8 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
 
 ## Still to do
 
-- **Construction overview** must exist with exactly that title, under Slide Decks & Presentations. Until it does, theme 2.23.3 hides links to it. The same applies to Partner templates and Partner logos.
+- **The 3 newer pages haven't been created yet** (as of 21 October): Partner templates and Construction overview go under Slide Decks & Presentations, and Partner logos under Brand Guidelines, with exactly those titles. Until they exist, theme 2.23.3 hides links to them.
+  - Then run `python3 scripts/upload_kit.py --upload "Partner templates" "Partner logos"`. Reruns skip files that are already up.
 
 - **The page buttons.** "Open the Canto library" buttons on the media pages could become "Open the Staff Resources Portal". This is waiting for the owner's decision.
 - **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK` in `scripts/links.py`). Add its address to the local `dev/links.json`, then package and upload the theme again.
@@ -39,7 +40,9 @@ The slideshow on Photos and video, and the video strips on Video and animation, 
   - Talk decks need lighter copies under 100 MB, named `YYYY-MM Title.pptx`, labelled `approved`.
   - Put the details in the attachment comment: `Speaker: … · Event: …`.
   - A JPG with the same name becomes the deck's cover.
-- **Page text.** Replace the March placeholder text on the live Confluence pages. The theme shows its own text, but Confluence search reads the page text.
+- **Page text.** The Confluence pages still hold the March placeholder text. The theme shows its own text, but Confluence search and anyone opening a page in Confluence see the old text.
+  - `python3 scripts/confluence_text.py` writes the Hub's text for 58 pages (all except the hidden Events pages) in storage format to `release/go-live/page-text/` for review.
+  - `--apply` puts it on the pages as new versions, so page history keeps the old text. Run `scripts/build.py` first.
 - **Old pages.** Retire the old pages the Hub has folded into others, one to three months after launch. The list is in the local `UPLOAD-PLAN.md`.
 - **Events.** Review it, then bring it back: take `'Events'` out of `HIDDEN_SECTIONS` and upload its files (`build/kit`, `build/event-files`).
 - **Brand bank flags.**
