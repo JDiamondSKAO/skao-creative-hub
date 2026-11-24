@@ -6,7 +6,7 @@ Updated 21 October 2026, for whoever picks this up next, whether a person or ano
 
 ## Where things stand
 
-- **Live.** Theme **2.24.8** runs on the Scroll Viewport site for the Confluence space `CRH`. Branch `main` is the live release, and each release is tagged.
+- **Live.** Theme **2.25.0** (packaged 24 November; 2.24.8 before it) runs on the Scroll Viewport site for the Confluence space `CRH`. Branch `main` is the live release, and each release is tagged.
 - **Confluence is set up.** The Hub's own text is in its pages, the newer pages exist (Partner templates, Partner logos, Construction overview, Share your presentation) and the page tree follows the Hub's sections. Pages the Hub no longer uses were moved to the space trash with `confluence_cleanup.py`, and the Events pages went with them. These scripts were run on 21 October. Running them again is safe, because they skip pages already done.
 - **Access.** Staff view the space through the staff group. If staff can open the homepage but not the pages behind it, check Space tools → Permissions → Restricted Pages, or Inspect Permissions. This happened once at launch.
 - **Files.** The brand files are attached and labelled (`upload_kit.py`).
@@ -19,7 +19,7 @@ Updated 21 October 2026, for whoever picks this up next, whether a person or ano
 
 1. **Daily Canto sync.** Rotate the Canto App Secret first. Then run `canto_sync.py` from a scheduler that keeps the Canto credentials and a Confluence token as secrets.
 2. **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK`). Add it to `dev/links.json`, package and upload.
-3. **Approved slide decks.** Add talk decks to the About SKAO Master Deck page.
+3. **Approved slide decks.** Add talk decks to the Approved slide decks page (titled About SKAO Master Deck until 2.25.0).
    - Use lighter copies under 100 MB, named `YYYY-MM Title.pptx` and labelled `approved`.
    - Put the details in the attachment comment: `Speaker: … · Event: …`.
    - A JPG with the same name becomes the deck's cover.
@@ -38,7 +38,7 @@ Updated 21 October 2026, for whoever picks this up next, whether a person or ano
 ## Known quirks
 
 - **Confluence's own CSS reaches the theme** on the live site. It once pushed the side-menu title down and clipped its toggle. Layout-critical spacing is pinned, so keep it that way.
-- **Newer pages are found by title**, ignoring capitals, and linked through the site's page tree. If a page is renamed, update `interiors.PLANNED`.
+- **Pages are linked through the site's page tree.** Pages added later are found by title, ignoring capitals. Pages that existed at launch are found by page ID, so renaming them in Confluence is safe. If a newer page is renamed, update `interiors.PLANNED`.
 - **The Hub starts in light mode.** People can switch with the moon button, and the Hub remembers per browser. The welcome note and the tour are remembered per browser too. `?fresh` in local test mode, or a private window on the live site, shows them again.
 - **After adding a link name** to `scripts/links.py`, restart the local test server.
 

@@ -41,6 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const treeByTitle = new Map($$("#hubRoutes a[data-page-id]").map((a) => [a.textContent.trim().toLowerCase(), a]));
   $$("[data-page-title]").forEach((el) => { if (!el.dataset.pageId) el.dataset.pageId = treeByTitle.get(el.dataset.pageTitle.toLowerCase())?.dataset.pageId || ""; });
   $$("a[data-hub-title]").forEach((a) => { const node = treeByTitle.get(a.dataset.hubTitle.toLowerCase()); if (node) a.href = node.href; else a.hidden = true; });
+  // Every other page link carries its page ID too, so a page renamed in Confluence keeps working: its address
+  // comes from the site's page tree, which knows each page by ID whatever its title.
+  const treeById = new Map($$("#hubRoutes a[data-page-id]").map((a) => [a.dataset.pageId, a]));
+  $$("a[data-hub-id]").forEach((a) => { const node = treeById.get(a.dataset.hubId); if (node) a.href = node.href.split("#")[0] + (a.hash || ""); });
   const navItems = $$("#mainNav a");
   const currentPath = location.pathname.replace(/\/$/, "");
   [...navItems, ...$$(".sidebar a:not(#toc a)")].filter((a) => !a.hidden).forEach(a => {
@@ -1114,7 +1118,18 @@ document.addEventListener("DOMContentLoaded", () => {
     try { files = await attachmentsOf(pageId, ctx); } catch { return; }
     showPhoto(hero.querySelector("[data-site-photo]"), files, ctx);
     const rows = pageFiles(files, ctx), title = hero.querySelector("[data-hero-title]"), meta = hero.querySelector("[data-hero-meta]");
-    if (!rows.length) { title.textContent = "No slides yet"; meta.textContent = hero.dataset.empty || ""; return; }
+    if (!rows.length) {
+      // No deck uploaded yet: point to the team's live status slides rather than leave the panel empty.
+      const status = $(".live-status a.link-title[href]");
+      if (!status) { title.textContent = "No slides yet"; meta.textContent = hero.dataset.empty || ""; return; }
+      title.textContent = "Status slides";
+      meta.textContent = "The team keeps its latest status slides up to date in Google Slides.";
+      const open = document.createElement("a");
+      open.className = "button on-dark"; open.href = status.href; open.target = "_blank"; open.rel = "noopener";
+      open.textContent = "Open the status slides \u2197";
+      hero.querySelector("[data-hero-actions]").replaceChildren(open);
+      return;
+    }
     const r = rows[0], a = document.createElement("a");
     title.textContent = r.month || fmt(r.when);
     const file = document.createElement("span"); file.className = "site-hero-file"; file.textContent = r.name;

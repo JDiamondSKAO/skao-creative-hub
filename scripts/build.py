@@ -156,11 +156,16 @@ prod=prod.replace('SECTION_EYEBROW',crumbs,1)
 PAGE_TITLES={'index.html':'SKAO Creative Hub Home','resources.html':'Templates & Assets','presentations.html':'Slide Decks & Presentations','brand.html':'Brand Guidelines','request.html':'Submitting a Request','contribute.html':'How to Submit Your Deck','events.html':'Events Support','help.html':'Tools & Resources'}
 PAGE_TITLES.update({filename:title for id,title,filename,group in ROUTES})
 for local,title in PAGE_TITLES.items():
- prod=prod.replace('href="'+local+'"', ("href=\"$link.page('CRH', '"+title+"')\"") if "'" not in title else ('href="$link.page(\"CRH\", \"'+title+'\")"'))
+ target=("$link.page('CRH', '"+title+"')") if "'" not in title else ('$link.page(\"CRH\", \"'+title+'\")')
+ # Each link also carries its page ID: main.js takes the address from the site's page tree by ID, so a page
+ # renamed in Confluence keeps working even before the theme knows its new title.
+ page_id=ROUTE_IDS.get(local,'')
+ tag=f' data-hub-id="{page_id}"' if page_id and page_id not in PLANNED else ''
+ prod=prod.replace('href="'+local+'"','href="'+target+'"'+tag)
  # Links to a part of a page ("working-with-us.html#video") keep their anchor.
- prod=prod.replace('href="'+local+'#', ("href=\"$link.page('CRH', '"+title+"')#") if "'" not in title else ('href="$link.page(\"CRH\", \"'+title+'\")#'))
+ prod=re.sub('href="'+re.escape(local)+'#([^"]*)"',lambda m,target=target,tag=tag:'href="'+target+'#'+m.group(1)+'"'+tag,prod)
 prod=prod.replace('https://confluence.skatelescope.org/crh/document-templates-381891700.html', "$link.page('CRH', 'Document Templates')")
-for slug,title in [('Standard+SKAO+Template','Standard SKAO Template'),('About+SKAO+Master+Deck','About SKAO Master Deck'),('Science+Case+Presentations','Science Case Presentations')]:
+for slug,title in [('Standard+SKAO+Template','Slide deck and template'),('About+SKAO+Master+Deck','Approved slide decks'),('Science+Case+Presentations','Science Case Presentations')]:
  prod=prod.replace('https://confluence.skatelescope.org/display/CRH/'+slug, "$link.page('CRH', '"+title+"')")
 for folder in ['css','js','images']:prod=prod.replace('"'+folder+'/','"${theme.baseUrl}/'+folder+'/')
 prod=prod.replace('<title>$stringEscapeUtils.escapeHtml($page.title) | SKAO Creative Hub</title>','<title>$stringEscapeUtils.escapeHtml($page.title) | SKAO Creative Hub</title>')

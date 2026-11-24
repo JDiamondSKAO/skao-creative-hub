@@ -63,7 +63,7 @@ class Storage(HTMLParser):
     """Keeps headings, paragraphs, lists, tables and links; unwraps layout; drops the theme's furniture."""
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.out, self.stack, self.skip, self.para = [], [], 0, False
+        self.out, self.stack, self.skip, self.para, self.files_listed = [], [], 0, False, False
 
     def in_block(self):
         return any(t in BLOCK for t in self.stack)
@@ -82,12 +82,16 @@ class Storage(HTMLParser):
             if tag not in VOID: self.skip += 1
             return
         classes = (a.get('class') or '').split()
-        if 'data-downloads-slot' in a or 'data-attachments' in a:
-            self.close_para(); self.out.append(attachments('' if 'data-attachments' in a else 'approved'))
+        # Where the Hub lists the page's files, or says they're on the way ("Not yet available"), Confluence gets
+        # its own list of them instead, once per page.
+        lists_files = ('data-downloads-slot' in a or 'data-attachments' in a or 'data-deck-library' in a or 'how-to-get' in classes
+                       or 'availability-note' in classes)
+        if lists_files and not self.files_listed:
+            self.close_para(); self.out.append(attachments('' if 'data-attachments' in a else 'approved')); self.files_listed = True
         href = a.get('href') or ''
         in_page_button = tag == 'a' and not href.startswith(('https://', 'http://', 'mailto:')) and (
             'button' in classes or 'text-link' in classes or not href)
-        if (tag in DROP or 'hidden' in a or a.get('aria-hidden') == 'true' or 'data-downloads-slot' in a or 'data-attachments' in a
+        if (tag in DROP or 'hidden' in a or a.get('aria-hidden') == 'true' or lists_files
                 or 'data-file-pending' in a or in_page_button or any(c in FURNITURE for c in classes)):
             if tag not in VOID: self.skip = 1
             return
@@ -215,6 +219,10 @@ def apply():
     def find(title):
         if title not in ids:
             hits = json.loads(http('GET', base + '/rest/api/content?' + urlencode({'spaceKey': SPACE, 'title': title, 'type': 'page'}), head)[1]).get('results', [])
+            if not hits:  # the same title with other capitals ("Partner Logos")
+                cql = f'space="{SPACE}" AND type=page AND title~"{title}"'
+                found = json.loads(http('GET', base + '/rest/api/content/search?' + urlencode({'cql': cql, 'limit': '25'}), head)[1]).get('results', [])
+                hits = [h for h in found if h.get('title', '').lower() == title.lower()]
             ids[title] = hits[0]['id'] if hits else ''
         return ids[title]
     texts = {title: (page_id, body) for title, page_id, body in pages()}
@@ -234,12 +242,14 @@ def apply():
         if not page_id: print(f'{title}: not in Confluence, left alone'); continue
         try:
             current = json.loads(http('GET', f'{base}/rest/api/content/{page_id}?expand=version', head)[1])
-            update = {'id': page_id, 'type': 'page', 'title': current['title'], 'body': {'storage': {'value': body, 'representation': 'storage'}},
-                      'version': {'number': current['version']['number'] + 1, 'message': 'Creative Hub text, replacing the March placeholder'}}
+            renamed = current['title'] if current['title'] != title else ''
+            update = {'id': page_id, 'type': 'page', 'title': title, 'body': {'storage': {'value': body, 'representation': 'storage'}},
+                      'version': {'number': current['version']['number'] + 1, 'minorEdit': True,
+                                  'message': 'Creative Hub text' + (f', renamed from {renamed}' if renamed else '')}}
             parent = find(MOVES[title]) if title in MOVES else ''
             if parent: update['ancestors'] = [{'id': parent}]
             send('PUT', f'/rest/api/content/{page_id}', update)
-            done += 1; print(f'{title}: text updated' + (f', moved under {MOVES[title]}' if parent else ''))
+            done += 1; print(f'{title}: text updated' + (f', renamed from "{renamed}"' if renamed else '') + (f', moved under {MOVES[title]}' if parent else ''))
         except HTTPError as e:
             failed += 1; print(f'{title}: FAILED ({e.code} {e.reason})')
     print(f'Done: {done} changes' + (f', {failed} failed' if failed else '') + '. Page history keeps the old text.')

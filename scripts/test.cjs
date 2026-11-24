@@ -72,13 +72,14 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  for(const id of ['381891696','381891810']){const out=Velocity.render(tpl,{page:page(id,'Test'),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,title)=>'/crh/'+encodeURIComponent(title)}});const doc=new JSDOM(out).window.document;assert(doc.querySelector(id==='381891696'?'.page-grid.full-width .file-feed':'.content-body .moved-note a.button'));assert(![...doc.querySelectorAll('a')].some(a=>a.getAttribute('href').includes('$link')));}pass('Latest files and the contribution landing page render in the production template');
  for(const [title,section] of [['Partner templates','Presentations'],['Partner logos','Brand']]){const out=Velocity.render(tpl,{page:page('555001',title),pages:{home},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:(space,t)=>'/crh/'+encodeURIComponent(t)}});const doc=new JSDOM(out).window.document;
   assert.equal(doc.querySelector('.asset-panel').dataset.pageId,'555001',title+' reads its own attachments');assert.equal(doc.querySelector('.sidebar .section-nav h2').textContent,section);assert(!out.includes('99000000'),'no stand-in IDs in production');}
- {const h2=page('381887066','Home'),slides=page('381891843','Standard SKAO Template');h2.children=[slides,page('555001','Partner templates')];
+ {const h2=page('381887066','Home'),slides=page('381891843','Standard SKAO Template');h2.children=[slides,page('555001','Partner templates'),page('381891798','Renamed in Confluence')];
   const out=Velocity.render(tpl,{page:slides,pages:{home:h2},contextPath:'',theme:{baseUrl:'/theme'},stringEscapeUtils:{escapeHtml:esc},webPanels:'',attributionLine:'Attribution',link:{page:()=>''}});
   const lw=new JSDOM(out,{url:'http://localhost/crh/381891843',runScripts:'outside-only'}).window;lw.matchMedia=()=>({matches:false});lw.HTMLElement.prototype.scrollIntoView=()=>{};lw.HTMLDialogElement.prototype.showModal=function(){this.open=true};lw.fetch=async()=>({ok:false,json:async()=>({})});
   lw.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));
   const side=t=>[...lw.document.querySelectorAll('.sidebar a')].find(a=>a.textContent.trim()===t);
   assert.equal(new URL(side('Partner templates').href).pathname,'/crh/555001','a later page links through the site tree');assert(!side('Partner templates').hasAttribute('aria-current'),'and is not marked current on another page');
   assert(side('Construction overview').hidden&&!side('Construction overview').hasAttribute('aria-current'),'a page missing from the tree is hidden, not linked to the page you are on');
+  const decks=side('Approved slide decks');assert.equal(new URL(decks.href).pathname,'/crh/381891798','a page renamed in Confluence still links by its ID');assert(!decks.hasAttribute('aria-current'));
   pass('Pages added later link through the site tree and never light up another page');}
  pass('New partner pages render in production by title, before their page IDs are known');
  const routes=JSON.parse(fs.readFileSync(path.join(root,'evidence/interior-route-map.json')));
@@ -351,6 +352,11 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   const f=dom('fonts.html','confluence'),fw=f.window;fw.HTMLElement.prototype.getBoundingClientRect=box;fw.scrollTo=()=>{};
   fw.document.querySelector('.footer [data-tour-start]').click();assert.equal(fw.document.querySelectorAll('.tour-dots i').length,4,'a page without quick links skips that step');
   d.window.close();f.window.close();pass('A short guided tour starts from the welcome note or the footer, skips what a page lacks and closes with Esc');}
+ {const st=dom('low-slides.html','confluence',h=>h.replace('<body data-mode="preview"','<body data-mode="preview" data-page-id="381891829"').replace(/<span class="pending-link" data-link="LOW_STATUS"[^>]*>.*?<\/small><\/span>/,'<a href="https://example.org/low-status" class="link-title">SKA-Low status slides</a>'));
+  st.window.fetch=async()=>({ok:true,json:async()=>({results:[]})});await new Promise(r=>setTimeout(r,30));
+  const sd=st.window.document;assert.equal(sd.querySelector('[data-hero-title]').textContent,'Status slides','no deck yet: the panel points to the status slides');
+  assert.equal(sd.querySelector('[data-hero-actions] a').getAttribute('href'),'https://example.org/low-status');st.window.close();
+  pass('A site page with no deck yet points to the team status slides');}
  {const sh=read('share-presentation.html');assert.equal(sh.querySelector('.page-head h1').textContent,'Share your presentation');
   assert(sh.querySelector('a.button[data-share-deck][href*="servicedesk"]'),'the button opens the helpdesk until the form exists');assert.equal(sh.querySelectorAll('.use-steps li').length,3);
   assert(/approved slide decks/i.test(sh.querySelector('.share-hero').textContent),'it says some talks become approved slide decks');assert(!sh.querySelector('.share-page .next-step'),'no separate block at the foot');

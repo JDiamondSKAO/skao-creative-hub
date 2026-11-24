@@ -1,5 +1,18 @@
 # Changes
 
+## 2.25.0 Ready for review: links that survive renames, kinder site pages, a cleaner Confluence side
+
+- **Page links carry their page ID.** Links to pages that existed at launch now carry their Confluence page ID too, and the Hub takes their address from the site's page tree. A page renamed in Confluence keeps working even before the theme knows its new title.
+- **Two pages take their Hub names in Confluence**, which also changes their web addresses:
+  - About SKAO Master Deck becomes **Approved slide decks**;
+  - Standard SKAO Template becomes **Slide deck and template**.
+- **SKA-Low and SKA-Mid progress**: until a team uploads a deck, the panel points to the team's live status slides ("Open the status slides") instead of saying "No slides yet".
+- **The Confluence side** (`confluence_text.py`):
+  - Pages where the Hub lists files now get Confluence's own list of the approved files, instead of the old "Not yet available to download" note.
+  - Updates are minor edits, so watchers aren't emailed for each page.
+  - Pages are found by title whatever the capitals.
+  - A page whose title differs from the Hub's is renamed to match. That covers Partner Logos, About SKAO Master Deck and Standard SKAO Template.
+
 ## 2.24.8 Side menu: proof against the live site's own styles
 
 - On the live site, Confluence's own styles also reach headings and boxes on the page. They pushed the menu title about 8 px down, so the round toggle looked high, and the menu box clipped the top of the toggle.
