@@ -1,5 +1,12 @@
 # Changes
 
+## 2.25.2 Just added and All files stay in the Hub
+
+- **Just added and All files open the Hub's own page** for each file. The page is found by its ID in the site's page tree.
+  - They used to open Confluence's own view of the page (`/display/CRH/…`), which took people out of the Hub.
+  - A page that isn't part of the Hub still opens in Confluence.
+- Two theme files change from 2.25.1: `main.js`, and `page.vm` for its asset stamp.
+
 ## 2.25.1 Start fresh: see the Hub as a first-time visitor
 
 - **Start fresh** is a small, quiet icon beside Take the tour in the footer. It makes this browser forget what it remembers about the Hub, then opens the homepage as someone new sees it, welcome note first.

@@ -45,6 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // comes from the site's page tree, which knows each page by ID whatever its title.
   const treeById = new Map($$("#hubRoutes a[data-page-id]").map((a) => [a.dataset.pageId, a]));
   $$("a[data-hub-id]").forEach((a) => { const node = treeById.get(a.dataset.hubId); if (node) a.href = node.href.split("#")[0] + (a.hash || ""); });
+  // A page's address on the Hub, by its Confluence page ID, or null if the page isn't in the site's tree. Lists of
+  // files built from Confluence's API (Just added, All files) use it before Confluence's own page address, so a
+  // click stays in the Hub rather than opening Confluence's view of the page.
+  const hubHref = (id) => { const node = treeById.get(String(id || "")); return node ? safeLink(node.href.split("#")[0]) : null; };
   const navItems = $$("#mainNav a");
   const currentPath = location.pathname.replace(/\/$/, "");
   [...navItems, ...$$(".sidebar a:not(#toc a)")].filter((a) => !a.hidden).forEach(a => {
@@ -453,7 +457,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const preview = document.body.dataset.mode === "preview", ctx = document.body.dataset.context || "";
     const note = (text) => { const p = document.createElement("p"); p.className = "feed-note"; p.textContent = text; list.replaceChildren(p); };
     const placeOf = (id, title) => pages["i:" + id] || pages["t:" + String(title || "").toLowerCase()] || null;
-    const routeHref = (id) => { const a = $$("#hubRoutes a").find((x) => x.dataset.pageId === String(id)); return a ? safeLink(a.getAttribute("href")) : null; };
     const toRow = (f, site) => {
       const title = String(f.title || ""), href = preview ? null : safeLink(ctx + (f._links?.download || ""));
       if (!preview && !href) return null;
@@ -465,7 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
         href, name: dm ? dm[3].trim() : base, title, ext: (title.match(/\.([a-z0-9]+)$/i)?.[1] || "file").toLowerCase(),
         when: Date.parse(f.version?.when || "") || 0, updated: Number(f.version?.number) > 1, size: f.extensions?.fileSize,
         type: at?.[0] || "", page: at?.[1] || String(f.container?.title || ""), order: at?.[2] ?? 99,
-        pageHref: preview ? null : (webui ? safeLink(ctx + webui) : routeHref(id)), downloads: !site,
+        pageHref: preview ? null : (hubHref(id) || (webui ? safeLink(ctx + webui) : null)), downloads: !site,
       };
     };
     let rows = [];
@@ -1572,7 +1575,7 @@ document.addEventListener("DOMContentLoaded", () => {
         size: r.extensions?.fileSize,
         download: r._links?.download ? ctx + r._links.download : "",
         pageTitle: hubTitles[String(r.container?.id || "")] || hubTitles["t:" + String(r.container?.title || "").toLowerCase()] || (r.container?.title ? String(r.container.title) : ""),
-        pageHref: r.container?._links?.webui ? ctx + r.container._links.webui : "",
+        pageHref: hubHref(r.container?.id) || (r.container?._links?.webui ? ctx + r.container._links.webui : ""),
       }));
     };
     try {

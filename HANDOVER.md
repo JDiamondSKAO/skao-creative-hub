@@ -6,12 +6,13 @@ Updated 26 November 2026, for whoever picks this up next, whether a person or an
 
 ## Where things stand
 
-- **Live.** Theme **2.24.8** runs on the Scroll Viewport site for the Confluence space `CRH`. This was checked on 26 November against the theme file uploaded to the site.
-  - **2.25.1 is packaged and ready to upload.** It adds 2.25.0 (links that survive renames) and Start fresh.
-  - Only three files differ from what's live: `page.vm`, `main.js` and `style.css`.
+- **Live.** Theme **2.25.1** runs on the Scroll Viewport site for the Confluence space `CRH`. It was uploaded and checked on 26 November.
+  - **2.25.2 is packaged and ready to upload.** It keeps Just added and All files in the Hub.
+  - Only two files differ from what's live: `page.vm` and `main.js`.
   - Branch `main` holds the latest release, and each release is tagged.
-- **Confluence is set up.** The Hub's own text is in its pages, the newer pages exist (Partner templates, Partner logos, Construction overview, Share your presentation) and the page tree follows the Hub's sections. Pages the Hub no longer uses were moved to the space trash with `confluence_cleanup.py`, and the Events pages went with them. These scripts were run on 21 October. Running them again is safe, because they skip pages already done.
+- **Confluence is set up.** The Hub's own text is in its pages, the newer pages exist (Partner templates, Partner logos, Construction overview, Share your presentation) and the page tree follows the Hub's sections. Pages the Hub no longer uses were moved to the space trash with `confluence_cleanup.py`, and the Events pages went with them. These scripts were run on 21 October. Running them again is safe. Pages already created or moved are skipped, and each text update is a new page version, so page history can bring back the old text.
 - **Access.** Staff view the space through the staff group. If staff can open the homepage but not the pages behind it, check Space tools → Permissions → Restricted Pages, or Inspect Permissions. This happened once at launch.
+  - If someone can't see the Hub at all, check the home page's own restrictions. A view restriction there hides every page below it.
 - **Files.** The brand files are attached and labelled (`upload_kit.py`).
 - **Canto slideshow.** Published from a 20 October snapshot (`canto_sync.py --publish`). The theme reads it straight from the Photography Media page.
 - **Share your presentation.** The button opens an Airtable form on the base **Shared presentations** (SKA Communications workspace). The form's address is `SHARE_DECK_FORM` in `dev/links.json`. The review steps and reply templates are in the local `SHARE-YOUR-PRESENTATION.md`.
@@ -20,10 +21,9 @@ Updated 26 November 2026, for whoever picks this up next, whether a person or an
 
 ## Next steps
 
-1. **Upload 2.25.1, then run `confluence_text.py --apply`, in that order.**
-   - The live theme (2.24.8) finds Approved slide decks and Slide deck and template by their old Confluence titles.
-   - Renaming those pages before the new theme is up would break the links to them until it is.
-   - 2.25.1 finds them by page ID, so it works before and after the rename.
+1. **Upload 2.25.2 and run `confluence_text.py --apply`.**
+   - The order no longer matters: since 2.25.1 the live theme finds pages by ID, so the renames are safe.
+   - The script replaces each page's text with the Hub's, so check first that nobody has edited the pages directly in Confluence. Page history keeps the old text either way.
 2. **Daily Canto sync.** Rotate the Canto App Secret first. Then run `canto_sync.py` from a scheduler that keeps the Canto credentials and a Confluence token as secrets.
 3. **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK`). Add it to `dev/links.json`, package and upload.
 4. **Approved slide decks.** Add talk decks to the Approved slide decks page (titled About SKAO Master Deck until 2.25.0).

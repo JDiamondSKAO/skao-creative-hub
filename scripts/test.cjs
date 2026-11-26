@@ -114,7 +114,8 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(quick.length>=10);assert(quick.every(h=>h.startsWith('/crh/')||h.startsWith('https://')),quick.join(' '));
  pass('Quick links resolve to Confluence pages in the production template');
  {const lid=routes['letterheads.html'].id,lowId=routes['low-slides.html'].id,calls=[];
-  const fd=dom('resources.html','confluence'),fw=fd.window,fdoc=fw.document,fq=s=>fdoc.querySelector(s);
+  // The live template carries the site's page tree (#hubRoutes); here Partner logos is in it and Letterheads isn't.
+  const fd=dom('resources.html','confluence',h=>h.replace('</body>','<nav id="hubRoutes" hidden><a data-page-id="777" href="/crh/partner-logos-777.html">Partner logos</a></nav></body>')),fw=fd.window,fdoc=fw.document,fq=s=>fdoc.querySelector(s);
   fw.fetch=async u=>{const s=String(u);calls.push(s);
    if(s.includes('/child/attachment'))return {ok:true,json:async()=>({results:s.includes(`/content/${lowId}/`)?[
     {title:'2026-10 SKA-Low progress.pptx',version:{when:'2026-10-15T10:00:00Z',number:1},extensions:{fileSize:3145728},_links:{download:`/download/attachments/${lowId}/a.pptx`}},
@@ -130,6 +131,7 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
   assert.deepEqual([...fdoc.querySelectorAll('.feed-group > h2')].map(h=>h.firstChild.textContent),['Presentations','Documents','Brand'],'sections in the Hub’s order');
   assert.deepEqual([...fdoc.querySelectorAll('.feed-page h3')].map(h=>h.firstChild.textContent),['SKA-Low progress','Letterheads','Partner logos'],'each section’s pages, with their files');
   assert.equal(fq('.feed-page h3 a[href$="letterheads.html#downloads"]').textContent,'Letterheads');
+  assert.equal(fq('.feed-page h3 a[href="http://localhost/crh/partner-logos-777.html#downloads"]')?.textContent,'Partner logos','a page in the site tree opens on the Hub, not in Confluence’s own view (/display/…)');
   fq('.feed-views [data-feed-view="newest"]').click();assert.equal(fq('[data-feed-list]').dataset.view,'newest');
   assert.deepEqual([...fdoc.querySelectorAll('.feed-month h2')].map(h=>h.firstChild.textContent),['October 2026','September 2026'],'or grouped by month, newest first');
   assert.deepEqual([...fdoc.querySelectorAll('.feed-name')].map(n=>n.textContent),['SKA-Low progress','SKAO Letterhead UNRESTRICTED','SRCNet logos'],'site photo and off-site links left out; date prefixes read');
@@ -170,6 +172,15 @@ const wait=()=>new Promise(r=>setTimeout(r,10));
  assert(items[0].getAttribute('href').endsWith('/letterheads#downloads'),'opens the page downloads, not the file');
  assert.equal(lv.window.document.querySelector('#latestHeading').textContent,'Latest files in the Hub');assert(!box.querySelector('a[href^="https://evil"]'));assert(!box.querySelector('b'));
  pass('Latest assets prefer the approval label, fall back honestly to deliverable files and render safely');lv.window.close();
+ // On the live site Confluence gives each file's page as /display/CRH/<title> (its own view). Just added opens the
+ // Hub's page instead, found by ID in the site's page tree.
+ {const hv=dom('index.html','confluence',h=>h.replace('</body>','<nav id="hubRoutes" hidden><a data-page-id="555" href="/crh/slide-deck-and-template-555.html">Slide deck and template</a></nav></body>'));await wait();
+  const file={title:'SKAO_PPT.potx',version:{when:'2026-10-21T10:00:00Z'},extensions:{fileSize:2048},_links:{download:'/download/attachments/555/SKAO_PPT.potx'},container:{id:'555',title:'Standard SKAO Template',_links:{webui:'/display/CRH/Standard+SKAO+Template'}}};
+  hv.window.fetch=async u=>({ok:true,json:async()=>({results:new URL(u,'http://localhost').searchParams.get('cql').includes('label=')?[file]:[]})});
+  hv.window.eval(fs.readFileSync(path.join(root,'js/main.js'),'utf8').replace("document.addEventListener(\"DOMContentLoaded\", () => {",'(()=>{').replace(/\}\);\s*$/, '})();'));await wait();await wait();
+  const item=hv.window.document.querySelector('#latestAssets .strip-item');
+  assert.equal(item?.getAttribute('href'),'http://localhost/crh/slide-deck-and-template-555.html#downloads','Just added opens the Hub page');
+  hv.window.close();pass('Just added and All files open the Hub page, not Confluence’s own view of it');}
  const nd=dom('fonts.html'),nw=nd.window,nq=s=>nw.document.querySelector(s);
  const top=[...nw.document.querySelectorAll('#mainNav > a:not(.nav-menu-extra)')];assert.equal(top.length,5);assert.equal(nw.document.querySelectorAll('#mainNav a:not(.nav-menu-extra)').length,5,'menu has no nested panels');
  assert.equal(nq('#mainNav a[aria-current]').getAttribute('href'),'brand.html');
