@@ -6,11 +6,13 @@ Updated 26 November 2026, for whoever picks this up next, whether a person or an
 
 ## Where things stand
 
-- **Live.** Theme **2.25.1** runs on the Scroll Viewport site for the Confluence space `CRH`. It was uploaded and checked on 26 November.
-  - **2.25.2 is packaged and ready to upload.** It keeps Just added and All files in the Hub.
-  - Only two files differ from what's live: `page.vm` and `main.js`.
-  - Branch `main` holds the latest release, and each release is tagged.
-- **Confluence is set up.** The Hub's own text is in its pages, the newer pages exist (Partner templates, Partner logos, Construction overview, Share your presentation) and the page tree follows the Hub's sections. Pages the Hub no longer uses were moved to the space trash with `confluence_cleanup.py`, and the Events pages went with them. These scripts were run on 21 October. Running them again is safe. Pages already created or moved are skipped, and each text update is a new page version, so page history can bring back the old text.
+- **Live.** Theme **2.25.2** runs on the Scroll Viewport site for the Confluence space `CRH`. It was uploaded and checked on 26 November. Branch `main` holds the live release, and each release is tagged.
+- **Confluence is set up.** The Hub's own text is in its pages, the newer pages exist (Partner templates, Partner logos, Construction overview, Share your presentation) and the page tree follows the Hub's sections. Pages the Hub no longer uses were moved to the space trash with `confluence_cleanup.py`, and the Events pages went with them. These scripts were run on 21 October, and `confluence_text.py` again on 26 November.
+  - The second run gave three pages their Hub names: Approved slide decks, Slide deck and template, and Partner logos.
+  - Pages that list files now show Confluence's own list of the approved files.
+  - A renamed page's old address still works, because the site finds pages by the ID in the address.
+  - Running the scripts again is safe. Pages already created or moved are skipped, and each text update is a new page version, so page history can bring back the old text.
+  - `confluence_text.py` replaces each page's text with the Hub's. Before running it, check that nobody has edited the pages directly in Confluence.
 - **Access.** Staff view the space through the staff group. If staff can open the homepage but not the pages behind it, check Space tools → Permissions → Restricted Pages, or Inspect Permissions. This happened once at launch.
   - If someone can't see the Hub at all, check the home page's own restrictions. A view restriction there hides every page below it.
 - **Files.** The brand files are attached and labelled (`upload_kit.py`).
@@ -21,24 +23,21 @@ Updated 26 November 2026, for whoever picks this up next, whether a person or an
 
 ## Next steps
 
-1. **Upload 2.25.2 and run `confluence_text.py --apply`.**
-   - The order no longer matters: since 2.25.1 the live theme finds pages by ID, so the renames are safe.
-   - The script replaces each page's text with the Hub's, so check first that nobody has edited the pages directly in Confluence. Page history keeps the old text either way.
-2. **Daily Canto sync.** Rotate the Canto App Secret first. Then run `canto_sync.py` from a scheduler that keeps the Canto credentials and a Confluence token as secrets.
-3. **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK`). Add it to `dev/links.json`, package and upload.
-4. **Approved slide decks.** Add talk decks to the Approved slide decks page (titled About SKAO Master Deck until 2.25.0).
+1. **Daily Canto sync.** Rotate the Canto App Secret first. Then run `canto_sync.py` from a scheduler that keeps the Canto credentials and a Confluence token as secrets.
+2. **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK`). Add it to `dev/links.json`, package and upload.
+3. **Approved slide decks.** Add talk decks to the Approved slide decks page.
    - Use lighter copies under 100 MB, named `YYYY-MM Title.pptx` and labelled `approved`.
    - Put the details in the attachment comment: `Speaker: … · Event: …`.
    - A JPG with the same name becomes the deck's cover.
    - Talks shared through the form can come in this way once they're chosen.
-5. **Events.**
+4. **Events.**
    1. Restore its five pages from the Confluence trash first, so they keep the IDs in `scripts/interiors.py`.
    2. Take `'Events'` out of `HIDDEN_SECTIONS`.
    3. Upload its files (`build/kit`, `build/event-files`).
-6. **Housekeeping.**
+5. **Housekeeping.**
    - Empty the Confluence trash once nobody needs the old pages.
    - The older release branches can be deleted, since all their work is in `main`.
-7. **Brand bank flags.**
+6. **Brand bank flags.**
    - The Brand Book file is called v2 but its cover says v1.2.
    - On the colour sheet, `#9B6017` has the wrong RGB values (it should be 155, 96, 23).
 
