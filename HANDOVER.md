@@ -1,12 +1,15 @@
 # Creative Hub handover
 
-Updated 21 October 2026, for whoever picks this up next, whether a person or another AI. Read [AGENTS.md](AGENTS.md) for the working rules and [README.md](README.md) for how the project fits together.
+Updated 26 November 2026, for whoever picks this up next, whether a person or another AI. Read [AGENTS.md](AGENTS.md) for the working rules and [README.md](README.md) for how the project fits together.
 
 **This repository is public.** Internal links, credentials and working notes live in local files on the owner's Mac, listed at the end.
 
 ## Where things stand
 
-- **Live.** Theme **2.25.0** (packaged 24 November; 2.24.8 before it) runs on the Scroll Viewport site for the Confluence space `CRH`. Branch `main` is the live release, and each release is tagged.
+- **Live.** Theme **2.24.8** runs on the Scroll Viewport site for the Confluence space `CRH`. This was checked on 26 November against the theme file uploaded to the site.
+  - **2.25.1 is packaged and ready to upload.** It adds 2.25.0 (links that survive renames) and Start fresh.
+  - Only three files differ from what's live: `page.vm`, `main.js` and `style.css`.
+  - Branch `main` holds the latest release, and each release is tagged.
 - **Confluence is set up.** The Hub's own text is in its pages, the newer pages exist (Partner templates, Partner logos, Construction overview, Share your presentation) and the page tree follows the Hub's sections. Pages the Hub no longer uses were moved to the space trash with `confluence_cleanup.py`, and the Events pages went with them. These scripts were run on 21 October. Running them again is safe, because they skip pages already done.
 - **Access.** Staff view the space through the staff group. If staff can open the homepage but not the pages behind it, check Space tools → Permissions → Restricted Pages, or Inspect Permissions. This happened once at launch.
 - **Files.** The brand files are attached and labelled (`upload_kit.py`).
@@ -17,21 +20,25 @@ Updated 21 October 2026, for whoever picks this up next, whether a person or ano
 
 ## Next steps
 
-1. **Daily Canto sync.** Rotate the Canto App Secret first. Then run `canto_sync.py` from a scheduler that keeps the Canto credentials and a Confluence token as secrets.
-2. **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK`). Add it to `dev/links.json`, package and upload.
-3. **Approved slide decks.** Add talk decks to the Approved slide decks page (titled About SKAO Master Deck until 2.25.0).
+1. **Upload 2.25.1, then run `confluence_text.py --apply`, in that order.**
+   - The live theme (2.24.8) finds Approved slide decks and Slide deck and template by their old Confluence titles.
+   - Renaming those pages before the new theme is up would break the links to them until it is.
+   - 2.25.1 finds them by page ID, so it works before and after the rename.
+2. **Daily Canto sync.** Rotate the Canto App Secret first. Then run `canto_sync.py` from a scheduler that keeps the Canto credentials and a Confluence token as secrets.
+3. **IT service desk link.** It's the only link still missing (`IT_SERVICE_DESK`). Add it to `dev/links.json`, package and upload.
+4. **Approved slide decks.** Add talk decks to the Approved slide decks page (titled About SKAO Master Deck until 2.25.0).
    - Use lighter copies under 100 MB, named `YYYY-MM Title.pptx` and labelled `approved`.
    - Put the details in the attachment comment: `Speaker: … · Event: …`.
    - A JPG with the same name becomes the deck's cover.
    - Talks shared through the form can come in this way once they're chosen.
-4. **Events.**
+5. **Events.**
    1. Restore its five pages from the Confluence trash first, so they keep the IDs in `scripts/interiors.py`.
    2. Take `'Events'` out of `HIDDEN_SECTIONS`.
    3. Upload its files (`build/kit`, `build/event-files`).
-5. **Housekeeping.**
+6. **Housekeeping.**
    - Empty the Confluence trash once nobody needs the old pages.
    - The older release branches can be deleted, since all their work is in `main`.
-6. **Brand bank flags.**
+7. **Brand bank flags.**
    - The Brand Book file is called v2 but its cover says v1.2.
    - On the colour sheet, `#9B6017` has the wrong RGB values (it should be 155, 96, 23).
 
@@ -39,7 +46,9 @@ Updated 21 October 2026, for whoever picks this up next, whether a person or ano
 
 - **Confluence's own CSS reaches the theme** on the live site. It once pushed the side-menu title down and clipped its toggle. Layout-critical spacing is pinned, so keep it that way.
 - **Pages are linked through the site's page tree.** Pages added later are found by title, ignoring capitals. Pages that existed at launch are found by page ID, so renaming them in Confluence is safe. If a newer page is renamed, update `interiors.PLANNED`.
-- **The Hub starts in light mode.** People can switch with the moon button, and the Hub remembers per browser. The welcome note and the tour are remembered per browser too. `?fresh` in local test mode, or a private window on the live site, shows them again.
+- **The Hub starts in light mode.** People can switch with the moon button, and the Hub remembers per browser. The welcome note and the tour are remembered per browser too.
+  - **Start fresh**, the small icon beside Take the tour in the footer, shows them again. So does `?fresh` in local test mode.
+  - It was added for demos. To take it out, remove the `footer-tools` link in `footer()` in `scripts/build.py`, along with its test.
 - **After adding a link name** to `scripts/links.py`, restart the local test server.
 
 ## Local-only files on the owner's Mac (not in Git, on purpose)

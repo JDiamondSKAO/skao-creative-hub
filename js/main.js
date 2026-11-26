@@ -804,6 +804,16 @@ document.addEventListener("DOMContentLoaded", () => {
     show(0);
   }
   $$("[data-tour-start]").forEach((b) => b.addEventListener("click", () => { if (welcome?.open) welcome.close(); startTour(); }));
+  // Start fresh, the small icon beside Take the tour: this browser forgets what it remembers about the Hub (the
+  // welcome note, the tour, light or dark mode, recently viewed and a closed announcement). The link then opens the
+  // homepage as a first-time visitor sees it, welcome note first. Handy for showing the Hub to someone new.
+  $$("[data-fresh-start]").forEach((l) => l.addEventListener("click", () => {
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+      keys.filter((k) => k && k.startsWith("crh-")).forEach((k) => localStorage.removeItem(k));
+    } catch {}
+  }));
   // The feedback form (Airtable) opens with this page filled in, so we know where feedback came from.
   // While Share feedback still points at the helpdesk, the links stay as they are.
   if (pageTitle) $$("a[data-feedback]").forEach((l) => {

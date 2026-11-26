@@ -4,7 +4,7 @@ The theme behind the **SKAO Creative Hub**: the Communications team's site on Co
 
 This repository holds the theme, the scripts that generate it, a static preview, the test suite and the tools used to set up the Confluence space behind it.
 
-**Status:** live, theme 2.24.8 (October 2026). See [CHANGELOG.md](CHANGELOG.md) for every release and [HANDOVER.md](HANDOVER.md) for where things stand.
+**Status:** live. See [CHANGELOG.md](CHANGELOG.md) for every release, and [HANDOVER.md](HANDOVER.md) for the version on the site and where things stand.
 
 ## What the Hub does
 
@@ -13,7 +13,7 @@ This repository holds the theme, the scripts that generate it, a static preview,
 - **Search** across pages, files and quick answers to common questions.
 - **Photos and video** from the Canto staff media library, shown as a slideshow and linked to the Staff Resources Portal.
 - **Share your presentation:** staff send a talk for review, and some become approved slide decks.
-- **For new staff:** a first-visit welcome note and a short guided tour.
+- **For new staff:** a first-visit welcome note and a short guided tour. Start fresh, a small icon in the footer, shows them again.
 - **Feedback** from every page, through a form that records the page it came from.
 - Light and dark modes, keyboard support and reduced motion throughout.
 

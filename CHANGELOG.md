@@ -1,5 +1,12 @@
 # Changes
 
+## 2.25.1 Start fresh: see the Hub as a first-time visitor
+
+- **Start fresh** is a small, quiet icon beside Take the tour in the footer. It makes this browser forget what it remembers about the Hub, then opens the homepage as someone new sees it, welcome note first.
+  - It forgets the welcome note, the tour, light or dark mode, recently viewed pages and a closed announcement, and nothing else.
+  - It's handy for showing the Hub to someone, and harmless if anyone else presses it.
+- Only three theme files change from 2.25.0: `page.vm`, `main.js` and `style.css`.
+
 ## 2.25.0 Ready for review: links that survive renames, kinder site pages, a cleaner Confluence side
 
 - **Page links carry their page ID.** Links to pages that existed at launch now carry their Confluence page ID too, and the Hub takes their address from the site's page tree. A page renamed in Confluence keeps working even before the theme knows its new title.
